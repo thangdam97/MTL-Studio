@@ -174,13 +174,13 @@ WORK/[volume_id]/
 ```
 ┌─────────────┐    ┌──────────────────┐    ┌─────────────┐
 │ JP/CHAPTER  │───►│   RAG Engine     │───►│ Gemini API  │
-│    .md      │    │ (2.5MB modules)  │    │   3 Flash   │
+│    .md      │    │ (2.5MB modules)  │    │      │
 └─────────────┘    └──────────────────┘    └──────┬──────┘
                             │                      │
                    ┌────────┴─────────┐           │
                    ▼                  ▼           ▼
              ┌──────────┐      ┌──────────┐ ┌──────────┐
-             │Character │      │Localization│ │EN/CHAPTER│
+             │Character │      │Localization│ │EN(VN)/CHAPTER│
              │ Voices   │      │  Primer   │ │   .md    │
              └──────────┘      └──────────┘ └──────────┘
 ```
@@ -482,7 +482,7 @@ directories:
 
 | Model | Use Case | Performance |
 |-------|----------|-------------|
-| gemini-3-flash-preview | Primary translation | Highest quality |
+| gemini-2.5-pro | Primary translation | Highest quality |
 | gemini-2.5-flash | Fallback | Fast, reliable |
 | gemini-2.0-flash-exp | Legacy fallback | Stable |
 

@@ -8,6 +8,12 @@ Version 3.0 LTS | Production Ready | January 2026
 
 ---
 
+![MTL Studio Interface](assets/screenshot_main.png)
+
+*V3 Enhanced Schema with character profiles, keigo_switch, and interactive CLI menu*
+
+---
+
 ## Table of Contents
 
 1. [Overview](#overview)

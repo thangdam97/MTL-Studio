@@ -86,9 +86,24 @@ class MarkdownToXHTML:
         # This ensures 100% typographic compliance even if AI agents output straight quotes
         content = para
         if SMARTYPANTS_AVAILABLE:
+            # STEP 1: Protect stacked dialogue (3+ consecutive quotes for multi-speaker chorus)
+            stacked_quotes = []
+            STACKED_PATTERN = re.compile(r'"{3,}([^"]+)"{3,}')
+            
+            def protect_stacked(match):
+                stacked_quotes.append(match.group(0))
+                return f"__STACKED_{len(stacked_quotes)-1}__"
+            
+            content = STACKED_PATTERN.sub(protect_stacked, content)
+            
+            # STEP 2: Apply curly quotes to normal dialogue
             # Use Attr flags: q=quotes, D=em-dashes, e=ellipses
             # smartypants converts: " → &#8220; (left curly quote), ' → &#8216;, etc.
             content = smartypants(content, Attr.q | Attr.D | Attr.e)
+            
+            # STEP 3: Restore stacked dialogue with original straight quotes
+            for idx, original in enumerate(stacked_quotes):
+                content = content.replace(f"__STACKED_{idx}__", original)
         
         # Escape XML special characters (< > &) BUT preserve HTML entities from smartypants
         # We can't use escape() directly as it would double-escape &#8220; → &amp;#8220;

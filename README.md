@@ -761,37 +761,43 @@ python mtl.py list
 ```json
 {
   "version": "1.0",
-  "volume_id": "unique-volume-identifier",
-  "created_at": "2026-01-21T10:00:00Z",
+  "volume_id": "男嫌いな美人姉妹を名前も告げずに助けたら一体どうなる？1_20260127_1cca",
+  "created_at": "2026-01-27T09:12:14.525942",
   "metadata": {
-    "title": "Japanese Title",
-    "title_en": "English Title",
-    "author": "Author Name",
-    "author_en": "Author Name (Romanized)",
-    "publisher": "Publisher Name",
-    "source_epub": "/path/to/source.epub"
+    "title": "男嫌いな美人姉妹を名前も告げずに助けたら一体どうなる？",
+    "author": "みょん",
+    "publisher": "株式会社ＫＡＤＯＫＡＷＡ",
+    "source_language": "ja",
+    "target_language": "en",
+    "source_epub": "/path/to/男嫌いな美人姉妹を名前も告げずに助けたら一体どうなる？1.epub"
+  },
+  "metadata_en": {
+    "title_en": "I Saved Two Man-Hating Beauties Without Giving My Name... Now What?",
+    "author_en": "Myon",
+    "illustrator_en": "Myon",
+    "publisher_en": "KADOKAWA CORPORATION"
   },
   "pipeline_state": {
     "librarian": {
       "status": "completed",
-      "timestamp": "2026-01-21T10:00:00Z",
-      "chapters_completed": 12,
-      "chapters_total": 12
+      "timestamp": "2026-01-27T09:12:14Z",
+      "chapters_completed": 9,
+      "chapters_total": 9
     },
     "metadata_processor": {
       "status": "completed",
-      "timestamp": "2026-01-21T10:05:00Z"
+      "timestamp": "2026-01-27T09:15:00Z"
     },
     "translator": {
       "status": "completed",
-      "chapters_completed": 12,
-      "chapters_total": 12
+      "chapters_completed": 9,
+      "chapters_total": 9
     },
     "builder": {
       "status": "completed",
-      "output_file": "Title_EN.epub",
-      "chapters_built": 12,
-      "images_included": 16
+      "output_file": "I_Saved_Two_Man_Hating_Beauties_EN.epub",
+      "chapters_built": 9,
+      "images_included": 5
     }
   },
   "chapters": [
@@ -820,8 +826,12 @@ python mtl.py list
 ```json
 {
   "Japanese Name (Kanji)": "Romanized Name",
-  "高橋隆史": "Takahashi Takashi",
-  "白雪姫乃": "Shirayuki Himeno"
+  "堂本隼人": "Doumoto Hayato",
+  "新条亜利沙": "Shinjou Arisa",
+  "新条藍那": "Shinjou Aina",
+  "新条咲奈": "Shinjou Sakina",
+  "宮永颯太": "Miyanaga Souta",
+  "青島魁人": "Aoshima Kaito"
 }
 ```
 
@@ -850,7 +860,6 @@ The translator supports **four metadata schema variants** for enhanced character
 {
   "metadata_en": {
     "schema_version": "v3_enhanced",
-    "inherited_from": "previous_volume_id",
     "character_profiles": {
       "Doumoto Hayato": {
         "full_name": "Doumoto Hayato",
@@ -858,45 +867,75 @@ The translator supports **four metadata schema variants** for enhanced character
         "age": "16 (1st year high school)",
         "pronouns": "he/him",
         "relationship_to_protagonist": "PROTAGONIST",
-        "relationship_to_others": "Dating both Shinjou sisters, friend to Souta",
-        "personality_traits": "Kind, modest, thoughtful, reluctant hero",
-        "speech_pattern": "Casual male teen speech, uses 俺 (ore)",
+        "relationship_to_others": "Savior of Shinjou family, friend to Souta and Kaito",
+        "personality_traits": "Kind, modest, thoughtful, reluctant hero, lives alone",
+        "speech_pattern": "Casual male teen speech, uses 俺 (ore), straightforward but humble",
         "keigo_switch": {
           "narration": "casual_introspective",
+          "internal_thoughts": "casual_introspective",
           "speaking_to": {
-            "Shinjou Arisa": "casual_boyfriend",
+            "Shinjou Arisa": "casual_respectful",
+            "Shinjou Aina": "casual_respectful",
+            "Shinjou Sakina": "polite_formal",
             "strangers": "polite_formal"
           },
           "emotional_shifts": {
             "embarrassed": "casual",
-            "protective": "casual_boyfriend"
+            "surprised": "casual",
+            "nervous": "casual_introspective"
+          },
+          "notes": "Protagonist narrator. Use contractions heavily. Internal monologue should feel natural teen voice."
+        },
+        "key_traits": "Lives alone (parents deceased), supported by grandfather, saved sisters wearing pumpkin mask on Halloween",
+        "character_arc": "Reluctant hero who saved the man-hating sisters, gradually becomes their emotional anchor",
+        "ruby_base": "堂本隼人",
+        "ruby_reading": "どうもとはやと",
+        "occurrences": 100
+      },
+      "Shinjou Arisa": {
+        "full_name": "Shinjou Arisa",
+        "nickname": "Arisa",
+        "age": "16 (1st year high school)",
+        "pronouns": "she/her",
+        "relationship_to_protagonist": "Love interest, one of the saved sisters",
+        "relationship_to_others": "Elder twin of Aina, daughter of Sakina",
+        "personality_traits": "Cool beauty, reserved, man-hating (trauma), devoted to family, secretly passionate",
+        "speech_pattern": "Formal and composed, uses 私 (watashi), elegant speech, rarely laughs openly",
+        "keigo_switch": {
+          "narration": "formal_polite",
+          "speaking_to": {
+            "Doumoto Hayato": "polite_formal",
+            "Shinjou Aina": "warm_big_brother",
+            "male_classmates": "sharp_direct"
+          },
+          "emotional_shifts": {
+            "attracted": "formal_polite",
+            "protective": "sharp_direct"
           }
         },
-        "key_traits": "Lives alone, supported by grandfather",
-        "character_arc": "Navigating relationship while ex-girlfriend reappears",
-        "occurrences": 414
+        "key_traits": "Long black hair with side braid, cold blue eyes, voluptuous figure, rejects all confessions, trauma from men",
+        "character_arc": "Man-hating beauty who finds herself drawn to Hayato after he saved her family",
+        "ruby_base": "新条亜利沙",
+        "occurrences": 80
       }
     },
     "localization_notes": {
       "volume_specific_notes": {
-        "sequel_context": "Volume 2 - relationship established",
-        "character_dynamics": {
-          "arisa": "Now girlfriend, jealous of ex"
-        }
+        "trauma_handling": "Both sisters have trauma from men - Arisa from constant unwanted attention, Aina from childhood molestation by teacher",
+        "pumpkin_mask": "Hayato wore a pumpkin mask when saving them for Halloween, so they didn't see his face",
+        "yandere_elements": "Aina shows obsessive/yandere tendencies - translate her inner thoughts to reflect this intensity"
       }
     },
     "chapters": {
       "chapter_01": {
         "title_jp": "プロローグ",
         "title_en": "Prologue",
-        "pov_tracking": [
-          {
-            "character": "Doumoto Hayato",
-            "start_line": 1,
-            "end_line": null,
-            "context": "Full chapter"
-          }
-        ]
+        "pov_character": "[TO BE DETERMINED]"
+      },
+      "chapter_02": {
+        "title_jp": "一、目覚めた女心に嘲笑うカボチャ",
+        "title_en": "One: The Mocking Pumpkin and the Stirring of a Heart",
+        "pov_character": "[TO BE DETERMINED]"
       }
     }
   }
@@ -908,28 +947,44 @@ The translator supports **four metadata schema variants** for enhanced character
 ```json
 {
   "metadata_en": {
-    "title_en": "Volume Title",
+    "title_en": "I Saved Two Man-Hating Beauties Without Giving My Name... Now What?",
     "characters": [
       {
-        "name_jp": "青柳明人",
-        "name_en": "Aoyagi Akihito",
+        "name_jp": "堂本隼人",
+        "name_en": "Doumoto Hayato",
         "role": "protagonist",
-        "archetype": "everyman_mc",
-        "speech_style": "casual_polite",
-        "voice_notes": "Self-deprecating, awkward with compliments"
+        "archetype": "reluctant_hero",
+        "speech_style": "casual_introspective",
+        "voice_notes": "Kind, modest, thoughtful. Natural teen voice with heavy contractions."
+      },
+      {
+        "name_jp": "新条亜利沙",
+        "name_en": "Shinjou Arisa",
+        "role": "love_interest",
+        "archetype": "cool_beauty",
+        "speech_style": "formal_polite",
+        "voice_notes": "Reserved, elegant speech. Speaks formally even in casual situations."
       }
     ],
     "dialogue_patterns": {
-      "protagonist": {
-        "contractions": ["I'm", "don't", "can't"],
-        "filler_words": ["well", "I mean"],
-        "avoid": ["Indeed", "Furthermore"]
+      "Doumoto Hayato": {
+        "contractions": ["I'm", "don't", "can't", "won't", "it's"],
+        "filler_words": ["well", "uh"],
+        "avoid": ["Indeed", "Furthermore", "cannot"]
+      },
+      "Shinjou Arisa": {
+        "contractions": ["I'm", "don't"],
+        "speech_traits": ["formal", "composed", "elegant"],
+        "avoid": ["casual slang"]
       }
     },
     "translation_guidelines": {
-      "tone": "rom-com",
-      "formality": "casual",
-      "honorifics": "localize"
+      "tone": "yandere_romance",
+      "formality": "mixed",
+      "target_metrics": {
+        "contraction_rate": ">95%",
+        "ai_ism_density": "<0.3 per 1000 words"
+      }
     }
   }
 }
@@ -941,17 +996,27 @@ The translator supports **four metadata schema variants** for enhanced character
 {
   "metadata_en": {
     "character_profiles": {
-      "Akihito": {
-        "full_name": "Aoyagi Akihito",
-        "archetype": "everyman_mc",
-        "speech_pattern": "casual, self-deprecating",
-        "character_arc": "Growing confidence through relationships"
+      "Doumoto Hayato": {
+        "full_name": "Doumoto Hayato",
+        "archetype": "reluctant_hero",
+        "speech_pattern": "Casual male teen speech, uses 俺 (ore), straightforward but humble",
+        "character_arc": "Reluctant hero who saved the man-hating sisters, gradually becomes their emotional anchor"
+      },
+      "Shinjou Arisa": {
+        "full_name": "Shinjou Arisa",
+        "archetype": "cool_beauty",
+        "speech_pattern": "Formal and composed, uses 私 (watashi), elegant speech",
+        "character_arc": "Man-hating beauty who finds herself drawn to Hayato after he saved her family"
       }
     },
     "localization_notes": {
-      "british_character_exceptions": ["Charlotte", "Emma"],
-      "forbidden_patterns": ["Indeed", "Quite so"],
-      "target_metrics": { "contraction_rate": 0.85 }
+      "british_character_exceptions": [],
+      "forbidden_patterns": ["cannot", "do not", "does not", "will not"],
+      "target_metrics": { "contraction_rate": 0.95 },
+      "volume_specific_notes": {
+        "trauma_handling": "Both sisters have trauma from men",
+        "pumpkin_mask": "Hayato wore a pumpkin mask when saving them for Halloween"
+      }
     }
   }
 }
@@ -963,12 +1028,25 @@ The translator supports **four metadata schema variants** for enhanced character
 {
   "metadata_en": {
     "character_names": {
-      "青柳明人《あおやぎあきひと》": {
-        "name_en": "Aoyagi Akihito",
+      "堂本隼人《どうもとはやと》": {
+        "name_en": "Doumoto Hayato",
         "role": "protagonist",
-        "relationships": { "シャーロット": "girlfriend" },
-        "traits": ["kind", "caring", "self_doubting"],
+        "relationships": { 
+          "新条亜利沙": "love_interest",
+          "新条藍那": "love_interest"
+        },
+        "traits": ["kind", "modest", "thoughtful", "reluctant_hero"],
         "pronouns": { "subject": "he", "object": "him" }
+      },
+      "新条亜利沙《しんじょうありさ》": {
+        "name_en": "Shinjou Arisa",
+        "role": "love_interest",
+        "relationships": { 
+          "堂本隼人": "savior",
+          "新条藍那": "twin_sister"
+        },
+        "traits": ["cool_beauty", "reserved", "traumatized", "devoted"],
+        "pronouns": { "subject": "she", "object": "her" }
       }
     }
   }
@@ -997,26 +1075,27 @@ The `keigo_switch` feature enables automatic speech register switching based on:
 ```json
 {
   "keigo_switch": {
-    "narration": "formal_polite",
-    "internal_thoughts": "formal_polite",
+    "narration": "casual_introspective",
+    "internal_thoughts": "casual_introspective",
     "speaking_to": {
-      "Akihito": "polite_formal",
-      "Emma": "gentle_sisterly",
-      "Miyu-sensei": "respectful_formal",
-      "classmates": "polite_formal",
-      "strangers": "very_formal"
+      "Shinjou Arisa": "casual_respectful",
+      "Shinjou Aina": "casual_respectful",
+      "Shinjou Sakina": "polite_formal",
+      "Miyanaga Souta": "casual_bro",
+      "Aoshima Kaito": "casual_bro",
+      "strangers": "polite_formal"
     },
     "emotional_shifts": {
-      "jealous": "slightly_clipped_formal",
-      "embarrassed": "stuttering_formal",
-      "happy": "warm_polite"
+      "embarrassed": "casual",
+      "surprised": "casual",
+      "nervous": "casual_introspective"
     },
-    "notes": "Charlotte maintains formal register in ALL contexts"
+    "notes": "Protagonist narrator. Use contractions heavily. Internal monologue should feel natural teen voice."
   }
 }
 ```
 
-**Proven Impact**: Testing showed Charlotte's POV chapters in V3 had **12x higher formal phrase rate** (3.7 vs 0.3 per 1000 words) compared to V1, demonstrating successful schema injection and character voice differentiation.
+**Proven Impact**: The keigo_switch system enables context-aware speech register control, ensuring characters maintain consistent voice patterns across different social situations and emotional states.
 
 #### CLI Schema Inspection
 

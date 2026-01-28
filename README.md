@@ -931,12 +931,12 @@ The translator supports **four metadata schema variants** for enhanced character
       "chapter_01": {
         "title_jp": "プロローグ",
         "title_en": "Prologue",
-        "pov_character": "[TO BE DETERMINED]"
+        "pov_character": "Doumoto Hayato"
       },
       "chapter_02": {
         "title_jp": "一、目覚めた女心に嘲笑うカボチャ",
         "title_en": "One: The Mocking Pumpkin and the Stirring of a Heart",
-        "pov_character": "[TO BE DETERMINED]"
+        "pov_character": "Doumoto Hayato (main) / Third-person omniscient (Aina backstory section)"
       }
     }
   }

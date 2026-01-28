@@ -221,6 +221,86 @@ WORK/[volume_id]/
 
 **Purpose**: Assemble final EPUB from translated content
 
+**Components**:
+- `agent.py` - Main orchestrator for EPUB assembly
+- `epub_structure.py` - OEBPS directory structure creation
+- `epub_packager.py` - ZIP packaging with EPUB validation
+- `markdown_to_xhtml.py` - Markdown to XHTML converter
+- `xhtml_builder.py` - Chapter XHTML generation
+- `structure_builder.py` - Special pages (cover, kuchie, TOC)
+- `opf_generator.py` - OPF manifest generation
+- `ncx_generator.py` - NCX navigation (EPUB 2.0 compatibility)
+- `nav_generator.py` - nav.xhtml generation (EPUB 3.0)
+- `image_analyzer.py` - Image orientation detection
+- `image_handler.py` - Image processing and optimization
+- `css_processor.py` - Stylesheet generation
+- `font_processor.py` - Font embedding
+- `metadata_updater.py` - Manifest metadata updates
+
+**Key Features**:
+
+1. **Multi-Language Support**
+   - Configurable target language (EN, VN, etc.)
+   - Language-specific output filenames (`_EN.epub`, `_VN.epub`)
+   - Translated metadata extraction from manifest
+
+2. **EPUB Standards Compliance**
+   - EPUB 3.0 with EPUB 2.0 backward compatibility
+   - Dual navigation (nav.xhtml + toc.ncx)
+   - IDPF-compliant mimetype and container.xml
+   - Proper spine ordering and fallback references
+
+3. **Advanced Image Handling**
+   - Automatic orientation detection (horizontal/vertical)
+   - Kuchie-e special formatting (horizontal images)
+   - SVG viewport for proper scaling
+   - Cover image detection and assignment
+   - Image dimension analysis for responsive layouts
+
+4. **Professional Typography**
+   - Industry-standard CSS (Yen Press / J-Novel Club style)
+   - Proper text indentation and justification
+   - Scene break formatting (centered symbols)
+   - Em-dash and quotation mark handling
+   - Ruby text support for character names
+
+5. **Chapter Processing**
+   - Markdown to semantic XHTML conversion
+   - Illustration embedding with proper markup
+   - Metadata preservation (POV, themes, mood)
+   - Chapter title translation from manifest
+
+6. **Frontmatter Generation**
+   - Cover page (cover.xhtml)
+   - Kuchie-e pages (special horizontal images)
+   - Table of Contents page (toc.xhtml)
+   - Title page with metadata
+
+7. **Navigation Documents**
+   - nav.xhtml with EPUB 3.0 landmarks
+   - toc.ncx for backward compatibility
+   - Automatic spine order generation
+   - TOC hierarchy preservation
+
+8. **Build Workflow** (8 Steps):
+   ```
+   [1] Load manifest.json and validate
+   [2] Create EPUB directory structure (OEBPS/)
+   [3] Convert markdown chapters to XHTML
+   [4] Process and copy images to Images/
+   [5] Generate frontmatter (cover, kuchie, TOC)
+   [6] Generate navigation (nav.xhtml, toc.ncx)
+   [7] Create stylesheet (stylesheet.css)
+   [8] Generate OPF and package as .epub
+   ```
+
+9. **Quality Assurance**
+   - Critics completion check (warns if QC pending)
+   - EPUB structure validation
+   - File size reporting
+   - Chapter/image count verification
+   - Manifest update with build metadata
+
 **Output Specifications**:
 - EPUB 3.0 with EPUB 2.0 backward compatibility
 - Dual navigation (nav.xhtml + toc.ncx)
@@ -239,14 +319,44 @@ final.epub/
     ├── toc.ncx
     ├── nav.xhtml
     ├── Styles/
-    │   └── style.css
+    │   └── stylesheet.css
     ├── Images/
     │   ├── cover.jpg
+    │   ├── kuchie-001.jpg
+    │   ├── illust-001.jpg
     │   └── *.jpg
     └── Text/
         ├── cover.xhtml
+        ├── p-fmatter-001.xhtml    # Kuchie pages
         ├── toc.xhtml
+        ├── chapter_001.xhtml
         └── chapter_*.xhtml
+```
+
+**Usage**:
+```bash
+# Build EPUB for a volume
+python mtl.py phase4 <volume_id>
+
+# Build with custom output name
+python mtl.py phase4 <volume_id> --output "Custom Title.epub"
+
+# Skip QC check (force build)
+python mtl.py phase4 <volume_id> --skip-qc
+
+# Direct builder invocation
+python -m pipeline.builder.agent <volume_id>
+```
+
+**Configuration** (config.yaml):
+```yaml
+builder:
+  epub_version: "EPUB3"              # EPUB3 or EPUB2
+  validate_structure: true           # Validate after packaging
+  include_fonts: false               # Embed custom fonts
+  compress_images: false             # Image optimization
+  max_image_width: 1600              # Image size limit
+  kuchie_special_handling: true      # Horizontal image treatment
 ```
 
 ---
@@ -931,12 +1041,12 @@ The translator supports **four metadata schema variants** for enhanced character
       "chapter_01": {
         "title_jp": "プロローグ",
         "title_en": "Prologue",
-        "pov_character": "[TO BE DETERMINED]"
+        "pov_character": "Doumoto Hayato"
       },
       "chapter_02": {
         "title_jp": "一、目覚めた女心に嘲笑うカボチャ",
         "title_en": "One: The Mocking Pumpkin and the Stirring of a Heart",
-        "pov_character": "[TO BE DETERMINED]"
+        "pov_character": "Doumoto Hayato (main) / Third-person omniscient (Aina backstory section)"
       }
     }
   }
@@ -1225,4 +1335,4 @@ See LICENSE.txt for licensing information.
 
 ---
 
-Version 3.0 LTS | January 2026 | Production Ready | EN/VN Supported
+Version 3.0 LTS | January 2026

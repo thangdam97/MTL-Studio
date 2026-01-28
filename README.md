@@ -51,7 +51,7 @@ MTL Studio is a complete automated pipeline for translating Japanese Light Novel
 - **Multi-Publisher Support**: KADOKAWA, Overlap, SB Creative, Hifumi Shobo, Hobby Japan, Media Factory, Shueisha
 - **Publisher Pattern Database**: 65+ documented EPUB structure patterns across 7 major publishers
 - **Automatic Publisher Detection**: Pattern-based image classification without hardcoded logic
-- **AI-Powered QC**: Gemini CLI agent for auditing, formatting fixes, and illustration insertion
+- **AI-Powered QC**: IDE agents (VSCode, Windsurf, Cursor,...) for auditing, formatting fixes, and illustration insertion
 - **Interactive CLI**: Volume selection menus, configuration management, verbose mode
 - **Post-Processing**: CJK artifact removal, format normalization, smart typography
 
@@ -602,7 +602,7 @@ MTL_Studio/
 │   ├── start.sh                # Interactive TUI launcher
 │   └── mtl.py                  # Main CLI entry point
 ├── VN/                         # External Vietnamese resources
-├── AUDIT_AGENT.md              # Gemini CLI QC agent definition
+├── AUDIT_AGENT.md              # IDE Agents QC agent definition
 ├── Launch_Studio.sh            # Main launcher (macOS/Linux)
 ├── Launch_Studio.bat           # Main launcher (Windows)
 └── README.md                   # This file
@@ -666,7 +666,7 @@ The Vietnamese pipeline includes dedicated modules in `VN/modules/`:
 }
 ```
 
-### Gemini CLI Integration (AUDIT_AGENT.md)
+### IDE Agents Integration (AUDIT_AGENT.md)
 
 The `AUDIT_AGENT.md` file defines an AI-powered QC agent with two modules:
 

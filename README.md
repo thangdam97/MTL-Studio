@@ -829,6 +829,12 @@ python mtl.py list
 
 The translator supports **four metadata schema variants** for enhanced character voice and translation guidelines. Schema detection is automatic—the translator transforms any variant to a unified internal format.
 
+**Example Source Material**:
+- **Original Title (JP)**: 男嫌いな美人姉妹を名前も告げずに助けたら一体どうなる？1
+- **English Title**: I Saved Two Man-Hating Beauties Without Giving My Name... Now What? - Volume 1
+- **Author**: Myon
+- **Disclaimer**: All rights reserved to the original author. Examples provided for demonstration of translation system capabilities only.
+
 #### Schema Variants
 
 | Schema | Use Case | Key Fields |

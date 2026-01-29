@@ -40,11 +40,11 @@ gemini:
   model: gemini-2.5-pro
   fallback_model: gemini-2.5-flash
   generation:
-    temperature: 0.6
+    temperature: 0.8
     top_p: 0.95
     top_k: 40
-    max_output_tokens: 65535
-    thinking_level: medium
+    max_output_tokens: 32768
+    thinking_level: high
     qc_temperature: 0.3
   safety:
     harassment: BLOCK_NONE
@@ -58,10 +58,50 @@ gemini:
   caching:
     enabled: true
     ttl_minutes: 60
+kimi:
+  web_url: https://kimi.com
+  validation:
+    enabled: true
+    auto_mark_character_names: true
+    auto_mark_locations: true
+    auto_mark_organizations: true
+    auto_mark_special_terms: true
+    confidence_threshold: medium
+    cache_file: WORK/.kimi_validation_cache.json
+    cache_ttl_hours: 168
 translation:
   quality:
-    contraction_rate_min: 0.8
+    contraction_rate_min: 0.95  # Gold standard: 95%+ casual, 99%+ ideal
+    contraction_rate_gold: 0.99  # Yen Press/J-Novel Club gold standard
     max_ai_isms_per_chapter: 5
+  contraction_rules:
+    # Yen Press/J-Novel Club Gold Standard Rules
+    casual_introspective:
+      required_rate: 0.995  # 99.5% for casual narration/internal monologue
+      critical_forms:  # MUST contract in casual contexts
+        - "it is -> it's"
+        - "that is -> that's"
+        - "there is -> there's"
+        - "do not -> don't"
+        - "does not -> doesn't"
+      high_priority:  # Should contract unless emphatic
+        - "was not -> wasn't"
+        - "were not -> weren't"
+        - "could not -> couldn't"
+        - "should not -> shouldn't"
+        - "would not -> wouldn't"
+    formal_polite:
+      required_rate: 0.85  # Allow 15% uncontracted for formal register
+      exceptions:
+        - "emphasis"
+        - "philosophical_discourse"
+        - "character_defined_formal"
+    internal_monologue:
+      required_rate: 0.99  # Thoughts should be natural/contracted
+      perfect_tense:  # J-Novel Club additions
+        - "would have -> would've"
+        - "could have -> could've"
+        - "should have -> should've"
   context:
     lookback_chapters: 2
     enforce_name_consistency: true

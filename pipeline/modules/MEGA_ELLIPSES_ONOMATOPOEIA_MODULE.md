@@ -253,11 +253,12 @@ My heart was pounding. *Thump-thump.*
 
 | Japanese | Usage | Preserve? |
 |----------|-------|-----------|
-| ふふ (fufu) | Refined laughter | ✅ YES |
-| あらあら (ara ara) | Mature woman surprise | ✅ YES |
-| うふふ (ufufu) | Teasing laughter | ✅ YES |
-| えへへ (ehehe) | Embarrassed giggle | ✅ YES |
-| むふふ (mufufu) | Mischievous chuckle | ✅ YES |
+| ふふ (fufu) | Refined laughter | ✅ YES - Keep romanized |
+| あらあら (ara ara) | Mature woman surprise | ✅ YES - Keep romanized |
+| うふふ (ufufu) | Teasing laughter | ✅ YES - Keep romanized |
+| えへへ (ehehe) | Embarrassed giggle | ✅ YES - Keep romanized |
+| にしし (nishishi) | Mischievous laugh | ✅ YES - Keep romanized |
+| むふふ (mufufu) | Mischievous chuckle | ✅ YES - Keep romanized |
 
 **Example:**
 ```japanese
@@ -268,7 +269,16 @@ My heart was pounding. *Thump-thump.*
 "Fufu, how adorable."
 ```
 
-**Rationale:** These are recognized by English LN readers as character voice markers. Localizing to "Hehe" loses the cultural nuance.
+**Example:**
+```japanese
+「にしし、イタズラ成功♪」
+```
+**✅ GOOD:**
+```
+"Nishishi, prank successful♪"
+```
+
+**Rationale:** These are signature character voice markers in Japanese light novels. They are deliberately preserved as part of the **hybrid localization strategy** to maintain authentic LN flavor while making prose accessible. English LN readers recognize and expect these markers—transcreating them to "Hehe" or "she chuckled" would erase cultural character identity.
 
 ---
 

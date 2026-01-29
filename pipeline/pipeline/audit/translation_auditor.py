@@ -3,9 +3,12 @@ Translation Auditor Module
 
 Comprehensive audit system for JP-EN and JP-VN light novel translations.
 Covers global requirements, English-specific rules, and Vietnamese-specific rules.
+
+Anti-AI-ism patterns loaded from: config/anti_ai_ism_patterns.json
 """
 
 import re
+import json
 import logging
 from pathlib import Path
 from typing import List, Dict, Any, Optional, Set, Tuple
@@ -13,6 +16,55 @@ from dataclasses import dataclass, field
 from enum import Enum
 
 logger = logging.getLogger(__name__)
+
+
+# ============================================================
+# PATTERN LOADER - Single Source of Truth
+# ============================================================
+
+def load_anti_ai_patterns(config_path: Path = None) -> Dict:
+    """Load anti-AI-ism patterns from JSON config file."""
+    if config_path is None:
+        # Default path relative to this file
+        module_dir = Path(__file__).parent.parent.parent
+        config_path = module_dir / "config" / "anti_ai_ism_patterns.json"
+    
+    if not config_path.exists():
+        logger.warning(f"Pattern config not found at {config_path}, using built-in defaults")
+        return None
+    
+    with open(config_path, 'r', encoding='utf-8') as f:
+        return json.load(f)
+
+
+def extract_translationese_patterns(patterns_json: Dict) -> Tuple[List, List]:
+    """Extract CRITICAL and MAJOR patterns in auditor tuple format."""
+    critical = []
+    major = []
+    
+    if patterns_json is None:
+        return critical, major
+    
+    # CRITICAL patterns
+    if "CRITICAL" in patterns_json:
+        for p in patterns_json["CRITICAL"].get("patterns", []):
+            critical.append((
+                p["regex"],
+                p["display"],
+                p["fix"]
+            ))
+    
+    # MAJOR patterns - flatten categories
+    if "MAJOR" in patterns_json:
+        for category_name, category_data in patterns_json["MAJOR"].get("categories", {}).items():
+            for p in category_data.get("patterns", []):
+                major.append((
+                    p["regex"],
+                    p["display"],
+                    p["fix"]
+                ))
+    
+    return critical, major
 
 
 class Severity(Enum):
@@ -106,6 +158,8 @@ class TranslationAuditor:
     - Global: Fidelity, name consistency, terminology, safety
     - EN: AI-isms, formality, contractions, character voice
     - VN: Pronouns, particles, Han-Viet ratio, translationese, archetypes
+    
+    Anti-AI-ism patterns loaded from: config/anti_ai_ism_patterns.json
     """
 
     # ============================================================
@@ -124,7 +178,7 @@ class TranslationAuditor:
     # ENGLISH-SPECIFIC PATTERNS
     # ============================================================
 
-    # AI-ism patterns to detect (EN)
+    # AI-ism patterns to detect (EN) - Basic patterns kept as fallback
     EN_AI_ISM_PATTERNS = [
         # "A sense of" pattern
         (r"\ba sense of\b", "a sense of [emotion]", "Use direct emotion instead"),
@@ -149,7 +203,46 @@ class TranslationAuditor:
         (r"\bas it were\b", "as it were", "Remove this phrase"),
     ]
 
-    # Formal verbs to avoid in casual dialogue
+    def __init__(self, config_path: Path = None):
+        """Initialize auditor with patterns from JSON config."""
+        # Load patterns from JSON
+        patterns_json = load_anti_ai_patterns(config_path)
+        
+        if patterns_json:
+            self.EN_CRITICAL_TRANSLATIONESE, self.EN_MAJOR_TRANSLATIONESE = \
+                extract_translationese_patterns(patterns_json)
+            logger.info(f"Loaded {len(self.EN_CRITICAL_TRANSLATIONESE)} critical and "
+                       f"{len(self.EN_MAJOR_TRANSLATIONESE)} major patterns from JSON config")
+        else:
+            # Fallback to hardcoded defaults
+            self._load_fallback_patterns()
+    
+    def _load_fallback_patterns(self):
+        """Load fallback patterns if JSON config not found."""
+        self.EN_CRITICAL_TRANSLATIONESE = [
+            (r"asserting (?:their|its|his|her) presence", 
+             "asserting presence", 
+             "Use: 'obvious' / 'impossible to ignore'"),
+            (r"release(?:d|s|ing)? (?:their|his|her|sweet)? ?pheromones?",
+             "release pheromones",
+             "Use: 'ooze allure' / 'exude charm'"),
+            (r"surreal (?:picture|scene|sight)",
+             "surreal picture/scene",
+             "Use: 'absurd situation' / 'how did I end up here?'"),
+        ]
+        self.EN_MAJOR_TRANSLATIONESE = [
+            (r"\bit cannot be helped\b",
+             "it cannot be helped",
+             "Use: 'nothing I can do' / 'oh well'"),
+            (r"\bas expected of\b",
+             "as expected of",
+             "Use: 'that's [Name] for you' / 'classic [Name]'"),
+            (r"\bseemed to \w+",
+             "seemed to [verb]",
+             "Use direct verb: 'seemed to smile' → 'smiled'"),
+        ]
+
+    # Formal verbs to avoid in casual dialogue    # Formal verbs to avoid in casual dialogue
     EN_FORMAL_VERBS = [
         ("shall", "will/would"),
         ("procure", "get"),
@@ -562,8 +655,34 @@ class TranslationAuditor:
 
         total_opportunities = 0
         total_contractions = 0
+        critical_violations = []
+        high_priority_violations = []
 
-        contraction_opportunities = [
+        # CRITICAL: Must always contract (unless emphatic)
+        critical_opportunities = [
+            (r"\bit is\b", "it's"),
+            (r"\bthat is\b", "that's"),
+            (r"\bthere is\b", "there's"),
+            (r"\bwhat is\b", "what's"),
+            (r"\bdo not\b", "don't"),
+            (r"\bdoes not\b", "doesn't"),
+            (r"\bcannot\b", "can't"),
+            (r"\bwill not\b", "won't"),
+        ]
+        
+        # HIGH PRIORITY: Should contract in casual dialogue
+        high_priority_opportunities = [
+            (r"\bwas not\b", "wasn't"),
+            (r"\bwere not\b", "weren't"),
+            (r"\bcould not\b", "couldn't"),
+            (r"\bshould not\b", "shouldn't"),
+            (r"\bwould not\b", "wouldn't"),
+            (r"\bdid not\b", "didn't"),
+            (r"\bhas not\b", "hasn't"),
+        ]
+        
+        # STANDARD: Common contractions
+        standard_opportunities = [
             (r"\bI am\b", "I'm"),
             (r"\bI will\b", "I'll"),
             (r"\bI have\b", "I've"),
@@ -572,34 +691,61 @@ class TranslationAuditor:
             (r"\byou will\b", "you'll"),
             (r"\bwe are\b", "we're"),
             (r"\bthey are\b", "they're"),
-            (r"\bcannot\b", "can't"),
-            (r"\bdo not\b", "don't"),
-            (r"\bdoes not\b", "doesn't"),
-            (r"\bdid not\b", "didn't"),
-            (r"\bwill not\b", "won't"),
-            (r"\bwould not\b", "wouldn't"),
-            (r"\bcould not\b", "couldn't"),
-            (r"\bshould not\b", "shouldn't"),
             (r"\bis not\b", "isn't"),
             (r"\bare not\b", "aren't"),
-            (r"\bwas not\b", "wasn't"),
-            (r"\bwere not\b", "weren't"),
-            (r"\bhas not\b", "hasn't"),
             (r"\bhave not\b", "haven't"),
             (r"\bhad not\b", "hadn't"),
-            (r"\bit is\b", "it's"),
-            (r"\bthat is\b", "that's"),
-            (r"\bwhat is\b", "what's"),
             (r"\bwho is\b", "who's"),
             (r"\bhere is\b", "here's"),
-            (r"\bthere is\b", "there's"),
             (r"\blet us\b", "let's"),
         ]
+        
+        # J-Novel Club perfect tense contractions
+        perfect_tense_opportunities = [
+            (r"\bwould have\b", "would've"),
+            (r"\bcould have\b", "could've"),
+            (r"\bshould have\b", "should've"),
+            (r"\bmight have\b", "might've"),
+            (r"\bmust have\b", "must've"),
+        ]
+        
+        # Combine all opportunities
+        all_opportunities = (
+            critical_opportunities + 
+            high_priority_opportunities + 
+            standard_opportunities + 
+            perfect_tense_opportunities
+        )
 
-        for line in lines:
+        for i, line in enumerate(lines, 1):
             dialogues = re.findall(dialogue_pattern, line)
             for dialogue in dialogues:
-                for full_form, contracted in contraction_opportunities:
+                # Check critical violations specifically
+                for full_form, contracted in critical_opportunities:
+                    matches = re.findall(full_form, dialogue, re.IGNORECASE)
+                    if matches:
+                        critical_violations.append({
+                            'line': i,
+                            'form': full_form.replace(r'\b', ''),
+                            'contracted': contracted,
+                            'context': dialogue[:60]
+                        })
+                        total_opportunities += len(matches)
+                
+                # Check high priority violations specifically
+                for full_form, contracted in high_priority_opportunities:
+                    matches = re.findall(full_form, dialogue, re.IGNORECASE)
+                    if matches:
+                        high_priority_violations.append({
+                            'line': i,
+                            'form': full_form.replace(r'\b', ''),
+                            'contracted': contracted,
+                            'context': dialogue[:60]
+                        })
+                        total_opportunities += len(matches)
+                
+                # Check standard opportunities
+                for full_form, contracted in standard_opportunities + perfect_tense_opportunities:
                     full_matches = len(re.findall(full_form, dialogue, re.IGNORECASE))
                     total_opportunities += full_matches
 
@@ -610,12 +756,47 @@ class TranslationAuditor:
         if total_opportunities > 0:
             contraction_rate = total_contractions / (total_opportunities + total_contractions) if (total_opportunities + total_contractions) > 0 else 0
 
-            if contraction_rate < 0.8 and total_opportunities > 5:
+            # Gold Standard: 99%+ for Yen Press/J-Novel Club quality
+            # Tiered severity based on rate
+            if contraction_rate < 0.95:
+                # Critical: Below professional standard
+                result.add_issue(AuditIssue(
+                    category=IssueCategory.EN_CONTRACTION,
+                    severity=Severity.CRITICAL,
+                    message=f"Low contraction rate: {contraction_rate:.1%} (Gold Standard: 99%+)",
+                    suggestion="Apply contractions to all casual dialogue for natural speech",
+                ))
+            elif contraction_rate < 0.99:
+                # Major: Meets basic standard but not gold
                 result.add_issue(AuditIssue(
                     category=IssueCategory.EN_CONTRACTION,
                     severity=Severity.MAJOR,
-                    message=f"Low contraction rate in dialogue: {contraction_rate:.0%} (target: 80%+)",
-                    suggestion="Use contractions in casual dialogue for natural speech",
+                    message=f"Contraction rate {contraction_rate:.1%} below gold standard (99%+)",
+                    suggestion="Review borderline cases to reach Yen Press/J-Novel Club level",
+                ))
+        
+        # Report critical violations specifically
+        if critical_violations:
+            for v in critical_violations[:5]:  # Limit to first 5
+                result.add_issue(AuditIssue(
+                    category=IssueCategory.EN_CONTRACTION,
+                    severity=Severity.MAJOR,
+                    message=f"Critical: '{v['form']}' should be '{v['contracted']}'",
+                    line_number=v['line'],
+                    context=v['context'],
+                    suggestion=f"Contract '{v['form']}' → '{v['contracted']}' (required in casual dialogue)",
+                ))
+        
+        # Report high-priority violations
+        if high_priority_violations:
+            for v in high_priority_violations[:3]:  # Limit to first 3
+                result.add_issue(AuditIssue(
+                    category=IssueCategory.EN_CONTRACTION,
+                    severity=Severity.MINOR,
+                    message=f"High priority: '{v['form']}' → '{v['contracted']}'",
+                    line_number=v['line'],
+                    context=v['context'],
+                    suggestion=f"Contract unless emphatic or formal context",
                 ))
 
     def _check_en_voice(self, content: str, lines: List[str], result: AuditResult):

@@ -9,6 +9,7 @@ Supported proprietary patterns (discovered from OUTPUT analysis):
 - Stars: ★, ☆, ★ ★ ★, ☆ ☆ ☆, ☆☆
 - Triangles: ▼▽
 - Circles: ●, ○
+- Ampersand: & (discovered in 0dad)
 - Others: ※※※, §, ◇ ◇ ◇, ◇　　　◇　　　◇
 """
 
@@ -64,6 +65,7 @@ class SceneBreakFormatter:
         r'^\s*※[\s　]*※[\s　]*※\s*$',                 # ※ ※ ※
         r'^\s*§\s*$',                                # §
         r'^\s*§§+\s*$',                              # §§, §§§
+        r'^\s*&\s*$',                                # & (discovered in 0dad)
         r'^\s*❖\s*$',                                # ❖
         r'^\s*◈\s*$',                                # ◈
         r'^\s*⬥\s*$',                                # ⬥

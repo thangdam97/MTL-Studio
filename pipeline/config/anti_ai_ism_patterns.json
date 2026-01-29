@@ -1,0 +1,698 @@
+{
+    "_meta": {
+        "version": "2.0",
+        "description": "Anti-AI-ism patterns for prose quality detection with Echo Detection",
+        "target_density_per_1k_words": 0.02,
+        "reference": "RESEARCH_INDUSTRIAL_PRACTICES.md",
+        "last_updated": "2026-01-29",
+        "echo_detection": {
+            "enabled": true,
+            "description": "Proximity-based clustering detection - catches AI repetition within short distances",
+            "default_proximity_window": 100,
+            "proximity_thresholds": {
+                "critical": 50,
+                "major": 100,
+                "minor": 150
+            },
+            "rationale": "AI reuses 'safe' sentence structures too close together, creating monotonous drone effect"
+        }
+    },
+    "CRITICAL": {
+        "description": "Direct translations that BLOCK publication",
+        "patterns": [
+            {
+                "id": "asserting_presence",
+                "regex": "asserting (?:their|its|his|her) presence",
+                "display": "asserting presence",
+                "fix": "Use: 'obvious' / 'impossible to ignore'",
+                "source": "Literal Japanese (存在感をアピール)"
+            },
+            {
+                "id": "release_pheromones",
+                "regex": "release(?:d|s|ing)? (?:their|his|her|sweet)? ?pheromones?",
+                "display": "release pheromones",
+                "fix": "Use: 'ooze allure' / 'exude charm'",
+                "source": "Pseudo-biological phrasing"
+            },
+            {
+                "id": "noun_bridge",
+                "regex": "had a (?:sadness|happiness|warmth|coldness|core|weight) to (?:it|them|him|her)",
+                "display": "had a [noun] to it",
+                "fix": "Use: 'looked sad' / 'carried weight' / 'spoke with conviction'",
+                "source": "Abstract noun bridge (Japanese calque)"
+            },
+            {
+                "id": "say_again_what",
+                "regex": "let me say (?:it|that) again[,:]?\\s*what (?:is|was) this",
+                "display": "Let me say it again, what is this",
+                "fix": "Use: 'I'll say it again: what even IS this?!'",
+                "source": "Literal もう一度言う translation"
+            },
+            {
+                "id": "surreal_picture",
+                "regex": "surreal (?:picture|scene|sight)",
+                "display": "surreal picture/scene",
+                "fix": "Use: 'absurd situation' / 'how did I end up here?'",
+                "source": "Awkward literalism for 超現実的な光景"
+            },
+            {
+                "id": "formidable_opponent",
+                "regex": "(?:a |the )?formidable opponent",
+                "display": "formidable opponent",
+                "fix": "Use: 'tough nut to crack' / 'hard to handle'",
+                "source": "Too formal for casual teen dialogue"
+            }
+        ]
+    },
+    "MAJOR": {
+        "description": "Common translationese patterns requiring revision",
+        "categories": {
+            "japanese_calques": {
+                "description": "Direct Japanese → English calques",
+                "patterns": [
+                    {
+                        "id": "cannot_be_helped",
+                        "regex": "\\bit cannot be helped\\b",
+                        "display": "it cannot be helped",
+                        "fix": "Use: 'nothing I can do' / 'oh well'",
+                        "source": "Literal 仕方がない"
+                    },
+                    {
+                        "id": "do_my_best",
+                        "regex": "\\bi['']?ll do my best\\b",
+                        "display": "I'll do my best",
+                        "fix": "Use: 'I'll give it my all!' / 'Here goes!'",
+                        "source": "Literal 頑張ります"
+                    },
+                    {
+                        "id": "as_expected_of",
+                        "regex": "\\bas expected of\\b",
+                        "display": "as expected of",
+                        "fix": "Use: 'that's [Name] for you' / 'classic [Name]'",
+                        "source": "Literal さすが"
+                    },
+                    {
+                        "id": "is_that_so",
+                        "regex": "\\bis that so\\?",
+                        "display": "is that so?",
+                        "fix": "Use: 'oh really?' / 'huh' / 'is it now?'",
+                        "source": "Literal そうですか"
+                    }
+                ]
+            },
+            "emotion_wrappers": {
+                "description": "AI uses wrappers instead of direct emotion",
+                "patterns": [
+                    {
+                        "id": "sense_of_emotion",
+                        "regex": "a sense of (?:unease|dread|relief|joy|happiness|sadness|tension|nostalgia|accomplishment|excitement|pride|shame|guilt|fear|anxiety|impatience|security|belonging|urgency|wonder|awe|confusion)",
+                        "display": "a sense of [emotion]",
+                        "fix": "Use: direct emotion ('Unease filled the room' / 'Relief washed over me' / 'I felt accomplished')",
+                        "source": "AI safety wrapper - adds unnecessary abstraction",
+                        "proximity_penalty": {
+                            "window": 100,
+                            "action": "FLAG_ECHO",
+                            "severity_override": "MAJOR",
+                            "fix_instruction": "Vary emotional expression: direct statement, active verb, physical manifestation"
+                        }
+                    },
+                    {
+                        "id": "felt_sense_of",
+                        "regex": "felt a sense of",
+                        "display": "felt a sense of",
+                        "fix": "Use: 'felt [adjective]' directly - double wrapper redundancy",
+                        "source": "Double wrapper",
+                        "proximity_penalty": {
+                            "window": 75,
+                            "action": "FLAG_ECHO",
+                            "severity_override": "CRITICAL",
+                            "fix_instruction": "Double wrapper is redundant - use 'felt [emotion]' or direct description"
+                        }
+                    },
+                    {
+                        "id": "could_sense",
+                        "regex": "\\bcould sense (?:the |a |that )?\\w+",
+                        "display": "could sense [noun/that]",
+                        "fix": "Use: direct observation or 'noticed' / 'felt'",
+                        "source": "AI emotion wrapper",
+                        "proximity_penalty": {
+                            "window": 100,
+                            "action": "FLAG_ECHO",
+                            "severity_override": "MAJOR",
+                            "fix_instruction": "Vary with: 'noticed', 'felt', 'picked up on', or direct description of observation"
+                        }
+                    }
+                ]
+            },
+            "filter_phrases": {
+                "description": "AI uses these to hedge assertions",
+                "patterns": [
+                    {
+                        "id": "felt_like_could",
+                        "regex": "\\bfelt like (?:I |he |she |they |we )?(?:could|was|were|had)\\b",
+                        "display": "felt like [subject] could/was",
+                        "fix": "Remove filter: 'felt like I could' → 'I could'",
+                        "source": "AI filter phrase"
+                    },
+                    {
+                        "id": "seemed_to",
+                        "regex": "\\bseemed to (?:be |have )?\\w+",
+                        "display": "seemed to [verb]",
+                        "fix": "Use direct verb or 'looked': 'seemed to smile' → 'smiled' / 'seemed to be tired' → 'was tired'",
+                        "source": "AI filter phrase - hedges definitive observations",
+                        "proximity_penalty": {
+                            "window": 100,
+                            "action": "FLAG_ECHO",
+                            "severity_override": "MAJOR",
+                            "fix_instruction": "Vary with: 'appeared', 'looked', direct observation, or remove entirely"
+                        }
+                    },
+                    {
+                        "id": "appeared_to",
+                        "regex": "\\bappeared to (?:be )?\\w+",
+                        "display": "appeared to [verb]",
+                        "fix": "Use direct statement: 'appeared to be angry' → 'was angry' / 'looked angry'",
+                        "source": "AI filter phrase",
+                        "proximity_penalty": {
+                            "window": 100,
+                            "action": "FLAG_ECHO",
+                            "severity_override": "MAJOR",
+                            "fix_instruction": "Vary with: 'seemed', 'looked', specific detail, or direct statement"
+                        }
+                    },
+                    {
+                        "id": "found_myself",
+                        "regex": "\\bI found myself \\w+ing",
+                        "display": "I found myself [verb]ing",
+                        "fix": "Use direct action: 'I found myself staring' → 'I stared'",
+                        "source": "AI filter phrase",
+                        "proximity_penalty": {
+                            "window": 75,
+                            "action": "FLAG_ECHO",
+                            "severity_override": "CRITICAL",
+                            "fix_instruction": "Use direct verb - character has agency over their actions"
+                        }
+                    },
+                    {
+                        "id": "couldnt_help_but",
+                        "regex": "\\bcouldn'?t help but \\w+",
+                        "display": "couldn't help but [verb]",
+                        "fix": "Use direct action: 'couldn't help but smile' → 'smiled'",
+                        "source": "AI passive agency removal - eliminates character intentionality",
+                        "proximity_penalty": {
+                            "window": 75,
+                            "action": "FLAG_ECHO",
+                            "severity_override": "CRITICAL",
+                            "fix_instruction": "Use direct verb - character chooses their reactions"
+                        }
+                    },
+                    {
+                        "id": "almost_seemed",
+                        "regex": "\\balmost seemed (?:to |like )?\\w+",
+                        "display": "almost seemed [to/like]",
+                        "fix": "Use direct observation: 'almost seemed to glow' → 'nearly glowed'",
+                        "source": "AI double hedge",
+                        "proximity_penalty": {
+                            "window": 50,
+                            "action": "FLAG_ECHO",
+                            "severity_override": "MAJOR",
+                            "fix_instruction": "Remove double hedging - pick one modifier or use direct statement"
+                        }
+                    },
+                    {
+                        "id": "looked_like_could",
+                        "regex": "\\blooked like (?:he |she |they |it )?(?:could|was|were|might)\\b",
+                        "display": "looked like [subject] could/was",
+                        "fix": "Simplify: 'looked like she could cry' → 'looked ready to cry'",
+                        "source": "AI filter phrase"
+                    }
+                ]
+            },
+            "ai_crutch_phrases": {
+                "description": "AI filler phrases with no semantic value",
+                "patterns": [
+                    {
+                        "id": "to_be_honest",
+                        "regex": "\\b[Tt]o be honest,?",
+                        "display": "to be honest",
+                        "fix": "Remove entirely - adds no value. If character voice requires hesitation, use 'honestly' sparingly",
+                        "source": "AI crutch phrase - pure filler"
+                    },
+                    {
+                        "id": "to_be_fair",
+                        "regex": "\\b[Tt]o be fair,?",
+                        "display": "to be fair",
+                        "fix": "Often unnecessary. Use 'Though' or 'Still' for contrast",
+                        "source": "AI crutch phrase - overused"
+                    },
+                    {
+                        "id": "at_end_of_day",
+                        "regex": "\\bat the end of the day,?",
+                        "display": "at the end of the day",
+                        "fix": "Use 'ultimately' or 'in the end' if needed",
+                        "source": "AI crutch phrase"
+                    }
+                ]
+            },
+            "process_verbs": {
+                "description": "AI pads actions with unnecessary process verbs",
+                "patterns": [
+                    {
+                        "id": "started_to",
+                        "regex": "\\bstarted to \\w+",
+                        "display": "started to [verb]",
+                        "fix": "Use direct verb: 'started to walk' → 'walked'",
+                        "source": "AI process verb",
+                        "proximity_penalty": {
+                            "window": 100,
+                            "action": "ESCALATE_TO_MAJOR",
+                            "severity_override": "CRITICAL",
+                            "fix_instruction": "Use strong verb or vary with 'began', direct verb, or action description"
+                        }
+                    },
+                    {
+                        "id": "began_to",
+                        "regex": "\\bbegan to \\w+",
+                        "display": "began to [verb]",
+                        "fix": "Use direct verb: 'began to cry' → 'cried'",
+                        "source": "AI process verb",
+                        "proximity_penalty": {
+                            "window": 100,
+                            "action": "ESCALATE_TO_MAJOR",
+                            "severity_override": "CRITICAL",
+                            "fix_instruction": "Use direct verb or vary with 'started', action description"
+                        }
+                    },
+                    {
+                        "id": "proceeded_to",
+                        "regex": "\\bproceeded to \\w+",
+                        "display": "proceeded to [verb]",
+                        "fix": "Use direct verb: 'proceeded to explain' → 'explained'",
+                        "source": "AI process verb"
+                    },
+                    {
+                        "id": "managed_to",
+                        "regex": "\\bmanaged to \\w+",
+                        "display": "managed to [verb]",
+                        "fix": "Use direct verb unless difficulty matters: 'managed to escape' → 'escaped'",
+                        "source": "AI process verb",
+                        "proximity_penalty": {
+                            "window": 150,
+                            "action": "ESCALATE_TO_MAJOR",
+                            "severity_override": "MAJOR",
+                            "fix_instruction": "Replace with strong verb or distinct synonym showing effort/difficulty"
+                        }
+                    }
+                ]
+            },
+            "nominalizations": {
+                "description": "AI loves abstract nouns over direct statements",
+                "patterns": [
+                    {
+                        "id": "the_fact_that",
+                        "regex": "\\bthe fact that\\b",
+                        "display": "the fact that",
+                        "fix": "Restructure: 'The fact that she came' → 'That she came'",
+                        "source": "AI nominalization"
+                    },
+                    {
+                        "id": "the_idea_that",
+                        "regex": "\\bthe idea that\\b",
+                        "display": "the idea that",
+                        "fix": "Simplify: use 'that' or direct statement",
+                        "source": "AI nominalization"
+                    },
+                    {
+                        "id": "the_reason_why",
+                        "regex": "\\bthe reason why\\b",
+                        "display": "the reason why",
+                        "fix": "Simplify: 'the reason why I left' → 'why I left'",
+                        "source": "AI nominalization"
+                    },
+                    {
+                        "id": "due_to_fact",
+                        "regex": "\\bdue to the fact that\\b",
+                        "display": "due to the fact that",
+                        "fix": "Simplify: use 'because'",
+                        "source": "AI wordy connector"
+                    }
+                ]
+            },
+            "manner_phrases": {
+                "description": "Use adverbs instead of manner phrases",
+                "patterns": [
+                    {
+                        "id": "in_manner",
+                        "regex": "in a \\w+ manner",
+                        "display": "in a [adj] manner",
+                        "fix": "Use adverb: 'spoke gently' not 'spoke in a gentle manner'",
+                        "source": "AI translationese"
+                    }
+                ]
+            },
+            "hedging": {
+                "description": "Unnecessary hedging and filler",
+                "patterns": [
+                    {
+                        "id": "can_be_said",
+                        "regex": "it can be said that",
+                        "display": "it can be said that",
+                        "fix": "Just say it directly",
+                        "source": "Unnecessary hedge"
+                    },
+                    {
+                        "id": "needless_to_say",
+                        "regex": "needless to say",
+                        "display": "needless to say",
+                        "fix": "If needless, don't say it",
+                        "source": "Pointless filler"
+                    }
+                ]
+            }
+        }
+    },
+    "MINOR": {
+        "description": "Style improvements for polish",
+        "categories": {
+            "formal_vocabulary": {
+                "description": "Too formal for casual teen dialogue",
+                "patterns": [
+                    {
+                        "id": "shall_we",
+                        "regex": "\\bshall we\\b",
+                        "display": "shall we",
+                        "fix": "Consider: 'should we' / 'wanna' for casual",
+                        "source": "May be too formal for teens"
+                    },
+                    {
+                        "id": "i_shall",
+                        "regex": "\\bi shall\\b",
+                        "display": "I shall",
+                        "fix": "Use: 'I'll' / 'I will' for non-ojou characters",
+                        "source": "Victorian formality"
+                    },
+                    {
+                        "id": "procure",
+                        "regex": "\\bprocure\\b",
+                        "display": "procure",
+                        "fix": "Use: 'get' / 'buy' for casual",
+                        "source": "Latinate formality"
+                    },
+                    {
+                        "id": "inquire",
+                        "regex": "\\binquire\\b",
+                        "display": "inquire",
+                        "fix": "Use: 'ask' for casual",
+                        "source": "Latinate formality"
+                    },
+                    {
+                        "id": "commence",
+                        "regex": "\\bcommence\\b",
+                        "display": "commence",
+                        "fix": "Use: 'start' / 'begin' for casual",
+                        "source": "Latinate formality"
+                    }
+                ]
+            },
+            "transitional_overuse": {
+                "description": "Vary transitional words",
+                "patterns": [
+                    {
+                        "id": "however_start",
+                        "regex": "^however,",
+                        "display": "However,",
+                        "fix": "Vary with: 'But', 'Still', 'Though'",
+                        "source": "Transitional variety",
+                        "flags": "MULTILINE"
+                    }
+                ]
+            },
+            "japanese_sounds": {
+                "description": "Japanese sounds left untranslated",
+                "patterns": [
+                    {
+                        "id": "ehehe",
+                        "regex": "\\behehe\\b",
+                        "display": "Ehehe",
+                        "fix": "Describe: 'she giggled' or integrate naturally",
+                        "source": "Japanese laugh sound"
+                    },
+                    {
+                        "id": "ufufu",
+                        "regex": "\\bufufu\\b",
+                        "display": "Ufufu",
+                        "fix": "Describe: 'she chuckled mischievously'",
+                        "source": "Japanese laugh sound"
+                    },
+                    {
+                        "id": "maji_de",
+                        "regex": "\\bmaji de\\?",
+                        "display": "Maji de?",
+                        "fix": "Use: 'Seriously?!' / 'For real?!'",
+                        "source": "Japanese slang left untranslated"
+                    },
+                    {
+                        "id": "ara_ara",
+                        "regex": "\\bara ara\\b",
+                        "display": "Ara ara",
+                        "fix": "Use: 'Oh my' / 'My, my'",
+                        "source": "Japanese expression"
+                    }
+                ]
+            },
+            "wordy_connectors": {
+                "description": "AI is verbose with connectors",
+                "patterns": [
+                    {
+                        "id": "in_order_to",
+                        "regex": "\\bin order to\\b",
+                        "display": "in order to",
+                        "fix": "Simplify: use 'to'",
+                        "source": "AI wordy connector"
+                    },
+                    {
+                        "id": "for_purpose_of",
+                        "regex": "\\bfor the purpose of\\b",
+                        "display": "for the purpose of",
+                        "fix": "Simplify: use 'to' or 'for'",
+                        "source": "AI wordy connector"
+                    },
+                    {
+                        "id": "with_intention_of",
+                        "regex": "\\bwith the intention of\\b",
+                        "display": "with the intention of",
+                        "fix": "Simplify: use 'to'",
+                        "source": "AI wordy connector"
+                    },
+                    {
+                        "id": "at_this_point",
+                        "regex": "\\bat this point in time\\b",
+                        "display": "at this point in time",
+                        "fix": "Simplify: use 'now'",
+                        "source": "AI wordy connector"
+                    },
+                    {
+                        "id": "in_spite_of_fact",
+                        "regex": "\\bin spite of the fact that\\b",
+                        "display": "in spite of the fact that",
+                        "fix": "Simplify: use 'although' / 'despite'",
+                        "source": "AI wordy connector"
+                    }
+                ]
+            },
+            "perception_verbs": {
+                "description": "AI over-explains perceptions",
+                "patterns": [
+                    {
+                        "id": "could_feel",
+                        "regex": "\\bcould feel (?:that |the )?\\w+",
+                        "display": "could feel [noun]",
+                        "fix": "Show directly: 'could feel my heart racing' → 'My heart raced'",
+                        "source": "AI perception verb"
+                    },
+                    {
+                        "id": "was_aware",
+                        "regex": "\\bwas aware (?:of |that )",
+                        "display": "was aware of/that",
+                        "fix": "Use direct statement: 'was aware of her presence' → 'noticed her'",
+                        "source": "AI perception verb"
+                    },
+                    {
+                        "id": "realized_that",
+                        "regex": "\\brealized that\\b",
+                        "display": "realized that",
+                        "fix": "Often unnecessary: just state the realization directly",
+                        "source": "AI perception verb",
+                        "proximity_penalty": {
+                            "window": 100,
+                            "action": "FLAG_ECHO",
+                            "severity_override": "MAJOR",
+                            "fix_instruction": "Vary with: 'noticed', 'understood', 'it hit me', or direct statement"
+                        }
+                    }
+                ]
+            },
+            "reaction_verbs": {
+                "description": "AI Echo Detection - Common reaction verbs that cluster",
+                "echo_detection_priority": true,
+                "patterns": [
+                    {
+                        "id": "let_out_sigh",
+                        "regex": "\\blet out a (?:sigh|breath|chuckle|laugh|groan|gasp)",
+                        "display": "let out a [reaction]",
+                        "fix": "Use direct verb: 'let out a sigh' → 'sighed'",
+                        "source": "AI reaction padding",
+                        "proximity_penalty": {
+                            "window": 75,
+                            "action": "FLAG_ECHO",
+                            "severity_override": "MAJOR",
+                            "fix_instruction": "Use direct verb or vary the physical description"
+                        }
+                    },
+                    {
+                        "id": "nodded_head",
+                        "regex": "\\bnodded(?: his| her| their| my)? head",
+                        "display": "nodded head",
+                        "fix": "Redundant: 'nodded' implies head. Just use 'nodded'",
+                        "source": "Redundant body part",
+                        "proximity_penalty": {
+                            "window": 50,
+                            "action": "FLAG_ECHO",
+                            "severity_override": "MAJOR",
+                            "fix_instruction": "Remove 'head' or vary reaction entirely"
+                        }
+                    },
+                    {
+                        "id": "shrugged_shoulders",
+                        "regex": "\\bshrugged(?: his| her| their| my)? shoulders",
+                        "display": "shrugged shoulders",
+                        "fix": "Redundant: 'shrugged' implies shoulders. Just use 'shrugged'",
+                        "source": "Redundant body part",
+                        "proximity_penalty": {
+                            "window": 50,
+                            "action": "FLAG_ECHO",
+                            "severity_override": "MAJOR",
+                            "fix_instruction": "Remove 'shoulders' or use different dismissive gesture"
+                        }
+                    }
+                ]
+            },
+            "gaze_verbs": {
+                "description": "AI Echo Detection - Eye movement verbs that drone",
+                "echo_detection_priority": true,
+                "patterns": [
+                    {
+                        "id": "glanced_at",
+                        "regex": "\\bglanced (?:at|toward|over|back)",
+                        "display": "glanced [direction]",
+                        "fix": "Acceptable in moderation, but varies easily",
+                        "source": "Common gaze verb",
+                        "proximity_penalty": {
+                            "window": 100,
+                            "action": "FLAG_ECHO",
+                            "severity_override": "MAJOR",
+                            "fix_instruction": "Vary with: 'looked', 'peeked', 'met [their] gaze', 'eyes flicked', direct action"
+                        }
+                    },
+                    {
+                        "id": "looked_at",
+                        "regex": "\\blooked (?:at|toward|over|back)",
+                        "display": "looked [direction]",
+                        "fix": "Acceptable in moderation, but varies easily",
+                        "source": "Common gaze verb",
+                        "proximity_penalty": {
+                            "window": 100,
+                            "action": "FLAG_ECHO",
+                            "severity_override": "MAJOR",
+                            "fix_instruction": "Vary with: 'glanced', 'stared', 'watched', 'turned to', direct description"
+                        }
+                    },
+                    {
+                        "id": "turned_to",
+                        "regex": "\\bturned to (?:me|him|her|them|face|look)",
+                        "display": "turned to [person/action]",
+                        "fix": "Acceptable, but AI overuses",
+                        "source": "Common transition verb",
+                        "proximity_penalty": {
+                            "window": 75,
+                            "action": "FLAG_ECHO",
+                            "severity_override": "MAJOR",
+                            "fix_instruction": "Vary with: 'faced', 'spun around', 'met [their] eyes', action + dialogue"
+                        }
+                    }
+                ]
+            },
+            "hedge_words": {
+                "description": "AI Echo Detection - Hedge words that create monotony when clustered",
+                "echo_detection_priority": true,
+                "patterns": [
+                    {
+                        "id": "somewhat",
+                        "regex": "\\bsomewhat\\b",
+                        "display": "somewhat",
+                        "fix": "Often unnecessary or can use stronger word",
+                        "source": "AI hedge word",
+                        "proximity_penalty": {
+                            "window": 150,
+                            "action": "FLAG_ECHO",
+                            "severity_override": "MINOR",
+                            "fix_instruction": "Acceptable in moderation but varies easily: 'a bit', 'slightly', 'rather', or remove"
+                        }
+                    },
+                    {
+                        "id": "rather",
+                        "regex": "\\brather (?!than)\\w+",
+                        "display": "rather [adj/adv]",
+                        "fix": "Fine in dialogue, but AI overuses in narration",
+                        "source": "AI hedge word",
+                        "proximity_penalty": {
+                            "window": 150,
+                            "action": "FLAG_ECHO",
+                            "severity_override": "MINOR",
+                            "fix_instruction": "Vary with: 'quite', 'fairly', 'pretty', or use stronger adjective"
+                        }
+                    },
+                    {
+                        "id": "a_bit",
+                        "regex": "\\ba bit\\b",
+                        "display": "a bit",
+                        "fix": "Common in casual speech but AI clusters it",
+                        "source": "AI hedge word",
+                        "proximity_penalty": {
+                            "window": 100,
+                            "action": "FLAG_ECHO",
+                            "severity_override": "MAJOR",
+                            "fix_instruction": "Vary with: 'somewhat', 'a little', 'slightly', or remove for directness"
+                        }
+                    },
+                    {
+                        "id": "kind_of",
+                        "regex": "\\bkind of(?! like)\\b",
+                        "display": "kind of",
+                        "fix": "Casual hedge - acceptable in dialogue",
+                        "source": "AI hedge word",
+                        "proximity_penalty": {
+                            "window": 100,
+                            "action": "FLAG_ECHO",
+                            "severity_override": "MAJOR",
+                            "fix_instruction": "Vary with: 'sort of', 'a bit', or remove for stronger statement"
+                        }
+                    },
+                    {
+                        "id": "sort_of",
+                        "regex": "\\bsort of\\b",
+                        "display": "sort of",
+                        "fix": "Casual hedge - acceptable in dialogue",
+                        "source": "AI hedge word",
+                        "proximity_penalty": {
+                            "window": 100,
+                            "action": "FLAG_ECHO",
+                            "severity_override": "MAJOR",
+                            "fix_instruction": "Vary with: 'kind of', 'a bit', 'somewhat', or remove"
+                        }
+                    }
+                ]
+            }
+        }
+    }
+}

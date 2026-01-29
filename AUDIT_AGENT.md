@@ -331,9 +331,138 @@
     </CATEGORY>
 
     <CATEGORY id="2">
-      <NAME>Contraction Rate</NAME>
-      <TARGET>80%+</TARGET>
-      <METHOD>Count (I am/do not/cannot) vs (I'm/don't/can't). Low rate = WARNING.</METHOD>
+      <NAME>Contraction Rate (Natural Dialogue Standard)</NAME>
+      <TARGET_MINIMUM>80% (Pass)</TARGET_MINIMUM>
+      <TARGET_GOLD>95%+ (A+ Grade)</TARGET_GOLD>
+      <TARGET_PERFECT>99%+ (FFXVI-Tier / J-Novel Club Standard)</TARGET_PERFECT>
+      
+      <METHOD>
+        Calculate: Contractions / (Contractions + Expansion Opportunities) × 100
+        
+        Example:
+        - Contractions found: 1,100 instances (I'm, don't, can't, etc.)
+        - Expansion opportunities: 19 instances (I am, do not, cannot)
+        - Rate: 1,100 / (1,100 + 19) = 98.3%
+      </METHOD>
+      
+      <STANDARD_CONTRACTIONS>
+        <!-- Common contractions (MUST use in dialogue/casual narration) -->
+        - I'm, you're, he's, she's, it's, we're, they're
+        - I'll, you'll, he'll, she'll, it'll, we'll, they'll
+        - I've, you've, we've, they've
+        - I'd, you'd, he'd, she'd, we'd, they'd
+        - don't, doesn't, didn't
+        - won't, wouldn't
+        - can't, couldn't
+        - isn't, aren't, wasn't, weren't
+        - hasn't, haven't, hadn't
+        - shouldn't, mustn't
+        - there's, there'll, there'd
+        - that's, that'll, that'd
+        - what's, what'll, what'd
+        - who's, who'll, who'd
+        - where's, when's, why's, how's
+      </STANDARD_CONTRACTIONS>
+      
+      <PERFECT_TENSE_CONTRACTIONS>
+        <!-- J-Novel Club / Professional LN standard (rarely used by AI) -->
+        - could've, should've, would've, might've, must've
+        - couldn't've, shouldn't've, wouldn't've
+        - there've, we've, they've
+        
+        Example:
+        - ❌ "You could have told me" 
+        - ✅ "You could've told me"
+      </PERFECT_TENSE_CONTRACTIONS>
+      
+      <EXPANSION_VIOLATIONS>
+        <!-- These should NEVER appear in casual dialogue/narration -->
+        - "I am" → Must be "I'm" (except emphasis: "I AM serious!")
+        - "you are" → Must be "you're"
+        - "he is" / "she is" → Must be "he's" / "she's"
+        - "do not" → Must be "don't"
+        - "does not" → Must be "doesn't"
+        - "did not" → Must be "didn't"
+        - "will not" → Must be "won't"
+        - "cannot" → Must be "can't"
+        - "it is" → Must be "it's" (possessive "its" is different!)
+        - "there is" → Must be "there's"
+        - "that is" → Must be "that's"
+        - "what is" → Must be "what's"
+      </EXPANSION_VIOLATIONS>
+      
+      <EXCEPTIONS>
+        <!-- When expansions ARE acceptable -->
+        1. **Emphasis/Stress:** "I AM being serious!" (shouting/emphasis)
+        2. **Formal Speech:** Butler, noble, formal occasion dialogue
+        3. **Foreign Speaker:** Character learning English (intentional stiffness)
+        4. **Possessive Its:** "its color" (not "it's color" - different meaning!)
+        5. **Title/Heading:** "Chapter 1: What Is Love" (formal title)
+        6. **Deliberate Enunciation:** "Do. Not. Touch. That."
+      </EXCEPTIONS>
+      
+      <CHARACTER_SPECIFIC_RULES>
+        <!-- Some archetypes have different contraction rates -->
+        - **Teen Protagonist (POV):** 99%+ rate (natural contemporary voice)
+        - **Casual Friends:** 95%+ rate
+        - **Formal Characters (Butler, Ojou-sama):** 70-80% rate acceptable
+        - **Internal Monologue:** 99%+ rate (most natural)
+        - **Dialogue vs Narration:** Both should contract heavily unless character-specific
+      </CHARACTER_SPECIFIC_RULES>
+      
+      <DETECTION_PROTOCOL>
+        1. **Scan for expansion patterns:**
+           - Regex: `\b(I am|you are|he is|she is|do not|does not|cannot|will not|it is|there is|that is|what is)\b`
+           - Exclude: Emphasis context (ALL CAPS, "I AM!"), formal characters
+        
+        2. **Count contractions:**
+           - Regex: `'(m|ll|ve|d|re|t|s)\b` (apostrophe + suffix)
+           - Count total instances
+        
+        3. **Calculate rate:**
+           - Rate = Contractions / (Contractions + Opportunities)
+        
+        4. **Grade based on rate:**
+           - <70%: Grade D (unnatural)
+           - 70-80%: Grade C (needs work)
+           - 80-90%: Grade B (acceptable)
+           - 90-95%: Grade A (good)
+           - 95-99%: Grade A+ (excellent)
+           - 99%+: FFXVI-Tier (perfect)
+      </DETECTION_PROTOCOL>
+      
+      <GRADING_IMPACT>
+        Contraction rate is a CRITICAL quality indicator:
+        - Low rate (<80%) = Robotic, unnatural prose
+        - High rate (95%+) = Natural, contemporary English
+        - Perfect rate (99%+) = Professional localization standard
+        
+        **Grade Override Rules:**
+        - <70% contraction rate → Maximum Grade C (even if no other issues)
+        - 70-80% rate → Maximum Grade B
+        - 90%+ rate → A/A+ possible (if other metrics pass)
+      </GRADING_IMPACT>
+      
+      <AUDIT_OUTPUT_FORMAT>
+        ```
+        ### Contraction Rate: [X]%
+        
+        - Total contractions: [X]
+        - Expansion violations: [X]
+        - Rate: [X]%
+        - Target: 95%+ (A+), 99%+ (FFXVI-Tier)
+        
+        **Status:** [✅ PASS / ⚠️ ACCEPTABLE / ❌ FAIL]
+        
+        **Violations Found:** (if any)
+        1. Line [X]: "I am going" → Should be "I'm going"
+        2. Line [Y]: "do not worry" → Should be "don't worry"
+        [etc.]
+        
+        **Exceptions Applied:** (if any)
+        - Line [Z]: "I AM serious!" → Acceptable (emphasis)
+        ```
+      </AUDIT_OUTPUT_FORMAT>
     </CATEGORY>
 
     <CATEGORY id="3">
@@ -390,32 +519,185 @@
     <CATEGORY id="5">
       <NAME>AI-isms (FFXVI-Tier Zero Tolerance)</NAME>
       <FAIL_CRITERIA>Common AI translationese artifacts that break natural English flow.</FAIL_CRITERIA>
+      <SOURCE>config/anti_ai_ism_patterns.json + INDUSTRY_STANDARD_PROSE_MODULE.md</SOURCE>
+      <TARGET_DENSITY>Less than 0.02 instances per 1000 words (Yen Press/J-Novel Club standard)</TARGET_DENSITY>
+      
       <PATTERNS>
-        <CRITICAL_PATTERNS>
-          - "a sense of [emotion]" → Fix: Direct emotion ("felt uneasy" not "felt a sense of unease")
-          - "Feeling a sense of [emotion]" → Fix: Vivid imagery ("[Emotion] washed over him")
-          - "containing a sense of" → Fix: "tinged with" or direct adjective
-          - "brought a sense of" → Fix: Active verb ("reassured" not "brought reassurance")
+        <CRITICAL_PATTERNS severity="BLOCKS_PUBLICATION">
+          <!-- Direct translations that destroy natural English -->
+          1. "asserting presence" → Fix: "obvious" / "impossible to ignore"
+             Source: Literal 存在感をアピール
+          
+          2. "release pheromones" → Fix: "ooze allure" / "exude charm"
+             Source: Pseudo-biological phrasing
+          
+          3. "had a [noun] to it" → Fix: "carried weight" / "spoke with conviction"
+             Source: Abstract noun bridge (Japanese calque)
+             Examples: "had a sadness to it", "had a warmth to it"
+          
+          4. "Let me say it again, what is this" → Fix: "I'll say it again: what even IS this?!"
+             Source: Literal もう一度言う translation
+          
+          5. "surreal picture/scene" → Fix: "absurd situation" / "how did I end up here?"
+             Source: Awkward literalism for 超現実的な光景
+          
+          6. "formidable opponent" (casual context) → Fix: "tough nut to crack" / "hard to handle"
+             Source: Over-formal register
         </CRITICAL_PATTERNS>
-        <STANDARD_PATTERNS>
-          - "had a [adj] core to it" → Fix: Strong verb
-          - "in a [adj] manner" → Fix: Adverb ("[adj]ly")
-          - "needless to say" → Fix: Remove
-          - "It can be said that" → Fix: Remove
-        </STANDARD_PATTERNS>
+        
+        <MAJOR_PATTERNS severity="REQUIRES_REVISION">
+          <!-- Hedging/Distancing (AI uses these to hedge uncertainty) -->
+          <HEDGING_DISTANCING>
+            7. "a sense of [emotion]" → Fix: Direct emotion ("dread" not "a sense of dread")
+            8. "felt like [action]" → Fix: Direct statement ("I could" not "I felt like I could")
+            9. "seemed to [verb]" → Fix: Direct verb or "looked" ("smiled" not "seemed to smile")
+            10. "appeared to [verb]" → Fix: Direct verb ("was angry" not "appeared to be angry")
+            11. "I found myself [verb+ing]" → Fix: Direct action ("I stared" not "I found myself staring")
+          </HEDGING_DISTANCING>
+          
+          <!-- Noun Bridges (Abstract noun constructions) -->
+          <NOUN_BRIDGES>
+            12. "containing [noun]" → Fix: Active verb or adjective
+                Examples: "containing joy" → "joyful", "containing tension" → "tense"
+            13. "holding [abstract noun]" → Fix: Active verb
+                Examples: "holding promise" → "promising", "holding danger" → "dangerous"
+            14. "brought [emotion/state]" → Fix: Active verb
+                Examples: "brought reassurance" → "reassured", "brought comfort" → "comforted"
+          </NOUN_BRIDGES>
+          
+          <!-- Adverbial Constructions -->
+          <ADVERBIAL_CONSTRUCTIONS>
+            15. "in a [adj] manner" → Fix: Adverb ("[adj]ly") or restructure
+                Examples: "in a careful manner" → "carefully"
+            16. "with [noun]" → Fix: Direct adverb
+                Examples: "with care" → "carefully", "with hesitation" → "hesitantly"
+          </ADVERBIAL_CONSTRUCTIONS>
+          
+          <!-- Calques (Direct translations from Japanese) -->
+          <CALQUES>
+            17. "it cannot be helped" → Fix: "nothing I can do" / "oh well"
+                Source: 仕方がない
+            18. "I'll do my best" → Fix: "I'll give it my all!" / "Here goes!"
+                Source: 頑張ります
+            19. "as expected of" → Fix: "that's [Name] for you" / "classic [Name]"
+                Source: さすが
+            20. "is that so?" → Fix: "oh really?" / "huh" / "is it now?"
+                Source: そうですか
+            21. "the current situation" → Fix: "this mess" / "what's happening"
+                Source: 今の状況
+          </CALQUES>
+          
+          <!-- Meta-commentary -->
+          <META_COMMENTARY>
+            22. "needless to say" → Fix: Remove entirely
+            23. "It can be said that" → Fix: Remove entirely
+            24. "It goes without saying" → Fix: Remove entirely
+            25. "In other words" → Fix: Restructure or remove
+            26. "To put it simply" → Fix: Just say it simply
+            27. "As the name suggests" → Fix: Remove or integrate naturally
+          </META_COMMENTARY>
+        </MAJOR_PATTERNS>
+        
+        <MINOR_PATTERNS severity="STYLE_POLISH">
+          <!-- Japanese Narrative Structures (Rigid/Formal) -->
+          <NARRATIVE_RIGIDITY>
+            28. Double "had" constructions → Fix: Simplify tense
+                BAD: "the lives they had led had forced that way of thinking upon them"
+                GOOD: "their life experiences forced that way of thinking on them"
+            
+            29. Passive voice with "upon" → Fix: Active voice with "on"
+                BAD: "imposed upon", "forced upon"
+                GOOD: "imposed on", "forced on"
+            
+            30. Overly formal phrasing → Fix: Natural register
+                BAD: "the words that had been spoken had left an impression upon her"
+                GOOD: "his words left an impression on her"
+          </NARRATIVE_RIGIDITY>
+          
+          <!-- Subject Repetition (Japanese Calque) -->
+          <SUBJECT_REPETITION>
+            31. Restating subjects → Fix: Use pronouns
+                BAD: "Yuki closed the book. Yuki turned to me."
+                GOOD: "Yuki closed the book. She turned to me."
+          </SUBJECT_REPETITION>
+          
+          <!-- Transitional Word Overuse -->
+          <TRANSITIONAL_OVERUSE>
+            32. "However" → Limit to 2x per chapter opening, vary with "But", "Still", "Though"
+            33. "By the way" → Max 1x per chapter, often omit entirely
+            34. "Therefore" → Avoid in dialogue, use "So" or restructure
+            35. "Nevertheless" → Formal contexts only
+          </TRANSITIONAL_OVERUSE>
+          
+          <!-- Internal Monologue Literalism -->
+          <MONOLOGUE_LITERALISM>
+            36. "What is this? I thought." → Fix: "What the heck?" / "How did I end up here?"
+                Source: 何だこれ、と思った
+            37. "I wonder" overuse → Fix: Vary with "Maybe", "Could it be", or restructure
+            38. "Mu..." / "Muu..." → Fix: "Hmph" or describe action (she pouted)
+          </MONOLOGUE_LITERALISM>
+          
+          <!-- Onomatopoeia (Should be preserved per hybrid localization) -->
+          <ONOMATOPOEIA_PRESERVATION>
+            39. "Ehehe" / "Ufufu" / "Fufu" / "Nishishi" → KEEP ROMANIZED (cultural voice markers)
+                Note: These are INTENTIONALLY preserved. Do not flag as errors.
+            40. "Ara ara" → Context-dependent: Keep or "Oh my" / "My, my"
+          </ONOMATOPOEIA_PRESERVATION>
+          
+          <!-- Formal Register Overuse (Casual contexts) -->
+          <FORMAL_REGISTER_OVERUSE>
+            41. "Please treat me well" → Fix: "Nice to meet you" / "Looking forward to working with you"
+                Source: よろしくお願いします
+            42. "That is most unfortunate" (casual) → Fix: "That's too bad" / "What a shame"
+            43. "I am terribly sorry" (casual) → Fix: "I'm so sorry" / "My bad"
+            44. "If you would permit me..." (casual) → Fix: "If it's okay..." / "Mind if I...?"
+            45. "I humbly ask..." (casual) → Fix: "Can I ask you something?"
+            46. "Shall we depart?" (casual) → Fix: "Ready to go?" / "Let's head out"
+          </FORMAL_REGISTER_OVERUSE>
+          
+          <!-- Scene Transition Literalism -->
+          <SCENE_TRANSITIONS>
+            47. "The next moment—" → Fix: "Before I knew it—" / "Suddenly—"
+            48. "At that time—" → Fix: "Just then—" / "Right at that moment—"
+            49. "Such a thing—" → Fix: "Something like that—" or contextual
+            50. "However" (excessive) → Vary: "But", "Still", "Though", or omit
+          </SCENE_TRANSITIONS>
+        </MINOR_PATTERNS>
+        
         <IDIOMATIC_EXCEPTIONS>
+          <!-- These are ACCEPTABLE despite containing flagged patterns -->
           - "have a sense of humor" → ACCEPTABLE (idiomatic English)
           - "make sense" → ACCEPTABLE (idiomatic)
           - "sense of direction" → ACCEPTABLE (idiomatic)
+          - "sense of purpose" → ACCEPTABLE (idiomatic)
+          - "sense of timing" → ACCEPTABLE (idiomatic)
+          - "common sense" → ACCEPTABLE (idiomatic)
+          - "Fufu", "Ufufu", "Ehehe", "Nishishi" → ACCEPTABLE (hybrid localization)
         </IDIOMATIC_EXCEPTIONS>
       </PATTERNS>
+      
       <KOJI_FOX_TECHNIQUE>
-        Apply Michael-Christopher Koji Fox's FFXVI method:
-        1. Direct Emotion Words: "felt uneasy" (not "felt a sense of unease")
-        2. Active Verbs: "reassured her" (not "brought her reassurance")
-        3. Vivid Imagery: "Nostalgia washed over him" (not "Feeling nostalgic")
-        4. Natural Phrasing: "the conversation felt awkward" (not "conversing awkwardly")
+        Apply Michael-Christopher Koji Fox's FFXVI method (Gold Standard):
+        1. **Direct Emotion Words:** "felt uneasy" (not "felt a sense of unease")
+        2. **Active Verbs:** "reassured her" (not "brought her reassurance")
+        3. **Vivid Imagery:** "Nostalgia washed over him" (not "Feeling nostalgic")
+        4. **Natural Phrasing:** "the conversation felt awkward" (not "conversing awkwardly")
+        5. **Show Don't Tell:** "Her smile remained, but her eyes had gone cold" (not "Her voice turned cold")
       </KOJI_FOX_TECHNIQUE>
+      
+      <DETECTION_METHOD>
+        1. Scan text with regex patterns from anti_ai_ism_patterns.json
+        2. Count instances per 1000 words
+        3. Categorize by severity (CRITICAL / MAJOR / MINOR)
+        4. Calculate density: instances / (word_count / 1000)
+        5. Compare against target: <0.02 instances per 1k words
+        
+        **Grading Impact:**
+        - CRITICAL patterns found: Automatic Grade C or lower
+        - MAJOR patterns >5 instances: Grade B
+        - MAJOR patterns 2-5 instances: Grade A
+        - MAJOR patterns 0-1 + MINOR <10: Grade A+
+      </DETECTION_METHOD>
     </CATEGORY>
     
     <CATEGORY id="6">

@@ -195,9 +195,9 @@ class MetadataProcessor:
         with open(self.manifest_path, 'r', encoding='utf-8') as f:
             self.manifest = json.load(f)
 
-        # Load model from config.yaml if not specified
-        gemini_config = get_config_section("gemini")
-        model = model or gemini_config.get("model", "gemini-2.5-flash")
+        # Prioritize hardcoded gemini-2.5-flash for metadata (fast, simple task)
+        # Only use config.yaml model if explicitly overridden via parameter
+        model = model or "gemini-2.5-flash"
         logger.info(f"Using model: {model}")
 
         # Disable caching for metadata processor (only 1-2 API calls per volume, not worth overhead)

@@ -33,22 +33,37 @@ class AuditResult:
         }
 
 class QualityMetrics:
-    # Common contraction patterns (simplified)
-    CONTRACTIBLE_PATTERNS = [
+    # Critical contraction patterns (Yen Press/J-Novel Club Gold Standard)
+    # Priority 1: MUST contract in casual contexts - "it is", "that is", "there is"
+    CRITICAL_CONTRACTIBLE = [
+        (r"\bit is\b", "it's"),
+        (r"\bthat is\b", "that's"),
+        (r"\bthere is\b", "there's"),
+        (r"\bhere is\b", "here's"),
+        (r"\bwhat is\b", "what's"),
+        (r"\bwho is\b", "who's"),
         (r"\bdo not\b", "don't"),
         (r"\bdoes not\b", "doesn't"),
-        (r"\bdid not\b", "didn't"),
-        (r"\bis not\b", "isn't"),
-        (r"\bare not\b", "aren't"),
+    ]
+    
+    # Priority 2: High priority - negative contractions
+    HIGH_PRIORITY_CONTRACTIBLE = [
         (r"\bwas not\b", "wasn't"),
         (r"\bwere not\b", "weren't"),
+        (r"\bcould not\b", "couldn't"),
+        (r"\bshould not\b", "shouldn't"),
+        (r"\bwould not\b", "wouldn't"),
+        (r"\bdid not\b", "didn't"),
+        (r"\bhad not\b", "hadn't"),
+    ]
+    
+    # Priority 3: Standard contractions
+    STANDARD_CONTRACTIBLE = [
+        (r"\bis not\b", "isn't"),
+        (r"\bare not\b", "aren't"),
         (r"\bhave not\b", "haven't"),
         (r"\bhas not\b", "hasn't"),
-        (r"\bhad not\b", "hadn't"),
         (r"\bwill not\b", "won't"),
-        (r"\bwould not\b", "wouldn't"),
-        (r"\bshould not\b", "shouldn't"),
-        (r"\bcould not\b", "couldn't"),
         (r"\bcannot\b", "can't"),
         (r"\bI am\b", "I'm"),
         (r"\byou are\b", "you're"),
@@ -57,8 +72,26 @@ class QualityMetrics:
         (r"\bI will\b", "I'll"),
         (r"\byou will\b", "you'll"),
         (r"\bI have\b", "I've"),
-        (r"\byou have\b", "you've")
+        (r"\byou have\b", "you've"),
+        (r"\blet us\b", "let's"),
     ]
+    
+    # J-Novel Club perfect tense contractions (internal monologue)
+    PERFECT_TENSE_CONTRACTIBLE = [
+        (r"\bwould have\b", "would've"),
+        (r"\bcould have\b", "could've"),
+        (r"\bshould have\b", "should've"),
+        (r"\bmight have\b", "might've"),
+        (r"\bmust have\b", "must've"),
+    ]
+    
+    # Combined pattern list (all priorities)
+    CONTRACTIBLE_PATTERNS = (
+        CRITICAL_CONTRACTIBLE + 
+        HIGH_PRIORITY_CONTRACTIBLE + 
+        STANDARD_CONTRACTIBLE + 
+        PERFECT_TENSE_CONTRACTIBLE
+    )
     
     # Default AI-isms if not in config
     DEFAULT_AI_ISMS = [

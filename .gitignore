@@ -12,6 +12,7 @@
 .env.*.local
 *.env
 **/.env
+pipeline/.env
 
 # ============================================
 # WORKING DIRECTORIES - LARGE/TRANSIENT DATA
@@ -24,6 +25,8 @@ pipeline/OUTPUT/
 # Development workspaces (internal testing/experimentation)
 bleu_workspace/
 data/
+.auditing/
+auditing/
 
 # Context files (legacy continuity system)
 **/.context/
@@ -34,6 +37,9 @@ data/
 # Pipeline documents (audit reports, investigation notes)
 pipeline/documents/
 pipeline/docs/
+pipeline/auditing/
+pipeline/pipeline/narrator/
+pipeline/pipeline/pdf_builder
 
 # Root level docs (setup guides, verification reports)
 docs/
@@ -41,6 +47,12 @@ docs/
 # Design documents
 UNIVERSAL_CONTINUITY_PACK_DESIGN.md
 VERIFICATION_REPORT.md
+AUDIT_AGENT.md
+
+# Audit reports
+AUDIT_REPORT*.md
+AUDIT_REPORT*.txt
+*_COMPARISON_REPORT.md
 
 # ============================================
 # TEST SCRIPTS AND DEVELOPMENT AIDS
@@ -48,6 +60,12 @@ VERIFICATION_REPORT.md
 test_script/
 pipeline/scripts/test_*.py
 pipeline/scripts/*_test.py
+
+# Analysis and test output files
+*_analysis_results.json
+*_analysis_results.txt
+*_analysis.json
+*_pattern_analysis.json
 
 # ============================================
 # PYTHON ARTIFACTS
@@ -74,6 +92,7 @@ ENV/
 # Pytest
 .pytest_cache/
 **/.pytest_cache/
+pipeline/.pytest_cache/
 .coverage
 htmlcov/
 .tox/
@@ -84,6 +103,7 @@ htmlcov/
 # ============================================
 .vscode/
 **/.vscode/
+pipeline/.vscode/
 .idea/
 **/.idea/
 *.swp
@@ -97,6 +117,7 @@ htmlcov/
 **/.claude/
 .agent/
 **/.agent/
+pipeline/.agent/
 
 # ============================================
 # OS GENERATED FILES
@@ -158,7 +179,7 @@ pipeline/VN/Reference/
 MTL Studio.app/
 
 # ============================================
-# TTS DEVELOPMENT - TEMPORARY
+# TTS DEVELOPMENT (EXPERIMENTAL FEATURES)
 # ============================================
+# All TTS-related development files (guides, tests, voice samples)
 TTS_development/
-test_voices/

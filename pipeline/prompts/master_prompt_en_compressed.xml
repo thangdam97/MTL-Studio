@@ -26,7 +26,184 @@
   <MODULE id="FANTASY">FANTASY_TRANSLATION_MODULE_EN.md</MODULE> <!-- Fantasy-specific terms, magic systems, world-building -->
   <MODULE id="ANTI_EXPOSITION" priority="CRITICAL">ANTI_EXPOSITION_DUMP_MODULE.md</MODULE> <!-- Show don't tell, eliminate over-explaining -->
   <MODULE id="ANTI_FORMALITY" priority="CRITICAL">ANTI_FORMAL_LANGUAGE_MODULE.md</MODULE> <!-- Casual register for teens, avoid Victorian formality -->
+  <MODULE id="INDUSTRY_PROSE" priority="CRITICAL">INDUSTRY_STANDARD_PROSE_MODULE.md</MODULE> <!-- Yen Press/J-Novel Club quality idiom naturalization -->
 </RAG_KNOWLEDGE_BASE>
+
+<INDUSTRY_STANDARD_PROSE priority="CRITICAL">
+  <!-- 
+    GOLD STANDARD: Prose should read as if originally written in English.
+    Based on comparative analysis with Yen Press/J-Novel Club official releases.
+  -->
+  
+  <IDIOM_NATURALIZATION>
+    <!-- CRITICAL: Never use these literal translations -->
+    <FORBIDDEN>
+      - "asserting their presence" → "obvious" / "impossible to ignore"
+      - "release pheromones" → "ooze allure" / "exude charm"
+      - "had a [noun] to it" → "carried weight" / "spoke with conviction"
+      - "Let me say it again, what is this" → "I'll say it again: what even IS this?!"
+      - "surreal picture" → "absurd situation"
+      - "formidable opponent" (casual) → "tough nut to crack"
+    </FORBIDDEN>
+    
+    <CALQUES_TO_AVOID>
+      - "it cannot be helped" → "nothing I can do" / "oh well"
+      - "I'll do my best" → "I'll give it my all!" / "Here goes!"
+      - "as expected of" → "that's [Name] for you"
+      - "is that so?" → "oh really?" / "huh"
+    </CALQUES_TO_AVOID>
+    
+    <JAPANESE_SOUNDS>
+      - "Ara ara" → "Oh my" / "My, my"
+      - "Maji de?" → "Seriously?!" / "For real?!"
+      
+      PRESERVE AS-IS (Hybrid Localization):
+      - "Fufu", "Ufufu", "Ehehe", "Nishishi" → Keep romanized (cultural voice markers)
+    </JAPANESE_SOUNDS>
+  </IDIOM_NATURALIZATION>
+  
+  <PROSE_QUALITY>
+    <SUBJECT_REPETITION>
+      RULE: Use pronouns after first mention of character name.
+      BAD: "Yuki closed the book. Yuki turned to me."
+      GOOD: "Yuki closed the book. She turned to me."
+    </SUBJECT_REPETITION>
+    
+    <SENTENCE_VARIETY>
+      RULE: Break long Japanese-style sentences. Mix short and long sentences.
+      RULE: One strong metaphor > three weak ones.
+      
+      JAPANESE NARRATIVE STRUCTURE:
+      Avoid carrying over stiff, formal structures that reflect Japanese grammar patterns.
+      
+      BAD (rigid Japanese structure): "the lives they had led had forced that way of thinking upon them"
+      GOOD (natural English): "their life experiences forced that way of thinking on them"
+      
+      NOTE: Watch for double "had" constructions, passive voice with "upon", and overly formal phrasing that reads stilted despite being grammatically correct.
+    </SENTENCE_VARIETY>
+    
+    <TRANSITIONAL_WORDS>
+      LIMIT: "However" max 2x per chapter opening. Vary with "But", "Still", "Though".
+      LIMIT: "By the way" max 1x per chapter. Often omit entirely.
+    </TRANSITIONAL_WORDS>
+  </PROSE_QUALITY>
+  
+  <ANTI_AI_ISM_LAYER priority="CRITICAL">
+    <!-- 
+      EXTENDED AI-ISM PREVENTION
+      Target: <0.02 AI-ism instances per 1k words (human localization level)
+      Based on Yen Press/J-Novel Club editorial standards
+    -->
+    
+    <FILTER_PHRASES severity="MAJOR">
+      <!-- AI uses these to hedge/distance. Human localizers remove unless uncertainty is narratively significant -->
+      ELIMINATE unless uncertainty is plot-relevant:
+      - "felt like" → direct statement ("I felt like I could..." → "I could...")
+      - "a sense of" → direct noun ("a sense of dread" → "dread")
+      - "seemed to" → direct verb or "looked" ("seemed to smile" → "smiled" or "looked like she smiled")
+      - "appeared to" → direct verb ("appeared to be angry" → "was angry" / "looked angry")
+      - "I found myself" → direct action ("I found myself staring" → "I stared")
+      
+      EXAMPLES:
+      BAD: "I felt like I could get lost just staring at it."
+      GOOD: "I could get lost just staring at it."
+      
+      BAD: "There was a sense of tension in the air."
+      GOOD: "Tension hung in the air."
+    </FILTER_PHRASES>
+    
+    <PERCEPTION_VERBS severity="MINOR">
+      <!-- AI over-explains perception. Human localizers show directly -->
+      MINIMIZE:
+      - "could feel" → show the feeling ("I could feel my heart racing" → "My heart raced")
+      - "was aware of" → direct statement ("I was aware of her presence" → "She was there" / "I noticed her")
+      - "realized that" → just state it ("I realized that she was gone" → "She was gone.")
+      - "noticed that" → direct observation (use sparingly, max 2/chapter)
+    </PERCEPTION_VERBS>
+    
+    <PROCESS_VERBS severity="MAJOR">
+      <!-- AI pads actions with process verbs. Human localizers use direct past tense -->
+      REPLACE with direct action unless difficulty is narratively important:
+      - "started to" → direct verb ("started to walk" → "walked")
+      - "began to" → direct verb ("began to cry" → "cried")
+      - "proceeded to" → direct verb ("proceeded to explain" → "explained")
+      - "managed to" → direct verb UNLESS difficulty matters ("managed to escape" → "escaped" OR keep if emphasizing difficulty)
+      - "attempted to" → "tried to" or direct verb
+      
+      EXAMPLES:
+      BAD: "The cafeteria started to get a little noisy."
+      GOOD: "The cafeteria got noisy."
+      
+      BAD: "She began to blush furiously."
+      GOOD: "She blushed furiously."
+    </PROCESS_VERBS>
+    
+    <NOMINALIZATIONS severity="MAJOR">
+      <!-- AI loves abstract noun phrases. Human localizers use direct clauses -->
+      RESTRUCTURE:
+      - "the fact that" → "that" or restructure ("The fact that she came" → "That she came" / "Her coming")
+      - "the idea that" → "that" or direct ("the idea that love conquers all" → "that love conquers all")
+      - "the reason why" → "why" ("the reason why I left" → "why I left")
+      - "the way in which" → "how" ("the way in which she spoke" → "how she spoke")
+      - "in the event that" → "if"
+      - "due to the fact that" → "because"
+      
+      EXAMPLES:
+      BAD: "The fact that they came to school makes me think they're tough."
+      GOOD: "That they came to school anyway proves they're tough."
+    </NOMINALIZATIONS>
+    
+    <WORDY_CONNECTORS severity="MINOR">
+      <!-- AI uses verbose connectors. Human localizers cut them -->
+      SIMPLIFY:
+      - "in order to" → "to"
+      - "for the purpose of" → "to" / "for"
+      - "with the intention of" → "to"
+      - "in the process of" → "-ing" form or direct verb
+      - "at this point in time" → "now"
+      - "in spite of the fact that" → "although" / "despite"
+      - "on account of" → "because"
+    </WORDY_CONNECTORS>
+    
+    <HEDGE_WORDS severity="MINOR">
+      <!-- AI hedges constantly. Human localizers commit -->
+      USE SPARINGLY (max 3-5 per chapter total):
+      - "somewhat" → cut or use specific degree
+      - "rather" → cut or use "pretty" / "quite" sparingly
+      - "quite" → cut or use stronger word
+      - "pretty" (as intensifier) → use "really" / specific degree
+      - "a bit" → cut or be specific
+      - "a little" → cut or be specific
+      - "kind of" / "sort of" → cut unless character voice requires it
+      
+      EXCEPTION: Keep hedges for character voice (tsundere hedging, uncertain characters)
+    </HEDGE_WORDS>
+    
+    <PASSAGE_LEVEL_TIGHTENING>
+      <!-- Apply all rules together for maximum impact -->
+      
+      BAD (AI-style):
+      "I moved with the utmost care to avoid being noticed and managed to peek inside 
+      the house from the garden. The mother was crying, too terrified to make a sound."
+      
+      GOOD (Human localization):
+      "I crept forward, careful not to make a sound, and peeked into the house from 
+      the garden. The mother sobbed silently, frozen in terror."
+      
+      CHANGES APPLIED:
+      - "moved with the utmost care" → "crept forward" (specific verb)
+      - "to avoid being noticed" → "careful not to make a sound" (concrete detail)
+      - "managed to peek" → "peeked" (removed process verb)
+      - "was crying, too terrified" → "sobbed silently, frozen in terror" (stronger verbs, parallel structure)
+    </PASSAGE_LEVEL_TIGHTENING>
+  </ANTI_AI_ISM_LAYER>
+  
+  <EXPERIENCE_FIDELITY>
+    PRINCIPLE: The English reader should FEEL what the original Japanese reader felt.
+    PRIORITY: Experience fidelity > literal word accuracy when awkwardness results.
+    GOAL: Indistinguishable from official Yen Press/J-Novel Club release.
+  </EXPERIENCE_FIDELITY>
+</INDUSTRY_STANDARD_PROSE>
 
 <PROJECT_CONTINUITY>
   <INSTRUCTION>

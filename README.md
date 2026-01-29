@@ -2,15 +2,15 @@
 
 **Machine Translation Publishing Pipeline for Japanese Light Novels**
 
-Version 3.0 LTS | Production Ready | January 2026
+Version 3.5 LTS | Production Ready | January 2026
 
-> Multi-Language Support: English & Vietnamese | V3 Enhanced Schema | AI-Powered QC | Interactive CLI
+> Multi-Language Support: English & Vietnamese | V3.5 Enhanced Schema (TTS Support) | AI-Powered QC | Interactive CLI
 
 ---
 
 ![MTL Studio Interface](assets/screenshot_main.png)
 
-*V3 Enhanced Schema with character profiles, keigo_switch, and interactive CLI menu*
+*V3.5 Enhanced Schema with character profiles, keigo_switch, TTS voice assignments, and interactive CLI menu*
 
 ---
 
@@ -52,6 +52,8 @@ MTL Studio is a complete automated pipeline for translating Japanese Light Novel
 - **Publisher Pattern Database**: 65+ documented EPUB structure patterns across 7 major publishers
 - **Automatic Publisher Detection**: Pattern-based image classification without hardcoded logic
 - **AI-Powered QC**: IDE agents (VSCode, Windsurf, Cursor,...) for auditing, formatting fixes, and illustration insertion
+- **Anti-AI-ism Detection**: 63-pattern JSON library with 3 severity tiers (CRITICAL/MAJOR/MINOR)
+- **Echo Detection System**: Professional proximity-based clustering detection (23 patterns, 36.5% coverage)
 - **Interactive CLI**: Volume selection menus, configuration management, verbose mode
 - **Post-Processing**: CJK artifact removal, format normalization, smart typography
 
@@ -61,6 +63,7 @@ MTL Studio is a complete automated pipeline for translating Japanese Light Novel
 |--------|--------|-------------|
 | Contraction Rate | 80%+ | Natural dialogue flow |
 | AI-ism Count | <5/chapter | Elimination of translationese |
+| AI-ism Clustering | 0 echoes | No pattern repetition within proximity windows |
 | Victorian Patterns | 0 | No archaic phrasing (with ojou-sama exceptions) |
 | Name Consistency | 100% | Ruby-verified romanization |
 | Content Fidelity | <5% deviation | 1:1 faithful to source |
@@ -722,7 +725,9 @@ MTL_Studio/
 
 ## RAG Modules
 
-The translation system uses a 2.5MB retrieval-augmented generation knowledge base stored in `pipeline/modules/`:
+The translation system uses a 2.5MB retrieval-augmented generation knowledge base stored in `pipeline/modules/`, plus a comprehensive quality control pattern library:
+
+**Core Translation Modules**:
 
 | Module | Size | Purpose |
 |--------|------|---------|
@@ -734,6 +739,14 @@ The translation system uses a 2.5MB retrieval-augmented generation knowledge bas
 | ANTI_FORMAL_LANGUAGE_MODULE.md | 17KB | Victorian pattern elimination |
 | ANTI_EXPOSITION_DUMP_MODULE.md | 14KB | Natural prose flow |
 | FANTASY_TRANSLATION_MODULE_EN.md | 19KB | Fantasy genre conventions |
+
+**Quality Control Pattern Library**:
+
+| Configuration | Patterns | Purpose |
+|---------------|----------|---------||
+| anti_ai_ism_patterns.json | 63 patterns | AI-ism detection with 3 severity tiers |
+| Echo Detection System | 23 patterns | Proximity-based clustering detection (50/75/100/150-word windows) |
+| Documentation | ECHO_DETECTION_GUIDE.md | Complete technical specifications and integration guide |
 
 ### Vietnamese Translation Modules
 
@@ -751,11 +764,52 @@ The Vietnamese pipeline includes dedicated modules in `VN/modules/`:
 
 ## Quality Control
 
+### Anti-AI-ism Pattern Library
+
+**Version 2.0** - Comprehensive 63-pattern detection system with industrial publishing standards:
+
+**Pattern Organization**:
+- **CRITICAL** (6 patterns): Publication blockers - direct translations, pseudo-biology
+- **MAJOR** (28 patterns): Quality degraders - emotion wrappers, filter phrases, process verbs, AI crutch phrases
+- **MINOR** (29 patterns): Style polish - formal vocabulary, transitional overuse, hedge words
+
+**Categories**: 11 specialized subcategories including emotion_wrappers, filter_phrases, process_verbs, ai_crutch_phrases, perception_verbs, reaction_verbs, gaze_verbs, hedge_words, and more.
+
+**Configuration**: `pipeline/config/anti_ai_ism_patterns.json`
+
+### Echo Detection System
+
+**Professional proximity-based clustering detection** that catches AI's tendency to reuse "safe" sentence structures within short distances.
+
+**Core Concept**: Moves from "Is this word bad?" to "Is this rhythm bad?" - the same pattern 3 times across 20 pages is acceptable, but 3 times in one scene creates robotic monotony.
+
+**Coverage**: 23 patterns (36.5%) equipped with proximity penalties:
+- **CRITICAL Escalation** (5 patterns): `started_to`, `began_to`, `found_myself`, `couldnt_help_but`, `felt_sense_of`
+- **MAJOR Escalation** (16 patterns): Emotion wrappers, filter phrases, gaze verbs, reaction verbs, hedge words
+- **MINOR Monitoring** (2 patterns): `somewhat`, `rather` (acceptable in moderation)
+
+**Proximity Windows**:
+- **50-word windows** (3 patterns): Tight clustering detection for redundant constructions
+- **75-word windows** (5 patterns): Close proximity for agency-removal patterns
+- **100-word windows** (12 patterns): Default detection for common AI-isms
+- **150-word windows** (3 patterns): Loose monitoring for legitimate patterns
+
+**How It Works**:
+```
+Instance 1: "He started to walk" at word 100 → MINOR flag
+Instance 2: "She started to run" at word 150 → Distance: 50 words
+Trigger: 50 < 100-word window → Escalate to CRITICAL
+Result: Forces synonym variation ("She ran" / "She took off running")
+```
+
+**Documentation**: See `pipeline/docs/ECHO_DETECTION_GUIDE.md` for complete technical specifications, integration examples, and best practices.
+
 ### Automatic QC Features
 
 - **Typography Fixes**: Smart quotes, em-dashes, ellipses standardization
 - **Contraction Enforcement**: Expansion patterns detected and corrected
-- **AI-ism Detection**: Victorian patterns, repetitive phrases flagged
+- **AI-ism Detection**: 63-pattern library with severity classification
+- **Echo Detection**: Proximity-based clustering analysis with automatic escalation
 - **Name Consistency**: Ruby text verification against translations
 
 ### QC Report Schema
@@ -965,12 +1019,12 @@ The translator supports **four metadata schema variants** for enhanced character
 | **Legacy V2** | Volumes 1-3 style | `character_profiles`, `localization_notes`, `speech_pattern` |
 | **V4 Nested** | Compact character data | `character_names` with nested `{relationships, traits, pronouns}` |
 
-#### V3 Enhanced Schema (Recommended)
+#### V3.5 Enhanced Schema (Recommended - With TTS Support)
 
 ```json
 {
   "metadata_en": {
-    "schema_version": "v3_enhanced",
+    "schema_version": "v3.5_enhanced",
     "character_profiles": {
       "Doumoto Hayato": {
         "full_name": "Doumoto Hayato",
@@ -1001,7 +1055,20 @@ The translator supports **four metadata schema variants** for enhanced character
         "character_arc": "Reluctant hero who saved the man-hating sisters, gradually becomes their emotional anchor",
         "ruby_base": "堂本隼人",
         "ruby_reading": "どうもとはやと",
-        "occurrences": 100
+        "occurrences": 100,
+        "voice_assignment": {
+          "tts_provider": "gemini",
+          "voice_name": "Kore",
+          "voice_characteristic": "Clear",
+          "style_prompt_base": "Voice of a typical 16-year-old Japanese boy. Natural teen pitch, casual and modest delivery. Straightforward but humble tone.",
+          "emotional_variations": {
+            "default": "Casual and thoughtful. Natural introspective quality.",
+            "embarrassed": "Slightly flustered, awkward delivery. Pitch rises slightly.",
+            "surprised": "Quick reaction, sharper tone. Brief intake of breath.",
+            "nervous": "Hesitant delivery, slightly uncertain pacing.",
+            "determined": "Firm and resolute. Steady pace, confident tone."
+          }
+        }
       },
       "Shinjou Arisa": {
         "full_name": "Shinjou Arisa",
@@ -1027,7 +1094,42 @@ The translator supports **four metadata schema variants** for enhanced character
         "key_traits": "Long black hair with side braid, cold blue eyes, voluptuous figure, rejects all confessions, trauma from men",
         "character_arc": "Man-hating beauty who finds herself drawn to Hayato after he saved her family",
         "ruby_base": "新条亜利沙",
-        "occurrences": 80
+        "occurrences": 80,
+        "voice_assignment": {
+          "tts_provider": "gemini",
+          "voice_name": "Aoede",
+          "voice_characteristic": "Clear",
+          "style_prompt_base": "Voice of a composed 16-year-old Japanese girl. Cool, elegant delivery with formal register. Reserved and refined tone.",
+          "emotional_variations": {
+            "default": "Formal and composed. Elegant, controlled delivery.",
+            "cold": "Sharp and direct. Clipped, dismissive tone.",
+            "attracted": "Slightly softer, but still formal. Subtle warmth underneath.",
+            "protective": "Firm and commanding. Authoritative edge.",
+            "flustered": "Struggling to maintain composure. Slight tremor in voice."
+          }
+        }
+      },
+      "Charlotte Bennett": {
+        "full_name": "Charlotte Bennett",
+        "nickname": "Lottie",
+        "age": "16 (high school first year)",
+        "origin": "British (from England)",
+        "relationship": "Exchange student, protagonist's classmate and neighbor, Emma's older sister",
+        "traits": "Beautiful with long silver hair, kind and gentle personality, fluent in Japanese, good at cooking, loves Japanese culture, slightly shy, caring older sister",
+        "appearance": "Long straight silver hair, elegant demeanor, refined gestures, friendly smile, clear voice",
+        "voice_assignment": {
+          "tts_provider": "gemini",
+          "voice_name": "Erinome",
+          "voice_characteristic": "Clear",
+          "style_prompt_base": "Voice of a typical 16-year-old British girl with a refined English accent. Higher-pitched youthful voice befitting a teenage girl. Bright, energetic quality while maintaining elegance.",
+          "emotional_variations": {
+            "default": "Elegant and gentle delivery. Warm and friendly.",
+            "shy": "Suddenly flustered and embarrassed. Shy, timid delivery with slight hesitation.",
+            "formal": "Speaking politely and clearly to a classroom. Refined and composed.",
+            "happy": "Bright and cheerful, but still refined. Slightly faster pace.",
+            "surprised": "Startled, higher pitch. Quick intake of breath before speaking."
+          }
+        }
       }
     },
     "localization_notes": {
@@ -1289,7 +1391,7 @@ See LICENSE.txt for licensing information.
 
 **Core System**:
 - Pipeline Architecture: MTL Studio Development Team
-- AI Engine: Google Gemini (3 Flash / 2.5 Flash)
+- AI Engine: Google Gemini (Pro/Flash)
 - Typography: smartypants library
 - EPUB Handling: ebooklib, BeautifulSoup
 
@@ -1301,8 +1403,20 @@ See LICENSE.txt for licensing information.
 
 ## Changelog
 
+### Version 3.5 LTS (January 2026)
+- **Anti-AI-ism Pattern Library**: Comprehensive 63-pattern detection system (6 CRITICAL, 28 MAJOR, 29 MINOR)
+- **Echo Detection System**: Professional proximity-based clustering detection (23 patterns with 50/75/100/150-word windows)
+- **Pattern Categories**: 11 specialized subcategories including emotion_wrappers, filter_phrases, process_verbs, ai_crutch_phrases, perception_verbs, reaction_verbs, gaze_verbs, hedge_words
+- **Flow-Based Quality Checking**: Moves from count-based ("Is this word bad?") to flow-based ("Is this rhythm bad?") analysis
+- **Automatic Severity Escalation**: Patterns escalate from MINOR → MAJOR → CRITICAL when clustering detected
+- **Industrial Publishing Standards**: Pattern library aligned with professional editing practices (Echo Detection)
+- **Enhanced Contraction Patterns**: Expanded coverage for natural dialogue flow
+- **Documentation**: Complete ECHO_DETECTION_GUIDE.md with integration examples and best practices
+- **Configuration**: Centralized pattern library at `pipeline/config/anti_ai_ism_patterns.json` (v2.0)
+- **TTS Development**: All TTS-related files consolidated to `TTS_development/` (excluded from repo)
+
 ### Version 3.0 LTS (January 2026)
-- **V3 Enhanced Schema**: Rich character profiles with `keigo_switch`, `relationship_to_others`, `speech_pattern`, `character_arc`, and `occurrences` tracking
+- **V3.5 Enhanced Schema**: Rich character profiles with `keigo_switch`, `relationship_to_others`, `speech_pattern`, `character_arc`, `occurrences` tracking, and **TTS voice assignments** with emotional variations
 - **POV Tracking System**: Per-chapter `pov_tracking` array supporting mid-chapter POV shifts with line ranges
 - **Legacy System Disabled**: `.context/` continuity pack system replaced by superior v3 schema character_profiles
 - **Double-Spread Illustration Detection**: Automatic pattern matching for `p###-p###.jpg` two-page spreads
@@ -1335,4 +1449,4 @@ See LICENSE.txt for licensing information.
 
 ---
 
-Version 3.0 LTS | January 2026 | Production Ready | EN/VN Supported
+Version 3.0 LTS | January 2026

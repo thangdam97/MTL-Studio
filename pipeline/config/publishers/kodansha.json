@@ -1,0 +1,263 @@
+{
+    "publisher": "kodansha",
+    "version": "1.0.0",
+    "detection": {
+        "opf_markers": [
+            "<!-- Kodansha ver.",
+            "<dc:publisher>講談社</dc:publisher>",
+            "<dc:publisher id=\"publisher\">講談社</dc:publisher>"
+        ],
+        "style_files": [
+            "style/style-kodansha.css"
+        ]
+    },
+    "structure": {
+        "xhtml_pattern": "xhtml/p-{:04d}.xhtml",
+        "image_path": "image/",
+        "page_progression": "rtl",
+        "text_orientation": "vertical"
+    },
+    "naming_conventions": {
+        "cover": "cover.jpg",
+        "titlepage": "titlepage.jpg",
+        "end_matter": "end.jpg",
+        "profile": "profile.jpg",
+        "illustrations": "p{:03d}.jpg",
+        "kuchie_pattern": "p{:03d}(-{:03d})?.jpg"
+    },
+    "pre_toc_structure": {
+        "typical_pages": [
+            {
+                "page_id": "p-0001",
+                "type": "cover",
+                "class": "cover-page",
+                "content": "Main cover image",
+                "in_toc": false
+            },
+            {
+                "page_id": "p-0002",
+                "type": "notice",
+                "class": "caution-page",
+                "content": "Vertical reading recommendation",
+                "in_toc": false
+            },
+            {
+                "page_id": "p-0003 to p-0006",
+                "type": "kuchie",
+                "class": "image-page",
+                "content": "Color plate illustrations (口絵)",
+                "in_toc": false,
+                "combine_into": "cover_chapter"
+            },
+            {
+                "page_id": "p-0007",
+                "type": "toc",
+                "class": "various",
+                "content": "Table of contents nav",
+                "in_toc": true,
+                "toc_label": "目次"
+            },
+            {
+                "page_id": "p-0008",
+                "type": "titlepage",
+                "class": "image-page",
+                "content": "Title page illustration",
+                "in_toc": false
+            },
+            {
+                "page_id": "p-0009",
+                "type": "credits",
+                "class": "info-middle",
+                "content": "Illustrator and designer credits",
+                "in_toc": false
+            }
+        ],
+        "detection_rules": [
+            {
+                "rule": "page_before_first_h2",
+                "action": "mark_as_pre_toc",
+                "except": [
+                    "p-0007"
+                ]
+            },
+            {
+                "rule": "class_in_list",
+                "classes": [
+                    "cover-page",
+                    "caution-page",
+                    "image-page",
+                    "info-middle"
+                ],
+                "action": "mark_as_pre_toc"
+            }
+        ]
+    },
+    "chapter_detection": {
+        "method": "h2_heading",
+        "heading_selector": "h2",
+        "chapter_start_class": "main-top",
+        "title_extraction": "h2_text_content",
+        "numbering_format": "japanese_numerical"
+    },
+    "image_handling": {
+        "illustration_conversion": {
+            "from_format": "p{page_num}.jpg",
+            "to_format": "illust-{sequence:03d}.jpg",
+            "sequence_start": 2,
+            "exclude_special": [
+                "cover",
+                "titlepage",
+                "end",
+                "profile"
+            ]
+        },
+        "kuchie_detection": {
+            "filename_pattern": "p\\d{3}(-\\d{3})?\\.jpg",
+            "hyphen_indicates": "horizontal_spread",
+            "viewport": {
+                "single_page": "portrait",
+                "spread": "landscape"
+            }
+        },
+        "markdown_format": "[ILLUSTRATION: {filename}]"
+    },
+    "toc_behavior": {
+        "original_toc_minimal": true,
+        "original_entries_count": 3,
+        "original_includes": [
+            "cover",
+            "toc",
+            "colophon"
+        ],
+        "generate_chapter_toc": true,
+        "toc_source": "h2_headings",
+        "exclude_from_toc": [
+            "cover",
+            "notice",
+            "kuchie",
+            "titlepage",
+            "credits"
+        ]
+    },
+    "manifest_schema": {
+        "required_fields": [
+            "publisher_format",
+            "publisher_version",
+            "image_naming_scheme",
+            "image_mapping",
+            "pre_toc_pages",
+            "kuchie_images"
+        ],
+        "example": {
+            "publisher_format": "kodansha",
+            "publisher_version": "1.10",
+            "image_naming_scheme": "p###",
+            "image_mapping": {
+                "p017.jpg": "illust-002.jpg"
+            },
+            "pre_toc_pages": [
+                "p-0001",
+                "p-0002",
+                "p-0003"
+            ],
+            "kuchie_images": [
+                {
+                    "file": "p001.jpg",
+                    "page": "p-0003",
+                    "is_horizontal": false
+                }
+            ]
+        }
+    },
+    "builder_instructions": {
+        "cover_chapter": {
+            "combine_pages": [
+                "p-0001",
+                "p-0002",
+                "p-0003",
+                "p-0004",
+                "p-0005",
+                "p-0006",
+                "p-0008",
+                "p-0009"
+            ],
+            "suppress_title": true,
+            "in_spine": true,
+            "in_toc": false,
+            "illustrations": "all_kuchie_images"
+        },
+        "main_chapters": {
+            "start_from": "first_h2_page",
+            "title_source": "h2_text",
+            "in_spine": true,
+            "in_toc": true
+        },
+        "image_paths": {
+            "use_mapped_names": true,
+            "path_format": "../Images/{mapped_filename}",
+            "verify_exists": true
+        }
+    },
+    "validation": {
+        "checks": [
+            {
+                "name": "publisher_detected",
+                "test": "opf_contains_kodansha_marker",
+                "severity": "error"
+            },
+            {
+                "name": "image_mapping_complete",
+                "test": "all_p_images_have_illust_mapping",
+                "severity": "error"
+            },
+            {
+                "name": "pre_toc_marked",
+                "test": "pages_before_first_h2_are_marked",
+                "severity": "warning"
+            },
+            {
+                "name": "chapter_count_reasonable",
+                "test": "chapters_between_5_and_20",
+                "severity": "warning"
+            },
+            {
+                "name": "toc_excludes_cover",
+                "test": "nav_xhtml_has_no_cover_entry",
+                "severity": "error"
+            },
+            {
+                "name": "illustrations_accessible",
+                "test": "all_illust_files_exist_in_images_dir",
+                "severity": "error"
+            }
+        ]
+    },
+    "examples": {
+        "volumes": [
+            {
+                "title": "油断できない彼女 (My Girlfriend: Never Let Your Guard Down)",
+                "volume_id": "Innocent Looking Yandere_20260201_07a4",
+                "total_pages": 46,
+                "chapters": 14,
+                "illustrations": 12,
+                "kuchie": 5,
+                "pre_toc_pages": 9,
+                "notes": "Standard Kodansha light novel structure"
+            }
+        ]
+    },
+    "changelog": [
+        {
+            "version": "1.0.0",
+            "date": "2026-02-01",
+            "changes": [
+                "Initial Kodansha structure definition",
+                "Image mapping p### to illust-### format",
+                "Pre-TOC detection and marking",
+                "Chapter detection via h2 headings",
+                "TOC generation from chapter headings",
+                "Kuchie horizontal spread detection"
+            ]
+        }
+    ]
+}

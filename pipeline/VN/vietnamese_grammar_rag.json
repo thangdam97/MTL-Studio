@@ -1,0 +1,1951 @@
+{
+    "version": "2.0",
+    "description": "RAG Database for Vietnamese Grammar - Anti-AI-ism Patterns & Natural Dialogue System for JP→VN Translation (Corpus-Enhanced)",
+    "last_updated": "2026-01-31",
+    "metadata": {
+        "total_patterns": 150,
+        "categories": 11,
+        "validation_corpus": [
+            "0d29_romcom",
+            "16a0_romcom",
+            "1cca_drama"
+        ],
+        "corpus_analysis": {
+            "source": "107 Japanese light novels (EPUB)",
+            "total_dialogues_analyzed": 130000,
+            "total_characters_processed": 15000000
+        },
+        "tier_assignment": "Tier 1 (always inject)",
+        "estimated_tokens": 6500
+    },
+    "sentence_structure_ai_isms": {
+        "description": "Patterns that betray AI/MTL origin - ELIMINATE on sight",
+        "priority": "critical",
+        "patterns": [
+            {
+                "id": "vn-mot-cam-giac-elimination",
+                "rule": "Remove 'một cảm giác' wrapper - show emotion directly",
+                "severity": "critical",
+                "forbidden": [
+                    "một cảm giác bất an",
+                    "một cảm giác nhẹ nhõm",
+                    "một cảm giác căng thẳng",
+                    "một cảm giác hoài niệm",
+                    "cảm giác như mình đang",
+                    "tôi có cảm giác như",
+                    "cảm giác tội lỗi"
+                ],
+                "corrections": {
+                    "Một cảm giác bất an tràn ngập căn phòng": "Sự bất an tràn ngập căn phòng",
+                    "Tôi cảm thấy một cảm giác nhẹ nhõm": "Tôi thấy nhẹ nhõm",
+                    "Có một cảm giác căng thẳng": "Không khí căng thẳng",
+                    "Một cảm giác hoài niệm xâm chiếm anh": "Nỗi hoài niệm xâm chiếm anh",
+                    "Cảm giác như mình đang sống": "Như mình đang sống",
+                    "Tôi có cảm giác như một mảnh ghép vừa khớp": "Như một mảnh ghép vừa khớp",
+                    "Cảm giác tội lỗi luẩn quẩn trong tôi": "Tội lỗi luẩn quẩn trong tôi"
+                },
+                "detection_regex": "(một )?cảm giác (như |là )?"
+            },
+            {
+                "id": "vn-mot-cach-elimination",
+                "rule": "Replace 'một cách [adj]' with direct adverb or vivid verb",
+                "severity": "critical",
+                "forbidden": [
+                    "một cách trang trọng",
+                    "một cách bí ẩn",
+                    "một cách đột ngột",
+                    "một cách chậm chạp",
+                    "một cách vội vàng",
+                    "một cách cẩn thận"
+                ],
+                "corrections": {
+                    "Anh ấy nói một cách trang trọng": "Anh ấy nói nghiêm trang",
+                    "Cô ấy cười một cách bí ẩn": "Cô ấy mỉm cười bí hiểm",
+                    "Cánh cửa mở một cách đột ngột": "Cánh cửa bật mở",
+                    "Anh ấy đi một cách chậm chạp": "Anh ấy đi chậm rãi",
+                    "Cô ấy rời đi một cách vội vàng": "Cô ấy vội vã rời đi",
+                    "Anh ấy kiểm tra một cách cẩn thận": "Anh ấy kiểm tra kỹ lưỡng"
+                },
+                "detection_regex": "một cách [a-zA-ZÀ-ỹ]+"
+            },
+            {
+                "id": "vn-viec-subject-elimination",
+                "rule": "Remove unnecessary 'việc' as subject - use verb directly",
+                "severity": "high",
+                "forbidden": [
+                    "Việc cô ấy đến là",
+                    "Việc học tập rất",
+                    "Việc này là không thể",
+                    "Việc anh ấy từ chối"
+                ],
+                "corrections": {
+                    "Việc cô ấy đến là điều bất ngờ": "Cô ấy đến là điều bất ngờ",
+                    "Việc học tập rất quan trọng": "Học tập rất quan trọng",
+                    "Việc này là không thể chấp nhận": "Điều này không thể chấp nhận",
+                    "Việc anh ấy từ chối khiến tôi buồn": "Anh ấy từ chối khiến tôi buồn"
+                },
+                "detection_regex": "^Việc [a-zA-ZÀ-ỹ]+ (là|rất|khiến)"
+            },
+            {
+                "id": "vn-passive-voice-conversion",
+                "rule": "Convert passive to active voice - Vietnamese prefers active 80%+",
+                "severity": "high",
+                "forbidden": [
+                    "bị tràn ngập bởi",
+                    "được lấp đầy bởi",
+                    "được mô tả là",
+                    "bị che phủ bởi",
+                    "được tạo ra từ"
+                ],
+                "corrections": {
+                    "Anh ấy bị tràn ngập bởi cảm xúc": "Cảm xúc tràn ngập anh ấy",
+                    "Căn phòng được lấp đầy bóng tối": "Bóng tối bao phủ căn phòng",
+                    "Cô ấy được mô tả là xinh đẹp": "Mọi người khen cô ấy xinh đẹp",
+                    "Mặt đất bị che phủ bởi tuyết": "Tuyết phủ kín mặt đất",
+                    "Nó được tạo ra từ sắt": "Người ta chế tạo nó từ sắt"
+                },
+                "detection_regex": "(bị|được) [a-zA-ZÀ-ỹ]+ (bởi|từ)"
+            },
+            {
+                "id": "vn-dieu-overuse",
+                "rule": "Reduce 'điều' wrapper overuse - often unnecessary",
+                "severity": "medium",
+                "max_frequency_per_1000_words": 3,
+                "forbidden": [
+                    "Điều quan trọng là",
+                    "Điều duy nhất tôi muốn",
+                    "Điều đó là không thể"
+                ],
+                "corrections": {
+                    "Điều quan trọng là phải cố gắng": "Quan trọng là phải cố gắng",
+                    "Điều duy nhất tôi muốn là": "Tôi chỉ muốn",
+                    "Điều đó là không thể": "Không thể được"
+                }
+            },
+            {
+                "id": "vn-su-nominalization-overuse",
+                "rule": "Reduce excessive nominalization with 'sự' - use verbs when possible",
+                "severity": "medium",
+                "max_frequency_per_1000_words": 5,
+                "good_usage": [
+                    "sự thật",
+                    "sự việc",
+                    "sự kiện"
+                ],
+                "problematic_usage": [
+                    "sự xuất hiện của anh ấy",
+                    "sự ra đi của cô ấy",
+                    "sự thay đổi trong"
+                ],
+                "corrections": {
+                    "Sự xuất hiện của anh ấy khiến": "Anh ấy xuất hiện khiến",
+                    "Sự ra đi của cô ấy": "Cô ấy ra đi",
+                    "Sự thay đổi trong thái độ": "Thái độ thay đổi"
+                }
+            }
+        ]
+    },
+    "dialogue_ai_isms": {
+        "description": "Dialogue-specific AI patterns - dialogue must feel alive",
+        "priority": "critical",
+        "patterns": [
+            {
+                "id": "vn-missing-particles",
+                "rule": "Add natural particles based on RTAS and archetype",
+                "severity": "critical",
+                "examples": {
+                    "cold_to_warm": {
+                        "Cảm ơn.": "Cảm ơn nha.",
+                        "Tôi hiểu.": "Tôi hiểu rồi.",
+                        "Đi thôi.": "Đi thôi nào.",
+                        "Đúng.": "Đúng vậy.",
+                        "Được.": "Được mà."
+                    }
+                }
+            },
+            {
+                "id": "vn-wrong-register",
+                "rule": "Match register to character archetype",
+                "severity": "critical",
+                "archetype_examples": {
+                    "GYARU_wrong": "Tôi cảm thấy không vui.",
+                    "GYARU_correct": "Tớ thấy chán quá đi!",
+                    "OJOU_wrong": "Thôi xong!",
+                    "OJOU_correct": "Dạ, em đã hiểu ạ.",
+                    "DELINQUENT_wrong": "Xin lỗi.",
+                    "DELINQUENT_correct": "Hừ, sao nữa?",
+                    "KUUDERE_wrong": "Ui, vui quá nha!",
+                    "KUUDERE_correct": "Tôi hiểu."
+                }
+            },
+            {
+                "id": "vn-interjection-naturalization",
+                "rule": "Use natural Vietnamese interjections, not transliterations",
+                "severity": "high",
+                "note": "Updated to use corpus-derived mappings (frequency-validated from 107 light novels). See corpus_derived_interjections for full list.",
+                "mappings": {
+                    "ええ (ee)": [
+                        "Vâng",
+                        "Dạ vâng",
+                        "Ừm"
+                    ],
+                    "ちょっと (chotto)": [
+                        "Khoan",
+                        "Này",
+                        "Ê"
+                    ],
+                    "まあ (maa)": [
+                        "Ùi",
+                        "Ôi",
+                        "À"
+                    ],
+                    "ほら (hora)": [
+                        "Này",
+                        "Xem này",
+                        "Kìa"
+                    ],
+                    "やれやれ (yareyare)": [
+                        "Trời ơi",
+                        "Thôi rồi",
+                        "Mệt ghê"
+                    ],
+                    "えっと (etto)": [
+                        "Ừm",
+                        "À",
+                        "Ờ"
+                    ],
+                    "あの (ano)": [
+                        "Này",
+                        "Ơ này",
+                        "À"
+                    ],
+                    "ふん (fun)": [
+                        "Hừ",
+                        "Hứ",
+                        "Xì"
+                    ],
+                    "くそ (kuso)": [
+                        "Chết tiệt",
+                        "Khốn",
+                        "Đồ khốn"
+                    ],
+                    "うわ (uwa)": [
+                        "Ối",
+                        "Trời",
+                        "Chà"
+                    ]
+                }
+            },
+            {
+                "id": "vn-stuttering-patterns",
+                "rule": "Use Vietnamese stuttering patterns, not English ones",
+                "severity": "medium",
+                "wrong_patterns": [
+                    "T-Tôi không",
+                    "A-Anh ấy",
+                    "K-Không phải"
+                ],
+                "correct_patterns": {
+                    "hesitation": "Tô... tôi không...",
+                    "surprise": "A... anh ấy...",
+                    "denial": "Kh-Không phải!",
+                    "embarrassment": "E-Em... em không có...",
+                    "fear": "Tôi... tôi sợ..."
+                },
+                "rule_note": "Vietnamese stuttering: word... word OR first-syllable repeat"
+            }
+        ]
+    },
+    "corpus_derived_interjections": {
+        "description": "Japanese interjection → Vietnamese mappings derived from 107 light novel corpus analysis",
+        "priority": "high",
+        "source": "Analyzed 130,000+ dialogue lines",
+        "usage_note": "Frequency indicates how often this pattern appears in romcom/drama light novels",
+        "patterns": {
+            "うん_casual_yes": {
+                "japanese": "うん",
+                "frequency": 5652,
+                "vietnamese": [
+                    "Ừ",
+                    "Ờ",
+                    "Um"
+                ],
+                "register": "casual",
+                "gender": "neutral",
+                "confidence": "high"
+            },
+            "はい_formal_yes": {
+                "japanese": "はい",
+                "frequency": 5225,
+                "vietnamese": [
+                    "Vâng",
+                    "Dạ",
+                    "Vâng ạ"
+                ],
+                "register": "formal",
+                "gender": "neutral",
+                "confidence": "high"
+            },
+            "あっ_realization": {
+                "japanese": "あっ",
+                "frequency": 3906,
+                "vietnamese": [
+                    "À",
+                    "Ồ",
+                    "A"
+                ],
+                "register": "casual",
+                "gender": "neutral",
+                "confidence": "high"
+            },
+            "ちょっと_hey_wait": {
+                "japanese": "ちょっと",
+                "frequency": 3758,
+                "vietnamese": [
+                    "Khoan",
+                    "Này",
+                    "Ê"
+                ],
+                "register": "casual",
+                "gender": "neutral",
+                "confidence": "high"
+            },
+            "あの_attention_getter": {
+                "japanese": "あの",
+                "frequency": 3525,
+                "vietnamese": [
+                    "Này",
+                    "Ơ này",
+                    "À"
+                ],
+                "register": "casual_polite",
+                "gender": "neutral",
+                "confidence": "high"
+            },
+            "えっ_surprise_mild": {
+                "japanese": "えっ",
+                "frequency": 2496,
+                "vietnamese": [
+                    "Ơ",
+                    "Hả",
+                    "Ủa"
+                ],
+                "register": "casual",
+                "gender": "neutral",
+                "confidence": "high"
+            },
+            "ほら_look_here": {
+                "japanese": "ほら",
+                "frequency": 1596,
+                "vietnamese": [
+                    "Này",
+                    "Xem này",
+                    "Kìa"
+                ],
+                "register": "casual",
+                "gender": "neutral",
+                "confidence": "high"
+            },
+            "ほう_interest": {
+                "japanese": "ほう",
+                "frequency": 1550,
+                "vietnamese": [
+                    "Ồ",
+                    "Hoh",
+                    "Thú vị"
+                ],
+                "register": "casual",
+                "gender": "male_leaning",
+                "confidence": "high"
+            },
+            "なぁ_attention_male": {
+                "japanese": "なぁ",
+                "frequency": 1528,
+                "vietnamese": [
+                    "Này",
+                    "Ê",
+                    "Ơi"
+                ],
+                "register": "casual_rough",
+                "gender": "male",
+                "confidence": "high"
+            },
+            "おい_hey_rough": {
+                "japanese": "おい",
+                "frequency": 1469,
+                "vietnamese": [
+                    "Ê",
+                    "Này",
+                    "Ơi"
+                ],
+                "register": "rough",
+                "gender": "male",
+                "archetype_affinity": [
+                    "DELINQUENT",
+                    "male_friend"
+                ],
+                "confidence": "high"
+            },
+            "うわ_shock": {
+                "japanese": "うわ",
+                "frequency": 1232,
+                "vietnamese": [
+                    "Ối",
+                    "Trời",
+                    "Chà"
+                ],
+                "register": "casual",
+                "gender": "neutral",
+                "confidence": "high"
+            },
+            "ええ_polite_yes": {
+                "japanese": "ええ",
+                "frequency": 1175,
+                "vietnamese": [
+                    "Vâng",
+                    "Dạ vâng",
+                    "Ừm"
+                ],
+                "register": "polite",
+                "gender": "neutral",
+                "confidence": "high"
+            },
+            "ねぇ_attention_casual": {
+                "japanese": "ねぇ",
+                "frequency": 1174,
+                "vietnamese": [
+                    "Này",
+                    "Ê",
+                    "Nè"
+                ],
+                "register": "casual_soft",
+                "gender": "female_leaning",
+                "confidence": "high"
+            },
+            "えっと_hesitation": {
+                "japanese": "えっと",
+                "frequency": 1130,
+                "vietnamese": [
+                    "Ừm",
+                    "À",
+                    "Ờ"
+                ],
+                "register": "casual",
+                "gender": "neutral",
+                "confidence": "high"
+            },
+            "まあ_well_soft": {
+                "japanese": "まあ",
+                "frequency": 1096,
+                "vietnamese": [
+                    "Ùi",
+                    "Ôi",
+                    "À"
+                ],
+                "register": "casual_soft",
+                "gender": "female_leaning",
+                "confidence": "high"
+            },
+            "きゃ_fright_female": {
+                "japanese": "きゃ/きゃー",
+                "frequency": 924,
+                "vietnamese": [
+                    "Kyaa",
+                    "Ái chà",
+                    "Ôi"
+                ],
+                "register": "casual",
+                "gender": "female",
+                "archetype_affinity": [
+                    "DEREDERE",
+                    "IMOUTO",
+                    "GYARU"
+                ],
+                "confidence": "high"
+            },
+            "マジ_seriously": {
+                "japanese": "マジ",
+                "frequency": 655,
+                "vietnamese": [
+                    "Thật à",
+                    "Nghiêm túc",
+                    "Thiệt hả"
+                ],
+                "register": "slang",
+                "gender": "neutral",
+                "archetype_affinity": [
+                    "GYARU",
+                    "casual_youth"
+                ],
+                "confidence": "high"
+            },
+            "よし_alright": {
+                "japanese": "よし",
+                "frequency": 598,
+                "vietnamese": [
+                    "Ok",
+                    "Được rồi",
+                    "Tốt"
+                ],
+                "register": "casual",
+                "gender": "neutral",
+                "confidence": "high"
+            },
+            "はぁ_sigh": {
+                "japanese": "はぁ",
+                "frequency": 546,
+                "vietnamese": [
+                    "Hà",
+                    "Phù",
+                    "Thở"
+                ],
+                "register": "casual",
+                "gender": "neutral",
+                "confidence": "high"
+            },
+            "くっ_frustration": {
+                "japanese": "くっ",
+                "frequency": 542,
+                "vietnamese": [
+                    "Khh",
+                    "Tức",
+                    "Ức"
+                ],
+                "register": "casual",
+                "gender": "neutral",
+                "confidence": "high"
+            },
+            "やった_yay": {
+                "japanese": "やった",
+                "frequency": 394,
+                "vietnamese": [
+                    "Yeah",
+                    "Hura",
+                    "Tuyệt"
+                ],
+                "register": "casual_energetic",
+                "gender": "neutral",
+                "confidence": "high"
+            },
+            "しまった_oops": {
+                "japanese": "しまった",
+                "frequency": 385,
+                "vietnamese": [
+                    "Chết",
+                    "Thôi chết",
+                    "Hỏng rồi"
+                ],
+                "register": "casual",
+                "gender": "neutral",
+                "confidence": "high"
+            },
+            "すごい_amazing": {
+                "japanese": "すごい",
+                "frequency": 330,
+                "vietnamese": [
+                    "Tuyệt",
+                    "Đẹp",
+                    "Hay"
+                ],
+                "register": "casual",
+                "gender": "neutral",
+                "confidence": "high"
+            },
+            "ううん_casual_no": {
+                "japanese": "ううん",
+                "frequency": 305,
+                "vietnamese": [
+                    "Không",
+                    "Ừm không",
+                    "Đâu có"
+                ],
+                "register": "casual_soft",
+                "gender": "neutral",
+                "confidence": "high"
+            },
+            "うーん_pondering": {
+                "japanese": "うーん",
+                "frequency": 241,
+                "vietnamese": [
+                    "Hmm",
+                    "Ừm...",
+                    "Để nghĩ xem"
+                ],
+                "register": "casual",
+                "gender": "neutral",
+                "confidence": "high"
+            },
+            "さぁ_well_now": {
+                "japanese": "さぁ",
+                "frequency": 221,
+                "vietnamese": [
+                    "Nào",
+                    "Thôi nào",
+                    "Đi"
+                ],
+                "register": "casual",
+                "gender": "neutral",
+                "confidence": "high"
+            },
+            "へぇ_impressed": {
+                "japanese": "へぇ",
+                "frequency": 216,
+                "vietnamese": [
+                    "Ồ",
+                    "Chà",
+                    "Hay"
+                ],
+                "register": "casual",
+                "gender": "neutral",
+                "confidence": "high"
+            },
+            "ちっ_tch_annoyance": {
+                "japanese": "ちっ",
+                "frequency": 215,
+                "vietnamese": [
+                    "Tch",
+                    "Xì",
+                    "Hừ"
+                ],
+                "register": "rough",
+                "gender": "male_leaning",
+                "archetype_affinity": [
+                    "DELINQUENT",
+                    "TSUNDERE"
+                ],
+                "confidence": "high"
+            },
+            "ふん_dismissive": {
+                "japanese": "ふん",
+                "frequency": 210,
+                "vietnamese": [
+                    "Hừ",
+                    "Hứ",
+                    "Xì"
+                ],
+                "register": "casual_sharp",
+                "gender": "neutral",
+                "archetype_affinity": [
+                    "TSUNDERE",
+                    "KUUDERE"
+                ],
+                "confidence": "high"
+            },
+            "くそ_damn": {
+                "japanese": "くそ",
+                "frequency": 181,
+                "vietnamese": [
+                    "Chết tiệt",
+                    "Khốn",
+                    "Đồ khốn"
+                ],
+                "register": "rough",
+                "gender": "male",
+                "archetype_affinity": [
+                    "DELINQUENT"
+                ],
+                "confidence": "medium"
+            },
+            "ふぅ_relief_sigh": {
+                "japanese": "ふぅ",
+                "frequency": 164,
+                "vietnamese": [
+                    "Phù",
+                    "Hú hồn",
+                    "May quá"
+                ],
+                "register": "casual",
+                "gender": "neutral",
+                "confidence": "medium"
+            },
+            "やばい_yabai": {
+                "japanese": "やばい",
+                "frequency": 64,
+                "vietnamese": [
+                    "Chết",
+                    "Xong rồi",
+                    "Toang"
+                ],
+                "register": "slang",
+                "gender": "neutral",
+                "archetype_affinity": [
+                    "GYARU",
+                    "casual_youth"
+                ],
+                "confidence": "medium"
+            }
+        }
+    },
+    "onomatopoeia_mappings": {
+        "description": "Japanese onomatopoeia (擬音語/擬態語) → Vietnamese mappings from corpus",
+        "priority": "high",
+        "source": "Analyzed from 107 light novels",
+        "patterns": {
+            "ふふ_chuckling": {
+                "japanese": "ふふ",
+                "frequency": 1795,
+                "vietnamese": [
+                    "khúc khích",
+                    "hì hì",
+                    "cười nhẹ"
+                ],
+                "category": "laughter",
+                "usage": "Soft chuckling, often female or gentle"
+            },
+            "あはは_laughing": {
+                "japanese": "あはは",
+                "frequency": 764,
+                "vietnamese": [
+                    "ha ha",
+                    "cười lớn",
+                    "cười"
+                ],
+                "category": "laughter",
+                "usage": "Open laughing"
+            },
+            "えへへ_embarrassed_laugh": {
+                "japanese": "えへへ",
+                "frequency": 677,
+                "vietnamese": [
+                    "cười ngượng",
+                    "hì hì",
+                    "he he"
+                ],
+                "category": "laughter",
+                "usage": "Embarrassed or awkward laugh"
+            },
+            "ドキドキ_heartbeat_nervous": {
+                "japanese": "ドキドキ",
+                "frequency": 448,
+                "vietnamese": [
+                    "tim đập thình thịch",
+                    "hồi hộp",
+                    "đập thình thình"
+                ],
+                "category": "emotion",
+                "usage": "Nervous/excited heartbeat, romantic tension"
+            },
+            "ニヤニヤ_grinning": {
+                "japanese": "ニヤニヤ",
+                "frequency": 277,
+                "vietnamese": [
+                    "cười toe toét",
+                    "cười nham hiểm",
+                    "nhếch mép"
+                ],
+                "category": "expression",
+                "usage": "Smug or knowing grin"
+            },
+            "ニコニコ_smiling": {
+                "japanese": "ニコニコ",
+                "frequency": 182,
+                "vietnamese": [
+                    "tươi cười",
+                    "nở nụ cười",
+                    "cười"
+                ],
+                "category": "expression",
+                "usage": "Bright, happy smile"
+            },
+            "きょとん_blank_look": {
+                "japanese": "きょとん",
+                "frequency": 144,
+                "vietnamese": [
+                    "ngơ ngác",
+                    "trống rỗng",
+                    "không hiểu"
+                ],
+                "category": "expression",
+                "usage": "Blank, confused expression"
+            },
+            "ぼーっと_dazed": {
+                "japanese": "ぼーっと",
+                "frequency": 132,
+                "vietnamese": [
+                    "ngẩn ngơ",
+                    "thờ thẫn",
+                    "lơ đễnh"
+                ],
+                "category": "state",
+                "usage": "Spaced out, dazed"
+            },
+            "じーっと_staring": {
+                "japanese": "じーっと",
+                "frequency": 83,
+                "vietnamese": [
+                    "nhìn chằm chằm",
+                    "chăm chú",
+                    "đăm đăm"
+                ],
+                "category": "action",
+                "usage": "Staring intently"
+            },
+            "イライラ_irritated": {
+                "japanese": "イライラ",
+                "frequency": 69,
+                "vietnamese": [
+                    "bực bội",
+                    "khó chịu",
+                    "cáu"
+                ],
+                "category": "emotion",
+                "usage": "Irritation, frustration"
+            },
+            "ちらちら_glancing": {
+                "japanese": "ちらちら",
+                "frequency": 64,
+                "vietnamese": [
+                    "liếc",
+                    "đưa mắt",
+                    "nhìn lén"
+                ],
+                "category": "action",
+                "usage": "Repeated glancing, sneaking looks"
+            },
+            "くすくす_giggling": {
+                "japanese": "くすくす",
+                "frequency": 56,
+                "vietnamese": [
+                    "cười khúc khích",
+                    "cười hí hí",
+                    "cười"
+                ],
+                "category": "laughter",
+                "usage": "Quiet giggling, often mischievous"
+            },
+            "わくわく_excited": {
+                "japanese": "わくわく",
+                "frequency": 52,
+                "vietnamese": [
+                    "háo hức",
+                    "nôn nao",
+                    "phấn khích"
+                ],
+                "category": "emotion",
+                "usage": "Excited anticipation"
+            },
+            "ぐったり_exhausted": {
+                "japanese": "ぐったり",
+                "frequency": 48,
+                "vietnamese": [
+                    "kiệt sức",
+                    "mệt lả",
+                    "rã rời"
+                ],
+                "category": "state",
+                "usage": "Completely exhausted"
+            },
+            "ごくり_gulping": {
+                "japanese": "ごくり",
+                "frequency": 48,
+                "vietnamese": [
+                    "nuốt nước bọt",
+                    "ực",
+                    "nuốt khan"
+                ],
+                "category": "action",
+                "usage": "Nervous/anticipatory gulp"
+            },
+            "ガチャ_door_opening": {
+                "japanese": "ガチャ",
+                "frequency": 156,
+                "vietnamese": [
+                    "click",
+                    "lách cách",
+                    "tiếng cửa"
+                ],
+                "category": "sound",
+                "usage": "Door handle/lock sound"
+            },
+            "バタン_door_slamming": {
+                "japanese": "バタン",
+                "frequency": 45,
+                "vietnamese": [
+                    "rầm",
+                    "sầm",
+                    "đóng sầm"
+                ],
+                "category": "sound",
+                "usage": "Door slamming"
+            }
+        }
+    },
+    "register_frequency_baseline": {
+        "description": "Corpus-derived register distribution for light novels",
+        "priority": "medium",
+        "source": "Analyzed from 107 light novels",
+        "data": {
+            "da_casual": {
+                "frequency": 26925,
+                "percentage": "60%",
+                "note": "Most common ending in romcom/drama"
+            },
+            "nano_soft": {
+                "frequency": 13165,
+                "percentage": "29%",
+                "note": "Soft feminine ending"
+            },
+            "dayo_casual_emphasis": {
+                "frequency": 10678,
+                "percentage": "24%"
+            },
+            "desu_polite": {
+                "frequency": 3638,
+                "percentage": "8%"
+            },
+            "masu_polite": {
+                "frequency": 3570,
+                "percentage": "8%"
+            },
+            "jan_casual": {
+                "frequency": 1650,
+                "percentage": "4%"
+            },
+            "ssu_young_male": {
+                "frequency": 648,
+                "percentage": "1%",
+                "note": "Young male casual speech"
+            }
+        },
+        "implication": "Vietnamese translation should maintain ~70-75% casual register for romcom genre"
+    },
+    "sentence_particle_frequency_baseline": {
+        "description": "Japanese sentence-ending particle frequencies from corpus",
+        "priority": "medium",
+        "data": {
+            "よ_emphasis": {
+                "frequency": 18147,
+                "vietnamese_equivalent": "mà, chứ, đấy",
+                "note": "Most common emphasis particle"
+            },
+            "ね_seeking_agreement": {
+                "frequency": 15527,
+                "vietnamese_equivalent": "nhỉ, nha, nhé",
+                "note": "Seeking agreement/confirmation"
+            },
+            "か_question": {
+                "frequency": 13310,
+                "vietnamese_equivalent": "hả, à, sao",
+                "note": "Question marker"
+            },
+            "な_reflection": {
+                "frequency": 11446,
+                "vietnamese_equivalent": "nhỉ, ha",
+                "note": "Self-reflection, musing"
+            },
+            "から_because_trailing": {
+                "frequency": 6353,
+                "vietnamese_equivalent": "vì..., tại...",
+                "note": "Trailing reason"
+            },
+            "けど_trailing_but": {
+                "frequency": 3477,
+                "vietnamese_equivalent": "nhưng mà...",
+                "note": "Trailing contrast"
+            },
+            "し_listing_reason": {
+                "frequency": 3252,
+                "vietnamese_equivalent": "với lại..., mà...",
+                "note": "Listing reasons"
+            },
+            "よね_confirmation": {
+                "frequency": 3126,
+                "vietnamese_equivalent": "đúng không, phải không",
+                "note": "Seeking confirmation"
+            },
+            "ぞ_emphasis_male": {
+                "frequency": 2661,
+                "vietnamese_equivalent": "đấy, này",
+                "note": "Male emphatic"
+            }
+        },
+        "validation_rule": "80%+ of Vietnamese dialogue lines should have appropriate ending particles"
+    },
+    "dialogue_density_baseline": {
+        "description": "Expected dialogue patterns per chapter from corpus",
+        "priority": "low",
+        "data": {
+            "avg_dialogues_per_chapter": 159,
+            "avg_interjections_per_chapter": 45,
+            "avg_onomatopoeia_per_chapter": 12,
+            "expected_particle_rate": "80%+"
+        },
+        "note": "Use to validate translation output maintains natural dialogue density"
+    },
+    "particle_system": {
+        "description": "Complete Vietnamese particle injection system for natural dialogue",
+        "priority": "critical",
+        "question_particles": [
+            {
+                "particle": "ạ",
+                "register": "formal",
+                "rtas_range": [
+                    0,
+                    5.0
+                ],
+                "gender": "both",
+                "archetype_affinity": [
+                    "OJOU",
+                    "KOUHAI",
+                    "IMOUTO"
+                ],
+                "archetype_forbidden": [
+                    "DELINQUENT",
+                    "GYARU"
+                ],
+                "usage": "To elders, customers, showing respect",
+                "examples": [
+                    "Anh có khỏe không ạ?",
+                    "Dạ, em hiểu ạ."
+                ]
+            },
+            {
+                "particle": "vậy",
+                "register": "neutral",
+                "rtas_range": [
+                    2.0,
+                    4.0
+                ],
+                "gender": "both",
+                "archetype_affinity": [
+                    "universal"
+                ],
+                "usage": "Neutral questions, seeking information",
+                "examples": [
+                    "Sao vậy?",
+                    "Thế à vậy?"
+                ]
+            },
+            {
+                "particle": "à",
+                "register": "casual_soft",
+                "rtas_range": [
+                    3.0,
+                    5.0
+                ],
+                "gender": "female_leaning",
+                "archetype_affinity": [
+                    "OSANANAJIMI",
+                    "IMOUTO",
+                    "DEREDERE"
+                ],
+                "usage": "Soft confirmation, intimate questions",
+                "examples": [
+                    "Thật à?",
+                    "Anh đói à?"
+                ]
+            },
+            {
+                "particle": "hả",
+                "register": "casual",
+                "rtas_range": [
+                    3.5,
+                    5.0
+                ],
+                "gender": "both",
+                "archetype_affinity": [
+                    "universal_casual",
+                    "TSUNDERE"
+                ],
+                "usage": "Surprise, disbelief, teasing",
+                "examples": [
+                    "Thật hả?",
+                    "Anh nói gì hả?"
+                ]
+            },
+            {
+                "particle": "sao",
+                "register": "casual_sharp",
+                "rtas_range": [
+                    2.0,
+                    4.5
+                ],
+                "gender": "both",
+                "archetype_affinity": [
+                    "TSUNDERE",
+                    "GYARU",
+                    "KUUDERE"
+                ],
+                "usage": "Challenge, irritation, rhetorical",
+                "examples": [
+                    "Sao nữa?",
+                    "Biết sao không?"
+                ]
+            },
+            {
+                "particle": "nhỉ",
+                "register": "casual_warm",
+                "rtas_range": [
+                    3.5,
+                    5.0
+                ],
+                "gender": "female_leaning",
+                "archetype_affinity": [
+                    "DEREDERE",
+                    "OSANANAJIMI"
+                ],
+                "usage": "Seeking agreement, rhetorical warmth",
+                "examples": [
+                    "Đẹp nhỉ?",
+                    "Vui nhỉ?"
+                ]
+            },
+            {
+                "particle": "hử/hở",
+                "register": "slang",
+                "rtas_range": [
+                    4.0,
+                    5.0
+                ],
+                "gender": "both",
+                "archetype_affinity": [
+                    "GYARU",
+                    "DELINQUENT"
+                ],
+                "archetype_forbidden": [
+                    "OJOU",
+                    "KOUHAI"
+                ],
+                "usage": "Very casual, teasing, provocative",
+                "examples": [
+                    "Gì hở?",
+                    "Sợ hử?"
+                ]
+            },
+            {
+                "particle": "đấy",
+                "register": "northern_casual",
+                "rtas_range": [
+                    3.0,
+                    5.0
+                ],
+                "gender": "both",
+                "regional": "northern",
+                "usage": "Northern dialect question marker",
+                "examples": [
+                    "Đi đâu đấy?",
+                    "Làm gì đấy?"
+                ]
+            },
+            {
+                "particle": "nè",
+                "register": "southern_casual",
+                "rtas_range": [
+                    3.0,
+                    5.0
+                ],
+                "gender": "both",
+                "regional": "southern",
+                "usage": "Southern attention-getter",
+                "examples": [
+                    "Nè, nghe nè!",
+                    "Này nè!"
+                ]
+            }
+        ],
+        "affirmation_particles": [
+            {
+                "particle": "ạ",
+                "register": "formal",
+                "function": "respectful_statement",
+                "examples": [
+                    "Vâng ạ.",
+                    "Dạ, em hiểu ạ."
+                ]
+            },
+            {
+                "particle": "vậy",
+                "register": "neutral",
+                "function": "confirming_fact",
+                "examples": [
+                    "Đúng vậy.",
+                    "Thế vậy."
+                ]
+            },
+            {
+                "particle": "rồi",
+                "register": "casual",
+                "rtas_range": [
+                    3.0,
+                    5.0
+                ],
+                "function": "completion_agreement",
+                "examples": [
+                    "Tôi hiểu rồi.",
+                    "Xong rồi.",
+                    "Biết rồi."
+                ]
+            },
+            {
+                "particle": "đấy/đó",
+                "register": "casual",
+                "rtas_range": [
+                    3.0,
+                    5.0
+                ],
+                "function": "mild_emphasis",
+                "examples": [
+                    "Anh ấy đến đấy.",
+                    "Đẹp đó."
+                ]
+            },
+            {
+                "particle": "mà",
+                "register": "casual_warm",
+                "rtas_range": [
+                    3.5,
+                    5.0
+                ],
+                "function": "reassurance_explanation",
+                "archetype_affinity": [
+                    "DEREDERE",
+                    "OSANANAJIMI",
+                    "IMOUTO"
+                ],
+                "examples": [
+                    "Không sao mà.",
+                    "Em biết mà.",
+                    "Có mà."
+                ]
+            },
+            {
+                "particle": "chứ",
+                "register": "casual_emphatic",
+                "rtas_range": [
+                    3.0,
+                    5.0
+                ],
+                "function": "strong_affirmation",
+                "archetype_affinity": [
+                    "TSUNDERE",
+                    "universal"
+                ],
+                "examples": [
+                    "Có chứ!",
+                    "Đúng chứ!",
+                    "Biết chứ!"
+                ]
+            },
+            {
+                "particle": "luôn",
+                "register": "slang_emphatic",
+                "rtas_range": [
+                    3.5,
+                    5.0
+                ],
+                "function": "immediate_intense",
+                "archetype_affinity": [
+                    "GYARU",
+                    "DELINQUENT"
+                ],
+                "archetype_forbidden": [
+                    "OJOU",
+                    "KUUDERE"
+                ],
+                "examples": [
+                    "Đẹp luôn!",
+                    "Xong luôn!",
+                    "Đỉnh luôn!"
+                ]
+            },
+            {
+                "particle": "lận",
+                "register": "southern_slang",
+                "rtas_range": [
+                    3.5,
+                    5.0
+                ],
+                "regional": "southern",
+                "function": "southern_emphasis",
+                "examples": [
+                    "Ngon lận!",
+                    "Giỏi lận!"
+                ]
+            },
+            {
+                "particle": "á",
+                "register": "slang",
+                "rtas_range": [
+                    4.0,
+                    5.0
+                ],
+                "function": "casual_confirmation",
+                "archetype_affinity": [
+                    "GYARU",
+                    "casual_youth"
+                ],
+                "examples": [
+                    "Ừ á.",
+                    "Được á.",
+                    "Ok á."
+                ]
+            }
+        ],
+        "softening_particles": [
+            {
+                "particle": "nhé",
+                "register": "casual_warm",
+                "rtas_range": [
+                    3.5,
+                    5.0
+                ],
+                "gender": "neutral",
+                "function": "gentle_request_suggestion",
+                "examples": [
+                    "Đi nhé.",
+                    "Ăn đi nhé.",
+                    "Nghỉ ngơi nhé."
+                ]
+            },
+            {
+                "particle": "nha",
+                "register": "casual_warm",
+                "rtas_range": [
+                    3.5,
+                    5.0
+                ],
+                "gender": "female_leaning",
+                "regional": "southern_influence",
+                "function": "softer_than_nhe",
+                "examples": [
+                    "Cảm ơn nha.",
+                    "Đi nha.",
+                    "Nhớ nha."
+                ]
+            },
+            {
+                "particle": "nghen/nghe",
+                "register": "southern_casual",
+                "rtas_range": [
+                    3.5,
+                    5.0
+                ],
+                "regional": "southern",
+                "function": "southern_nhe_equivalent",
+                "examples": [
+                    "Đi nghen.",
+                    "Nhớ nghe."
+                ]
+            },
+            {
+                "particle": "đi",
+                "register": "casual",
+                "rtas_range": [
+                    3.0,
+                    5.0
+                ],
+                "function": "suggestion_invitation",
+                "examples": [
+                    "Ăn đi.",
+                    "Đi đi.",
+                    "Nói đi."
+                ]
+            },
+            {
+                "particle": "nào",
+                "register": "casual_energetic",
+                "rtas_range": [
+                    3.0,
+                    5.0
+                ],
+                "function": "encouragement_lets_go",
+                "examples": [
+                    "Đi thôi nào!",
+                    "Bắt đầu nào!",
+                    "Cố lên nào!"
+                ]
+            },
+            {
+                "particle": "thôi",
+                "register": "casual",
+                "rtas_range": [
+                    2.5,
+                    5.0
+                ],
+                "function": "resignation_suggestion_to_stop",
+                "examples": [
+                    "Thôi đi.",
+                    "Đủ rồi thôi.",
+                    "Về thôi."
+                ]
+            },
+            {
+                "particle": "cơ",
+                "register": "casual_cute",
+                "rtas_range": [
+                    3.5,
+                    5.0
+                ],
+                "gender": "female_leaning",
+                "archetype_affinity": [
+                    "IMOUTO",
+                    "DEREDERE"
+                ],
+                "archetype_forbidden": [
+                    "KUUDERE",
+                    "DELINQUENT"
+                ],
+                "function": "playful_emphasis",
+                "examples": [
+                    "Muốn cơ.",
+                    "Thích cơ.",
+                    "Đói cơ."
+                ]
+            },
+            {
+                "particle": "kìa",
+                "register": "casual",
+                "rtas_range": [
+                    3.0,
+                    5.0
+                ],
+                "function": "drawing_attention",
+                "examples": [
+                    "Nhìn kìa!",
+                    "Kia kìa!",
+                    "Anh ấy kìa!"
+                ]
+            }
+        ],
+        "exclamation_particles": [
+            {
+                "particle": "ơi",
+                "register": "universal",
+                "function": "calling_exclamation",
+                "examples": [
+                    "Anh ơi!",
+                    "Trời ơi!",
+                    "Mẹ ơi!"
+                ]
+            },
+            {
+                "particle": "ôi",
+                "register": "neutral_formal",
+                "function": "surprise_dismay",
+                "archetype_affinity": [
+                    "YAMATO_NADESHIKO",
+                    "OJOU"
+                ],
+                "examples": [
+                    "Ôi trời!",
+                    "Ôi, đẹp quá!"
+                ]
+            },
+            {
+                "particle": "trời (ơi)",
+                "register": "casual",
+                "function": "shock_exasperation",
+                "examples": [
+                    "Trời ơi!",
+                    "Trời đất!",
+                    "Trời ạ!"
+                ]
+            },
+            {
+                "particle": "chết",
+                "register": "casual",
+                "function": "mild_panic_oops",
+                "archetype_affinity": [
+                    "DEREDERE",
+                    "IMOUTO"
+                ],
+                "examples": [
+                    "Chết rồi!",
+                    "Chết tiệt!",
+                    "Chết mất!"
+                ]
+            },
+            {
+                "particle": "chà",
+                "register": "casual",
+                "function": "appreciation_admiration",
+                "gender": "male_leaning",
+                "examples": [
+                    "Chà, đẹp thật!",
+                    "Chà chà!"
+                ]
+            },
+            {
+                "particle": "ủa",
+                "register": "southern",
+                "regional": "southern",
+                "function": "surprise_confusion",
+                "examples": [
+                    "Ủa, sao vậy?",
+                    "Ủa, ai đó?"
+                ]
+            }
+        ],
+        "combination_patterns": [
+            {
+                "combination": "mà + nhé",
+                "register": "casual_warm",
+                "function": "reassuring_suggestion",
+                "example": "Không sao mà, nghỉ đi nhé."
+            },
+            {
+                "combination": "rồi + mà",
+                "register": "casual",
+                "function": "completed_reassurance",
+                "example": "Xong rồi mà."
+            },
+            {
+                "combination": "đi + nào",
+                "register": "casual_energetic",
+                "function": "enthusiastic_invitation",
+                "example": "Đi thôi nào!"
+            },
+            {
+                "combination": "chứ + sao",
+                "register": "casual_emphatic",
+                "function": "rhetorical_emphasis",
+                "example": "Có chứ, sao không?"
+            },
+            {
+                "combination": "á + nha",
+                "register": "slang_cute",
+                "function": "playful_confirmation",
+                "example": "Được á nha~"
+            },
+            {
+                "combination": "rồi + nha",
+                "register": "casual_warm",
+                "function": "gentle_completion",
+                "example": "Xong rồi nha."
+            }
+        ]
+    },
+    "archetype_register_matrix": {
+        "description": "Particle permissions by character archetype",
+        "priority": "high",
+        "archetypes": {
+            "OJOU": {
+                "formal_particles": [
+                    "ạ",
+                    "vậy ạ"
+                ],
+                "casual_particles": [
+                    "nhé"
+                ],
+                "forbidden_particles": [
+                    "hả",
+                    "hử",
+                    "luôn",
+                    "á",
+                    "mày",
+                    "tao"
+                ],
+                "preferred_register": "formal_elegant"
+            },
+            "KUUDERE": {
+                "formal_particles": [
+                    "vậy"
+                ],
+                "casual_particles": [
+                    "rồi"
+                ],
+                "forbidden_particles": [
+                    "nha",
+                    "cơ",
+                    "luôn",
+                    "á"
+                ],
+                "preferred_register": "minimal_neutral",
+                "note": "Often uses no particle at all"
+            },
+            "TSUNDERE": {
+                "formal_particles": [],
+                "casual_particles": [
+                    "chứ",
+                    "mà",
+                    "sao",
+                    "hả"
+                ],
+                "forbidden_particles": [
+                    "ạ",
+                    "nhé"
+                ],
+                "preferred_register": "defensive_sharp",
+                "state_override": {
+                    "dere_mode": [
+                        "mà",
+                        "nhé",
+                        "nha"
+                    ],
+                    "tsun_mode": [
+                        "chứ",
+                        "sao",
+                        "hả"
+                    ]
+                }
+            },
+            "DEREDERE": {
+                "formal_particles": [],
+                "casual_particles": [
+                    "nhé",
+                    "nha",
+                    "cơ",
+                    "mà"
+                ],
+                "forbidden_particles": [
+                    "sao",
+                    "hử"
+                ],
+                "preferred_register": "warm_affectionate"
+            },
+            "GYARU": {
+                "formal_particles": [],
+                "casual_particles": [
+                    "nha",
+                    "luôn",
+                    "á",
+                    "hả",
+                    "hở"
+                ],
+                "forbidden_particles": [
+                    "ạ",
+                    "vậy ạ"
+                ],
+                "preferred_register": "slang_energetic"
+            },
+            "IMOUTO": {
+                "formal_particles": [
+                    "ạ"
+                ],
+                "casual_particles": [
+                    "nha",
+                    "nhé",
+                    "cơ"
+                ],
+                "forbidden_particles": [
+                    "hử",
+                    "sao"
+                ],
+                "preferred_register": "cute_respectful",
+                "context_note": "ạ to elders, casual to siblings/friends"
+            },
+            "OSANANAJIMI": {
+                "formal_particles": [],
+                "casual_particles": [
+                    "nhé",
+                    "nha",
+                    "mà",
+                    "rồi",
+                    "à"
+                ],
+                "forbidden_particles": [
+                    "ạ"
+                ],
+                "preferred_register": "familiar_warm",
+                "context_note": "Never formal to love interest"
+            },
+            "DELINQUENT": {
+                "formal_particles": [],
+                "casual_particles": [
+                    "hả",
+                    "hử",
+                    "luôn",
+                    "chứ"
+                ],
+                "forbidden_particles": [
+                    "ạ",
+                    "nhé",
+                    "cơ"
+                ],
+                "preferred_register": "rough_dismissive"
+            },
+            "KOUHAI": {
+                "formal_particles": [
+                    "ạ",
+                    "vậy ạ"
+                ],
+                "casual_particles": [
+                    "nhé"
+                ],
+                "forbidden_particles": [
+                    "luôn",
+                    "hử"
+                ],
+                "preferred_register": "polite_eager"
+            },
+            "SENPAI": {
+                "formal_particles": [],
+                "casual_particles": [
+                    "nhé",
+                    "nha",
+                    "rồi"
+                ],
+                "forbidden_particles": [
+                    "ạ"
+                ],
+                "preferred_register": "gentle_guiding",
+                "context_note": "Never ạ to juniors"
+            }
+        }
+    },
+    "pronoun_tiers": {
+        "description": "Vietnamese pronoun system by relationship tier",
+        "priority": "critical",
+        "male_friendship": {
+            "tier_1_distant": {
+                "self": "Tớ",
+                "other": "Cậu",
+                "context": "New classmate, acquaintance, first meeting",
+                "signals": [
+                    "polite_conversation",
+                    "surface_chat",
+                    "formal_setting"
+                ]
+            },
+            "tier_2_close": {
+                "self": "Tôi",
+                "other": "Ông",
+                "context": "Good friends who banter, trust each other",
+                "signals": [
+                    "teasing",
+                    "inside_jokes",
+                    "casual_insults",
+                    "physical_contact",
+                    "long_friendship"
+                ],
+                "examples": [
+                    "\"Ông có thù hằn gì với tôi không đấy?\"",
+                    "\"Tôi đi guốc trong bụng ông rồi.\""
+                ]
+            },
+            "tier_3_bros": {
+                "self": "Tao",
+                "other": "Mày",
+                "context": "Best friends, very informal settings",
+                "signals": [
+                    "crude_jokes",
+                    "drunk_setting",
+                    "childhood_friends",
+                    "living_together",
+                    "explicit_best_friend"
+                ],
+                "examples": [
+                    "\"Mày điên à? Sao lại làm thế?\"",
+                    "\"Kệ tao! Việc của mày à?\""
+                ]
+            }
+        },
+        "female_friendship": {
+            "tier_1_formal": {
+                "self": "Tớ/Mình",
+                "other": "Cậu/Bạn",
+                "context": "New acquaintance, polite"
+            },
+            "tier_2_close": {
+                "self": "Tớ/Mình",
+                "other": "Cậu",
+                "context": "Good friends, comfortable"
+            },
+            "tier_3_best": {
+                "self": "Tao",
+                "other": "Mày",
+                "context": "Very close, playful teasing",
+                "note": "Tao-Mày between girls is playful, not hostile"
+            }
+        },
+        "mixed_gender_friendship": {
+            "classmates": {
+                "male_self": "Tớ/Tôi",
+                "male_to_female": "Cậu",
+                "female_self": "Tớ/Mình",
+                "female_to_male": "Cậu"
+            },
+            "close_friends": {
+                "male_self": "Tôi",
+                "male_to_female": "Cậu/Bà",
+                "female_self": "Tớ",
+                "female_to_male": "Ông/Cậu"
+            },
+            "teasing": {
+                "to_female_friend": "Bà này",
+                "to_male_friend": "Ông này",
+                "examples": [
+                    "\"Bà này điên thật đấy!\"",
+                    "\"Ông này lại giở trò gì đây?\""
+                ]
+            }
+        },
+        "romantic_rtas_scale": {
+            "1.0-1.5": {
+                "self": "Tôi",
+                "other": "Anh/Cô",
+                "tone": "formal_distant"
+            },
+            "1.5-2.5": {
+                "self": "Tôi",
+                "other": "Anh/Chị",
+                "tone": "polite_defensive"
+            },
+            "2.0-3.5": {
+                "self": "Tớ",
+                "other": "Cậu",
+                "tone": "casual_peers"
+            },
+            "3.5-4.2": {
+                "self": "Tớ",
+                "other": "Anh",
+                "tone": "friendly_warm"
+            },
+            "4.2-5.0": {
+                "self": "Em",
+                "other": "Anh",
+                "tone": "romantic_intimate"
+            }
+        },
+        "family_override": {
+            "priority": "ABSOLUTE",
+            "note": "Family pronouns CANNOT be overridden by RTAS or archetype",
+            "mappings": {
+                "younger_to_elder_sibling": {
+                    "self": "Em",
+                    "other": "Anh/Chị"
+                },
+                "elder_to_younger_sibling": {
+                    "self": "Anh/Chị",
+                    "other": "Em"
+                },
+                "child_to_parent": {
+                    "self": "Con",
+                    "other": "Ba/Mẹ"
+                },
+                "parent_to_child": {
+                    "self": "Ba/Mẹ",
+                    "other": "Con"
+                }
+            },
+            "banned_in_family": [
+                "Tao/Mày",
+                "Tớ/Cậu",
+                "Tôi/Anh"
+            ]
+        }
+    },
+    "rtas_particle_evolution": {
+        "description": "How particles shift as intimacy increases",
+        "priority": "high",
+        "scale": [
+            {
+                "rtas_range": "1.0-2.0",
+                "particle_style": "formal_or_none",
+                "examples": [
+                    "Vâng.",
+                    "Vâng ạ."
+                ]
+            },
+            {
+                "rtas_range": "2.0-3.0",
+                "particle_style": "neutral",
+                "examples": [
+                    "Tôi hiểu.",
+                    "Tôi hiểu vậy."
+                ]
+            },
+            {
+                "rtas_range": "3.0-3.5",
+                "particle_style": "casual_distant",
+                "examples": [
+                    "Được rồi.",
+                    "Ừ, được rồi."
+                ]
+            },
+            {
+                "rtas_range": "3.5-4.2",
+                "particle_style": "casual_warm",
+                "examples": [
+                    "Em hiểu rồi.",
+                    "Em hiểu rồi mà."
+                ]
+            },
+            {
+                "rtas_range": "4.2-5.0",
+                "particle_style": "intimate",
+                "examples": [
+                    "Anh biết mà.",
+                    "Anh biết mà, đừng lo nhé."
+                ]
+            }
+        ]
+    },
+    "japanese_structure_carryover": {
+        "description": "Japanese patterns that need restructuring in Vietnamese",
+        "priority": "high",
+        "patterns": [
+            {
+                "id": "vn-topic-comment-restructure",
+                "japanese_pattern": "XはYがZ (X wa Y ga Z)",
+                "problem": "Direct translation creates awkward Vietnamese",
+                "corrections": {
+                    "Cô ấy thì tóc thì dài": "Tóc cô ấy dài",
+                    "Anh ấy thì mắt thì to": "Mắt anh ấy to"
+                }
+            },
+            {
+                "id": "vn-double-subject-elimination",
+                "problem": "Japanese double-subject becomes redundant in Vietnamese",
+                "corrections": {
+                    "Tôi, tim tôi đập nhanh": "Tim tôi đập nhanh",
+                    "Cô ấy, mặt cô ấy đỏ": "Mặt cô ấy đỏ"
+                }
+            },
+            {
+                "id": "vn-sentence-final-verb",
+                "problem": "Japanese verb-final order sounds unnatural in Vietnamese",
+                "rule": "Restructure to SVO order",
+                "corrections": {
+                    "Cô ấy, cuốn sách đó, đã đọc": "Cô ấy đã đọc cuốn sách đó"
+                }
+            }
+        ]
+    },
+    "frequency_thresholds": {
+        "description": "Maximum allowed frequency for common AI-ism markers",
+        "priority": "medium",
+        "thresholds_per_1000_words": {
+            "một cảm giác": 0,
+            "một cách": 1,
+            "điều": 3,
+            "sự": 5,
+            "việc": 2,
+            "bị/được (passive)": 3,
+            "thực sự": 2,
+            "hoàn toàn": 2,
+            "chắc chắn": 2
+        }
+    },
+    "quality_gate_checklist": {
+        "description": "Pre-output validation checklist",
+        "priority": "high",
+        "checks": [
+            {
+                "id": "particle_presence",
+                "rule": "Dialogue lines should have appropriate particles",
+                "pass_rate": ">80%"
+            },
+            {
+                "id": "ai_ism_density",
+                "rule": "AI-ism patterns per 1000 words",
+                "max_allowed": 2
+            },
+            {
+                "id": "passive_voice_rate",
+                "rule": "Passive constructions",
+                "max_rate": "20%"
+            },
+            {
+                "id": "pronoun_consistency",
+                "rule": "Pronoun pairs consistent within scene",
+                "pass_rate": "100%"
+            },
+            {
+                "id": "register_match",
+                "rule": "Register matches character archetype",
+                "pass_rate": "100%"
+            }
+        ]
+    }
+}

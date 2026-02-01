@@ -2,37 +2,38 @@
 
 **Machine Translation Publishing Pipeline for Japanese Light Novels**
 
-Version 3.5 LTS | Production Ready | January 2026
+Version 4.0 LTS | Production Ready | February 2026
 
-> Multi-Language Support: English & Vietnamese | V3.5 Enhanced Schema (TTS Support) | AI-Powered QC | Interactive CLI
+> Multi-Language Support: English & Vietnamese | V4.0 Gap Moe Analysis | Kodansha Support | Grammar RAG | AI-Powered QC
 
 ---
 
 ![MTL Studio Interface](assets/screenshot_main.png)
 
-*V3.5 Enhanced Schema with character profiles, keigo_switch, TTS voice assignments, and interactive CLI menu*
+*V4.0 with Gap Moe Analysis, Kodansha EPUB Support, Grammar RAG, and enhanced quality control*
 
 ---
 
 ## Table of Contents
 
 1. [Overview](#overview)
-2. [System Architecture](#system-architecture)
-3. [Pipeline Phases](#pipeline-phases)
-4. [Installation](#installation)
-5. [Quick Start](#quick-start)
-6. [CLI Reference](#cli-reference)
-7. [Configuration](#configuration)
-8. [Publisher Profiles System](#publisher-profiles-system)
-9. [File Structure](#file-structure)
-10. [RAG Modules](#rag-modules)
-11. [Quality Control](#quality-control)
-12. [Troubleshooting](#troubleshooting)
-13. [API Reference](#api-reference)
+2. [What's New in V4.0](#whats-new-in-v40)
+3. [System Architecture](#system-architecture)
+4. [Pipeline Phases](#pipeline-phases)
+5. [Installation](#installation)
+6. [Quick Start](#quick-start)
+7. [CLI Reference](#cli-reference)
+8. [Configuration](#configuration)
+9. [Publisher Profiles System](#publisher-profiles-system)
+10. [File Structure](#file-structure)
+11. [RAG Modules](#rag-modules)
+12. [Quality Control](#quality-control)
+13. [Troubleshooting](#troubleshooting)
+14. [API Reference](#api-reference)
     - [Manifest Schema](#manifest-schema)
     - [Name Registry Schema](#name-registry-schema)
     - [Semantic Metadata Schema](#semantic-metadata-schema)
-14. [Performance Statistics](#performance-statistics)
+15. [Performance Statistics](#performance-statistics)
 
 ---
 
@@ -44,12 +45,15 @@ MTL Studio is a complete automated pipeline for translating Japanese Light Novel
 
 - **End-to-End Automation**: Single command transforms Japanese EPUB to translated EPUB
 - **Multi-Language Support**: Full English and Vietnamese translation pipelines
-- **RAG-Enhanced Translation**: 2.5MB+ knowledge base for context-aware translation
+- **RAG-Enhanced Translation**: 3.2MB+ knowledge base for context-aware translation
+- **Gap Moe Detection**: Semantic analysis of character behavioral transitions (cute→scary, cold→warm)
+- **Grammar Reference System**: English/Vietnamese grammar JSON as Tier-1 RAG for natural output
 - **Intelligent Typography**: Professional quotation marks, em-dashes, ellipses
 - **Illustration Management**: Automatic extraction, orientation detection, semantic insertion
 - **Sequel Intelligence**: Character names and terminology inherit across volumes
-- **Multi-Publisher Support**: KADOKAWA, Overlap, SB Creative, Hifumi Shobo, Hobby Japan, Media Factory, Shueisha
-- **Publisher Pattern Database**: 65+ documented EPUB structure patterns across 7 major publishers
+- **Multi-Publisher Support**: KADOKAWA, Overlap, SB Creative, Hifumi Shobo, Hobby Japan, Media Factory, Shueisha, **Kodansha**
+- **Publisher Pattern Database**: 65+ documented EPUB structure patterns across 8 major publishers
+- **Kodansha Structure Support**: Intelligent pre-TOC detection, kuchie handling, image remapping (p### → illust-###)
 - **Automatic Publisher Detection**: Pattern-based image classification without hardcoded logic
 - **AI-Powered QC**: IDE agents (VSCode, Windsurf, Cursor,...) for auditing, formatting fixes, and illustration insertion
 - **Anti-AI-ism Detection**: 63-pattern JSON library with 3 severity tiers (CRITICAL/MAJOR/MINOR)
@@ -68,6 +72,67 @@ MTL Studio is a complete automated pipeline for translating Japanese Light Novel
 | Name Consistency | 100% | Ruby-verified romanization |
 | Content Fidelity | <5% deviation | 1:1 faithful to source |
 | Character Voice | FFXVI-Tier | Distinct speech patterns per archetype |
+| Gap Moe Accuracy | 90%+ | Behavioral transition detection and preservation |
+
+---
+
+## What's New in V4.0
+
+### 🎭 Gap Moe Semantic Analysis
+- **Behavioral Transition Detection**: Automatically identifies character personality shifts (e.g., yandere gap moe: cute→scary)
+- **Context-Aware Translation**: Preserves tonal whiplash in translations (flat delivery for intense moments, soft for cute scenes)
+- **Pattern Recognition**: Detects 4 core gap patterns:
+  - Possessive language markers (21+ patterns)
+  - Surveillance subtext (25+ patterns)
+  - Emotional intensity shifts (14+ patterns)
+  - Explicit gap moe transitions (cute→scary, sweet→interrogation)
+- **Dual Voice Analysis**: Identifies characters with contrasting personas (e.g., "cute voice that sounds like interrogation")
+
+### 📚 Kodansha EPUB Support
+- **Publisher Detection**: Automatic identification via OPF metadata markers (`<!-- Kodansha ver. X.XX -->`)
+- **Pre-TOC Content Handling**: Intelligent detection of cover, caution pages, kuchie (color plates), credits
+- **Image Remapping**: Automatic conversion from Kodansha's `p###.jpg` format to standard `illust-###.jpg`
+- **Kuchie Orientation**: Detects multi-page spreads (`p002-003.jpg`) for horizontal viewport
+- **Chapter Detection**: Uses `<h2>` heading analysis instead of spine order
+- **TOC Generation**: Excludes pre-TOC pages, generates chapter-level navigation from headings
+- **Documentation**: Complete structure analysis in [docs/KODANSHA_STRUCTURE.md](pipeline/docs/KODANSHA_STRUCTURE.md)
+- **Configuration**: Publisher-specific settings in `config/publishers/kodansha.json`
+
+### 📖 Grammar Reference System (Tier-1 RAG)
+- **English Grammar JSON**: Comprehensive reference for natural English patterns, idioms, and constructions
+- **Vietnamese Grammar JSON**: VN-specific sentence structures, particles, and colloquialisms
+- **RAG Integration**: Grammar rules injected as Tier-1 context for every translation
+- **Anti-Pattern Detection**: Prevents translationese by referencing native grammar structures
+- **Example-Driven**: Each rule includes correct/incorrect examples for AI guidance
+
+### 🔍 Enhanced Quality Control
+- **AUDIT_AGENT V2.0**: 4-subagent quality control system running in external IDEs
+  - Subagent 1: Content Fidelity (ZERO TOLERANCE for truncation/censorship)
+  - Subagent 2: Content Integrity (name consistency, formatting, sequel continuity)
+  - Subagent 3: Prose Quality (AI-ism detection, transcreation validation)
+  - Subagent 4: Gap Preservation (emotion+action, ruby text, subtext)
+- **Schema Agent V3.6**: Enriched metadata generation in external IDEs
+  - Gap Moe analysis (behavioral transitions, dual voice detection)
+  - Character profiles with TTS assignments
+  - POV tracking and transcreation notes
+- **Gap Preservation Audit**: Validates behavioral transitions are maintained in translation
+- **Publisher Structure Validation**: Ensures EPUB conforms to detected publisher pattern
+- **Image Reference Integrity**: Verifies all `[ILLUSTRATION: ...]` tags point to existing files
+- **Pre-TOC Content Check**: Confirms cover/kuchie pages excluded from reader navigation
+- **Transcreation Detection**: Identifies Japanese discourse markers (まあ, やっぱり, さすが) needing localization
+
+### 🛠️ Technical Improvements
+- **Schema V3.6**: Added gap_moe_markers, dual_voice_analysis, and transcreation_notes to metadata
+- **Builder Agent Update**: Excludes `is_pre_toc_content: true` chapters from nav.xhtml generation
+- **Image Mapping System**: Maintains source→target filename relationships in manifest
+- **Multi-Replace Tool**: Batch file editing for illustration remapping and transcreations
+- **Markdown Format Standardization**: `[ILLUSTRATION: filename.jpg]` format enforced across all volumes
+
+### 📊 New Metrics
+- **Gap Moe Accuracy**: Percentage of behavioral transitions correctly detected and preserved
+- **Transcreation Coverage**: Count of Japanese discourse markers localized (vs. literal translation)
+- **Image Mapping Integrity**: Verification that all p###.jpg files have valid illust-### mappings
+- **Pre-TOC Detection Rate**: Accuracy of identifying non-chapter content for TOC exclusion
 
 ---
 
@@ -830,30 +895,253 @@ Result: Forces synonym variation ("She ran" / "She took off running")
 }
 ```
 
-### IDE Agents Integration (AUDIT_AGENT.md)
+### External IDE Agents
 
-The `AUDIT_AGENT.md` file defines an AI-powered QC agent with two modules:
+MTL Studio integrates with external IDE agents (VSCode, Windsurf, Cursor, etc.) for advanced quality control and metadata enrichment:
 
-**Module 1: Translation Audit**
-- Victorian pattern detection (with ojou-sama exemptions)
-- Contraction rate validation (80%+ target)
-- AI-ism detection (FFXVI-tier zero tolerance)
-- Character voice differentiation scoring
-- 1:1 content fidelity validation (<5% deviation)
-- Auto-fix for formatting violations
+#### 1. Schema Agent V3.6
 
-**Module 2: Illustration Insertion**
-- Semantic matching with Japanese source context
-- Dialogue and action sequence anchoring
-- Position optimization for narrative beats
+**Purpose**: Generates enriched metadata following V3.6 Enhanced Schema specifications.
 
+**Documentation**: `SCHEMA_V3.6_AGENT.md`
+
+**Key Features**:
+- **Gap Moe Analysis**: Detects behavioral transitions (cute→scary, cold→warm)
+  - Possessive language markers (21+ patterns)
+  - Surveillance subtext (25+ patterns)
+  - Emotional intensity shifts (14+ patterns)
+  - Dual voice analysis (contrasting personas)
+- **Character Profiles**: Rich metadata including:
+  - `gap_moe_markers`: Personality shift indicators
+  - `dual_voice_analysis`: Contrasting speech patterns
+  - `keigo_switch`: Formality level transitions
+  - `speech_pattern`: Voice differentiation
+  - `character_arc`: Development trajectory
+  - `tts_voice`: Voice synthesis assignments
+- **POV Tracking**: Mid-chapter perspective shifts with line ranges
+- **Transcreation Notes**: Japanese discourse marker handling (まあ, やっぱり, さすが)
+- **Genre Traits**: Series-specific patterns (idol culture, trauma protocols, etc.)
+
+**Output**: `metadata_en.json` with V3.6 schema compliance
+
+**Schema Version**: `v3.6_enhanced` (includes Gap Moe + TTS support)
+
+#### 2. AUDIT_AGENT V2.0
+
+**Purpose**: Multi-phase quality control system to eliminate truncations, hallucinations, lazy summarization, AI-isms, and missed transcreations.
+
+**Documentation**: `AUDIT_AGENT.md`
+
+**Architecture**: 4 independent subagents + final aggregator
+
+##### Subagent 1: Content Fidelity Auditor
+**Mission**: **ZERO TOLERANCE** for truncation, censorship, or lazy summarization.
+
+**Detection Rules**:
+- **TRUNCATION**: EN sentence significantly shorter than JP equivalent
+- **CENSORSHIP**: Romantic/intimate content softened or sanitized
+- **SUMMARIZATION**: Multiple JP paragraphs lazily combined into one
+- **OMISSION**: Entire paragraphs missing (CRITICAL - blocks publication)
+- **ADDITION**: Content added not present in source
+
+**Validation Checks**:
+- Dialogue count match (JP vs EN)
+- Paragraph count match
+- Scene break preservation
+- Character appearance consistency
+
+**Threshold**: <5% deviation = PASS | >10% deviation = FAIL (blocks publication)
+
+**Output**: `fidelity_audit_report.json`
+
+##### Subagent 2: Content Integrity Auditor
+**Mission**: Validate structural elements, names, terms, formatting standards.
+
+**Validation Categories**:
+- **Chapter Titles**: Cross-reference with JP source
+- **Character Names**: Ruby text verification, name order (surname first)
+- **Honorifics**: Hybrid localization standard (-san, -kun, -chan retained)
+- **Glossary Terms**: Consistency with manifest.json definitions
+- **Formatting**: Smart quotes, em-dashes, ellipses (auto-fixable)
+- **Illustration Markers**: JP/EN count match, proper placement
+- **Scene Breaks**: Format consistency (\* \* \*)
+- **Sequel Continuity**: Inherits character profiles from previous volumes
+- **Genre Traits**: Series-specific validation (idol terminology, kuchie handling, etc.)
+
+**Threshold**: >95% pass rate = PASS | Name order violations = CRITICAL FAIL
+
+**Output**: `integrity_audit_report.json`
+
+##### Subagent 3: Prose Quality Auditor
+**Mission**: Ensure natural English prose, detect AI-isms and missed transcreations.
+
+**Detection Integration**:
+- **Grammar RAG**: 53-pattern database for natural English constructions
+- **Anti-AI-ism Library**: 63-pattern detection (6 CRITICAL, 28 MAJOR, 29 MINOR)
+- **Echo Detection**: Proximity-based clustering (23 patterns, 36.5% coverage)
+- **Transcreation Patterns**: Japanese discourse markers (やっぱり→"sure enough", さすが→"that's X for you")
+
+**Validation Categories**:
+- **AI-ism Density**: Target <0.5 per 1k words | >1.0 = FAIL
+- **Contraction Rate**: Target 90%+ (FFXVI-tier 99%+) | <80% = FAIL
+- **Victorian Patterns**: Zero tolerance (with ojou-sama exemptions)
+- **Transcreation Coverage**: Target 80%+ | Flags literal translations
+- **Character Voice**: Differentiation score (distinct speech patterns)
+- **Sentence Quality**: Variety, passive voice rate, nominalization rate
+
+**Threshold**: Prose score >85 = PASS | >5 critical AI-isms = GRADE CAP AT C
+
+**Output**: `prose_audit_report.json`
+
+##### Subagent 4: Gap Preservation Auditor
+**Mission**: Validate semantic gaps (emotion+action, ruby text, subtext) preserved in translation.
+
+**Gap Categories**:
+- **Gap A (Emotion+Action)**: Simultaneous translation of emotions + physical actions
+  - Example: "exhaustion markers + glass chattering detail"
+  - Target: >90% preservation
+- **Gap B (Ruby Text)**: Furigana annotations indicating wordplay, names, specialized readings
+  - Example: 人間【ヒト】 (humanity [person])
+  - Target: 100% preservation (translator notes required)
+- **Gap C (Subtext)**: Hidden meanings, sarcasm, performative speech vs true feelings
+  - Example: Phone anxiety (PTSD trauma framing)
+  - Target: >85% preservation
+
+**Genre Validation**:
+- Idol culture terminology preservation
+- Psychological depth (depression protocols, trauma handling)
+- Kansai dialect markers
+- Digital trauma representation
+
+**Threshold**: >90% overall = GOOD | <75% = CRITICAL FAIL | Trauma misrepresentation = MANUAL REVIEW
+
+**Output**: `gap_preservation_audit_report.json`
+
+##### Final Auditor: Report Aggregator
+**Mission**: Aggregate 4 subagent reports into comprehensive final audit.
+
+**Grading Matrix**:
+```
+┌─────────────────┬───────────┬───────────┬───────────┬──────────┬──────────────────┐
+│     GRADE       │ FIDELITY  │ INTEGRITY │   PROSE   │   GAPS   │    VERDICT       │
+├─────────────────┼───────────┼───────────┼───────────┼──────────┼──────────────────┤
+│ A+ (FFXVI-Tier) │   PASS    │   PASS    │  95%+     │  >95%    │ PUBLISH READY    │
+│ A  (Excellent)  │   PASS    │   PASS    │  90%+     │  90-95%  │ PUBLISH READY    │
+│ B  (Good)       │   PASS    │  WARNINGS │  85%+     │  85-90%  │ MINOR FIXES      │
+│ C  (Acceptable) │   PASS    │  WARNINGS │  80%+     │  80-85%  │ REVISION NEEDED  │
+│ D  (Poor)       │  REVIEW   │   FAIL    │  <80%     │  75-80%  │ MAJOR REVISION   │
+│ F  (Fail)       │   FAIL    │   FAIL    │    ANY    │  <75%    │ BLOCKS PUBLISH   │
+└─────────────────┴───────────┴───────────┴───────────┴──────────┴──────────────────┘
+```
+
+**Blocking Conditions**:
+- Content Fidelity: >10% deviation → AUTOMATIC F
+- Content Integrity: Name order wrong → AUTOMATIC F
+- Content Integrity: Sequel continuity violation → AUTOMATIC F
+- Prose Quality: >5 critical AI-isms → GRADE CAP AT C
+- Gap Preservation: <75% rate → AUTOMATIC F
+- Gap Preservation: Trauma misrepresentation → MANUAL REVIEW REQUIRED
+
+**Outputs**:
+- `FINAL_AUDIT_REPORT.md`: Human-readable comprehensive report
+- `audit_summary.json`: Machine-readable aggregate statistics
+
+**Grading Weights** (configurable):
+- Fidelity: 40%
+- Integrity: 25%
+- Prose: 25%
+- Gaps: 10%
+
+**Workflow**:
 ```bash
-# Audit translated chapter
+# Run full audit pipeline
+python audit_pipeline.py --volume 05df
+
+# Or run individual subagents
+python -m auditors.fidelity --volume 05df --output audits/
+python -m auditors.integrity --volume 05df --output audits/
+python -m auditors.prose --volume 05df --output audits/
+python -m auditors.gap_preservation --volume 05df --output audits/
+
+# Generate final report
+python -m auditors.final --volume 05df --input audits/ --output FINAL_AUDIT_REPORT.md
+```
+
+---
+
+## Illustration System
+
+### Librarian Phase: Illustration Detection & Extraction
+
+**Spine-Based Detection**:
+1. **Manifest Properties Analysis**: Detects illustration pages from OPF `properties="image-only"` or SVG viewport patterns
+2. **Content Analysis**: Post-processing scan identifies illustration-only files:
+   - File size <2KB (quick filter for image pages)
+   - Body contains only `<svg><image>` elements with no text content
+3. **Classification**: Marks spine items with `is_illustration: true` flag
+
+**Illustration Extraction**:
+- **Image Normalization**: Copies and renames illustrations to standard format:
+  - Publisher-specific (p017.jpg, m045.jpg, etc.) → Standard (illust-001.jpg, illust-002.jpg, etc.)
+  - Maintains aspect ratio and orientation metadata
+- **Markdown Placeholder Insertion**: Embeds `[ILLUSTRATION: illust-XXX.jpg]` markers at correct chapter positions
+  - Spine order determines placement (illustration pages between content pages)
+  - Multi-file chapters: illustrations inserted after preceding content file
+  - Example: spine order `[chapter-01.xhtml, p017.xhtml, chapter-01-2.xhtml]` → Chapter 1 markdown gets `[ILLUSTRATION: illust-002.jpg]` after first section
+
+**Special Cases**:
+- **Kuchie-e (Color Plates)**: Horizontal spreads with hyphenated filenames (p002-003.jpg) get `horizontal` orientation flag
+- **Chapter-Opening Illustrations**: Detected by spine position (first item in chapter group) and handled as frontmatter
+- **Double-Page Spreads**: Two sequential illustration pages merged into single reference
+
+### Builder Phase: Illustration Rendering
+
+**Markdown to XHTML Conversion**:
+1. **Pattern Detection**: Recognizes two formats:
+   - Legacy: `[ILLUSTRATION: filename.jpg]`
+   - Markdown: `![illustration](filename.jpg)` or `![gaiji](filename.jpg)`
+2. **XHTML Generation**: Converts placeholders to semantic markup:
+   ```html
+   <p class="illustration">
+     <img class="insert" src="../Images/illust-001.jpg" alt=""/>
+   </p>
+   ```
+3. **Path Resolution**: Adjusts relative paths from chapter XHTML to Images/ directory
+4. **Orientation-Aware**: Applies CSS classes based on metadata:
+   - `class="insert"` - Vertical/portrait images (default)
+   - `class="fit horizontal"` - Horizontal spreads (kuchie-e)
+   - `class="cover"` - Cover images with full-page treatment
+
+**Validation**:
+- **Reference Integrity**: Builder verifies all `[ILLUSTRATION: ...]` tags point to existing files in `_assets/illustrations/`
+- **Missing Images**: Logs warnings for broken references (publisher filename mismatches)
+- **Duplicate Detection**: Flags multiple references to same illustration file
+
+### Manual QC (IDE Agents)
+
+**When Automated Insertion Fails**:
+- **Complex Publisher Structures**: Kodansha volumes with non-sequential image pages (p017, p029, p087, etc.)
+- **Contextual Placement**: Illustrations requiring semantic analysis (mid-dialogue interruptions, action sequence beats)
+
+**IDE Agent Workflow**:
+```bash
+# Audit identifies missing/misplaced illustrations
 gemini -s AUDIT_AGENT.md 'Audit WORK/volume_id/EN/CHAPTER_01.md'
 
-# Insert illustrations with semantic matching
-gemini -s AUDIT_AGENT.md 'Insert illustrations for Chapter 3 in volume_id'
+# Manual review of Japanese source context
+# Agent suggests optimal insertion point based on:
+# - Dialogue flow (between speaker turns)
+# - Scene breaks (before/after * * *)
+# - Action sequences (at narrative climax)
+
+# Insert illustration with context-aware positioning
+gemini -s AUDIT_AGENT.md 'Insert illust-005.jpg in Chapter 3 before "Maria stepped back" line'
 ```
+
+**Quality Checks**:
+- **JP/EN Count Match**: Subagent 2 (Content Integrity) verifies equal illustration count in source and translation
+- **Placement Validation**: Subagent 4 (Gap Preservation) checks illustrations preserve visual narrative beats
+- **Semantic Anchoring**: Confirms illustrations align with referenced actions (e.g., "She winked" → wink illustration nearby)
 
 ### Grading Rubric (FFXVI-Tier)
 
@@ -884,9 +1172,19 @@ python mtl.py list
 ```
 
 **Safety block / Content policy refusal**
-- Use Web Gemini interface as fallback
-- Upload `prompts/master_prompt_en_compressed.xml`
-- Copy output back to EN/ directory
+- The system implements 4-tier fallback: Pro → Flash → Amnesia → Web Gemini
+- When API blocks, a BLOCKED document is auto-generated with translation prompt
+- Use Web Gemini interface (https://gemini.google.com) as final fallback
+- **Validated**: Volume 1420 Ch17-21 translated via Web Gemini with A+ quality
+- Copy Web Gemini output to `EN/CHAPTER_XX_EN.md`
+
+**Web Gemini Fallback (Proven with Volume 1420)**:
+1. Open https://gemini.google.com
+2. Select "Gemini 3 Flash Thinking" mode
+3. Activate EN_WEB_NOVEL_TRANSLATOR Gem (or paste prompt from BLOCKED doc)
+4. Paste JP chapter content
+5. Copy result to EN/CHAPTER_XX_EN.md
+6. Quality: A+ grade, 99.97% continuity with API chapters
 
 **Illustration not appearing in EPUB**
 - Check `manifest.json` → assets.illustrations
@@ -1019,12 +1317,12 @@ The translator supports **four metadata schema variants** for enhanced character
 | **Legacy V2** | Volumes 1-3 style | `character_profiles`, `localization_notes`, `speech_pattern` |
 | **V4 Nested** | Compact character data | `character_names` with nested `{relationships, traits, pronouns}` |
 
-#### V3.5 Enhanced Schema (Recommended - With TTS Support)
+#### V3.6 Enhanced Schema (Current - With Gap Moe & TTS Support)
 
 ```json
 {
   "metadata_en": {
-    "schema_version": "v3.5_enhanced",
+    "schema_version": "v3.6_enhanced",
     "character_profiles": {
       "Doumoto Hayato": {
         "full_name": "Doumoto Hayato",
@@ -1403,6 +1701,37 @@ See LICENSE.txt for licensing information.
 
 ## Changelog
 
+### Version 4.0 LTS (February 2026)
+- **Gap Moe Semantic Analysis**: Automatic detection and preservation of character behavioral transitions (cute→scary, cold→warm)
+  - Possessive language markers (21+ patterns)
+  - Surveillance subtext (25+ patterns)
+  - Emotional intensity shifts (14+ patterns)
+  - Dual voice analysis for contrasting personas
+- **Kodansha EPUB Support**: Complete publisher pattern documentation and automation (8th supported publisher)
+  - Pre-TOC content detection (cover, notice, kuchie, credits)
+  - Automatic image remapping (p###.jpg → illust-###.jpg)
+  - Kuchie orientation handling (horizontal spreads)
+  - Chapter detection via `<h2>` heading analysis
+  - TOC generation excludes pre-TOC pages
+  - Documentation: `docs/KODANSHA_STRUCTURE.md` and `config/publishers/kodansha.json`
+- **Grammar Reference System**: English/Vietnamese grammar JSON as Tier-1 RAG (3.2MB+ knowledge base)
+  - Comprehensive reference for natural language patterns
+  - Anti-translationese pattern detection
+  - Example-driven AI guidance
+- **Enhanced Quality Control**:
+  - Gap preservation audit
+  - Publisher structure validation
+  - Image reference integrity checks
+  - Pre-TOC content verification
+  - Transcreation detection (Japanese discourse markers)
+- **Technical Improvements**:
+  - Schema V3.6: Added gap_moe_markers, dual_voice_analysis, transcreation_notes
+  - Builder agent: Excludes `is_pre_toc_content: true` chapters from nav.xhtml
+  - Image mapping system: Source→target filename tracking
+  - Multi-replace tool: Batch file editing
+  - Markdown format standardization: `[ILLUSTRATION: filename.jpg]`
+- **New Metrics**: Gap Moe Accuracy (90%+), Transcreation Coverage, Image Mapping Integrity, Pre-TOC Detection Rate
+
 ### Version 3.5 LTS (January 2026)
 - **Anti-AI-ism Pattern Library**: Comprehensive 63-pattern detection system (6 CRITICAL, 28 MAJOR, 29 MINOR)
 - **Echo Detection System**: Professional proximity-based clustering detection (23 patterns with 50/75/100/150-word windows)
@@ -1424,12 +1753,13 @@ See LICENSE.txt for licensing information.
 - **Sequel Inheritance**: `inherited_from` field tracks volume lineage for character profile continuity
 - **Volume-Specific Context**: `volume_specific_notes` for sequel-aware translation (ex-girlfriend subplot, role expansions)
 - **Character Occurrence Tracking**: Mention counts inform translation priorities and voice consistency
-- **AUDIT_AGENT.md**: Renamed from GEMINI.md for clarity
+- **AUDIT_AGENT.md V2.0**: 4-subagent quality control system (fidelity, integrity, prose, gap preservation)
 
 ### Version 2.5 (January 2026)
 - **Multi-Language Support**: Full Vietnamese translation pipeline with dedicated modules
 - **Gemini 2.5 Pro/Flash**: Updated to latest models with thinking mode
-- **GEMINI.md QC Agent**: AI-powered quality control with auto-fix capabilities
+- **AUDIT_AGENT.md**: AI-powered quality control with 4-phase audit system (renamed from GEMINI.md)
+- **SCHEMA_V3.6_AGENT.md**: External IDE agent for enriched metadata generation
 - **Interactive CLI**: Volume selection menus, configuration commands
 - **Semantic Metadata Schema System**: Three schema variants (Enhanced v2.1, Legacy V2, V4 Nested) with auto-transformation
 - **Keigo Switch System**: Automatic speech register switching based on narration, conversation partner, and emotional state

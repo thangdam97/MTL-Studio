@@ -36,13 +36,16 @@ auditing/
 # ============================================
 # Pipeline documents (audit reports, investigation notes)
 pipeline/documents/
-pipeline/docs/
 pipeline/auditing/
 pipeline/pipeline/narrator/
 pipeline/pipeline/pdf_builder
 
 # Root level docs (setup guides, verification reports)
 docs/
+
+# Keep publisher structure documentation (non-copyrighted analysis)
+!pipeline/docs/KODANSHA_STRUCTURE.md
+!pipeline/config/publishers/*.json
 
 # Design documents
 UNIVERSAL_CONTINUITY_PACK_DESIGN.md
@@ -53,6 +56,9 @@ AUDIT_AGENT.md
 AUDIT_REPORT*.md
 AUDIT_REPORT*.txt
 *_COMPARISON_REPORT.md
+
+# Security audit (V4.0 pre-release)
+!SECURITY_AUDIT_V4.md
 
 # ============================================
 # TEST SCRIPTS AND DEVELOPMENT AIDS

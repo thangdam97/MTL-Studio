@@ -83,6 +83,8 @@ MTL Studio is a complete automated pipeline for translating Japanese Light Novel
 ## What's New in V4.5
 
 ### 🏆 Historic Milestone: Single-Pass Equals Multi-Pass Professional Editorial
+**Google Drive**: https://drive.google.com/drive/folders/11yDkQgtyBHCwcDlInJ-sBlCAX3zN0g0I?usp=drive_link
+DISCLAIMER: We cannot distribute copyrighted material. The above link is for internal benchmarking only.
 
 **February 4, 2026** - MTL Studio v4.5 becomes the first automated translation system to achieve **source fidelity parity with professional publications** (95.75/100 vs 93.00/100) while matching editorial quality (93/100) in a **single automated pass** + cleanup.
 

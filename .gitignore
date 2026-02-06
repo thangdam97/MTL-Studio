@@ -77,6 +77,7 @@ pipeline/*_INTEGRATION*.md
 
 # Schema documentation (moved to docs/)
 pipeline/SCHEMA_*.md
+!pipeline/SCHEMA_V3.8_AGENT.md
 pipeline/DIALOGUE_*.md
 
 # Audit reports

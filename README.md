@@ -17,10 +17,11 @@ Version 5.0 | Production Ready | February 2026
 ## Table of Contents
 
 1. [Overview](#overview)
-2. [What's New in V4.5](#whats-new-in-v45)
-3. [Gemini 3 Pro Vision: Illustration Multimodal Processor](#-gemini-3-pro-vision-illustration-multimodal-processor)
-4. [Gemini Embedding: Vector Search Engine](#-gemini-embedding-vector-search-engine)
-5. [System Architecture](#system-architecture)
+2. [What's New in V5.0](#whats-new-in-v50)
+3. [What's New in V4.5](#whats-new-in-v45)
+4. [Gemini 3 Pro Vision: Illustration Multimodal Processor](#-gemini-3-pro-vision-illustration-multimodal-processor)
+5. [Gemini Embedding: Vector Search Engine](#-gemini-embedding-vector-search-engine)
+6. [System Architecture](#system-architecture)
 6. [Pipeline Phases](#pipeline-phases)
 7. [Installation](#installation)
 8. [Quick Start](#quick-start)
@@ -47,17 +48,19 @@ MTL Studio is a complete automated pipeline for translating Japanese Light Novel
 
 - **End-to-End Automation**: Single command transforms Japanese EPUB to translated EPUB
 - **Multi-Language Support**: Full English and Vietnamese translation pipelines
-- **RAG-Enhanced Translation**: 3.2MB+ knowledge base for context-aware translation
+- **Multimodal Vision Intelligence**: Gemini 3 Pro Vision analyzes every illustration, generates Art Director's Notes (composition, emotional_delta, narrative_directives, spoiler_prevention) for visually-informed prose calibration
+- **Vector Search Engine**: Gemini Embedding 001 (3072D) converts 70+ Japanese grammar patterns to semantic embeddings, ChromaDB cosine matching against 204 indexed English patterns for confidence-based natural phrasing injection
+- **RAG-Enhanced Translation**: 3.2MB+ knowledge base for context-aware translation with three-pillar context (RAG + Vector Search + Visual Cache)
 - **Gap Moe Detection**: Semantic analysis of character behavioral transitions (cute→scary, cold→warm)
 - **Grammar Reference System**: English/Vietnamese grammar JSON as Tier-1 RAG for natural output
 - **Intelligent Typography**: Professional quotation marks, em-dashes, ellipses
-- **Illustration Management**: Automatic extraction, orientation detection, semantic insertion
+- **Illustration Management**: Automatic extraction, orientation detection, semantic insertion with hash-based visual cache invalidation
 - **Sequel Intelligence**: Character names and terminology inherit across volumes
-- **Multi-Publisher Support**: KADOKAWA, Overlap, SB Creative, Hifumi Shobo, Hobby Japan, Media Factory, Shueisha, **Kodansha**
+- **Multi-Publisher Support**: KADOKAWA, Overlap, SB Creative, Hifumi Shobo, Hobby Japan, Media Factory, Shueisha, Kodansha,...
 - **Publisher Pattern Database**: 65+ documented EPUB structure patterns across 8 major publishers
 - **Kodansha Structure Support**: Intelligent pre-TOC detection, kuchie handling, image remapping (p### → illust-###)
 - **Automatic Publisher Detection**: Pattern-based image classification without hardcoded logic
-- **AI-Powered QC**: IDE agents (VSCode, Windsurf, Cursor,...) for auditing, formatting fixes, and illustration insertion
+- **AI-Powered QC**: IDE agents (VSCode, Windsurf, Cursor,...) for smart AI-ism fixes, formatting fixes, and contraction rate tuning
 - **Anti-AI-ism Detection**: 63-pattern JSON library with 3 severity tiers (CRITICAL/MAJOR/MINOR)
 - **Echo Detection System**: Professional proximity-based clustering detection (23 patterns, 36.5% coverage)
 - **Interactive CLI**: Volume selection menus, configuration management, verbose mode
@@ -84,11 +87,11 @@ MTL Studio is a complete automated pipeline for translating Japanese Light Novel
 
 ## What's New in V5.0
 
-### 🎯 Vision + Vector Intelligence: The Multimodal Breakthrough
+### Vision + Vector Intelligence: The Multimodal Breakthrough
 
 **February 7, 2026** - MTL Studio v5.0 introduces two game-changing subsystems that elevate translation from text-only analysis to **true contextual understanding**:
 
-#### 1. 🔮 Gemini 3 Pro Vision: Multimodal Illustration Processor (Phase 1.6)
+#### 1. Gemini 3 Pro Vision: Multimodal Illustration Processor (Phase 1.6)
 
 **The Problem**: Traditional MTL systems translate text in isolation, producing prose that contradicts the emotional tone visible in illustrations — cheerful dialogue for a sad illustration, or generic descriptions when the image shows specific actions.
 
@@ -106,7 +109,7 @@ MTL Studio is a complete automated pipeline for translating Japanese Light Novel
 
 **Architecture**: Decoupled "bake assets once, render many times" design — Gemini 2.5 Pro never sees images, only structured JSON interpretations
 
-#### 2. 🧠 Gemini Embedding 001: Vector Search Engine (Phase 2)
+#### 2. Gemini Embedding 001: Vector Search Engine (Phase 2)
 
 **The Problem**: Hardcoded grammar rules create brittle translation patterns; regex-based systems miss semantic nuance in Japanese discourse markers (やっぱり, けど...も, まあ).
 
@@ -139,7 +142,7 @@ MTL Studio is a complete automated pipeline for translating Japanese Light Novel
 2. **Vector Search** (semantic grammar guidance) — 70+ regex → 3072D embeddings → ChromaDB cosine match
 3. **Multimodal Cache** (visual context) — Illustration composition, emotion, narrative directives
 
-### 📊 New Technical Capabilities
+### New Technical Capabilities
 
 - **Hash-based cache invalidation**: Prompt + image + model hash triggers regeneration only when needed
 - **Batch embedding optimization**: 1 API call for N patterns vs N sequential calls (−2-3s latency per chapter)
@@ -148,7 +151,7 @@ MTL Studio is a complete automated pipeline for translating Japanese Light Novel
 - **ThinkingConfig reasoning capture**: `cache/thoughts/*.json` logs Gemini 3 Pro Vision's internal reasoning
 - **Canon name enforcement**: Post-processing replaces generic descriptions with manifest character names
 
-### 🎨 Production Validation
+### Production Validation
 
 **Multimodal Translation Enhancement** (Ice Princess Vol 2, 13 illustrations):
 - Forehead Flick (i-019): Split-panel emotion → ellipses for distress, upbeat markers for teasing
@@ -162,7 +165,7 @@ Match:  sim=0.686 | けど...も pattern | contrastive_comparison
 Output: "She's one thing, but [contrast]..." (idiomatic vs literal)
 ```
 
-### ⚙️ Configuration
+### Configuration
 
 ```yaml
 # config.yaml

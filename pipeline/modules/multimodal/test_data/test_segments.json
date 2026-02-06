@@ -1,0 +1,87 @@
+{
+    "description": "Test prose segments for Multimodal Processor validation",
+    "version": "1.0",
+    "volume_id": "1d46",
+    "title": "Ice Princess Volume 1 - Test Segments",
+    "segments": [
+        {
+            "id": "test_001_first_meeting",
+            "illustration_id": "illust-001",
+            "scene_name": "First Train Meeting - Good Morning",
+            "chapter": 1,
+            "jp_lines": "127-155",
+            "en_lines": "206-240",
+            "source_jp": "ガタンゴトン、ガタンゴトン。\n次の日。電車に揺られながら、俺はスマートフォンを弄っていた。今日は運良く乗ったタイミングで席が空き、周りを見ても誰も座る様子がなかったので座ったのだ。もちろん常識はあるので、席が必要な人が居れば譲るつもりだ。\n次の駅に着くと、隣のサラリーマンが降りるために立ち上がった。それと同時に、隣に女子高生らしい人影が座り──席が必要な人が居ないか見渡そうとした時だった。\n\n\"おはようございます\"\n\n隣からそう声を掛けられ、心臓が止まるかと思った。\n頭をそちらに向けようとしたのだが、ギギ、と錆びた機械のような音が鳴りそうだった。\n\n[ILLUSTRATION: illust-001.jpg]\n\nまず最初に目に付いたのは、蒼い瞳。海のように蒼く、どこまでも深く吸い込まれそうな瞳だ。\n続いて目に入ったのは、新雪のように真っ白な髪と肌。もちろん髪の方が白いのだが、肌もミルクのように白く、無垢な子どもを連想させる。その白さは決して病的なものではなく、例えるのならば飴細工のような繊細さと透明感を放っていた。\nそして、キリッとした顔立ちは凜々しいものがある。その表情は普段からほとんど変わらない。美しくも、可愛くも思える。\n\"…あの\"\n彼女の柔らかい鈴を転がすような声音に俺は意識を取り戻した。\nまずい、見蕩れていた。",
+            "reference_en": "The next day, as the train swayed, I was fiddling with my smartphone. I'd gotten lucky and found an empty seat right when I boarded, and since no one else seemed to need it, I sat down. Of course, I'm not a total jerk, so I was fully prepared to give it up if someone who needed it came along.\n\nWhen we reached the next station, the salaryman next to me stood up to get off. At the same time, the silhouette of a high school girl sat down beside me—and just as I was about to look around for anyone who might need the seat…\n\n\"Good morning.\"\n\nA voice from beside me made my heart nearly stop.\n\nI tried to turn my head toward her, but it felt like it would creak like a rusty machine.\n\n[ILLUSTRATION: illust-001.jpg]\n\nThe first thing I saw were her blue eyes. As blue as the ocean, so deep you felt like you could be drawn into them forever.\n\nNext came her snow-white hair and skin. Her hair was whiter, of course, but her skin was as pale as milk, reminding me of an innocent child. The whiteness wasn't sickly at all; if anything, it had the delicate, transparent quality of spun sugar.\n\nAnd her sharp, chiseled features gave her a dignified air. Her expression was, as usual, almost unchanging. She could be seen as beautiful, or as cute.\n\n\"…Excuse me.\"\n\nHer soft, bell-like voice brought me back to my senses.\n\nDamn, I'd been staring.",
+            "test_focus": [
+                "Accurate description of Nagi's white hair and blue eyes",
+                "Conveying Souta's overwhelmed reaction",
+                "Matching prose tone to the illustration's intimate framing"
+            ],
+            "expected_vision_guidance": {
+                "primary_emotion": "nervous_anticipation",
+                "body_language": "close_proximity",
+                "lighting_mood": "soft_morning_light",
+                "prose_tone": "intimate, slightly breathless, first-impression awe"
+            }
+        },
+        {
+            "id": "test_002_mont_blanc",
+            "illustration_id": "illust-002",
+            "scene_name": "Mont Blanc Jealousy",
+            "chapter": 1,
+            "jp_lines": "935-975",
+            "en_lines": "1740-1800",
+            "source_jp": "しかし、仕方がないので私は歩き始めた。\nこの辺りは来たことがなかった。普段見ない景色が物珍しく、辺りを見渡していた。\n\"海以君が一緒だったら、もっと楽しかったのでしょうか\"\n思わずそんなことを考えてしまう。彼がここに居たら、色々案内してくれたのかな、とか。ううん。きっと、ただ隣に居てくれるだけでも安心して、楽しくなると思う。\nでも、隣に彼は居ない。それを考えるだけで胸にチクリと針が刺さったような痛みが走る。\n一度、口を引き結んでから私は歩き始めた。\nすると、一つのお店が目に留まった。一見それはカフェのように見えた。しかし、少し違う。よく見れば、それはスイーツの専門店のようだった。\n外に立てられている旗を見たところ、モンブランのフェアが今日までやっているらしい。私は思わず考えてしまった。\n\"…海以君と行きたかったですね\"\nそう呟いてしまい、すぐに首を振った。ここは彼の高校が近い。彼と一緒に食べていたら変に思われてしまうかもしれない。ただでさえ最近は海以君のことが周りにバレかけているのだ。彼に迷惑を掛けたくない。\nそろそろ戻ろうかな、と思った時。\n\n[ILLUSTRATION: illust-002.jpg]\n\n私は見てしまった。\n\"──海以君\"\n彼が、綺麗な女性と楽しそうに──モンブランのパフェを食べているところを。\n\n栗色の髪にふんわりとパーマが掛かっている。とても明るそうな女性と。\nああ。ここ、だったんだ。彼が言っていた場所は。\nギュッと。まるで、心が絞られたみたいに痛くなった。",
+            "reference_en": "But he wasn't by my side. Just thinking about that sent a sharp pain through my chest, like being pricked by a needle.\n\nI pursed my lips once and started walking.\n\nThen, a shop caught my eye. At first glance, it looked like a café. But it was slightly different. Looking closely, it seemed to be a dessert specialty shop.\n\nAccording to the flag outside, they were having a Mont Blanc special that ended today. I couldn't help but think.\n\n\"…I wanted to go with Minori-kun.\"\n\nI muttered, then quickly shook my head. His high school was nearby. If we were seen eating together, it might seem strange. Lately, people were already starting to figure things out about Minori-kun and me. I didn't want to cause him trouble.\n\nJust as I was thinking about heading back…\n\n[ILLUSTRATION: illust-002.jpg]\n\nI saw it.\n\n\"—Minori-kun.\"\n\nHe was… with a beautiful woman, laughing and enjoying—a Mont Blanc parfait.\n\nA woman with soft, wavy, chestnut-colored hair who looked very cheerful.\n\nAh. So this was the place he was talking about.\n\n*Squeeze*. My heart ached as if it were being wrung out.",
+            "test_focus": [
+                "SPOILER PREVENTION: Illustration shows Nagi's anguished face but text builds to this",
+                "Chronological discipline - forecast mood without describing her expression too early",
+                "Capture jealousy without AI-isms like 'her heart shattered'"
+            ],
+            "expected_vision_guidance": {
+                "primary_emotion": "jealousy",
+                "secondary_emotion": "heartbreak",
+                "chronological_warning": true,
+                "allowed_before_moment": [
+                    "emotional_atmosphere",
+                    "tension_foreshadowing"
+                ],
+                "forbidden_before_moment": [
+                    "facial_expression_of_pain",
+                    "tears"
+                ],
+                "prose_tone": "building dread, aching longing before the reveal"
+            }
+        },
+        {
+            "id": "test_003_secret",
+            "illustration_id": "illust-004",
+            "scene_name": "It's a Secret",
+            "chapter": 1,
+            "jp_lines": "490-520",
+            "en_lines": "2620-2655",
+            "source_jp": "東雲は小さく。本当に小さく笑った。白い肌に映える桃色の唇が開き、その中から赤く小さな舌が覗いた。\n\"どうしてだと思いますか？\"\nその声は少しだけ弾んでいて、鼓膜をゾリゾリと撫でる。嫌に心臓が高鳴り、脳内ではありえない選択肢が浮かんでいた。\n\"…分から、ないな\"\n\"そうでしたか。残念です\"\n残念、と言いながらも彼女の声から落胆は感じられない。それどころか──少しだけ、楽しそうにも見えた。\n\"では、分かったら教えてくださいね\"\n想像していた答えは返ってこず、小さく息が漏れた。\n\"教えては、くれないんだな\"\n\"ふふ、今はまだ秘密です\"\n\n[ILLUSTRATION: illust-004.jpg]\n\n唇の前に指を一つ立てて笑う東雲。\n心臓がドクン、と強く打ち付けられた。",
+            "reference_en": "A wicked thought spread through my chest, and I forced it down with reason.\n\n\"Can I ask you something?\"\n\nI continued to the girl tilting her head.\n\n\"Shinonome… what do you want me to do?\"\n\nI asked, squeezing the words from my throat, and Shinonome's eyes narrowed as she smiled.\n\n*Shh*. A single, slender white finger was placed in front of her lips.\n\n\"It's a secret.\"\n\n[ILLUSTRATION: illust-004.jpg]\n\nThe color of anticipation leaked from her narrowed eyes. They even seemed to sparkle thirty percent more than usual. My heart was struck far more intensely than that time… when I had caught her.\n\nDay by day, this feeling grows.\n\nIf this goes on any longer… it's really not good.\n\n—I'm going to fall for her.",
+            "test_focus": [
+                "Capture the playful, mysterious quality of Nagi's rare smile",
+                "Convey the 'Ice Princess breaking facade' moment",
+                "Match prose to the illustration's emotional peak"
+            ],
+            "expected_vision_guidance": {
+                "primary_emotion": "playful_mystery",
+                "secondary_emotion": "hidden_affection",
+                "body_language": "finger_to_lips_shh_gesture",
+                "lighting_mood": "warm, intimate",
+                "prose_tone": "intimate revelation, heart-racing moment, the mask slipping"
+            }
+        }
+    ],
+    "evaluation_criteria": {
+        "prose_to_art_sync": "Does the translation match what the illustration shows?",
+        "emotion_accuracy": "Are character emotions correctly identified and conveyed?",
+        "ai_ism_avoidance": "Does it avoid generic phrases like 'her heart shattered'?",
+        "chronological_discipline": "For illust-002, does it avoid spoiling the climax?",
+        "character_voice": "Does Nagi sound like Nagi? Does Souta sound like Souta?"
+    }
+}

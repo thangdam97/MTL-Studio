@@ -1,0 +1,376 @@
+{
+    "version": "1.0",
+    "description": "Vietnamese particle density calibration per character voice type and formality level",
+    "last_updated": "2026-02-04",
+    "baseline_density": {
+        "target_per_1000_words": 60,
+        "minimum_acceptable": 45,
+        "maximum_recommended": 80,
+        "measurement_unit": "particles_per_1000_words"
+    },
+    "particle_inventory": {
+        "conversational_connectors": [
+            "mà",
+            "rồi",
+            "thì",
+            "nên",
+            "vì",
+            "với lại",
+            "cho nên",
+            "thế nên"
+        ],
+        "emphasis_particles": [
+            "chứ",
+            "đấy",
+            "nhé",
+            "nha",
+            "đâu",
+            "cơ",
+            "kia",
+            "mà"
+        ],
+        "question_softeners": [
+            "à",
+            "ạ",
+            "hả",
+            "nhỉ",
+            "chứ",
+            "sao"
+        ],
+        "trailing_particles": [
+            "thôi",
+            "đi",
+            "nào",
+            "vậy",
+            "thế",
+            "đó"
+        ],
+        "interjections": [
+            "ôi",
+            "trời",
+            "chà",
+            "ủa",
+            "hử",
+            "ể",
+            "á",
+            "ơ"
+        ],
+        "hedging_particles": [
+            "chắc",
+            "có lẽ",
+            "hình như",
+            "dường như",
+            "chắc hẳn"
+        ],
+        "intensifiers": [
+            "quá",
+            "lắm",
+            "thật",
+            "cực kỳ",
+            "vô cùng",
+            "siêu"
+        ]
+    },
+    "character_voice_profiles": {
+        "casual_teen_protagonist": {
+            "description": "First-person teen narrator with introspective monologue (e.g., Uchida Souta)",
+            "density_target": 65,
+            "density_range": [
+                55,
+                75
+            ],
+            "particle_priorities": {
+                "conversational_connectors": 1.3,
+                "emphasis_particles": 1.4,
+                "interjections": 1.5,
+                "trailing_particles": 1.2,
+                "question_softeners": 1.1
+            },
+            "preferred_particles": [
+                "mà",
+                "chứ",
+                "đấy",
+                "à",
+                "ôi",
+                "trời",
+                "thôi"
+            ],
+            "avoid_particles": [
+                "ạ"
+            ],
+            "example_patterns": [
+                "Ôi trời, thật đấy à...",
+                "Chà, ai mà ngờ được chuyện này lại xảy ra...",
+                "Gì đây, cậu ấy thích tôi à?",
+                "Mà nói đúng hơn thì...",
+                "Được rồi, cố lên nào~"
+            ],
+            "internal_monologue_markers": {
+                "panic_spiral": "Khoan khoan, không... không...",
+                "self_talk": "A a, gay go rồi...",
+                "hesitation": "Ừm, thì..."
+            }
+        },
+        "formal_polite_female": {
+            "description": "Polite female character with reduced casual markers (e.g., formal love interest)",
+            "density_target": 50,
+            "density_range": [
+                40,
+                60
+            ],
+            "particle_priorities": {
+                "conversational_connectors": 1.0,
+                "emphasis_particles": 0.8,
+                "question_softeners": 1.2,
+                "trailing_particles": 0.9,
+                "interjections": 0.6
+            },
+            "preferred_particles": [
+                "ạ",
+                "nhé",
+                "thì",
+                "vậy"
+            ],
+            "avoid_particles": [
+                "chứ",
+                "đấy",
+                "mà"
+            ],
+            "example_patterns": [
+                "Em hiểu rồi ạ.",
+                "Vậy thì được rồi nhé.",
+                "Chuyện đó thì... em không rõ ạ."
+            ]
+        },
+        "casual_male_friend": {
+            "description": "Casual male friend with blunt speech (e.g., Endou)",
+            "density_target": 55,
+            "density_range": [
+                45,
+                65
+            ],
+            "particle_priorities": {
+                "conversational_connectors": 1.1,
+                "emphasis_particles": 1.0,
+                "trailing_particles": 1.3,
+                "interjections": 0.8,
+                "question_softeners": 0.9
+            },
+            "preferred_particles": [
+                "thôi",
+                "đi",
+                "mà",
+                "vậy"
+            ],
+            "avoid_particles": [
+                "ạ",
+                "nhé"
+            ],
+            "example_patterns": [
+                "Thôi thì cứ tới đâu hay tới đó là được mà.",
+                "Ông ngu ngơ y như nhân vật chính trong anime vậy.",
+                "Rồi rồi, là tôi sai, tôi xin lỗi được chưa."
+            ]
+        },
+        "energetic_female": {
+            "description": "Energetic, expressive female with high particle density (e.g., genki girl)",
+            "density_target": 75,
+            "density_range": [
+                65,
+                85
+            ],
+            "particle_priorities": {
+                "emphasis_particles": 1.5,
+                "interjections": 1.6,
+                "trailing_particles": 1.4,
+                "question_softeners": 1.3,
+                "intensifiers": 1.5
+            },
+            "preferred_particles": [
+                "nha",
+                "đấy",
+                "á",
+                "ơi",
+                "quá",
+                "lắm"
+            ],
+            "example_patterns": [
+                "Dễ thương quá đi mất!",
+                "Á! Anh lại gọi Shirasu nữa rồi nhé!?",
+                "Em đã mạnh tay mua loại thịt cực kỳ ngon luôn!"
+            ]
+        },
+        "possessive_girlfriend": {
+            "description": "Sweet surface with possessive undertones (e.g., Kurumi yandere)",
+            "density_target": 60,
+            "density_range": [
+                50,
+                70
+            ],
+            "particle_priorities": {
+                "emphasis_particles": 1.3,
+                "question_softeners": 1.4,
+                "trailing_particles": 1.2,
+                "hedging_particles": 0.7,
+                "intensifiers": 1.2
+            },
+            "preferred_particles": [
+                "nhé",
+                "mà",
+                "đâu",
+                "chứ",
+                "sao"
+            ],
+            "special_patterns": {
+                "sweet_surface": [
+                    "nhé",
+                    "nha",
+                    "đi"
+                ],
+                "possessive_undertone": [
+                    "mà",
+                    "chứ",
+                    "đâu"
+                ],
+                "questioning_jealousy": [
+                    "sao",
+                    "à",
+                    "hả"
+                ]
+            },
+            "example_patterns": [
+                "Em tin Souta mà.",
+                "Anh không đi đâu đấy chứ?",
+                "Vì chúng ta sẽ không bao giờ chia tay. Souta sẽ không bao giờ bỏ trốn, đúng không?"
+            ]
+        },
+        "mature_older_sister": {
+            "description": "Mature, teasing older sister type (e.g., Suzune)",
+            "density_target": 55,
+            "density_range": [
+                45,
+                65
+            ],
+            "particle_priorities": {
+                "conversational_connectors": 1.2,
+                "trailing_particles": 1.1,
+                "question_softeners": 1.0,
+                "emphasis_particles": 0.9,
+                "interjections": 0.8
+            },
+            "preferred_particles": [
+                "nhỉ",
+                "nào",
+                "thôi",
+                "vậy"
+            ],
+            "teasing_markers": [
+                "~",
+                "hừm"
+            ],
+            "example_patterns": [
+                "Lâu rồi không gặp nhỉ~",
+                "À, không phải bạn trai đâu, nên em đừng lo nhé.",
+                "Ể~, buồn thế~"
+            ]
+        },
+        "sporty_younger_sister": {
+            "description": "Athletic, straightforward younger sister (e.g., Aoi)",
+            "density_target": 58,
+            "density_range": [
+                48,
+                68
+            ],
+            "particle_priorities": {
+                "emphasis_particles": 1.2,
+                "trailing_particles": 1.2,
+                "conversational_connectors": 1.1,
+                "question_softeners": 1.0
+            },
+            "preferred_particles": [
+                "ạ",
+                "nhé",
+                "thôi",
+                "mà"
+            ],
+            "polite_but_direct": true,
+            "example_patterns": [
+                "Anh thấy sao ạ? Nếu không có thời gian thì để hôm khác cũng được.",
+                "Vâng, em là con út trong ba chị em, anh chưa nghe ạ?"
+            ]
+        }
+    },
+    "scene_context_modifiers": {
+        "comedy_scene": {
+            "density_modifier": 1.2,
+            "boost_categories": [
+                "interjections",
+                "emphasis_particles"
+            ],
+            "note": "Increase particles for comedic timing and reactions"
+        },
+        "romantic_tension": {
+            "density_modifier": 1.1,
+            "boost_categories": [
+                "trailing_particles",
+                "hedging_particles"
+            ],
+            "note": "More trailing particles for emotional hesitation"
+        },
+        "serious_conversation": {
+            "density_modifier": 0.9,
+            "reduce_categories": [
+                "interjections"
+            ],
+            "note": "Slightly reduce casual markers for weight"
+        },
+        "internal_panic": {
+            "density_modifier": 1.3,
+            "boost_categories": [
+                "interjections",
+                "emphasis_particles"
+            ],
+            "special_patterns": [
+                "Khoan",
+                "Hả",
+                "Gì đây"
+            ],
+            "note": "High particle density for panic spirals"
+        },
+        "confrontation": {
+            "density_modifier": 0.95,
+            "boost_categories": [
+                "question_softeners"
+            ],
+            "note": "Maintain tension with pointed questions"
+        }
+    },
+    "anti_patterns": {
+        "avoid_consecutive_same_particle": {
+            "description": "Don't use same particle in consecutive sentences",
+            "max_repetition": 2,
+            "exception": "Deliberate emphasis through repetition"
+        },
+        "particle_overload": {
+            "description": "Don't stack more than 3 particles in one sentence",
+            "max_per_sentence": 3,
+            "exception": "Long complex sentences with multiple clauses"
+        },
+        "formal_particle_in_casual_speech": {
+            "description": "Don't use 'ạ' when character is speaking casually to peers",
+            "applies_to": [
+                "casual_teen_protagonist",
+                "casual_male_friend"
+            ]
+        }
+    },
+    "quality_metrics": {
+        "optimal_distribution": {
+            "conversational_connectors": "25-30%",
+            "emphasis_particles": "20-25%",
+            "trailing_particles": "15-20%",
+            "question_softeners": "15-20%",
+            "interjections": "10-15%"
+        }
+    }
+}

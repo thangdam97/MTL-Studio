@@ -1,0 +1,314 @@
+{
+  "metadata": {
+    "version": "1.0",
+    "generated": "2026-02-03",
+    "source": "MTL Studio JP→EN paired translations",
+    "description": "Real-world examples of literary techniques applied in translation",
+    "total_volumes_processed": 46
+  },
+  "free_indirect_discourse": {
+    "description": "EN paragraphs showing direct perception without filter words (felt/saw/thought)",
+    "instruction": "Use character emotional vocabulary to describe reality directly, without mediation",
+    "examples": [
+      {
+        "en_text": "Frost-san's eyes narrowed suspiciously as she stared me down.",
+        "has_emotional_content": true,
+        "filter_words_eliminated": true,
+        "technique": "free_indirect_discourse",
+        "source": "孤高の華と呼ばれる英国美少女、義妹になったら不器用に甘えてきた 1_20260125_0164/CHAPTER_02"
+      },
+      {
+        "en_text": "My heart pounded at her expression as I forced a smile and spoke.",
+        "has_emotional_content": true,
+        "filter_words_eliminated": true,
+        "technique": "free_indirect_discourse",
+        "source": "孤高の華と呼ばれる英国美少女、義妹になったら不器用に甘えてきた 1_20260125_0164/CHAPTER_06"
+      },
+      {
+        "en_text": "When I said that—her eyes widened again, and she buried her face.",
+        "has_emotional_content": true,
+        "filter_words_eliminated": true,
+        "technique": "free_indirect_discourse",
+        "source": "孤高の華と呼ばれる英国美少女、義妹になったら不器用に甘えてきた 4_20260126_2172/CHAPTER_07"
+      },
+      {
+        "en_text": "*Thump-thump.* Her heart pounded… She knew this was wrong, she knew she was betraying her daughters, but Sakina couldn't stop herself.",
+        "has_emotional_content": true,
+        "filter_words_eliminated": true,
+        "technique": "free_indirect_discourse",
+        "source": "男嫌いな美人姉妹を名前も告げずに助けたら一体どうなる？2_20260127_024a/CHAPTER_05"
+      },
+      {
+        "en_text": "Sitoen's eyes narrowed. My sudden silence must have worried her.",
+        "has_emotional_content": true,
+        "filter_words_eliminated": true,
+        "technique": "free_indirect_discourse",
+        "source": "隣国から来た嫁が可愛すぎてどうしよう。ー冬熊と呼ばれる俺が相手で本当にいいのか！？ー【電子版特典付】_20260127_211e/CHAPTER_03"
+      },
+      {
+        "en_text": "Seeing our group, the young man's eyes widened. But even that was a subtle reaction. His swollen eyelids barely lifted.",
+        "has_emotional_content": true,
+        "filter_words_eliminated": true,
+        "technique": "free_indirect_discourse",
+        "source": "隣国から来た嫁が可愛すぎてどうしよう。ー冬熊と呼ばれる俺が相手で本当にいいのか！？ー【電子版特典付】_20260127_211e/CHAPTER_03"
+      },
+      {
+        "en_text": "When I asked that, Shimizu-san's eyes widened as if she'd been slapped.",
+        "has_emotional_content": true,
+        "filter_words_eliminated": true,
+        "technique": "free_indirect_discourse",
+        "source": "(迷子になっていた幼女を助けたら、お隣に住む美少女留学生が家に遊びに来るようになった件について (2)_20260126_1478/CHAPTER_04"
+      },
+      {
+        "en_text": "Spotting her best friend, her purple eyes widened, and she called out.",
+        "has_emotional_content": true,
+        "filter_words_eliminated": true,
+        "technique": "free_indirect_discourse",
+        "source": "貴族令嬢。俺にだけなつく_20260119_1d74/CHAPTER_02"
+      },
+      {
+        "en_text": "The moment I answered, her golden eyes narrowed. The first emotion I could read from her was 'suspicion'.",
+        "has_emotional_content": true,
+        "filter_words_eliminated": true,
+        "technique": "free_indirect_discourse",
+        "source": "貴族令嬢。俺にだけなつく_20260119_1d74/CHAPTER_04"
+      },
+      {
+        "en_text": "Her eyes narrowed as she approached and started poking my sides with her finger. Ugh, the guilt is way stronger than the sense of accomplishment…!",
+        "has_emotional_content": true,
+        "filter_words_eliminated": true,
+        "technique": "free_indirect_discourse",
+        "source": "弓道部の美人な先輩が、俺の部屋でお腹出して寝てる_20260129_165c/CHAPTER_05"
+      },
+      {
+        "en_text": "The mother's eyes widened, but she quickly let out a small laugh.",
+        "has_emotional_content": true,
+        "filter_words_eliminated": true,
+        "technique": "free_indirect_discourse",
+        "source": "男嫌いな美人姉妹を名前も告げずに助けたら一体どうなる？1_20260127_1cca/CHAPTER_05"
+      },
+      {
+        "en_text": "Sana glared at Shintarou, her guard up and her eyes narrowed.",
+        "has_emotional_content": true,
+        "filter_words_eliminated": true,
+        "technique": "free_indirect_discourse",
+        "source": "年上幼馴染と再会したら、姉妹で俺の取り合いが始まった　どっちがいいか、試してみる？_20260125_038e/CHAPTER_04"
+      },
+      {
+        "en_text": "Momo-nee's voice rose with delight. Even in the darkness, I could tell her eyes were sparkling, and sitting next to her, my heart pounded a little.",
+        "has_emotional_content": true,
+        "filter_words_eliminated": true,
+        "technique": "free_indirect_discourse",
+        "source": "年上幼馴染と再会したら、姉妹で俺の取り合いが始まった　どっちがいいか、試してみる？_20260125_038e/CHAPTER_05"
+      },
+      {
+        "en_text": "Akari-chan's gaze darted about in a slight panic. She squeezed my hand just a little tighter—and gave a small nod.",
+        "has_emotional_content": true,
+        "filter_words_eliminated": true,
+        "technique": "free_indirect_discourse",
+        "source": "友人に500円貸したら借金のカタに妹をよこしてきたのだけれど、俺は一体どうすればいいんだろう_20260129_205c/CHAPTER_06"
+      },
+      {
+        "en_text": "His heart pounded, and he frantically tried to back away.",
+        "has_emotional_content": true,
+        "filter_words_eliminated": true,
+        "technique": "free_indirect_discourse",
+        "source": "この中に1人、妹がいる! 4_20260201_0523/CHAPTER_04"
+      },
+      {
+        "en_text": "The moment she, in her swimsuit, held his hand, his heart skipped a beat.",
+        "has_emotional_content": true,
+        "filter_words_eliminated": true,
+        "technique": "free_indirect_discourse",
+        "source": "この中に1人、妹がいる! 4_20260201_0523/CHAPTER_05"
+      },
+      {
+        "en_text": "Konoha's eyes widened in surprise as she stumbled into his arms.",
+        "has_emotional_content": true,
+        "filter_words_eliminated": true,
+        "technique": "free_indirect_discourse",
+        "source": "この中に1人、妹がいる! 4_20260201_0523/CHAPTER_05"
+      },
+      {
+        "en_text": "My heart skipped a beat when she said she liked it.",
+        "has_emotional_content": true,
+        "filter_words_eliminated": true,
+        "technique": "free_indirect_discourse",
+        "source": "幼なじみは誘えばいつでもデキる関係【電子特別版】_20260130_1420/CHAPTER_02"
+      },
+      {
+        "en_text": "Then, as if struck by a realization, her eyes widened.",
+        "has_emotional_content": true,
+        "filter_words_eliminated": true,
+        "technique": "free_indirect_discourse",
+        "source": "貴族令嬢。俺にだけなつく4_20260123_2429/CHAPTER_02"
+      },
+      {
+        "en_text": "As he listened to her, Beret's eyes widened.",
+        "has_emotional_content": true,
+        "filter_words_eliminated": true,
+        "technique": "free_indirect_discourse",
+        "source": "貴族令嬢。俺にだけなつく4_20260123_2429/CHAPTER_02"
+      },
+      {
+        "en_text": "Her eyes darted around, forgetting to breathe for several seconds.",
+        "has_emotional_content": true,
+        "filter_words_eliminated": true,
+        "technique": "free_indirect_discourse",
+        "source": "貴族令嬢。俺にだけなつく4_20260123_2429/CHAPTER_05"
+      },
+      {
+        "en_text": "Her breath hitched.",
+        "has_emotional_content": true,
+        "filter_words_eliminated": true,
+        "technique": "free_indirect_discourse",
+        "source": "貴族令嬢。俺にだけなつく4_20260123_2429/CHAPTER_10"
+      },
+      {
+        "en_text": "His open eyes darted around as a fierce palpitation seized him.",
+        "has_emotional_content": true,
+        "filter_words_eliminated": true,
+        "technique": "free_indirect_discourse",
+        "source": "貴族令嬢。俺にだけなつく4_20260123_2429/CHAPTER_11"
+      },
+      {
+        "en_text": "She said it with a smile, and my heart skipped a beat.",
+        "has_emotional_content": true,
+        "filter_words_eliminated": true,
+        "technique": "free_indirect_discourse",
+        "source": "学年一の金髪碧眼美少女に勉強を教えることになりました（ブレイブ文庫）2_20260124_23a3/CHAPTER_02"
+      },
+      {
+        "en_text": "When I said that, Arisa's eyes widened, but she quickly smiled and nodded.",
+        "has_emotional_content": true,
+        "filter_words_eliminated": true,
+        "technique": "free_indirect_discourse",
+        "source": "男嫌いな美人姉妹を名前も告げずに助けたら一体どうなる？3_20260128_1d91/CHAPTER_06"
+      },
+      {
+        "en_text": "Sophia's eyes widened and she froze, staring at me.",
+        "has_emotional_content": true,
+        "filter_words_eliminated": true,
+        "technique": "free_indirect_discourse",
+        "source": "孤高の華と呼ばれる英国美少女、義妹になったら不器用に甘えてきた 2_20260126_015c/CHAPTER_04"
+      },
+      {
+        "en_text": "When I stood before her, Sophia's gaze darted around awkwardly.",
+        "has_emotional_content": true,
+        "filter_words_eliminated": true,
+        "technique": "free_indirect_discourse",
+        "source": "孤高の華と呼ばれる英国美少女、義妹になったら不器用に甘えてきた 2_20260126_015c/CHAPTER_08"
+      },
+      {
+        "en_text": "Then, as if to escape my gaze, her eyes darted around and she began to think desperately about something.",
+        "has_emotional_content": true,
+        "filter_words_eliminated": true,
+        "technique": "free_indirect_discourse",
+        "source": "孤高の華と呼ばれる英国美少女、義妹になったら不器用に甘えてきた 3_20260126_0860/CHAPTER_02"
+      },
+      {
+        "en_text": "When I gave her my former name, Haimiya-san's eyes widened in surprise, and she jumped back.",
+        "has_emotional_content": true,
+        "filter_words_eliminated": true,
+        "technique": "free_indirect_discourse",
+        "source": "孤高の華と呼ばれる英国美少女、義妹になったら不器用に甘えてきた 3_20260126_0860/CHAPTER_05"
+      },
+      {
+        "en_text": "As Beret and Sia approached, his eyes widened and he called out.",
+        "has_emotional_content": true,
+        "filter_words_eliminated": true,
+        "technique": "free_indirect_discourse",
+        "source": "貴族令嬢。俺にだけなつく3_20260121_2707/CHAPTER_02"
+      }
+    ]
+  },
+  "show_dont_tell_transformations": {
+    "description": "JP emotion labels transformed into EN physical manifestations",
+    "instruction": "When JP uses emotion words, translate as physical sensations/actions",
+    "examples": [
+      {
+        "jp_text": "\"焦らないでゆっくり色んな楽しいことをしよう。夏になったら海とかお祭り、色々あるでしょ？\"",
+        "en_text": "Then Kurumi's eyes widened.",
+        "emotion_in_jp": "happy",
+        "physical_show_in_en": true,
+        "emotion_label_avoided": true,
+        "source": "Innocent Looking Yandere_20260201_07a4/CHAPTER_11"
+      },
+      {
+        "jp_text": "俺はそんな不安を抱きながら、腕の中でご機嫌となったエマちゃんを抱えてシャーロットさんと共にスーパーへと向かうのだった。",
+        "en_text": "When Emma apologized, Charlotte's eyes widened in surprise.",
+        "emotion_in_jp": "nervous",
+        "physical_show_in_en": true,
+        "emotion_label_avoided": true,
+        "source": "(迷子になっていた幼女を助けたら、お隣に住む美少女留学生が家に遊びに来るようになった件について (1)_20260126_25b4/CHAPTER_04"
+      }
+    ]
+  },
+  "emotional_vocabulary_upgrades": {
+    "description": "Simple JP descriptors becoming rich EN literary vocabulary",
+    "instruction": "Elevate simple adjectives to create atmosphere and emotional depth",
+    "examples": []
+  },
+  "psychic_distance_shifts": {
+    "description": "JP distant narration brought closer in EN (Free Indirect Discourse)",
+    "instruction": "Remove quotative markers and thought-reporting to create intimacy",
+    "examples": [
+      {
+        "jp_text": "今は夏休み終盤なので、これくらいなら遊んでいる学生も多いと思うが…。",
+        "en_text": "Frost-san's eyes narrowed suspiciously as she stared me down.",
+        "jp_distance": "distant (quotative markers)",
+        "en_distance": "very_close (direct perception)",
+        "shift_direction": "jp_distant_to_en_close",
+        "source": "孤高の華と呼ばれる英国美少女、義妹になったら不器用に甘えてきた 1_20260125_0164/CHAPTER_02"
+      },
+      {
+        "jp_text": "相変わらず、まじめすぎるというか、なんというか…。",
+        "en_text": "My heart pounded at her expression as I forced a smile and spoke.",
+        "jp_distance": "distant (quotative markers)",
+        "en_distance": "very_close (direct perception)",
+        "shift_direction": "jp_distant_to_en_close",
+        "source": "孤高の華と呼ばれる英国美少女、義妹になったら不器用に甘えてきた 1_20260125_0164/CHAPTER_06"
+      },
+      {
+        "jp_text": "純粋なシアと立場を気にしないエレナは相性がよく、お互いに気を許している仲なのだ。",
+        "en_text": "Spotting her best friend, her purple eyes widened, and she called out.",
+        "jp_distance": "distant (quotative markers)",
+        "en_distance": "very_close (direct perception)",
+        "shift_direction": "jp_distant_to_en_close",
+        "source": "貴族令嬢。俺にだけなつく_20260119_1d74/CHAPTER_02"
+      },
+      {
+        "jp_text": "俺はそんな不安を抱きながら、腕の中でご機嫌となったエマちゃんを抱えてシャーロットさんと共にスーパーへと向かうのだった。",
+        "en_text": "When Emma apologized, Charlotte's eyes widened in surprise.",
+        "jp_distance": "distant (quotative markers)",
+        "en_distance": "very_close (direct perception)",
+        "shift_direction": "jp_distant_to_en_close",
+        "source": "(迷子になっていた幼女を助けたら、お隣に住む美少女留学生が家に遊びに来るようになった件について (1)_20260126_25b4/CHAPTER_04"
+      },
+      {
+        "jp_text": "まぁシャーロットさんが何を好きになろうと、彼女の勝手だからいいのだけど…。",
+        "en_text": "*Thump*—enthralled by Charlotte's smile and words, my heart pounded in my chest.",
+        "jp_distance": "distant (quotative markers)",
+        "en_distance": "very_close (direct perception)",
+        "shift_direction": "jp_distant_to_en_close",
+        "source": "(迷子になっていた幼女を助けたら、お隣に住む美少女留学生が家に遊びに来るようになった件について (1)_20260126_25b4/CHAPTER_04"
+      },
+      {
+        "jp_text": "\"態度で勘違いされやすいけど、まっすぐでいい奴なんだよ。というか、野球馬鹿だな。野球のことしか頭にないって感じで、練習は人一倍真剣に取り組んでいるんだ\"",
+        "en_text": "Sophia's eyes widened and she froze, staring at me.",
+        "jp_distance": "distant (quotative markers)",
+        "en_distance": "very_close (direct perception)",
+        "shift_direction": "jp_distant_to_en_close",
+        "source": "孤高の華と呼ばれる英国美少女、義妹になったら不器用に甘えてきた 2_20260126_015c/CHAPTER_04"
+      },
+      {
+        "jp_text": "『一生懸命に尽くしたいと思えるご主人様だから』という意味を持ったものなのだから。",
+        "en_text": "It was no wonder Tetra's eyes widened.",
+        "jp_distance": "distant (quotative markers)",
+        "en_distance": "very_close (direct perception)",
+        "shift_direction": "jp_distant_to_en_close",
+        "source": "お世話した王女様、ずっとくっついてくる【電子特典付き】_20260202_0cc3/CHAPTER_13"
+      }
+    ]
+  }
+}

@@ -7,6 +7,14 @@ project:
         romcom: prompts/master_prompt_en_compressed.xml
         fantasy: prompts/master_prompt_fantasy_en.xml
       modules_dir: modules/
+      grammar_rag:
+        enabled: true
+        config_file: config/english_grammar_rag.json
+        inject_mode: always
+        max_patterns_per_prompt: 8
+        vector_store:
+          persist_directory: ./chroma_english_patterns
+          collection_name: english_grammar_patterns
       output_suffix: _EN
       language_code: en
       language_name: English
@@ -29,6 +37,11 @@ project:
       - Library_LOCALIZATION_PRIMER_VN.md
       - Library_REFERENCE_ICL_SAMPLES.md
       - Ref_ONOMATOPOEIA_PROTOCOL_v1.0.md
+      grammar_rag:
+        enabled: true
+        config_file: VN/vietnamese_grammar_rag.json
+        inject_mode: always
+        max_patterns_per_prompt: 10
       output_suffix: _VN
       language_code: vi
       language_name: Vietnamese
@@ -40,17 +53,31 @@ gemini:
   model: gemini-2.5-pro
   fallback_model: gemini-2.5-flash
   generation:
-    temperature: 0.8
+    temperature: 1
     top_p: 0.95
     top_k: 40
-    max_output_tokens: 32768
-    thinking_level: high
+    max_output_tokens: 65535
     qc_temperature: 0.3
+  thinking_mode:
+    enabled: true
+    thinking_budget: 32768
+    save_to_file: true
+    output_dir: THINKING
   safety:
     harassment: BLOCK_NONE
     hate_speech: BLOCK_NONE
     sexually_explicit: BLOCK_NONE
     dangerous_content: BLOCK_NONE
+    fallback:
+      enabled: true
+      max_retries: 3
+      bridge_words: 200
+      temperature_boost: 0.15
+      revert_on_success: true
+      triggers:
+      - SAFETY
+      - RECITATION
+      - BLOCKED
   rate_limit:
     requests_per_minute: 2
     retry_attempts: 10
@@ -70,38 +97,38 @@ kimi:
     cache_file: WORK/.kimi_validation_cache.json
     cache_ttl_hours: 168
 translation:
+  enable_multimodal: true  # Auto-load visual_cache.json for context-aware translation
   quality:
-    contraction_rate_min: 0.95  # Gold standard: 95%+ casual, 99%+ ideal
-    contraction_rate_gold: 0.99  # Yen Press/J-Novel Club gold standard
+    contraction_rate_min: 0.95
+    contraction_rate_gold: 0.99
     max_ai_isms_per_chapter: 5
   contraction_rules:
-    # Yen Press/J-Novel Club Gold Standard Rules
     casual_introspective:
-      required_rate: 0.995  # 99.5% for casual narration/internal monologue
-      critical_forms:  # MUST contract in casual contexts
-        - "it is -> it's"
-        - "that is -> that's"
-        - "there is -> there's"
-        - "do not -> don't"
-        - "does not -> doesn't"
-      high_priority:  # Should contract unless emphatic
-        - "was not -> wasn't"
-        - "were not -> weren't"
-        - "could not -> couldn't"
-        - "should not -> shouldn't"
-        - "would not -> wouldn't"
+      required_rate: 0.995
+      critical_forms:
+      - it is -> it's
+      - that is -> that's
+      - there is -> there's
+      - do not -> don't
+      - does not -> doesn't
+      high_priority:
+      - was not -> wasn't
+      - were not -> weren't
+      - could not -> couldn't
+      - should not -> shouldn't
+      - would not -> wouldn't
     formal_polite:
-      required_rate: 0.85  # Allow 15% uncontracted for formal register
+      required_rate: 0.85
       exceptions:
-        - "emphasis"
-        - "philosophical_discourse"
-        - "character_defined_formal"
+      - emphasis
+      - philosophical_discourse
+      - character_defined_formal
     internal_monologue:
-      required_rate: 0.99  # Thoughts should be natural/contracted
-      perfect_tense:  # J-Novel Club additions
-        - "would have -> would've"
-        - "could have -> could've"
-        - "should have -> should've"
+      required_rate: 0.99
+      perfect_tense:
+      - would have -> would've
+      - could have -> could've
+      - should have -> should've
   context:
     lookback_chapters: 2
     enforce_name_consistency: true
@@ -140,6 +167,37 @@ directories:
   prompts: prompts/
   modules: modules/
   templates: templates/
+multimodal:
+  enabled: true
+  models:
+    vision: gemini-3-pro-preview
+    prose: gemini-2.5-pro
+  visual_cache:
+    enabled: true
+    path: visual_cache.json
+    invalidation:
+      on_model_upgrade: true
+      on_prompt_change: true
+      on_image_change: true
+      max_age_days: 90
+      respect_manual_override: true
+  safety:
+    fallback_on_block: true
+    log_blocked_images: true
+  thinking:
+    enabled: true
+    default_level: HIGH
+    high_triggers:
+    - emotional_climax
+    - character_introduction
+    - plot_revelation
+  lookahead:
+    enabled: true
+    buffer_size: 3
+  strict_prompt: true
+  thought_storage:
+    enabled: true
+    path: cache/thoughts
 pre_toc_detection:
   enabled: false
   min_text_length: 50

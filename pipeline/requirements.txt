@@ -27,6 +27,10 @@ backoff>=2.2.0                 # Exponential backoff decorators
 # Optional: Token counting
 tiktoken>=0.5.0                # Token counting for cost estimation
 
+# Vector Search (RAG Pattern Matching)
+chromadb>=0.4.0                # Vector database for semantic search
+google-cloud-aiplatform>=1.38.0  # Google AI embeddings (text-embedding-004)
+
 # CLI Interface (TUI)
 questionary>=2.0.0             # Interactive prompts with arrow-key navigation
 rich>=13.0.0                   # Beautiful terminal output, progress bars, tables

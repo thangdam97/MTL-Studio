@@ -139,7 +139,7 @@ class XHTMLToMarkdownConverter:
         
         Scene break icons are small decorative images used as dividers.
         They should be converted to text scene breaks (***) instead of
-        preserved as [ILLUSTRATION:] placeholders.
+        preserved as image placeholders.
         
         Args:
             image_filename: Name of the image file
@@ -154,9 +154,12 @@ class XHTMLToMarkdownConverter:
         if image_filename.startswith('gaiji-'):
             return False
         
-        # Try to locate the image file
-        image_path = self.content_dir / 'image' / image_filename
-        if not image_path.exists():
+        # Try to locate the image file (check both /image/ and /images/ paths)
+        for images_folder in ['image', 'images', 'Images', 'IMAGES']:
+            image_path = self.content_dir / images_folder / image_filename
+            if image_path.exists():
+                break
+        else:
             return False
         
         try:
@@ -170,6 +173,65 @@ class XHTMLToMarkdownConverter:
             pass
         
         return False
+
+    def _classify_inline_image(self, image_filename: str, css_class: list = None) -> str:
+        """
+        Classify inline images to determine how they should be handled.
+        
+        Image types:
+        - 'gaiji': Inline character/symbol replacement (e.g., ○, numbers, symbols)
+        - 'scene_break': Small decorative divider
+        - 'illustration': Regular illustration to preserve
+        
+        Args:
+            image_filename: Name of the image file
+            css_class: CSS classes from the img element
+        
+        Returns:
+            'gaiji', 'scene_break', or 'illustration'
+        """
+        # Check CSS class first (most reliable)
+        if css_class:
+            if isinstance(css_class, str):
+                css_class = css_class.split()
+            if any(c in css_class for c in ['gaiji', 'glyph', 'inline-char', 'symbol']):
+                return 'gaiji'
+        
+        # Named gaiji files
+        if image_filename.startswith('gaiji-') or image_filename.startswith('glyph-'):
+            return 'gaiji'
+        
+        if not self.content_dir:
+            return 'illustration'
+        
+        # Try to locate the image file
+        image_path = None
+        for images_folder in ['image', 'images', 'Images', 'IMAGES']:
+            candidate = self.content_dir / images_folder / image_filename
+            if candidate.exists():
+                image_path = candidate
+                break
+        
+        if not image_path:
+            return 'illustration'
+        
+        try:
+            file_size = image_path.stat().st_size
+            
+            # Very small images (< 6KB) are likely gaiji characters
+            # These are used for inline symbols/numbers that aren't in standard fonts
+            if file_size < 6000:
+                return 'gaiji'
+            
+            # Small images (6-15KB) are likely scene breaks or chapter decorations
+            # But only if they're standalone, not within text paragraphs
+            if file_size < 15000:
+                return 'scene_break'
+            
+        except Exception:
+            pass
+        
+        return 'illustration'
 
     def _extract_title(self, soup: BeautifulSoup) -> str:
         """Extract chapter title from HTML."""
@@ -276,30 +338,51 @@ class XHTMLToMarkdownConverter:
             src = element.get('src', element.get('xlink:href', ''))
             if src:
                 img_name = Path(src).name
+                css_class = element.get('class', [])
                 
-                # Check if this is a scene break icon
-                if self._is_scene_break_icon(img_name):
+                # Classify the image type
+                img_type = self._classify_inline_image(img_name, css_class)
+                
+                if img_type == 'gaiji':
+                    # Gaiji: inline character replacement - preserve as inline markdown image
+                    # These render inline with text (no line breaks)
+                    lines.append(f'![gaiji]({img_name})')
+                    illustrations.append(img_name)  # Track for copying
+                    return
+                
+                if img_type == 'scene_break':
+                    # Scene break icon - convert to text marker
                     lines.append(f'\n{self.scene_break}\n')
                     return
                 
-                # Regular illustration
+                # Regular illustration - use block markdown image format
                 illustrations.append(img_name)
-                lines.append(f'\n[ILLUSTRATION: {img_name}]\n')
+                lines.append(f'\n![illustration]({img_name})\n')
             return
 
         if tag_name == 'image':
             href = element.get('href', element.get('{http://www.w3.org/1999/xlink}href', ''))
             if href:
                 img_name = Path(href).name
+                css_class = element.get('class', [])
                 
-                # Check if this is a scene break icon
-                if self._is_scene_break_icon(img_name):
+                # Classify the image type
+                img_type = self._classify_inline_image(img_name, css_class)
+                
+                if img_type == 'gaiji':
+                    # Gaiji: inline character replacement
+                    lines.append(f'![gaiji]({img_name})')
+                    illustrations.append(img_name)
+                    return
+                
+                if img_type == 'scene_break':
+                    # Scene break icon
                     lines.append(f'\n{self.scene_break}\n')
                     return
                 
-                # Regular illustration - use markdown image format
+                # Regular illustration - use block markdown image format
                 illustrations.append(img_name)
-                lines.append(f'\n![\]({img_name})\n')
+                lines.append(f'\n![illustration]({img_name})\n')
             return
 
         # Handle SVG with embedded image
@@ -309,8 +392,22 @@ class XHTMLToMarkdownConverter:
                 href = img.get('href', img.get('{http://www.w3.org/1999/xlink}href', ''))
                 if href:
                     img_name = Path(href).name
+                    css_class = img.get('class', [])
+                    
+                    # Classify the image type
+                    img_type = self._classify_inline_image(img_name, css_class)
+                    
+                    if img_type == 'gaiji':
+                        lines.append(f'![gaiji]({img_name})')
+                        illustrations.append(img_name)
+                        return
+                    
+                    if img_type == 'scene_break':
+                        lines.append(f'\n{self.scene_break}\n')
+                        return
+                    
                     illustrations.append(img_name)
-                    lines.append(f'\n[ILLUSTRATION: {img_name}]\n')
+                    lines.append(f'\n![illustration]({img_name})\n')
             return
 
         # Handle headings (skip h1 since we add title separately)

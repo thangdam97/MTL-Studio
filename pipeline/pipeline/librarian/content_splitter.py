@@ -254,3 +254,251 @@ def split_large_chapter(
     """
     splitter = ContentSplitter(max_tokens, min_tokens, scene_break_patterns)
     return splitter.split_chapter(content)
+
+
+# =============================================================================
+# KODANSHA HEADING-BASED CHAPTER SPLITTER
+# =============================================================================
+
+@dataclass
+class SplitChapter:
+    """Represents a chapter extracted from heading-based splitting."""
+    id: str
+    title: str
+    content: str
+    word_count: int
+    illustrations: List[str]
+    toc_order: int
+
+
+class KodanshaSplitter:
+    """
+    Split Kodansha-style continuous chapters based on heading markers.
+    
+    Kodansha EPUBs often merge all content into one file with ### N markers.
+    This splitter:
+    1. Filters out copyright/credits content
+    2. Filters out 目次 (table of contents) headers
+    3. Splits chapters by ### heading patterns
+    """
+    
+    # Default heading patterns for Kodansha
+    DEFAULT_HEADING_PATTERNS = [
+        r'^###\s+[１２３４５６７８９０]+$',  # Full-width numbers: ### １
+        r'^###\s+\d+$',                      # Half-width numbers: ### 1
+        r'^###\s+プロローグ$',                # Prologue
+        r'^###\s+エピローグ$',                # Epilogue
+        r'^###\s+あとがき$',                  # Afterword
+        r'^###\s+序章$',                      # Opening chapter
+        r'^###\s+終章$',                      # Closing chapter
+    ]
+    
+    # Patterns to filter out (copyright, credits, TOC)
+    FILTER_PATTERNS = [
+        r'^#\s*目次\s*$',                    # # 目次 (TOC header)
+        r'^口絵.*イラスト[／/]',              # 口絵・本文イラスト／xxx
+        r'^デザイン[／/]',                   # デザイン／xxx  
+        r'^装丁[／/]',                       # 装丁／xxx
+        r'^カバーイラスト[／/]',              # カバーイラスト／xxx
+        r'^本文イラスト[／/]',                # 本文イラスト／xxx
+        r'^©\s*\d{4}',                       # © 2024 copyright lines
+        r'^\d{4}年\d{1,2}月.*発行',          # Publication date lines
+        r'^発行.*株式会社',                   # Publisher lines
+        r'^印刷.*株式会社',                   # Printer lines
+        r'^ISBN',                            # ISBN lines
+    ]
+    
+    def __init__(
+        self,
+        heading_patterns: Optional[List[str]] = None,
+        filter_patterns: Optional[List[str]] = None
+    ):
+        """
+        Initialize Kodansha splitter.
+        
+        Args:
+            heading_patterns: Custom heading patterns (uses defaults if None)
+            filter_patterns: Custom filter patterns (uses defaults if None)
+        """
+        self.heading_patterns = heading_patterns or self.DEFAULT_HEADING_PATTERNS
+        self.filter_patterns = filter_patterns or self.FILTER_PATTERNS
+        
+        # Compile patterns
+        self.heading_regex = [re.compile(p, re.MULTILINE) for p in self.heading_patterns]
+        self.filter_regex = [re.compile(p, re.MULTILINE) for p in self.filter_patterns]
+        
+        # Illustration pattern
+        self.illust_pattern = re.compile(r'!\[illustration\]\(([^)]+)\)')
+    
+    def _should_filter_line(self, line: str) -> bool:
+        """Check if a line should be filtered out."""
+        stripped = line.strip()
+        if not stripped:
+            return False
+        
+        for pattern in self.filter_regex:
+            if pattern.match(stripped):
+                return True
+        return False
+    
+    def _is_heading_line(self, line: str) -> Optional[str]:
+        """
+        Check if line is a chapter heading.
+        
+        Returns the heading title if matched, None otherwise.
+        """
+        stripped = line.strip()
+        for pattern in self.heading_regex:
+            if pattern.match(stripped):
+                # Extract the title (everything after ###)
+                match = re.match(r'^###\s+(.+)$', stripped)
+                if match:
+                    return match.group(1)
+        return None
+    
+    def _extract_illustrations(self, text: str) -> List[str]:
+        """Extract illustration references from text."""
+        return self.illust_pattern.findall(text)
+    
+    def _clean_content(self, lines: List[str]) -> List[str]:
+        """
+        Clean content by filtering lines that match filter patterns.
+        
+        Also removes any content before the first chapter heading.
+        """
+        cleaned = []
+        found_first_heading = False
+        
+        for line in lines:
+            # Check if this is a chapter heading
+            if self._is_heading_line(line):
+                found_first_heading = True
+                cleaned.append(line)
+                continue
+            
+            # Before first heading: only keep illustrations
+            if not found_first_heading:
+                # Skip non-illustration content before first heading
+                if self.illust_pattern.search(line):
+                    continue  # Skip standalone illustrations in header area
+                continue
+            
+            # After first heading: filter specific patterns
+            if self._should_filter_line(line):
+                continue
+            
+            cleaned.append(line)
+        
+        return cleaned
+    
+    def detect_chapters(self, content: str) -> int:
+        """
+        Detect how many chapter markers exist in content.
+        
+        Args:
+            content: Markdown content
+        
+        Returns:
+            Number of chapter markers found
+        """
+        count = 0
+        for line in content.split('\n'):
+            if self._is_heading_line(line):
+                count += 1
+        return count
+    
+    def split_chapters(
+        self,
+        content: str,
+        base_chapter_num: int = 1
+    ) -> List[SplitChapter]:
+        """
+        Split content by heading markers into separate chapters.
+        
+        Args:
+            content: Full markdown content with multiple ### headings
+            base_chapter_num: Starting chapter number (default: 1)
+        
+        Returns:
+            List of SplitChapter objects
+        """
+        lines = content.split('\n')
+        
+        # Clean content first
+        cleaned_lines = self._clean_content(lines)
+        
+        if not cleaned_lines:
+            return []
+        
+        # Find chapter boundaries
+        chapters = []
+        current_title = None
+        current_lines = []
+        chapter_num = base_chapter_num
+        
+        for line in cleaned_lines:
+            heading_title = self._is_heading_line(line)
+            
+            if heading_title:
+                # Save previous chapter if exists
+                if current_title is not None and current_lines:
+                    chapter_content = '\n'.join(current_lines).strip()
+                    if chapter_content:  # Only add non-empty chapters
+                        illustrations = self._extract_illustrations(chapter_content)
+                        chapters.append(SplitChapter(
+                            id=f"chapter_{chapter_num:02d}",
+                            title=current_title,
+                            content=chapter_content,
+                            word_count=len(chapter_content.split()),
+                            illustrations=illustrations,
+                            toc_order=chapter_num
+                        ))
+                        chapter_num += 1
+                
+                # Start new chapter
+                current_title = heading_title
+                current_lines = [line]  # Include heading in content
+            else:
+                current_lines.append(line)
+        
+        # Don't forget the last chapter
+        if current_title is not None and current_lines:
+            chapter_content = '\n'.join(current_lines).strip()
+            if chapter_content:
+                illustrations = self._extract_illustrations(chapter_content)
+                chapters.append(SplitChapter(
+                    id=f"chapter_{chapter_num:02d}",
+                    title=current_title,
+                    content=chapter_content,
+                    word_count=len(chapter_content.split()),
+                    illustrations=illustrations,
+                    toc_order=chapter_num
+                ))
+        
+        return chapters
+    
+    def should_split(self, content: str, min_chapters: int = 2) -> bool:
+        """
+        Check if content should be split (has multiple chapter markers).
+        
+        Args:
+            content: Markdown content
+            min_chapters: Minimum chapters to trigger split
+        
+        Returns:
+            True if content has enough chapter markers
+        """
+        return self.detect_chapters(content) >= min_chapters
+
+
+def create_kodansha_splitter(heading_patterns: Optional[List[str]] = None) -> KodanshaSplitter:
+    """
+    Factory function to create a Kodansha splitter.
+    
+    Args:
+        heading_patterns: Custom heading patterns (uses defaults if None)
+    
+    Returns:
+        Configured KodanshaSplitter instance
+    """
+    return KodanshaSplitter(heading_patterns=heading_patterns)

@@ -22,6 +22,7 @@ class GeminiResponse:
     finish_reason: str
     model: str
     cached_tokens: int = 0  # Track cached input tokens
+    thinking_content: Optional[str] = None  # CoT/thinking parts from model
 
 class GeminiClient:
     def __init__(self, api_key: str = None, model: str = "gemini-2.5-pro", enable_caching: bool = True):
@@ -38,9 +39,51 @@ class GeminiClient:
         # Context caching support
         self.enable_caching = enable_caching
         self._cached_content_name = None  # Cached content resource name
+        
+        # Thinking mode configuration
+        self.thinking_mode_config = self._load_thinking_config()
         self._cache_created_at = None
         self._cache_ttl_minutes = 60  # Default 1 hour TTL
         self._cached_model = None  # Track which model the cache was created for
+    
+    def _load_thinking_config(self) -> Dict[str, Any]:
+        """Load thinking mode configuration from config.yaml."""
+        try:
+            from pipeline.config import get_config_section
+            gemini_config = get_config_section('gemini')
+            return gemini_config.get('thinking_mode', {
+                'enabled': False,
+                'thinking_level': 'medium',
+                'save_to_file': False,
+                'output_dir': 'THINKING'
+            })
+        except:
+            return {'enabled': False}
+    
+    def _get_thinking_config(self) -> Optional[Any]:
+        """Get ThinkingConfig for Gemini API if thinking mode is enabled."""
+        if not self.thinking_mode_config.get('enabled', False):
+            return None
+        
+        try:
+            thinking_level = self.thinking_mode_config.get('thinking_level', 'medium')
+            
+            # Gemini 3 uses thinking_level, Gemini 2.5 uses thinking_budget
+            if 'gemini-3' in self.model.lower():
+                return types.ThinkingConfig(
+                    include_thoughts=True,
+                    thinking_level=thinking_level  # minimal, low, medium, high
+                )
+            else:
+                # Gemini 2.5 - use thinking_budget instead
+                # -1 = dynamic (default), 0 = disabled, >0 = specific token budget
+                return types.ThinkingConfig(
+                    include_thoughts=True,
+                    thinking_budget=-1  # Dynamic thinking for Gemini 2.5
+                )
+        except Exception as e:
+            logger.debug(f"ThinkingConfig not available: {e}")
+            return None
 
     def set_rate_limit(self, requests_per_minute: int):
         """Update rate limit delay."""
@@ -154,8 +197,13 @@ class GeminiClient:
         backoff.expo,
         (Exception),
         max_tries=8,
-        # Give up on 400 Bad Request but retry on 429 and other server errors
-        giveup=lambda e: "400" in str(e) and "429" not in str(e)
+        # Give up on 400 Bad Request and safety blocks (let safety_fallback handle)
+        giveup=lambda e: (
+            ("400" in str(e) and "429" not in str(e)) or
+            "PROHIBITED_CONTENT" in str(e).upper() or
+            "FinishReason.SAFETY" in str(e) or
+            "FinishReason.PROHIBITED_CONTENT" in str(e)
+        )
     )
     def generate(
         self,
@@ -165,7 +213,9 @@ class GeminiClient:
         max_output_tokens: int = 65536,
         safety_settings: Dict[str, str] = None,
         model: str = None,
-        cached_content: str = None
+        cached_content: str = None,
+        force_new_session: bool = False,
+        generation_config: Dict[str, Any] = None
     ) -> GeminiResponse:
         """
         Generate content with retry logic, rate limiting, and optional context caching.
@@ -178,8 +228,20 @@ class GeminiClient:
             safety_settings: Safety settings
             model: Model override
             cached_content: External cached content name (from schema cache)
+            force_new_session: If True, ignores internal cache and starts fresh (for Amnesia Protocol)
+            generation_config: Dict with temperature, top_p, top_k overrides
         """
         target_model = model or self.model
+        
+        # Apply generation_config overrides if provided
+        if generation_config:
+            temperature = generation_config.get('temperature', temperature)
+            max_output_tokens = generation_config.get('max_output_tokens', max_output_tokens)
+            top_p = generation_config.get('top_p', 0.95)
+            top_k = generation_config.get('top_k', 40)
+        else:
+            top_p = 0.95
+            top_k = 40
 
         # Enforce rate limit
         elapsed = time.time() - self._last_request_time
@@ -199,8 +261,12 @@ class GeminiClient:
             # Context Caching Logic
             cached_content_name = cached_content  # Use external cache if provided
             
-            # Only create/use internal cache if no external cache provided
-            if not cached_content_name and self.enable_caching:
+            # AMNESIA PROTOCOL: force_new_session bypasses internal cache
+            if force_new_session:
+                logger.info("[AMNESIA] Forcing new session - bypassing internal cache")
+                cached_content_name = cached_content  # Only use external cache if provided
+            # Only create/use internal cache if no external cache provided and not forcing new session
+            elif not cached_content_name and self.enable_caching:
                 # Check if cache is valid for target model
                 if not self._is_cache_valid(target_model):
                     # Need to create new cache (only if system_instruction provided)
@@ -227,21 +293,38 @@ class GeminiClient:
                 cache_source = "external" if cached_content else "internal"
                 config = types.GenerateContentConfig(
                     temperature=temperature,
+                    top_p=top_p,
+                    top_k=top_k,
                     max_output_tokens=max_output_tokens,
                     cached_content=cached_content_name,
                     safety_settings=safety_settings,
                     automatic_function_calling=None  # Disable AFC to prevent loops
                 )
+                
+                # Add thinking config if enabled (works with cached content too)
+                thinking_config = self._get_thinking_config()
+                if thinking_config:
+                    config.thinking_config = thinking_config
+                    logger.debug(f"Thinking mode enabled with cached content (budget: -1)")
+                
                 logger.debug(f"Using {cache_source} cached system instruction: {cached_content_name}")
             else:
                 # Standard mode (no caching or fallback)
                 config = types.GenerateContentConfig(
                     temperature=temperature,
+                    top_p=top_p,
+                    top_k=top_k,
                     max_output_tokens=max_output_tokens,
                     system_instruction=system_instruction,
                     safety_settings=safety_settings,
                     automatic_function_calling=None  # Disable AFC to prevent loops
                 )
+                
+                # Add thinking config if enabled
+                thinking_config = self._get_thinking_config()
+                if thinking_config:
+                    config.thinking_config = thinking_config
+                    logger.debug(f"Thinking mode enabled (budget: -1 dynamic)")
 
             # Log API call with accurate cache status (check AFTER internal cache logic)
             logger.info(f"Calling Gemini API (model: {target_model}, cached: {bool(cached_content_name)})...")
@@ -252,7 +335,11 @@ class GeminiClient:
                 config=config
             )
             duration = time.time() - start_time
-            logger.info(f"Received Gemini response in {duration:.2f}s (finish_reason: {response.candidates[0].finish_reason if response.candidates else 'N/A'})")
+            # Safely extract finish_reason (candidates can be None or empty)
+            finish_reason_str = 'N/A'
+            if response.candidates and len(response.candidates) > 0:
+                finish_reason_str = str(response.candidates[0].finish_reason)
+            logger.info(f"Received Gemini response in {duration:.2f}s (finish_reason: {finish_reason_str})")
 
             self._last_request_time = time.time()
 
@@ -269,21 +356,39 @@ class GeminiClient:
             # Log cache hit stats
             if cached_tokens > 0:
                 logger.info(f"✓ Cache hit: {cached_tokens} tokens cached, {input_tokens} tokens from prompt")
+            
+            # Extract thinking content if present
+            thinking_content = None
+            if response.candidates and len(response.candidates) > 0:
+                candidate = response.candidates[0]
+                if candidate.content and candidate.content.parts:
+                    thinking_parts = []
+                    for part in candidate.content.parts:
+                        if hasattr(part, 'text') and part.text:
+                            # Check if this is a thinking/CoT part
+                            is_thought = getattr(part, 'thought', False)
+                            if is_thought:
+                                thinking_parts.append(part.text)
+                    
+                    if thinking_parts:
+                        thinking_content = "\n\n".join(thinking_parts)
+                        logger.debug(f"Extracted thinking content: {len(thinking_content)} chars")
 
             # Handle potential empty response/safety block
             if not response.text:
                 finish_reason = "UNKNOWN"
                 safety_ratings = []
                 
-                if response.candidates:
-                    if response.candidates[0].finish_reason:
-                        finish_reason = str(response.candidates[0].finish_reason)
+                if response.candidates and len(response.candidates) > 0:
+                    candidate = response.candidates[0]
+                    if candidate.finish_reason:
+                        finish_reason = str(candidate.finish_reason)
                     
                     # Extract safety ratings if available
-                    if hasattr(response.candidates[0], 'safety_ratings'):
+                    if hasattr(candidate, 'safety_ratings') and candidate.safety_ratings:
                         safety_ratings = [
                             f"{rating.category.name}={rating.probability.name}"
-                            for rating in response.candidates[0].safety_ratings
+                            for rating in candidate.safety_ratings
                             if rating.probability.name != "NEGLIGIBLE"
                         ]
                 
@@ -299,7 +404,8 @@ class GeminiClient:
                     output_tokens=output_tokens,
                     finish_reason=finish_reason,
                     model=target_model,
-                    cached_tokens=cached_tokens
+                    cached_tokens=cached_tokens,
+                    thinking_content=None
                 )
 
             return GeminiResponse(
@@ -308,7 +414,8 @@ class GeminiClient:
                 output_tokens=output_tokens,
                 finish_reason="STOP",  # Assumed success
                 model=target_model,
-                cached_tokens=cached_tokens
+                cached_tokens=cached_tokens,
+                thinking_content=thinking_content
             )
 
         except Exception as e:

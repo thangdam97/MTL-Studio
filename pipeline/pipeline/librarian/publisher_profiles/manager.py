@@ -412,6 +412,35 @@ class PublisherProfileManager:
         pub_data = self._database["publishers"].get(publisher, {})
         return pub_data.get("chapter_splitting", {})
 
+    def get_heading_split_config(self, publisher: str = None) -> Optional[dict]:
+        """
+        Get heading-based chapter splitting config for publishers like Kodansha.
+        
+        Args:
+            publisher: Publisher name (uses fallback if None/unknown)
+        
+        Returns:
+            Dict with 'heading_patterns' and 'split_on_heading' if method is 'heading_split',
+            None otherwise
+        """
+        if not publisher or publisher not in self._database.get("publishers", {}):
+            return None
+        
+        # Access raw publisher data from database
+        pub_data = self._database["publishers"].get(publisher, {})
+        content_patterns = pub_data.get("content_patterns", {})
+        chapter_detection = content_patterns.get("chapter_detection", {})
+        
+        # Check if this publisher uses heading_split method
+        if chapter_detection.get("method") == "heading_split":
+            return {
+                "heading_patterns": chapter_detection.get("heading_patterns", []),
+                "split_on_heading": chapter_detection.get("split_on_heading", True),
+                "note": chapter_detection.get("note", "")
+            }
+        
+        return None
+
     def should_use_spine_fallback(self, publisher: str, toc_entry_count: int) -> bool:
         """
         Determine if spine-based fallback should be used.

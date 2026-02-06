@@ -78,6 +78,9 @@ class GeminiClient:
         # Rate limiting state
         self._request_timestamps: List[float] = []
         self._last_request_time: float = 0
+        
+        # Thinking mode configuration
+        self.thinking_mode_config = self._load_thinking_config()
 
         # Initialize client
         self._client = None
@@ -98,6 +101,45 @@ class GeminiClient:
                 "google-genai package not installed. Run: pip install google-genai"
             )
 
+    def _load_thinking_config(self) -> Dict[str, Any]:
+        """Load thinking mode configuration from config.yaml."""
+        from pipeline.config import get_config_section
+        
+        gemini_config = get_config_section('gemini')
+        return gemini_config.get('thinking_mode', {
+            'enabled': False,
+            'thinking_level': 'medium',
+            'save_to_file': False,
+            'output_dir': 'THINKING'
+        })
+    
+    def _get_thinking_config(self) -> Optional[Any]:
+        """Get ThinkingConfig for Gemini API if thinking mode is enabled."""
+        if not self.thinking_mode_config.get('enabled', False):
+            return None
+        
+        try:
+            from google.genai import types
+            
+            thinking_level = self.thinking_mode_config.get('thinking_level', 'medium')
+            
+            # Gemini 3 uses thinking_level, Gemini 2.5 uses thinking_budget
+            if 'gemini-3' in self.model_name.lower():
+                return types.ThinkingConfig(
+                    include_thoughts=True,
+                    thinking_level=thinking_level  # minimal, low, medium, high
+                )
+            else:
+                # Gemini 2.5 - use thinking_budget instead
+                # -1 = dynamic (default), 0 = disabled, >0 = specific token budget
+                return types.ThinkingConfig(
+                    include_thoughts=True,
+                    thinking_budget=-1  # Dynamic thinking for Gemini 2.5
+                )
+        except Exception as e:
+            # If ThinkingConfig not available, return None
+            return None
+    
     def _build_safety_settings(self) -> List[Any]:
         """Build safety settings for API request."""
         from google.genai import types
@@ -182,11 +224,12 @@ class GeminiClient:
                     top_k=self.generation_params['top_k'],
                     max_output_tokens=self.generation_params['max_output_tokens'],
                     safety_settings=self._build_safety_settings(),
-                    # Enable thinking/CoT mode
-                    thinking_config=types.ThinkingConfig(
-                        include_thoughts=True  # Include thinking parts in response
-                    )
                 )
+                
+                # Enable thinking mode if configured
+                thinking_config = self._get_thinking_config()
+                if thinking_config:
+                    gen_config.thinking_config = thinking_config
 
                 # Add system instruction if provided
                 if system_instruction:

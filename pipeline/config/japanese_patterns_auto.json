@@ -1,0 +1,5625 @@
+{
+  "metadata": {
+    "name": "Japanese Light Novel Patterns - Auto-Generated",
+    "version": "1.1",
+    "source": "Extracted from INPUT/ EPUB corpus",
+    "language_pair": "Japanese → Vietnamese",
+    "description": "Vietnamese translations for Japanese light novel kanji patterns"
+  },
+  "categories": {
+    "relationships": [
+      {
+        "zh": "二人",
+        "vn_correct": "hai người",
+        "vn_wrong": "nhị nhân",
+        "context": "relationships",
+        "frequency": 8819,
+        "note": "Auto-extracted from corpus (freq: 8819)"
+      },
+      {
+        "zh": "一人",
+        "vn_correct": "một người",
+        "vn_wrong": "nhất nhân",
+        "context": "relationships",
+        "frequency": 3507,
+        "note": "Auto-extracted from corpus (freq: 3507)"
+      },
+      {
+        "zh": "可愛",
+        "vn_correct": "đáng yêu",
+        "vn_wrong": "khả ái",
+        "context": "relationships",
+        "frequency": 2837,
+        "note": "Auto-extracted from corpus (freq: 2837)"
+      },
+      {
+        "zh": "人君",
+        "vn_correct": "anh ấy",
+        "vn_wrong": "nhân quân",
+        "context": "relationships",
+        "frequency": 2775,
+        "note": "Auto-extracted from corpus (freq: 2775)"
+      },
+      {
+        "zh": "隼人",
+        "vn_correct": "Hayato",
+        "vn_wrong": "Tuấn Nhân",
+        "context": "relationships",
+        "frequency": 2464,
+        "note": "Auto-extracted from corpus (freq: 2464)"
+      },
+      {
+        "zh": "関係",
+        "vn_correct": "quan hệ",
+        "vn_wrong": "quan hệ",
+        "context": "relationships",
+        "frequency": 2314,
+        "note": "Auto-extracted from corpus (freq: 2314)"
+      },
+      {
+        "zh": "様子",
+        "vn_correct": "dáng vẻ",
+        "vn_wrong": "dạng tử",
+        "context": "relationships",
+        "frequency": 2215,
+        "note": "Auto-extracted from corpus (freq: 2215)"
+      },
+      {
+        "zh": "友達",
+        "vn_correct": "bạn bè",
+        "vn_wrong": "hữu đạt",
+        "context": "relationships",
+        "frequency": 2185,
+        "note": "Auto-extracted from corpus (freq: 2185)"
+      },
+      {
+        "zh": "隼人君",
+        "vn_correct": "Hayato-kun",
+        "vn_wrong": "Tuấn Nhân quân",
+        "context": "relationships",
+        "frequency": 1839,
+        "note": "Auto-extracted from corpus (freq: 1839)"
+      },
+      {
+        "zh": "愛沙",
+        "vn_correct": "Aisa",
+        "vn_wrong": "Ái Sa",
+        "context": "relationships",
+        "frequency": 1811,
+        "note": "Auto-extracted from corpus (freq: 1811)"
+      },
+      {
+        "zh": "女子",
+        "vn_correct": "con gái",
+        "vn_wrong": "nữ tử",
+        "context": "relationships",
+        "frequency": 1712,
+        "note": "Auto-extracted from corpus (freq: 1712)"
+      },
+      {
+        "zh": "男子",
+        "vn_correct": "con trai",
+        "vn_wrong": "nam tử",
+        "context": "relationships",
+        "frequency": 1413,
+        "note": "Auto-extracted from corpus (freq: 1413)"
+      },
+      {
+        "zh": "恋人",
+        "vn_correct": "người yêu",
+        "vn_wrong": "luyến nhân",
+        "context": "relationships",
+        "frequency": 1387,
+        "note": "Auto-extracted from corpus (freq: 1387)"
+      },
+      {
+        "zh": "三人",
+        "vn_correct": "ba người",
+        "vn_wrong": "tam nhân",
+        "context": "relationships",
+        "frequency": 1305,
+        "note": "Auto-extracted from corpus (freq: 1305)"
+      },
+      {
+        "zh": "人間",
+        "vn_correct": "con người",
+        "vn_wrong": "nhân gian",
+        "context": "relationships",
+        "frequency": 1279,
+        "note": "Auto-extracted from corpus (freq: 1279)"
+      },
+      {
+        "zh": "子供",
+        "vn_correct": "trẻ con",
+        "vn_wrong": "tử cung",
+        "context": "relationships",
+        "frequency": 1149,
+        "note": "Auto-extracted from corpus (freq: 1149)"
+      },
+      {
+        "zh": "電子",
+        "vn_correct": "điện tử",
+        "vn_wrong": "điện tử",
+        "context": "relationships",
+        "frequency": 1133,
+        "note": "Auto-extracted from corpus (freq: 1133)"
+      },
+      {
+        "zh": "家族",
+        "vn_correct": "gia đình",
+        "vn_wrong": "gia tộc",
+        "context": "relationships",
+        "frequency": 1085,
+        "note": "Auto-extracted from corpus (freq: 1085)"
+      },
+      {
+        "zh": "大人",
+        "vn_correct": "người lớn",
+        "vn_wrong": "đại nhân",
+        "context": "relationships",
+        "frequency": 1057,
+        "note": "Auto-extracted from corpus (freq: 1057)"
+      },
+      {
+        "zh": "親友",
+        "vn_correct": "bạn thân",
+        "vn_wrong": "thân hữu",
+        "context": "relationships",
+        "frequency": 796,
+        "note": "Auto-extracted from corpus (freq: 796)"
+      },
+      {
+        "zh": "愛歌",
+        "vn_correct": "Aika",
+        "vn_wrong": "Ái Ca",
+        "context": "relationships",
+        "frequency": 732,
+        "note": "Auto-extracted from corpus (freq: 732)"
+      },
+      {
+        "zh": "明人",
+        "vn_correct": "Akito",
+        "vn_wrong": "Minh Nhân",
+        "context": "relationships",
+        "frequency": 725,
+        "note": "Auto-extracted from corpus (freq: 725)"
+      },
+      {
+        "zh": "小恋",
+        "vn_correct": "Koi",
+        "vn_wrong": "Tiểu Luyến",
+        "context": "relationships",
+        "frequency": 708,
+        "note": "Auto-extracted from corpus (freq: 708)"
+      },
+      {
+        "zh": "本人",
+        "vn_correct": "đương sự",
+        "vn_wrong": "bản nhân",
+        "context": "relationships",
+        "frequency": 689,
+        "note": "Auto-extracted from corpus (freq: 689)"
+      },
+      {
+        "zh": "賢人",
+        "vn_correct": "Kento",
+        "vn_wrong": "Hiền Nhân",
+        "context": "relationships",
+        "frequency": 642,
+        "note": "Auto-extracted from corpus (freq: 642)"
+      },
+      {
+        "zh": "他人",
+        "vn_correct": "người khác",
+        "vn_wrong": "tha nhân",
+        "context": "relationships",
+        "frequency": 628,
+        "note": "Auto-extracted from corpus (freq: 628)"
+      },
+      {
+        "zh": "愛菜",
+        "vn_correct": "Aina",
+        "vn_wrong": "Ái Thái",
+        "context": "relationships",
+        "frequency": 627,
+        "note": "Auto-extracted from corpus (freq: 627)"
+      },
+      {
+        "zh": "玄関",
+        "vn_correct": "lối vào",
+        "vn_wrong": "huyền quan",
+        "context": "relationships",
+        "frequency": 593,
+        "note": "Auto-extracted from corpus (freq: 593)"
+      },
+      {
+        "zh": "両親",
+        "vn_correct": "bố mẹ",
+        "vn_wrong": "lưỡng thân",
+        "context": "relationships",
+        "frequency": 592,
+        "note": "Auto-extracted from corpus (freq: 592)"
+      },
+      {
+        "zh": "人気",
+        "vn_correct": "nổi tiếng",
+        "vn_wrong": "nhân khí",
+        "context": "relationships",
+        "frequency": 580,
+        "note": "Auto-extracted from corpus (freq: 580)"
+      },
+      {
+        "zh": "王子",
+        "vn_correct": "hoàng tử",
+        "vn_wrong": "vương tử",
+        "context": "relationships",
+        "frequency": 568,
+        "note": "Auto-extracted from corpus (freq: 568)"
+      },
+      {
+        "zh": "美人",
+        "vn_correct": "người đẹp",
+        "vn_wrong": "mỹ nhân",
+        "context": "relationships",
+        "frequency": 557,
+        "note": "Auto-extracted from corpus (freq: 557)"
+      },
+      {
+        "zh": "姉妹",
+        "vn_correct": "chị em gái",
+        "vn_wrong": "tỷ muội",
+        "context": "relationships",
+        "frequency": 545,
+        "note": "Auto-extracted from corpus (freq: 545)"
+      },
+      {
+        "zh": "太子",
+        "vn_correct": "thái tử",
+        "vn_wrong": "thái tử",
+        "context": "relationships",
+        "frequency": 539,
+        "note": "Auto-extracted from corpus (freq: 539)"
+      },
+      {
+        "zh": "王太子",
+        "vn_correct": "thái tử",
+        "vn_wrong": "vương thái tử",
+        "context": "relationships",
+        "frequency": 536,
+        "note": "Auto-extracted from corpus (freq: 536)"
+      },
+      {
+        "zh": "家庭",
+        "vn_correct": "gia đình",
+        "vn_wrong": "gia đình",
+        "context": "relationships",
+        "frequency": 531,
+        "note": "Auto-extracted from corpus (freq: 531)"
+      },
+      {
+        "zh": "賢人君",
+        "vn_correct": "Kento-kun",
+        "vn_wrong": "Hiền Nhân quân",
+        "context": "relationships",
+        "frequency": 516,
+        "note": "Auto-extracted from corpus (freq: 516)"
+      },
+      {
+        "zh": "友人",
+        "vn_correct": "bạn bè",
+        "vn_wrong": "hữu nhân",
+        "context": "relationships",
+        "frequency": 515,
+        "note": "Auto-extracted from corpus (freq: 515)"
+      },
+      {
+        "zh": "調子",
+        "vn_correct": "tình trạng",
+        "vn_wrong": "điều tử",
+        "context": "relationships",
+        "frequency": 511,
+        "note": "Auto-extracted from corpus (freq: 511)"
+      },
+      {
+        "zh": "個人",
+        "vn_correct": "cá nhân",
+        "vn_wrong": "cá nhân",
+        "context": "relationships",
+        "frequency": 510,
+        "note": "Auto-extracted from corpus (freq: 510)"
+      },
+      {
+        "zh": "四人",
+        "vn_correct": "bốn người",
+        "vn_wrong": "tứ nhân",
+        "context": "relationships",
+        "frequency": 505,
+        "note": "Auto-extracted from corpus (freq: 505)"
+      },
+      {
+        "zh": "貴族",
+        "vn_correct": "quý tộc",
+        "vn_wrong": "quý tộc",
+        "context": "relationships",
+        "frequency": 504,
+        "note": "Auto-extracted from corpus (freq: 504)"
+      },
+      {
+        "zh": "人生",
+        "vn_correct": "cuộc đời",
+        "vn_wrong": "nhân sinh",
+        "context": "relationships",
+        "frequency": 485,
+        "note": "Auto-extracted from corpus (freq: 485)"
+      },
+      {
+        "zh": "子書",
+        "vn_correct": "sách điện tử",
+        "vn_wrong": "tử thư",
+        "context": "relationships",
+        "frequency": 456,
+        "note": "Auto-extracted from corpus (freq: 456)"
+      },
+      {
+        "zh": "子書籍",
+        "vn_correct": "sách điện tử",
+        "vn_wrong": "tử thư tịch",
+        "context": "relationships",
+        "frequency": 456,
+        "note": "Auto-extracted from corpus (freq: 456)"
+      },
+      {
+        "zh": "電子書",
+        "vn_correct": "sách điện tử",
+        "vn_wrong": "điện tử thư",
+        "context": "relationships",
+        "frequency": 456,
+        "note": "Auto-extracted from corpus (freq: 456)"
+      },
+      {
+        "zh": "電子書籍",
+        "vn_correct": "sách điện tử",
+        "vn_wrong": "điện tử thư tịch",
+        "context": "relationships",
+        "frequency": 456,
+        "note": "Auto-extracted from corpus (freq: 456)"
+      },
+      {
+        "zh": "恋愛",
+        "vn_correct": "tình yêu",
+        "vn_wrong": "luyến ái",
+        "context": "relationships",
+        "frequency": 445,
+        "note": "Auto-extracted from corpus (freq: 445)"
+      },
+      {
+        "zh": "本電子",
+        "vn_correct": "sách điện tử này",
+        "vn_wrong": "bản điện tử",
+        "context": "relationships",
+        "frequency": 419,
+        "note": "Auto-extracted from corpus (freq: 419)"
+      },
+      {
+        "zh": "本電子書",
+        "vn_correct": "sách điện tử này",
+        "vn_wrong": "bản điện tử thư",
+        "context": "relationships",
+        "frequency": 419,
+        "note": "Auto-extracted from corpus (freq: 419)"
+      },
+      {
+        "zh": "明人君",
+        "vn_correct": "Akito-kun",
+        "vn_wrong": "Minh Nhân quân",
+        "context": "relationships",
+        "frequency": 416,
+        "note": "Auto-extracted from corpus (freq: 416)"
+      },
+      {
+        "zh": "母親",
+        "vn_correct": "mẹ",
+        "vn_wrong": "mẫu thân",
+        "context": "relationships",
+        "frequency": 389,
+        "note": "Auto-extracted from corpus (freq: 389)"
+      },
+      {
+        "zh": "兄妹",
+        "vn_correct": "anh em",
+        "vn_wrong": "huynh muội",
+        "context": "relationships",
+        "frequency": 378,
+        "note": "Auto-extracted from corpus (freq: 378)"
+      },
+      {
+        "zh": "主人",
+        "vn_correct": "chủ nhân",
+        "vn_wrong": "chủ nhân",
+        "context": "relationships",
+        "frequency": 369,
+        "note": "Auto-extracted from corpus (freq: 369)"
+      },
+      {
+        "zh": "椅子",
+        "vn_correct": "ghế",
+        "vn_wrong": "ỷ tử",
+        "context": "relationships",
+        "frequency": 349,
+        "note": "Auto-extracted from corpus (freq: 349)"
+      },
+      {
+        "zh": "迷子",
+        "vn_correct": "trẻ lạc",
+        "vn_wrong": "mê tử",
+        "context": "relationships",
+        "frequency": 341,
+        "note": "Auto-extracted from corpus (freq: 341)"
+      },
+      {
+        "zh": "結愛",
+        "vn_correct": "Yua",
+        "vn_wrong": "Kết Ái",
+        "context": "relationships",
+        "frequency": 341,
+        "note": "Auto-extracted from corpus (freq: 341)"
+      },
+      {
+        "zh": "魁人",
+        "vn_correct": "Kaito",
+        "vn_wrong": "Khôi Nhân",
+        "context": "relationships",
+        "frequency": 329,
+        "note": "Auto-extracted from corpus (freq: 329)"
+      },
+      {
+        "zh": "菓子",
+        "vn_correct": "bánh kẹo",
+        "vn_wrong": "quả tử",
+        "context": "relationships",
+        "frequency": 322,
+        "note": "Auto-extracted from corpus (freq: 322)"
+      },
+      {
+        "zh": "子生",
+        "vn_correct": "học sinh",
+        "vn_wrong": "tử sinh",
+        "context": "relationships",
+        "frequency": 320,
+        "note": "Auto-extracted from corpus (freq: 320)"
+      },
+      {
+        "zh": "子生徒",
+        "vn_correct": "học sinh",
+        "vn_wrong": "tử sinh đồ",
+        "context": "relationships",
+        "frequency": 320,
+        "note": "Auto-extracted from corpus (freq: 320)"
+      },
+      {
+        "zh": "人物",
+        "vn_correct": "nhân vật",
+        "vn_wrong": "nhân vật",
+        "context": "relationships",
+        "frequency": 310,
+        "note": "Auto-extracted from corpus (freq: 310)"
+      },
+      {
+        "zh": "子特",
+        "vn_correct": "đặc biệt",
+        "vn_wrong": "tử đặc",
+        "context": "relationships",
+        "frequency": 303,
+        "note": "Auto-extracted from corpus (freq: 303)"
+      },
+      {
+        "zh": "父親",
+        "vn_correct": "bố",
+        "vn_wrong": "phụ thân",
+        "context": "relationships",
+        "frequency": 298,
+        "note": "Auto-extracted from corpus (freq: 298)"
+      },
+      {
+        "zh": "家庭教",
+        "vn_correct": "gia sư",
+        "vn_wrong": "gia đình giáo",
+        "context": "relationships",
+        "frequency": 296,
+        "note": "Auto-extracted from corpus (freq: 296)"
+      },
+      {
+        "zh": "家庭教師",
+        "vn_correct": "gia sư",
+        "vn_wrong": "gia đình giáo sư",
+        "context": "relationships",
+        "frequency": 296,
+        "note": "Auto-extracted from corpus (freq: 296)"
+      },
+      {
+        "zh": "電子特",
+        "vn_correct": "đặc biệt điện tử",
+        "vn_wrong": "điện tử đặc",
+        "context": "relationships",
+        "frequency": 295,
+        "note": "Auto-extracted from corpus (freq: 295)"
+      },
+      {
+        "zh": "人数",
+        "vn_correct": "số người",
+        "vn_wrong": "nhân số",
+        "context": "relationships",
+        "frequency": 292,
+        "note": "Auto-extracted from corpus (freq: 292)"
+      },
+      {
+        "zh": "五人",
+        "vn_correct": "năm người",
+        "vn_wrong": "ngũ nhân",
+        "context": "relationships",
+        "frequency": 292,
+        "note": "Auto-extracted from corpus (freq: 292)"
+      },
+      {
+        "zh": "息子",
+        "vn_correct": "con trai",
+        "vn_wrong": "tức tử",
+        "context": "relationships",
+        "frequency": 288,
+        "note": "Auto-extracted from corpus (freq: 288)"
+      },
+      {
+        "zh": "野子",
+        "vn_correct": "Noko",
+        "vn_wrong": "Dã Tử",
+        "context": "relationships",
+        "frequency": 288,
+        "note": "Auto-extracted from corpus (freq: 288)"
+      },
+      {
+        "zh": "鹿野子",
+        "vn_correct": "Kanoko",
+        "vn_wrong": "Lộc Dã Tử",
+        "context": "relationships",
+        "frequency": 288,
+        "note": "Auto-extracted from corpus (freq: 288)"
+      },
+      {
+        "zh": "人的",
+        "vn_correct": "cá nhân",
+        "vn_wrong": "nhân đích",
+        "context": "relationships",
+        "frequency": 286,
+        "note": "Auto-extracted from corpus (freq: 286)"
+      },
+      {
+        "zh": "個人的",
+        "vn_correct": "cá nhân",
+        "vn_wrong": "cá nhân đích",
+        "context": "relationships",
+        "frequency": 272,
+        "note": "Auto-extracted from corpus (freq: 272)"
+      },
+      {
+        "zh": "撫子",
+        "vn_correct": "Nadeshiko",
+        "vn_wrong": "Vũ Tử",
+        "context": "relationships",
+        "frequency": 265,
+        "note": "Auto-extracted from corpus (freq: 265)"
+      },
+      {
+        "zh": "子高",
+        "vn_correct": "cấp ba",
+        "vn_wrong": "tử cao",
+        "context": "relationships",
+        "frequency": 254,
+        "note": "Auto-extracted from corpus (freq: 254)"
+      },
+      {
+        "zh": "子版",
+        "vn_correct": "bản",
+        "vn_wrong": "tử bản",
+        "context": "relationships",
+        "frequency": 251,
+        "note": "Auto-extracted from corpus (freq: 251)"
+      },
+      {
+        "zh": "電子版",
+        "vn_correct": "bản điện tử",
+        "vn_wrong": "điện tử bản",
+        "context": "relationships",
+        "frequency": 251,
+        "note": "Auto-extracted from corpus (freq: 251)"
+      },
+      {
+        "zh": "子先",
+        "vn_correct": "tiền bối",
+        "vn_wrong": "tử tiên",
+        "context": "relationships",
+        "frequency": 232,
+        "note": "Auto-extracted from corpus (freq: 232)"
+      },
+      {
+        "zh": "子先輩",
+        "vn_correct": "tiền bối",
+        "vn_wrong": "tử tiền bối",
+        "context": "relationships",
+        "frequency": 231,
+        "note": "Auto-extracted from corpus (freq: 231)"
+      },
+      {
+        "zh": "撫子先",
+        "vn_correct": "Nadeshiko-senpai",
+        "vn_wrong": "Vũ Tử tiên",
+        "context": "relationships",
+        "frequency": 228,
+        "note": "Auto-extracted from corpus (freq: 228)"
+      },
+      {
+        "zh": "撫子先輩",
+        "vn_correct": "Nadeshiko-senpai",
+        "vn_wrong": "Vũ Tử tiền bối",
+        "context": "relationships",
+        "frequency": 228,
+        "note": "Auto-extracted from corpus (freq: 228)"
+      },
+      {
+        "zh": "義妹",
+        "vn_correct": "em gái",
+        "vn_wrong": "nghĩa muội",
+        "context": "relationships",
+        "frequency": 216,
+        "note": "Auto-extracted from corpus (freq: 216)"
+      },
+      {
+        "zh": "実家",
+        "vn_correct": "nhà",
+        "vn_wrong": "thực gia",
+        "context": "relationships",
+        "frequency": 211,
+        "note": "Auto-extracted from corpus (freq: 211)"
+      },
+      {
+        "zh": "人差",
+        "vn_correct": "ngón trỏ",
+        "vn_wrong": "nhân sai",
+        "context": "relationships",
+        "frequency": 206,
+        "note": "Auto-extracted from corpus (freq: 206)"
+      },
+      {
+        "zh": "人様",
+        "vn_correct": "người ta",
+        "vn_wrong": "nhân dạng",
+        "context": "relationships",
+        "frequency": 192,
+        "note": "Auto-extracted from corpus (freq: 192)"
+      },
+      {
+        "zh": "女子生",
+        "vn_correct": "nữ sinh",
+        "vn_wrong": "nữ tử sinh",
+        "context": "relationships",
+        "frequency": 190,
+        "note": "Auto-extracted from corpus (freq: 190)"
+      },
+      {
+        "zh": "女子生徒",
+        "vn_correct": "nữ sinh",
+        "vn_wrong": "nữ tử sinh đồ",
+        "context": "relationships",
+        "frequency": 190,
+        "note": "Auto-extracted from corpus (freq: 190)"
+      },
+      {
+        "zh": "人姉",
+        "vn_correct": "chị em",
+        "vn_wrong": "nhân tỷ",
+        "context": "relationships",
+        "frequency": 190,
+        "note": "Auto-extracted from corpus (freq: 190)"
+      },
+      {
+        "zh": "人姉妹",
+        "vn_correct": "chị em",
+        "vn_wrong": "nhân tỷ muội",
+        "context": "relationships",
+        "frequency": 190,
+        "note": "Auto-extracted from corpus (freq: 190)"
+      },
+      {
+        "zh": "美人姉",
+        "vn_correct": "chị em đẹp",
+        "vn_wrong": "mỹ nhân tỷ",
+        "context": "relationships",
+        "frequency": 189,
+        "note": "Auto-extracted from corpus (freq: 189)"
+      },
+      {
+        "zh": "美人姉妹",
+        "vn_correct": "chị em đẹp",
+        "vn_wrong": "mỹ nhân tỷ muội",
+        "context": "relationships",
+        "frequency": 189,
+        "note": "Auto-extracted from corpus (freq: 189)"
+      },
+      {
+        "zh": "爵家",
+        "vn_correct": "nhà quý tộc",
+        "vn_wrong": "tước gia",
+        "context": "relationships",
+        "frequency": 183,
+        "note": "Auto-extracted from corpus (freq: 183)"
+      },
+      {
+        "zh": "人同",
+        "vn_correct": "cùng nhau",
+        "vn_wrong": "nhân đồng",
+        "context": "relationships",
+        "frequency": 167,
+        "note": "Auto-extracted from corpus (freq: 167)"
+      },
+      {
+        "zh": "子特典",
+        "vn_correct": "đặc quyền",
+        "vn_wrong": "tử đặc điển",
+        "context": "relationships",
+        "frequency": 161,
+        "note": "Auto-extracted from corpus (freq: 161)"
+      },
+      {
+        "zh": "子特典付",
+        "vn_correct": "kèm đặc quyền",
+        "vn_wrong": "tử đặc điển phụ",
+        "context": "relationships",
+        "frequency": 161,
+        "note": "Auto-extracted from corpus (freq: 161)"
+      },
+      {
+        "zh": "電子特典",
+        "vn_correct": "đặc quyền điện tử",
+        "vn_wrong": "điện tử đặc điển",
+        "context": "relationships",
+        "frequency": 161,
+        "note": "Auto-extracted from corpus (freq: 161)"
+      },
+      {
+        "zh": "人暮",
+        "vn_correct": "sống một mình",
+        "vn_wrong": "nhân mộ",
+        "context": "relationships",
+        "frequency": 158,
+        "note": "Auto-extracted from corpus (freq: 158)"
+      },
+      {
+        "zh": "凪家",
+        "vn_correct": "nhà Nagi",
+        "vn_wrong": "Ngưng gia",
+        "context": "relationships",
+        "frequency": 156,
+        "note": "Auto-extracted from corpus (freq: 156)"
+      },
+      {
+        "zh": "朝凪家",
+        "vn_correct": "nhà Asanagi",
+        "vn_wrong": "Triều Ngưng gia",
+        "context": "relationships",
+        "frequency": 156,
+        "note": "Auto-extracted from corpus (freq: 156)"
+      }
+    ],
+    "emotions": [
+      {
+        "zh": "気持",
+        "vn_correct": "cảm giác",
+        "vn_wrong": "khí trì",
+        "context": "emotions",
+        "frequency": 3805,
+        "note": "Auto-extracted from corpus (freq: 3805)"
+      },
+      {
+        "zh": "表情",
+        "vn_correct": "biểu cảm",
+        "vn_wrong": "biểu tình",
+        "context": "emotions",
+        "frequency": 3208,
+        "note": "Auto-extracted from corpus (freq: 3208)"
+      },
+      {
+        "zh": "心乃",
+        "vn_correct": "Kokono",
+        "vn_wrong": "Tâm Nãi",
+        "context": "emotions",
+        "frequency": 2746,
+        "note": "Auto-extracted from corpus (freq: 2746)"
+      },
+      {
+        "zh": "心乃枝",
+        "vn_correct": "Kokonoe",
+        "vn_wrong": "Tâm Nãi Chi",
+        "context": "emotions",
+        "frequency": 2745,
+        "note": "Auto-extracted from corpus (freq: 2745)"
+      },
+      {
+        "zh": "心配",
+        "vn_correct": "lo lắng",
+        "vn_wrong": "tâm phối",
+        "context": "emotions",
+        "frequency": 2177,
+        "note": "Auto-extracted from corpus (freq: 2177)"
+      },
+      {
+        "zh": "安心",
+        "vn_correct": "yên tâm",
+        "vn_wrong": "an tâm",
+        "context": "emotions",
+        "frequency": 1216,
+        "note": "Auto-extracted from corpus (freq: 1216)"
+      },
+      {
+        "zh": "空気",
+        "vn_correct": "không khí",
+        "vn_wrong": "không khí",
+        "context": "emotions",
+        "frequency": 1093,
+        "note": "Auto-extracted from corpus (freq: 1093)"
+      },
+      {
+        "zh": "気分",
+        "vn_correct": "tâm trạng",
+        "vn_wrong": "khí phần",
+        "context": "emotions",
+        "frequency": 1072,
+        "note": "Auto-extracted from corpus (freq: 1072)"
+      },
+      {
+        "zh": "囲気",
+        "vn_correct": "không khí",
+        "vn_wrong": "vi khí",
+        "context": "emotions",
+        "frequency": 1029,
+        "note": "Auto-extracted from corpus (freq: 1029)"
+      },
+      {
+        "zh": "雰囲気",
+        "vn_correct": "bầu không khí",
+        "vn_wrong": "phân vi khí",
+        "context": "emotions",
+        "frequency": 1029,
+        "note": "Auto-extracted from corpus (freq: 1029)"
+      },
+      {
+        "zh": "気付",
+        "vn_correct": "nhận ra",
+        "vn_wrong": "khí phó",
+        "context": "emotions",
+        "frequency": 1023,
+        "note": "Auto-extracted from corpus (freq: 1023)"
+      },
+      {
+        "zh": "元気",
+        "vn_correct": "khỏe mạnh",
+        "vn_wrong": "nguyên khí",
+        "context": "emotions",
+        "frequency": 889,
+        "note": "Auto-extracted from corpus (freq: 889)"
+      },
+      {
+        "zh": "本気",
+        "vn_correct": "nghiêm túc",
+        "vn_wrong": "bản khí",
+        "context": "emotions",
+        "frequency": 832,
+        "note": "Auto-extracted from corpus (freq: 832)"
+      },
+      {
+        "zh": "大好",
+        "vn_correct": "rất thích",
+        "vn_wrong": "đại hảo",
+        "context": "emotions",
+        "frequency": 783,
+        "note": "Auto-extracted from corpus (freq: 783)"
+      },
+      {
+        "zh": "思議",
+        "vn_correct": "kỳ lạ",
+        "vn_wrong": "tư nghị",
+        "context": "emotions",
+        "frequency": 743,
+        "note": "Auto-extracted from corpus (freq: 743)"
+      },
+      {
+        "zh": "不思",
+        "vn_correct": "kỳ lạ",
+        "vn_wrong": "bất tư",
+        "context": "emotions",
+        "frequency": 740,
+        "note": "Auto-extracted from corpus (freq: 740)"
+      },
+      {
+        "zh": "不思議",
+        "vn_correct": "kỳ lạ",
+        "vn_wrong": "bất tư nghị",
+        "context": "emotions",
+        "frequency": 740,
+        "note": "Auto-extracted from corpus (freq: 740)"
+      },
+      {
+        "zh": "感情",
+        "vn_correct": "cảm xúc",
+        "vn_wrong": "cảm tình",
+        "context": "emotions",
+        "frequency": 646,
+        "note": "Auto-extracted from corpus (freq: 646)"
+      },
+      {
+        "zh": "情報",
+        "vn_correct": "thông tin",
+        "vn_wrong": "tình báo",
+        "context": "emotions",
+        "frequency": 616,
+        "note": "Auto-extracted from corpus (freq: 616)"
+      },
+      {
+        "zh": "機嫌",
+        "vn_correct": "tâm trạng",
+        "vn_wrong": "cơ hiềm",
+        "context": "emotions",
+        "frequency": 615,
+        "note": "Auto-extracted from corpus (freq: 615)"
+      },
+      {
+        "zh": "感謝",
+        "vn_correct": "cảm ơn",
+        "vn_wrong": "cảm tạ",
+        "context": "emotions",
+        "frequency": 583,
+        "note": "Auto-extracted from corpus (freq: 583)"
+      },
+      {
+        "zh": "格好",
+        "vn_correct": "dáng vẻ",
+        "vn_wrong": "cách hảo",
+        "context": "emotions",
+        "frequency": 509,
+        "note": "Auto-extracted from corpus (freq: 509)"
+      },
+      {
+        "zh": "感覚",
+        "vn_correct": "cảm giác",
+        "vn_wrong": "cảm giác",
+        "context": "emotions",
+        "frequency": 475,
+        "note": "Auto-extracted from corpus (freq: 475)"
+      },
+      {
+        "zh": "事情",
+        "vn_correct": "hoàn cảnh",
+        "vn_wrong": "sự tình",
+        "context": "emotions",
+        "frequency": 449,
+        "note": "Auto-extracted from corpus (freq: 449)"
+      },
+      {
+        "zh": "平気",
+        "vn_correct": "không sao",
+        "vn_wrong": "bình khí",
+        "context": "emotions",
+        "frequency": 432,
+        "note": "Auto-extracted from corpus (freq: 432)"
+      },
+      {
+        "zh": "一気",
+        "vn_correct": "một hơi",
+        "vn_wrong": "nhất khí",
+        "context": "emotions",
+        "frequency": 405,
+        "note": "Auto-extracted from corpus (freq: 405)"
+      },
+      {
+        "zh": "心臓",
+        "vn_correct": "tim",
+        "vn_wrong": "tâm tạng",
+        "context": "emotions",
+        "frequency": 392,
+        "note": "Auto-extracted from corpus (freq: 392)"
+      },
+      {
+        "zh": "感想",
+        "vn_correct": "cảm nghĩ",
+        "vn_wrong": "cảm tưởng",
+        "context": "emotions",
+        "frequency": 383,
+        "note": "Auto-extracted from corpus (freq: 383)"
+      },
+      {
+        "zh": "心地",
+        "vn_correct": "cảm giác",
+        "vn_wrong": "tâm địa",
+        "context": "emotions",
+        "frequency": 359,
+        "note": "Auto-extracted from corpus (freq: 359)"
+      },
+      {
+        "zh": "気味",
+        "vn_correct": "có vẻ",
+        "vn_wrong": "khí vị",
+        "context": "emotions",
+        "frequency": 344,
+        "note": "Auto-extracted from corpus (freq: 344)"
+      },
+      {
+        "zh": "感触",
+        "vn_correct": "cảm giác",
+        "vn_wrong": "cảm xúc",
+        "context": "emotions",
+        "frequency": 334,
+        "note": "Auto-extracted from corpus (freq: 334)"
+      },
+      {
+        "zh": "勇気",
+        "vn_correct": "can đảm",
+        "vn_wrong": "dũng khí",
+        "context": "emotions",
+        "frequency": 299,
+        "note": "Auto-extracted from corpus (freq: 299)"
+      },
+      {
+        "zh": "気合",
+        "vn_correct": "tinh thần",
+        "vn_wrong": "khí hợp",
+        "context": "emotions",
+        "frequency": 289,
+        "note": "Auto-extracted from corpus (freq: 289)"
+      },
+      {
+        "zh": "気配",
+        "vn_correct": "dấu hiệu",
+        "vn_wrong": "khí phối",
+        "context": "emotions",
+        "frequency": 285,
+        "note": "Auto-extracted from corpus (freq: 285)"
+      },
+      {
+        "zh": "中心",
+        "vn_correct": "trung tâm",
+        "vn_wrong": "trung tâm",
+        "context": "emotions",
+        "frequency": 274,
+        "note": "Auto-extracted from corpus (freq: 274)"
+      },
+      {
+        "zh": "予感",
+        "vn_correct": "linh cảm",
+        "vn_wrong": "dự cảm",
+        "context": "emotions",
+        "frequency": 270,
+        "note": "Auto-extracted from corpus (freq: 270)"
+      },
+      {
+        "zh": "思考",
+        "vn_correct": "suy nghĩ",
+        "vn_wrong": "tư khảo",
+        "context": "emotions",
+        "frequency": 269,
+        "note": "Auto-extracted from corpus (freq: 269)"
+      },
+      {
+        "zh": "神楽",
+        "vn_correct": "Kagura",
+        "vn_wrong": "Thần Nhạc",
+        "context": "emotions",
+        "frequency": 268,
+        "note": "Auto-extracted from corpus (freq: 268)"
+      },
+      {
+        "zh": "楽耶",
+        "vn_correct": "Rakuya",
+        "vn_wrong": "Lạc Da",
+        "context": "emotions",
+        "frequency": 266,
+        "note": "Auto-extracted from corpus (freq: 266)"
+      },
+      {
+        "zh": "神楽耶",
+        "vn_correct": "Kaguraya",
+        "vn_wrong": "Thần Nhạc Da",
+        "context": "emotions",
+        "frequency": 266,
+        "note": "Auto-extracted from corpus (freq: 266)"
+      },
+      {
+        "zh": "気遣",
+        "vn_correct": "quan tâm",
+        "vn_wrong": "khí khiển",
+        "context": "emotions",
+        "frequency": 246,
+        "note": "Auto-extracted from corpus (freq: 246)"
+      },
+      {
+        "zh": "悲鳴",
+        "vn_correct": "tiếng hét",
+        "vn_wrong": "bi minh",
+        "context": "emotions",
+        "frequency": 240,
+        "note": "Auto-extracted from corpus (freq: 240)"
+      },
+      {
+        "zh": "和感",
+        "vn_correct": "cảm giác",
+        "vn_wrong": "hòa cảm",
+        "context": "emotions",
+        "frequency": 230,
+        "note": "Auto-extracted from corpus (freq: 230)"
+      },
+      {
+        "zh": "違和感",
+        "vn_correct": "cảm giác khác thường",
+        "vn_wrong": "vi hòa cảm",
+        "context": "emotions",
+        "frequency": 230,
+        "note": "Auto-extracted from corpus (freq: 230)"
+      },
+      {
+        "zh": "内心",
+        "vn_correct": "trong lòng",
+        "vn_wrong": "nội tâm",
+        "context": "emotions",
+        "frequency": 227,
+        "note": "Auto-extracted from corpus (freq: 227)"
+      },
+      {
+        "zh": "実感",
+        "vn_correct": "cảm nhận",
+        "vn_wrong": "thực cảm",
+        "context": "emotions",
+        "frequency": 199,
+        "note": "Auto-extracted from corpus (freq: 199)"
+      },
+      {
+        "zh": "意気",
+        "vn_correct": "khí thế",
+        "vn_wrong": "ý khí",
+        "context": "emotions",
+        "frequency": 196,
+        "note": "Auto-extracted from corpus (freq: 196)"
+      },
+      {
+        "zh": "好意",
+        "vn_correct": "thiện cảm",
+        "vn_wrong": "hảo ý",
+        "context": "emotions",
+        "frequency": 194,
+        "note": "Auto-extracted from corpus (freq: 194)"
+      },
+      {
+        "zh": "悪感",
+        "vn_correct": "ác cảm",
+        "vn_wrong": "ác cảm",
+        "context": "emotions",
+        "frequency": 175,
+        "note": "Auto-extracted from corpus (freq: 175)"
+      },
+      {
+        "zh": "本心",
+        "vn_correct": "thực lòng",
+        "vn_wrong": "bản tâm",
+        "context": "emotions",
+        "frequency": 175,
+        "note": "Auto-extracted from corpus (freq: 175)"
+      },
+      {
+        "zh": "晴喜",
+        "vn_correct": "Haruki",
+        "vn_wrong": "Tình Hỉ",
+        "context": "emotions",
+        "frequency": 171,
+        "note": "Auto-extracted from corpus (freq: 171)"
+      },
+      {
+        "zh": "男嫌",
+        "vn_correct": "ghét đàn ông",
+        "vn_wrong": "nam hiềm",
+        "context": "emotions",
+        "frequency": 170,
+        "note": "Auto-extracted from corpus (freq: 170)"
+      },
+      {
+        "zh": "可哀",
+        "vn_correct": "đáng thương",
+        "vn_wrong": "khả ai",
+        "context": "emotions",
+        "frequency": 167,
+        "note": "Auto-extracted from corpus (freq: 167)"
+      },
+      {
+        "zh": "初心",
+        "vn_correct": "ban đầu",
+        "vn_wrong": "sơ tâm",
+        "context": "emotions",
+        "frequency": 163,
+        "note": "Auto-extracted from corpus (freq: 163)"
+      },
+      {
+        "zh": "不機嫌",
+        "vn_correct": "khó chịu",
+        "vn_wrong": "bất cơ hiềm",
+        "context": "emotions",
+        "frequency": 158,
+        "note": "Auto-extracted from corpus (freq: 158)"
+      },
+      {
+        "zh": "感動",
+        "vn_correct": "cảm động",
+        "vn_wrong": "cảm động",
+        "context": "emotions",
+        "frequency": 153,
+        "note": "Auto-extracted from corpus (freq: 153)"
+      },
+      {
+        "zh": "心者",
+        "vn_correct": "người mới",
+        "vn_wrong": "tâm giả",
+        "context": "emotions",
+        "frequency": 152,
+        "note": "Auto-extracted from corpus (freq: 152)"
+      },
+      {
+        "zh": "初心者",
+        "vn_correct": "người mới bắt đầu",
+        "vn_wrong": "sơ tâm giả",
+        "context": "emotions",
+        "frequency": 150,
+        "note": "Auto-extracted from corpus (freq: 150)"
+      },
+      {
+        "zh": "罪悪感",
+        "vn_correct": "cảm giác tội lỗi",
+        "vn_wrong": "tội ác cảm",
+        "context": "emotions",
+        "frequency": 145,
+        "note": "Auto-extracted from corpus (freq: 145)"
+      },
+      {
+        "zh": "何気",
+        "vn_correct": "vô tình",
+        "vn_wrong": "hà khí",
+        "context": "emotions",
+        "frequency": 144,
+        "note": "Auto-extracted from corpus (freq: 144)"
+      },
+      {
+        "zh": "感心",
+        "vn_correct": "khâm phục",
+        "vn_wrong": "cảm tâm",
+        "context": "emotions",
+        "frequency": 142,
+        "note": "Auto-extracted from corpus (freq: 142)"
+      },
+      {
+        "zh": "意思",
+        "vn_correct": "ý định",
+        "vn_wrong": "ý tư",
+        "context": "emotions",
+        "frequency": 138,
+        "note": "Auto-extracted from corpus (freq: 138)"
+      },
+      {
+        "zh": "距離感",
+        "vn_correct": "khoảng cách",
+        "vn_wrong": "cự ly cảm",
+        "context": "emotions",
+        "frequency": 126,
+        "note": "Auto-extracted from corpus (freq: 126)"
+      },
+      {
+        "zh": "離感",
+        "vn_correct": "khoảng cách",
+        "vn_wrong": "ly cảm",
+        "context": "emotions",
+        "frequency": 126,
+        "note": "Auto-extracted from corpus (freq: 126)"
+      },
+      {
+        "zh": "心当",
+        "vn_correct": "manh mối",
+        "vn_wrong": "tâm đương",
+        "context": "emotions",
+        "frequency": 121,
+        "note": "Auto-extracted from corpus (freq: 121)"
+      },
+      {
+        "zh": "浮気",
+        "vn_correct": "ngoại tình",
+        "vn_wrong": "phù khí",
+        "context": "emotions",
+        "frequency": 121,
+        "note": "Auto-extracted from corpus (freq: 121)"
+      },
+      {
+        "zh": "怒鳴",
+        "vn_correct": "quát mắng",
+        "vn_wrong": "nộ minh",
+        "context": "emotions",
+        "frequency": 112,
+        "note": "Auto-extracted from corpus (freq: 112)"
+      },
+      {
+        "zh": "天気",
+        "vn_correct": "thời tiết",
+        "vn_wrong": "thiên khí",
+        "context": "emotions",
+        "frequency": 111,
+        "note": "Auto-extracted from corpus (freq: 111)"
+      },
+      {
+        "zh": "居心",
+        "vn_correct": "thoải mái",
+        "vn_wrong": "cư tâm",
+        "context": "emotions",
+        "frequency": 107,
+        "note": "Auto-extracted from corpus (freq: 107)"
+      },
+      {
+        "zh": "居心地",
+        "vn_correct": "cảm giác thoải mái",
+        "vn_wrong": "cư tâm địa",
+        "context": "emotions",
+        "frequency": 107,
+        "note": "Auto-extracted from corpus (freq: 107)"
+      },
+      {
+        "zh": "心底",
+        "vn_correct": "tận đáy lòng",
+        "vn_wrong": "tâm để",
+        "context": "emotions",
+        "frequency": 106,
+        "note": "Auto-extracted from corpus (freq: 106)"
+      },
+      {
+        "zh": "気軽",
+        "vn_correct": "thoải mái",
+        "vn_wrong": "khí khinh",
+        "context": "emotions",
+        "frequency": 102,
+        "note": "Auto-extracted from corpus (freq: 102)"
+      },
+      {
+        "zh": "好感",
+        "vn_correct": "cảm tình",
+        "vn_wrong": "hảo cảm",
+        "context": "emotions",
+        "frequency": 99,
+        "note": "Auto-extracted from corpus (freq: 99)"
+      },
+      {
+        "zh": "音楽",
+        "vn_correct": "âm nhạc",
+        "vn_wrong": "âm nhạc",
+        "context": "emotions",
+        "frequency": 99,
+        "note": "Auto-extracted from corpus (freq: 99)"
+      },
+      {
+        "zh": "気者",
+        "vn_correct": "người nổi tiếng",
+        "vn_wrong": "khí giả",
+        "context": "emotions",
+        "frequency": 98,
+        "note": "Auto-extracted from corpus (freq: 98)"
+      },
+      {
+        "zh": "眠気",
+        "vn_correct": "buồn ngủ",
+        "vn_wrong": "miên khí",
+        "context": "emotions",
+        "frequency": 97,
+        "note": "Auto-extracted from corpus (freq: 97)"
+      },
+      {
+        "zh": "気楽",
+        "vn_correct": "thoải mái",
+        "vn_wrong": "khí lạc",
+        "context": "emotions",
+        "frequency": 92,
+        "note": "Auto-extracted from corpus (freq: 92)"
+      },
+      {
+        "zh": "思春",
+        "vn_correct": "dậy thì",
+        "vn_wrong": "tư xuân",
+        "context": "emotions",
+        "frequency": 91,
+        "note": "Auto-extracted from corpus (freq: 91)"
+      },
+      {
+        "zh": "思春期",
+        "vn_correct": "tuổi dậy thì",
+        "vn_wrong": "tư xuân kỳ",
+        "context": "emotions",
+        "frequency": 91,
+        "note": "Auto-extracted from corpus (freq: 91)"
+      },
+      {
+        "zh": "好良",
+        "vn_correct": "tốt",
+        "vn_wrong": "hảo lương",
+        "context": "emotions",
+        "frequency": 89,
+        "note": "Auto-extracted from corpus (freq: 89)"
+      },
+      {
+        "zh": "格好良",
+        "vn_correct": "bảnh bao",
+        "vn_wrong": "cách hảo lương",
+        "context": "emotions",
+        "frequency": 88,
+        "note": "Auto-extracted from corpus (freq: 88)"
+      },
+      {
+        "zh": "電気",
+        "vn_correct": "điện",
+        "vn_wrong": "điện khí",
+        "context": "emotions",
+        "frequency": 86,
+        "note": "Auto-extracted from corpus (freq: 86)"
+      },
+      {
+        "zh": "気満",
+        "vn_correct": "đầy năng lượng",
+        "vn_wrong": "khí mãn",
+        "context": "emotions",
+        "frequency": 82,
+        "note": "Auto-extracted from corpus (freq: 82)"
+      },
+      {
+        "zh": "同情",
+        "vn_correct": "đồng cảm",
+        "vn_wrong": "đồng tình",
+        "context": "emotions",
+        "frequency": 81,
+        "note": "Auto-extracted from corpus (freq: 81)"
+      },
+      {
+        "zh": "感度",
+        "vn_correct": "độ nhạy",
+        "vn_wrong": "cảm độ",
+        "context": "emotions",
+        "frequency": 79,
+        "note": "Auto-extracted from corpus (freq: 79)"
+      },
+      {
+        "zh": "好感度",
+        "vn_correct": "mức độ thiện cảm",
+        "vn_wrong": "hảo cảm độ",
+        "context": "emotions",
+        "frequency": 76,
+        "note": "Auto-extracted from corpus (freq: 76)"
+      },
+      {
+        "zh": "生意気",
+        "vn_correct": "láo xược",
+        "vn_wrong": "sinh ý khí",
+        "context": "emotions",
+        "frequency": 75,
+        "note": "Auto-extracted from corpus (freq: 75)"
+      },
+      {
+        "zh": "湯気",
+        "vn_correct": "hơi nước",
+        "vn_wrong": "thang khí",
+        "context": "emotions",
+        "frequency": 74,
+        "note": "Auto-extracted from corpus (freq: 74)"
+      },
+      {
+        "zh": "邪気",
+        "vn_correct": "khí xấu",
+        "vn_wrong": "tà khí",
+        "context": "emotions",
+        "frequency": 73,
+        "note": "Auto-extracted from corpus (freq: 73)"
+      },
+      {
+        "zh": "無表情",
+        "vn_correct": "không biểu cảm",
+        "vn_wrong": "vô biểu tình",
+        "context": "emotions",
+        "frequency": 73,
+        "note": "Auto-extracted from corpus (freq: 73)"
+      },
+      {
+        "zh": "共感",
+        "vn_correct": "đồng cảm",
+        "vn_wrong": "cộng cảm",
+        "context": "emotions",
+        "frequency": 71,
+        "note": "Auto-extracted from corpus (freq: 71)"
+      },
+      {
+        "zh": "心感",
+        "vn_correct": "cảm giác",
+        "vn_wrong": "tâm cảm",
+        "context": "emotions",
+        "frequency": 70,
+        "note": "Auto-extracted from corpus (freq: 70)"
+      },
+      {
+        "zh": "無邪気",
+        "vn_correct": "ngây thơ",
+        "vn_wrong": "vô tà khí",
+        "context": "emotions",
+        "frequency": 69,
+        "note": "Auto-extracted from corpus (freq: 69)"
+      },
+      {
+        "zh": "気恥",
+        "vn_correct": "ngại ngùng",
+        "vn_wrong": "khí sỉ",
+        "context": "emotions",
+        "frequency": 68,
+        "note": "Auto-extracted from corpus (freq: 68)"
+      },
+      {
+        "zh": "敏感",
+        "vn_correct": "nhạy cảm",
+        "vn_wrong": "mẫn cảm",
+        "context": "emotions",
+        "frequency": 68,
+        "note": "Auto-extracted from corpus (freq: 68)"
+      },
+      {
+        "zh": "在感",
+        "vn_correct": "sự hiện diện",
+        "vn_wrong": "tại cảm",
+        "context": "emotions",
+        "frequency": 68,
+        "note": "Auto-extracted from corpus (freq: 68)"
+      },
+      {
+        "zh": "存在感",
+        "vn_correct": "sự hiện diện",
+        "vn_wrong": "tồn tại cảm",
+        "context": "emotions",
+        "frequency": 68,
+        "note": "Auto-extracted from corpus (freq: 68)"
+      },
+      {
+        "zh": "下心",
+        "vn_correct": "ý đồ xấu",
+        "vn_wrong": "hạ tâm",
+        "context": "emotions",
+        "frequency": 67,
+        "note": "Auto-extracted from corpus (freq: 67)"
+      },
+      {
+        "zh": "気温",
+        "vn_correct": "nhiệt độ",
+        "vn_wrong": "khí ôn",
+        "context": "emotions",
+        "frequency": 67,
+        "note": "Auto-extracted from corpus (freq: 67)"
+      },
+      {
+        "zh": "病気",
+        "vn_correct": "bệnh",
+        "vn_wrong": "bệnh khí",
+        "context": "emotions",
+        "frequency": 66,
+        "note": "Auto-extracted from corpus (freq: 66)"
+      }
+    ],
+    "actions": [
+      {
+        "zh": "言葉",
+        "vn_correct": "lời nói",
+        "vn_wrong": "ngôn diệp",
+        "context": "actions",
+        "frequency": 5241,
+        "note": "Auto-extracted from corpus (freq: 5241)"
+      },
+      {
+        "zh": "出来",
+        "vn_correct": "có thể",
+        "vn_wrong": "xuất lai",
+        "context": "actions",
+        "frequency": 2156,
+        "note": "Auto-extracted from corpus (freq: 2156)"
+      },
+      {
+        "zh": "電話",
+        "vn_correct": "điện thoại",
+        "vn_wrong": "điện thoại",
+        "context": "actions",
+        "frequency": 1469,
+        "note": "Auto-extracted from corpus (freq: 1469)"
+      },
+      {
+        "zh": "会話",
+        "vn_correct": "trò chuyện",
+        "vn_wrong": "hội thoại",
+        "context": "actions",
+        "frequency": 1112,
+        "note": "Auto-extracted from corpus (freq: 1112)"
+      },
+      {
+        "zh": "行動",
+        "vn_correct": "hành động",
+        "vn_wrong": "hành động",
+        "context": "actions",
+        "frequency": 1025,
+        "note": "Auto-extracted from corpus (freq: 1025)"
+      },
+      {
+        "zh": "旅行",
+        "vn_correct": "du lịch",
+        "vn_wrong": "lữ hành",
+        "context": "actions",
+        "frequency": 1019,
+        "note": "Auto-extracted from corpus (freq: 1019)"
+      },
+      {
+        "zh": "移動",
+        "vn_correct": "di chuyển",
+        "vn_wrong": "di động",
+        "context": "actions",
+        "frequency": 779,
+        "note": "Auto-extracted from corpus (freq: 779)"
+      },
+      {
+        "zh": "見上",
+        "vn_correct": "ngước nhìn",
+        "vn_wrong": "kiến thượng",
+        "context": "actions",
+        "frequency": 664,
+        "note": "Auto-extracted from corpus (freq: 664)"
+      },
+      {
+        "zh": "出会",
+        "vn_correct": "gặp gỡ",
+        "vn_wrong": "xuất hội",
+        "context": "actions",
+        "frequency": 642,
+        "note": "Auto-extracted from corpus (freq: 642)"
+      },
+      {
+        "zh": "話題",
+        "vn_correct": "chủ đề",
+        "vn_wrong": "thoại đề",
+        "context": "actions",
+        "frequency": 631,
+        "note": "Auto-extracted from corpus (freq: 631)"
+      },
+      {
+        "zh": "世話",
+        "vn_correct": "chăm sóc",
+        "vn_wrong": "thế thoại",
+        "context": "actions",
+        "frequency": 613,
+        "note": "Auto-extracted from corpus (freq: 613)"
+      },
+      {
+        "zh": "動画",
+        "vn_correct": "video",
+        "vn_wrong": "động họa",
+        "context": "actions",
+        "frequency": 541,
+        "note": "Auto-extracted from corpus (freq: 541)"
+      },
+      {
+        "zh": "意見",
+        "vn_correct": "ý kiến",
+        "vn_wrong": "ý kiến",
+        "context": "actions",
+        "frequency": 501,
+        "note": "Auto-extracted from corpus (freq: 501)"
+      },
+      {
+        "zh": "一言",
+        "vn_correct": "một lời",
+        "vn_wrong": "nhất ngôn",
+        "context": "actions",
+        "frequency": 448,
+        "note": "Auto-extracted from corpus (freq: 448)"
+      },
+      {
+        "zh": "活動",
+        "vn_correct": "hoạt động",
+        "vn_wrong": "hoạt động",
+        "context": "actions",
+        "frequency": 423,
+        "note": "Auto-extracted from corpus (freq: 423)"
+      },
+      {
+        "zh": "発行",
+        "vn_correct": "phát hành",
+        "vn_wrong": "phát hành",
+        "context": "actions",
+        "frequency": 420,
+        "note": "Auto-extracted from corpus (freq: 420)"
+      },
+      {
+        "zh": "発言",
+        "vn_correct": "phát ngôn",
+        "vn_wrong": "phát ngôn",
+        "context": "actions",
+        "frequency": 419,
+        "note": "Auto-extracted from corpus (freq: 419)"
+      },
+      {
+        "zh": "修学旅行",
+        "vn_correct": "chuyến đi học tập",
+        "vn_wrong": "tu học lữ hành",
+        "context": "actions",
+        "frequency": 416,
+        "note": "Auto-extracted from corpus (freq: 416)"
+      },
+      {
+        "zh": "学旅行",
+        "vn_correct": "chuyến đi học tập",
+        "vn_wrong": "học lữ hành",
+        "context": "actions",
+        "frequency": 416,
+        "note": "Auto-extracted from corpus (freq: 416)"
+      },
+      {
+        "zh": "将来",
+        "vn_correct": "tương lai",
+        "vn_wrong": "tương lai",
+        "context": "actions",
+        "frequency": 404,
+        "note": "Auto-extracted from corpus (freq: 404)"
+      },
+      {
+        "zh": "運動",
+        "vn_correct": "vận động",
+        "vn_wrong": "vận động",
+        "context": "actions",
+        "frequency": 368,
+        "note": "Auto-extracted from corpus (freq: 368)"
+      },
+      {
+        "zh": "本来",
+        "vn_correct": "vốn dĩ",
+        "vn_wrong": "bản lai",
+        "context": "actions",
+        "frequency": 362,
+        "note": "Auto-extracted from corpus (freq: 362)"
+      },
+      {
+        "zh": "見送",
+        "vn_correct": "tiễn đưa",
+        "vn_wrong": "kiến tống",
+        "context": "actions",
+        "frequency": 324,
+        "note": "Auto-extracted from corpus (freq: 324)"
+      },
+      {
+        "zh": "無言",
+        "vn_correct": "im lặng",
+        "vn_wrong": "vô ngôn",
+        "context": "actions",
+        "frequency": 317,
+        "note": "Auto-extracted from corpus (freq: 317)"
+      },
+      {
+        "zh": "見守",
+        "vn_correct": "theo dõi",
+        "vn_wrong": "kiến thủ",
+        "context": "actions",
+        "frequency": 317,
+        "note": "Auto-extracted from corpus (freq: 317)"
+      },
+      {
+        "zh": "入学",
+        "vn_correct": "nhập học",
+        "vn_wrong": "nhập học",
+        "context": "actions",
+        "frequency": 316,
+        "note": "Auto-extracted from corpus (freq: 316)"
+      },
+      {
+        "zh": "動揺",
+        "vn_correct": "dao động",
+        "vn_wrong": "động dao",
+        "context": "actions",
+        "frequency": 292,
+        "note": "Auto-extracted from corpus (freq: 292)"
+      },
+      {
+        "zh": "帯電話",
+        "vn_correct": "điện thoại di động",
+        "vn_wrong": "đái điện thoại",
+        "context": "actions",
+        "frequency": 282,
+        "note": "Auto-extracted from corpus (freq: 282)"
+      },
+      {
+        "zh": "携帯電話",
+        "vn_correct": "điện thoại di động",
+        "vn_wrong": "huề đái điện thoại",
+        "context": "actions",
+        "frequency": 282,
+        "note": "Auto-extracted from corpus (freq: 282)"
+      },
+      {
+        "zh": "入部",
+        "vn_correct": "gia nhập câu lạc bộ",
+        "vn_wrong": "nhập bộ",
+        "context": "actions",
+        "frequency": 267,
+        "note": "Auto-extracted from corpus (freq: 267)"
+      },
+      {
+        "zh": "帰宅",
+        "vn_correct": "về nhà",
+        "vn_wrong": "quy trạch",
+        "context": "actions",
+        "frequency": 264,
+        "note": "Auto-extracted from corpus (freq: 264)"
+      },
+      {
+        "zh": "見回",
+        "vn_correct": "nhìn quanh",
+        "vn_wrong": "kiến hồi",
+        "context": "actions",
+        "frequency": 261,
+        "note": "Auto-extracted from corpus (freq: 261)"
+      },
+      {
+        "zh": "未来",
+        "vn_correct": "tương lai",
+        "vn_wrong": "vị lai",
+        "context": "actions",
+        "frequency": 258,
+        "note": "Auto-extracted from corpus (freq: 258)"
+      },
+      {
+        "zh": "見合",
+        "vn_correct": "nhìn nhau",
+        "vn_wrong": "kiến hợp",
+        "context": "actions",
+        "frequency": 257,
+        "note": "Auto-extracted from corpus (freq: 257)"
+      },
+      {
+        "zh": "動物",
+        "vn_correct": "động vật",
+        "vn_wrong": "động vật",
+        "context": "actions",
+        "frequency": 254,
+        "note": "Auto-extracted from corpus (freq: 254)"
+      },
+      {
+        "zh": "見知",
+        "vn_correct": "quen biết",
+        "vn_wrong": "kiến tri",
+        "context": "actions",
+        "frequency": 246,
+        "note": "Auto-extracted from corpus (freq: 246)"
+      },
+      {
+        "zh": "以来",
+        "vn_correct": "từ đó",
+        "vn_wrong": "dĩ lai",
+        "context": "actions",
+        "frequency": 234,
+        "note": "Auto-extracted from corpus (freq: 234)"
+      },
+      {
+        "zh": "来年",
+        "vn_correct": "năm sau",
+        "vn_wrong": "lai niên",
+        "context": "actions",
+        "frequency": 217,
+        "note": "Auto-extracted from corpus (freq: 217)"
+      },
+      {
+        "zh": "出来事",
+        "vn_correct": "sự việc",
+        "vn_wrong": "xuất lai sự",
+        "context": "actions",
+        "frequency": 209,
+        "note": "Auto-extracted from corpus (freq: 209)"
+      },
+      {
+        "zh": "来事",
+        "vn_correct": "sự việc",
+        "vn_wrong": "lai sự",
+        "context": "actions",
+        "frequency": 209,
+        "note": "Auto-extracted from corpus (freq: 209)"
+      },
+      {
+        "zh": "来実",
+        "vn_correct": "thực tế",
+        "vn_wrong": "lai thực",
+        "context": "actions",
+        "frequency": 209,
+        "note": "Auto-extracted from corpus (freq: 209)"
+      },
+      {
+        "zh": "見開",
+        "vn_correct": "mở to",
+        "vn_wrong": "kiến khai",
+        "context": "actions",
+        "frequency": 207,
+        "note": "Auto-extracted from corpus (freq: 207)"
+      },
+      {
+        "zh": "行為",
+        "vn_correct": "hành vi",
+        "vn_wrong": "hành vi",
+        "context": "actions",
+        "frequency": 201,
+        "note": "Auto-extracted from corpus (freq: 201)"
+      },
+      {
+        "zh": "見下",
+        "vn_correct": "nhìn xuống",
+        "vn_wrong": "kiến hạ",
+        "context": "actions",
+        "frequency": 200,
+        "note": "Auto-extracted from corpus (freq: 200)"
+      },
+      {
+        "zh": "通話",
+        "vn_correct": "cuộc gọi",
+        "vn_wrong": "thông thoại",
+        "context": "actions",
+        "frequency": 199,
+        "note": "Auto-extracted from corpus (freq: 199)"
+      },
+      {
+        "zh": "宣言",
+        "vn_correct": "tuyên bố",
+        "vn_wrong": "tuyên ngôn",
+        "context": "actions",
+        "frequency": 177,
+        "note": "Auto-extracted from corpus (freq: 177)"
+      },
+      {
+        "zh": "出迎",
+        "vn_correct": "đón tiếp",
+        "vn_wrong": "xuất nghinh",
+        "context": "actions",
+        "frequency": 162,
+        "note": "Auto-extracted from corpus (freq: 162)"
+      },
+      {
+        "zh": "鼓動",
+        "vn_correct": "nhịp tim",
+        "vn_wrong": "cổ động",
+        "context": "actions",
+        "frequency": 161,
+        "note": "Auto-extracted from corpus (freq: 161)"
+      },
+      {
+        "zh": "購入",
+        "vn_correct": "mua",
+        "vn_wrong": "cấu nhập",
+        "context": "actions",
+        "frequency": 161,
+        "note": "Auto-extracted from corpus (freq: 161)"
+      },
+      {
+        "zh": "見事",
+        "vn_correct": "tuyệt vời",
+        "vn_wrong": "kiến sự",
+        "context": "actions",
+        "frequency": 159,
+        "note": "Auto-extracted from corpus (freq: 159)"
+      },
+      {
+        "zh": "出場",
+        "vn_correct": "tham gia",
+        "vn_wrong": "xuất trường",
+        "context": "actions",
+        "frequency": 158,
+        "note": "Auto-extracted from corpus (freq: 158)"
+      },
+      {
+        "zh": "来週",
+        "vn_correct": "tuần sau",
+        "vn_wrong": "lai tuần",
+        "context": "actions",
+        "frequency": 156,
+        "note": "Auto-extracted from corpus (freq: 156)"
+      },
+      {
+        "zh": "実行",
+        "vn_correct": "thực hiện",
+        "vn_wrong": "thực hành",
+        "context": "actions",
+        "frequency": 155,
+        "note": "Auto-extracted from corpus (freq: 155)"
+      },
+      {
+        "zh": "何言",
+        "vn_correct": "nói gì",
+        "vn_wrong": "hà ngôn",
+        "context": "actions",
+        "frequency": 152,
+        "note": "Auto-extracted from corpus (freq: 152)"
+      },
+      {
+        "zh": "出発",
+        "vn_correct": "khởi hành",
+        "vn_wrong": "xuất phát",
+        "context": "actions",
+        "frequency": 150,
+        "note": "Auto-extracted from corpus (freq: 150)"
+      },
+      {
+        "zh": "見慣",
+        "vn_correct": "quen thuộc",
+        "vn_wrong": "kiến quán",
+        "context": "actions",
+        "frequency": 146,
+        "note": "Auto-extracted from corpus (freq: 146)"
+      },
+      {
+        "zh": "進行",
+        "vn_correct": "tiến hành",
+        "vn_wrong": "tiến hành",
+        "context": "actions",
+        "frequency": 134,
+        "note": "Auto-extracted from corpus (freq: 134)"
+      },
+      {
+        "zh": "飛行",
+        "vn_correct": "bay",
+        "vn_wrong": "phi hành",
+        "context": "actions",
+        "frequency": 133,
+        "note": "Auto-extracted from corpus (freq: 133)"
+      },
+      {
+        "zh": "参考",
+        "vn_correct": "tham khảo",
+        "vn_wrong": "tham khảo",
+        "context": "actions",
+        "frequency": 130,
+        "note": "Auto-extracted from corpus (freq: 130)"
+      },
+      {
+        "zh": "見覚",
+        "vn_correct": "nhớ ra",
+        "vn_wrong": "kiến giác",
+        "context": "actions",
+        "frequency": 125,
+        "note": "Auto-extracted from corpus (freq: 125)"
+      },
+      {
+        "zh": "新入",
+        "vn_correct": "mới vào",
+        "vn_wrong": "tân nhập",
+        "context": "actions",
+        "frequency": 124,
+        "note": "Auto-extracted from corpus (freq: 124)"
+      },
+      {
+        "zh": "行事",
+        "vn_correct": "sự kiện",
+        "vn_wrong": "hành sự",
+        "context": "actions",
+        "frequency": 122,
+        "note": "Auto-extracted from corpus (freq: 122)"
+      },
+      {
+        "zh": "起動",
+        "vn_correct": "khởi động",
+        "vn_wrong": "khởi động",
+        "context": "actions",
+        "frequency": 120,
+        "note": "Auto-extracted from corpus (freq: 120)"
+      },
+      {
+        "zh": "見返",
+        "vn_correct": "nhìn lại",
+        "vn_wrong": "kiến phản",
+        "context": "actions",
+        "frequency": 113,
+        "note": "Auto-extracted from corpus (freq: 113)"
+      },
+      {
+        "zh": "自動",
+        "vn_correct": "tự động",
+        "vn_wrong": "tự động",
+        "context": "actions",
+        "frequency": 104,
+        "note": "Auto-extracted from corpus (freq: 104)"
+      },
+      {
+        "zh": "新聞",
+        "vn_correct": "báo",
+        "vn_wrong": "tân văn",
+        "context": "actions",
+        "frequency": 103,
+        "note": "Auto-extracted from corpus (freq: 103)"
+      },
+      {
+        "zh": "外出",
+        "vn_correct": "ra ngoài",
+        "vn_wrong": "ngoại xuất",
+        "context": "actions",
+        "frequency": 96,
+        "note": "Auto-extracted from corpus (freq: 96)"
+      },
+      {
+        "zh": "見逃",
+        "vn_correct": "bỏ qua",
+        "vn_wrong": "kiến đào",
+        "context": "actions",
+        "frequency": 96,
+        "note": "Auto-extracted from corpus (freq: 96)"
+      },
+      {
+        "zh": "出席",
+        "vn_correct": "có mặt",
+        "vn_wrong": "xuất tịch",
+        "context": "actions",
+        "frequency": 93,
+        "note": "Auto-extracted from corpus (freq: 93)"
+      },
+      {
+        "zh": "入生",
+        "vn_correct": "sinh viên mới",
+        "vn_wrong": "nhập sinh",
+        "context": "actions",
+        "frequency": 93,
+        "note": "Auto-extracted from corpus (freq: 93)"
+      },
+      {
+        "zh": "入学式",
+        "vn_correct": "lễ nhập học",
+        "vn_wrong": "nhập học thức",
+        "context": "actions",
+        "frequency": 91,
+        "note": "Auto-extracted from corpus (freq: 91)"
+      },
+      {
+        "zh": "見渡",
+        "vn_correct": "nhìn xa",
+        "vn_wrong": "kiến độ",
+        "context": "actions",
+        "frequency": 90,
+        "note": "Auto-extracted from corpus (freq: 90)"
+      },
+      {
+        "zh": "見学",
+        "vn_correct": "tham quan",
+        "vn_wrong": "kiến học",
+        "context": "actions",
+        "frequency": 90,
+        "note": "Auto-extracted from corpus (freq: 90)"
+      },
+      {
+        "zh": "物言",
+        "vn_correct": "nói",
+        "vn_wrong": "vật ngôn",
+        "context": "actions",
+        "frequency": 89,
+        "note": "Auto-extracted from corpus (freq: 89)"
+      },
+      {
+        "zh": "言葉通",
+        "vn_correct": "đúng như lời",
+        "vn_wrong": "ngôn diệp thông",
+        "context": "actions",
+        "frequency": 89,
+        "note": "Auto-extracted from corpus (freq: 89)"
+      },
+      {
+        "zh": "行者",
+        "vn_correct": "người hành động",
+        "vn_wrong": "hành giả",
+        "context": "actions",
+        "frequency": 88,
+        "note": "Auto-extracted from corpus (freq: 88)"
+      },
+      {
+        "zh": "発動",
+        "vn_correct": "kích hoạt",
+        "vn_wrong": "phát động",
+        "context": "actions",
+        "frequency": 87,
+        "note": "Auto-extracted from corpus (freq: 87)"
+      },
+      {
+        "zh": "露出",
+        "vn_correct": "lộ ra",
+        "vn_wrong": "lộ xuất",
+        "context": "actions",
+        "frequency": 86,
+        "note": "Auto-extracted from corpus (freq: 86)"
+      },
+      {
+        "zh": "断言",
+        "vn_correct": "khẳng định",
+        "vn_wrong": "đoạn ngôn",
+        "context": "actions",
+        "frequency": 86,
+        "note": "Auto-extracted from corpus (freq: 86)"
+      },
+      {
+        "zh": "発行者",
+        "vn_correct": "nhà phát hành",
+        "vn_wrong": "phát hành giả",
+        "context": "actions",
+        "frequency": 85,
+        "note": "Auto-extracted from corpus (freq: 85)"
+      },
+      {
+        "zh": "見当",
+        "vn_correct": "ước tính",
+        "vn_wrong": "kiến đương",
+        "context": "actions",
+        "frequency": 85,
+        "note": "Auto-extracted from corpus (freq: 85)"
+      },
+      {
+        "zh": "校行",
+        "vn_correct": "hành trình trường",
+        "vn_wrong": "hiệu hành",
+        "context": "actions",
+        "frequency": 85,
+        "note": "Auto-extracted from corpus (freq: 85)"
+      },
+      {
+        "zh": "外見",
+        "vn_correct": "ngoại hình",
+        "vn_wrong": "ngoại kiến",
+        "context": "actions",
+        "frequency": 84,
+        "note": "Auto-extracted from corpus (freq: 84)"
+      },
+      {
+        "zh": "脱出",
+        "vn_correct": "thoát ra",
+        "vn_wrong": "thoát xuất",
+        "context": "actions",
+        "frequency": 84,
+        "note": "Auto-extracted from corpus (freq: 84)"
+      },
+      {
+        "zh": "行船",
+        "vn_correct": "khinh khí cầu",
+        "vn_wrong": "hành thuyền",
+        "context": "actions",
+        "frequency": 84,
+        "note": "Auto-extracted from corpus (freq: 84)"
+      },
+      {
+        "zh": "飛行船",
+        "vn_correct": "khinh khí cầu",
+        "vn_wrong": "phi hành thuyền",
+        "context": "actions",
+        "frequency": 84,
+        "note": "Auto-extracted from corpus (freq: 84)"
+      },
+      {
+        "zh": "出版",
+        "vn_correct": "xuất bản",
+        "vn_wrong": "xuất bản",
+        "context": "actions",
+        "frequency": 83,
+        "note": "Auto-extracted from corpus (freq: 83)"
+      },
+      {
+        "zh": "学校行",
+        "vn_correct": "hành trình trường",
+        "vn_wrong": "học hiệu hành",
+        "context": "actions",
+        "frequency": 83,
+        "note": "Auto-extracted from corpus (freq: 83)"
+      },
+      {
+        "zh": "入口",
+        "vn_correct": "lối vào",
+        "vn_wrong": "nhập khẩu",
+        "context": "actions",
+        "frequency": 82,
+        "note": "Auto-extracted from corpus (freq: 82)"
+      },
+      {
+        "zh": "行委",
+        "vn_correct": "ủy viên tổ chức",
+        "vn_wrong": "hành ủy",
+        "context": "actions",
+        "frequency": 81,
+        "note": "Auto-extracted from corpus (freq: 81)"
+      },
+      {
+        "zh": "行委員",
+        "vn_correct": "ủy viên tổ chức",
+        "vn_wrong": "hành ủy viên",
+        "context": "actions",
+        "frequency": 81,
+        "note": "Auto-extracted from corpus (freq: 81)"
+      },
+      {
+        "zh": "出番",
+        "vn_correct": "lượt ra",
+        "vn_wrong": "xuất phiên",
+        "context": "actions",
+        "frequency": 80,
+        "note": "Auto-extracted from corpus (freq: 80)"
+      },
+      {
+        "zh": "顔見",
+        "vn_correct": "gặp mặt",
+        "vn_wrong": "nhan kiến",
+        "context": "actions",
+        "frequency": 80,
+        "note": "Auto-extracted from corpus (freq: 80)"
+      },
+      {
+        "zh": "実行委",
+        "vn_correct": "ban tổ chức",
+        "vn_wrong": "thực hành ủy",
+        "context": "actions",
+        "frequency": 80,
+        "note": "Auto-extracted from corpus (freq: 80)"
+      },
+      {
+        "zh": "実行委員",
+        "vn_correct": "ủy viên tổ chức",
+        "vn_wrong": "thực hành ủy viên",
+        "context": "actions",
+        "frequency": 80,
+        "note": "Auto-extracted from corpus (freq: 80)"
+      },
+      {
+        "zh": "新入生",
+        "vn_correct": "sinh viên mới",
+        "vn_wrong": "tân nhập sinh",
+        "context": "actions",
+        "frequency": 79,
+        "note": "Auto-extracted from corpus (freq: 79)"
+      },
+      {
+        "zh": "動部",
+        "vn_correct": "câu lạc bộ thể thao",
+        "vn_wrong": "động bộ",
+        "context": "actions",
+        "frequency": 77,
+        "note": "Auto-extracted from corpus (freq: 77)"
+      },
+      {
+        "zh": "運動部",
+        "vn_correct": "câu lạc bộ thể thao",
+        "vn_wrong": "vận động bộ",
+        "context": "actions",
+        "frequency": 77,
+        "note": "Auto-extracted from corpus (freq: 77)"
+      },
+      {
+        "zh": "部活動",
+        "vn_correct": "hoạt động câu lạc bộ",
+        "vn_wrong": "bộ hoạt động",
+        "context": "actions",
+        "frequency": 76,
+        "note": "Auto-extracted from corpus (freq: 76)"
+      },
+      {
+        "zh": "泉旅行",
+        "vn_correct": "chuyến đi suối nước nóng",
+        "vn_wrong": "tuyền lữ hành",
+        "context": "actions",
+        "frequency": 76,
+        "note": "Auto-extracted from corpus (freq: 76)"
+      }
+    ],
+    "time": [
+      {
+        "zh": "時間",
+        "vn_correct": "thời gian",
+        "vn_wrong": "thời gian",
+        "context": "time",
+        "frequency": 5458,
+        "note": "Auto-extracted from corpus (freq: 5458)"
+      },
+      {
+        "zh": "今日",
+        "vn_correct": "hôm nay",
+        "vn_wrong": "kim nhật",
+        "context": "time",
+        "frequency": 5022,
+        "note": "Auto-extracted from corpus (freq: 5022)"
+      },
+      {
+        "zh": "朝凪",
+        "vn_correct": "Asanagi",
+        "vn_wrong": "Triều Ngưng",
+        "context": "time",
+        "frequency": 2024,
+        "note": "Auto-extracted from corpus (freq: 2024)"
+      },
+      {
+        "zh": "名前",
+        "vn_correct": "tên",
+        "vn_wrong": "danh tiền",
+        "context": "time",
+        "frequency": 1720,
+        "note": "Auto-extracted from corpus (freq: 1720)"
+      },
+      {
+        "zh": "間違",
+        "vn_correct": "sai lầm",
+        "vn_wrong": "gian vi",
+        "context": "time",
+        "frequency": 1548,
+        "note": "Auto-extracted from corpus (freq: 1548)"
+      },
+      {
+        "zh": "最後",
+        "vn_correct": "cuối cùng",
+        "vn_wrong": "tối hậu",
+        "context": "time",
+        "frequency": 1492,
+        "note": "Auto-extracted from corpus (freq: 1492)"
+      },
+      {
+        "zh": "今回",
+        "vn_correct": "lần này",
+        "vn_wrong": "kim hồi",
+        "context": "time",
+        "frequency": 1453,
+        "note": "Auto-extracted from corpus (freq: 1453)"
+      },
+      {
+        "zh": "瞬間",
+        "vn_correct": "khoảnh khắc",
+        "vn_wrong": "thuấn gian",
+        "context": "time",
+        "frequency": 1340,
+        "note": "Auto-extracted from corpus (freq: 1340)"
+      },
+      {
+        "zh": "優月",
+        "vn_correct": "Yuzuki",
+        "vn_wrong": "Ưu Nguyệt",
+        "context": "time",
+        "frequency": 1319,
+        "note": "Auto-extracted from corpus (freq: 1319)"
+      },
+      {
+        "zh": "前原",
+        "vn_correct": "Maehara",
+        "vn_wrong": "Tiền Nguyên",
+        "context": "time",
+        "frequency": 1271,
+        "note": "Auto-extracted from corpus (freq: 1271)"
+      },
+      {
+        "zh": "昨日",
+        "vn_correct": "hôm qua",
+        "vn_wrong": "tạc nhật",
+        "context": "time",
+        "frequency": 1210,
+        "note": "Auto-extracted from corpus (freq: 1210)"
+      },
+      {
+        "zh": "明日",
+        "vn_correct": "ngày mai",
+        "vn_wrong": "minh nhật",
+        "context": "time",
+        "frequency": 1174,
+        "note": "Auto-extracted from corpus (freq: 1174)"
+      },
+      {
+        "zh": "今度",
+        "vn_correct": "lần sau",
+        "vn_wrong": "kim độ",
+        "context": "time",
+        "frequency": 1162,
+        "note": "Auto-extracted from corpus (freq: 1162)"
+      },
+      {
+        "zh": "一年",
+        "vn_correct": "một năm",
+        "vn_wrong": "nhất niên",
+        "context": "time",
+        "frequency": 942,
+        "note": "Auto-extracted from corpus (freq: 942)"
+      },
+      {
+        "zh": "説明",
+        "vn_correct": "giải thích",
+        "vn_wrong": "thuyết minh",
+        "context": "time",
+        "frequency": 935,
+        "note": "Auto-extracted from corpus (freq: 935)"
+      },
+      {
+        "zh": "毎日",
+        "vn_correct": "hàng ngày",
+        "vn_wrong": "mỗi nhật",
+        "context": "time",
+        "frequency": 780,
+        "note": "Auto-extracted from corpus (freq: 780)"
+      },
+      {
+        "zh": "同時",
+        "vn_correct": "đồng thời",
+        "vn_wrong": "đồng thời",
+        "context": "time",
+        "frequency": 754,
+        "note": "Auto-extracted from corpus (freq: 754)"
+      },
+      {
+        "zh": "年生",
+        "vn_correct": "học sinh năm",
+        "vn_wrong": "niên sinh",
+        "context": "time",
+        "frequency": 715,
+        "note": "Auto-extracted from corpus (freq: 715)"
+      },
+      {
+        "zh": "一日",
+        "vn_correct": "một ngày",
+        "vn_wrong": "nhất nhật",
+        "context": "time",
+        "frequency": 668,
+        "note": "Auto-extracted from corpus (freq: 668)"
+      },
+      {
+        "zh": "日本",
+        "vn_correct": "Nhật Bản",
+        "vn_wrong": "Nhật Bản",
+        "context": "time",
+        "frequency": 640,
+        "note": "Auto-extracted from corpus (freq: 640)"
+      },
+      {
+        "zh": "美月",
+        "vn_correct": "Mitsuki",
+        "vn_wrong": "Mỹ Nguyệt",
+        "context": "time",
+        "frequency": 616,
+        "note": "Auto-extracted from corpus (freq: 616)"
+      },
+      {
+        "zh": "以前",
+        "vn_correct": "trước đây",
+        "vn_wrong": "dĩ tiền",
+        "context": "time",
+        "frequency": 548,
+        "note": "Auto-extracted from corpus (freq: 548)"
+      },
+      {
+        "zh": "放課後",
+        "vn_correct": "sau giờ học",
+        "vn_wrong": "phóng khóa hậu",
+        "context": "time",
+        "frequency": 538,
+        "note": "Auto-extracted from corpus (freq: 538)"
+      },
+      {
+        "zh": "課後",
+        "vn_correct": "sau giờ học",
+        "vn_wrong": "khóa hậu",
+        "context": "time",
+        "frequency": 538,
+        "note": "Auto-extracted from corpus (freq: 538)"
+      },
+      {
+        "zh": "曜日",
+        "vn_correct": "ngày trong tuần",
+        "vn_wrong": "diệu nhật",
+        "context": "time",
+        "frequency": 512,
+        "note": "Auto-extracted from corpus (freq: 512)"
+      },
+      {
+        "zh": "時点",
+        "vn_correct": "thời điểm",
+        "vn_wrong": "thời điểm",
+        "context": "time",
+        "frequency": 497,
+        "note": "Auto-extracted from corpus (freq: 497)"
+      },
+      {
+        "zh": "二年",
+        "vn_correct": "hai năm",
+        "vn_wrong": "nhị niên",
+        "context": "time",
+        "frequency": 494,
+        "note": "Auto-extracted from corpus (freq: 494)"
+      },
+      {
+        "zh": "仲間",
+        "vn_correct": "đồng đội",
+        "vn_wrong": "trọng gian",
+        "context": "time",
+        "frequency": 493,
+        "note": "Auto-extracted from corpus (freq: 493)"
+      },
+      {
+        "zh": "一時",
+        "vn_correct": "tạm thời",
+        "vn_wrong": "nhất thời",
+        "context": "time",
+        "frequency": 491,
+        "note": "Auto-extracted from corpus (freq: 491)"
+      },
+      {
+        "zh": "去年",
+        "vn_correct": "năm ngoái",
+        "vn_wrong": "khứ niên",
+        "context": "time",
+        "frequency": 478,
+        "note": "Auto-extracted from corpus (freq: 478)"
+      },
+      {
+        "zh": "今後",
+        "vn_correct": "sau này",
+        "vn_wrong": "kim hậu",
+        "context": "time",
+        "frequency": 458,
+        "note": "Auto-extracted from corpus (freq: 458)"
+      },
+      {
+        "zh": "後輩",
+        "vn_correct": "đàn em",
+        "vn_wrong": "hậu bối",
+        "context": "time",
+        "frequency": 431,
+        "note": "Auto-extracted from corpus (freq: 431)"
+      },
+      {
+        "zh": "生日",
+        "vn_correct": "sinh nhật",
+        "vn_wrong": "sinh nhật",
+        "context": "time",
+        "frequency": 429,
+        "note": "Auto-extracted from corpus (freq: 429)"
+      },
+      {
+        "zh": "誕生日",
+        "vn_correct": "sinh nhật",
+        "vn_wrong": "đản sinh nhật",
+        "context": "time",
+        "frequency": 429,
+        "note": "Auto-extracted from corpus (freq: 429)"
+      },
+      {
+        "zh": "時代",
+        "vn_correct": "thời đại",
+        "vn_wrong": "thời đại",
+        "context": "time",
+        "frequency": 425,
+        "note": "Auto-extracted from corpus (freq: 425)"
+      },
+      {
+        "zh": "今年",
+        "vn_correct": "năm nay",
+        "vn_wrong": "kim niên",
+        "context": "time",
+        "frequency": 425,
+        "note": "Auto-extracted from corpus (freq: 425)"
+      },
+      {
+        "zh": "背後",
+        "vn_correct": "phía sau",
+        "vn_wrong": "bội hậu",
+        "context": "time",
+        "frequency": 376,
+        "note": "Auto-extracted from corpus (freq: 376)"
+      },
+      {
+        "zh": "昼休",
+        "vn_correct": "giờ nghỉ trưa",
+        "vn_wrong": "trú hưu",
+        "context": "time",
+        "frequency": 374,
+        "note": "Auto-extracted from corpus (freq: 374)"
+      },
+      {
+        "zh": "直後",
+        "vn_correct": "ngay sau đó",
+        "vn_wrong": "trực hậu",
+        "context": "time",
+        "frequency": 345,
+        "note": "Auto-extracted from corpus (freq: 345)"
+      },
+      {
+        "zh": "時期",
+        "vn_correct": "thời kỳ",
+        "vn_wrong": "thời kỳ",
+        "context": "time",
+        "frequency": 332,
+        "note": "Auto-extracted from corpus (freq: 332)"
+      },
+      {
+        "zh": "後悔",
+        "vn_correct": "hối hận",
+        "vn_wrong": "hậu hối",
+        "context": "time",
+        "frequency": 331,
+        "note": "Auto-extracted from corpus (freq: 331)"
+      },
+      {
+        "zh": "週間",
+        "vn_correct": "tuần",
+        "vn_wrong": "tuần gian",
+        "context": "time",
+        "frequency": 329,
+        "note": "Auto-extracted from corpus (freq: 329)"
+      },
+      {
+        "zh": "如月",
+        "vn_correct": "Kisaragi",
+        "vn_wrong": "Như Nguyệt",
+        "context": "time",
+        "frequency": 326,
+        "note": "Auto-extracted from corpus (freq: 326)"
+      },
+      {
+        "zh": "輝夜",
+        "vn_correct": "Kaguya",
+        "vn_wrong": "Huy Dạ",
+        "context": "time",
+        "frequency": 322,
+        "note": "Auto-extracted from corpus (freq: 322)"
+      },
+      {
+        "zh": "休日",
+        "vn_correct": "ngày nghỉ",
+        "vn_wrong": "hưu nhật",
+        "context": "time",
+        "frequency": 319,
+        "note": "Auto-extracted from corpus (freq: 319)"
+      },
+      {
+        "zh": "学年",
+        "vn_correct": "năm học",
+        "vn_wrong": "học niên",
+        "context": "time",
+        "frequency": 312,
+        "note": "Auto-extracted from corpus (freq: 312)"
+      },
+      {
+        "zh": "一年生",
+        "vn_correct": "học sinh năm nhất",
+        "vn_wrong": "nhất niên sinh",
+        "context": "time",
+        "frequency": 306,
+        "note": "Auto-extracted from corpus (freq: 306)"
+      },
+      {
+        "zh": "本日",
+        "vn_correct": "hôm nay",
+        "vn_wrong": "bản nhật",
+        "context": "time",
+        "frequency": 300,
+        "note": "Auto-extracted from corpus (freq: 300)"
+      },
+      {
+        "zh": "翌日",
+        "vn_correct": "hôm sau",
+        "vn_wrong": "dực nhật",
+        "context": "time",
+        "frequency": 292,
+        "note": "Auto-extracted from corpus (freq: 292)"
+      },
+      {
+        "zh": "数日",
+        "vn_correct": "vài ngày",
+        "vn_wrong": "số nhật",
+        "context": "time",
+        "frequency": 287,
+        "note": "Auto-extracted from corpus (freq: 287)"
+      },
+      {
+        "zh": "一時間",
+        "vn_correct": "một giờ",
+        "vn_wrong": "nhất thời gian",
+        "context": "time",
+        "frequency": 274,
+        "note": "Auto-extracted from corpus (freq: 274)"
+      },
+      {
+        "zh": "当時",
+        "vn_correct": "lúc đó",
+        "vn_wrong": "đương thời",
+        "context": "time",
+        "frequency": 262,
+        "note": "Auto-extracted from corpus (freq: 262)"
+      },
+      {
+        "zh": "三年",
+        "vn_correct": "ba năm",
+        "vn_wrong": "tam niên",
+        "context": "time",
+        "frequency": 262,
+        "note": "Auto-extracted from corpus (freq: 262)"
+      },
+      {
+        "zh": "今更",
+        "vn_correct": "bây giờ mới",
+        "vn_wrong": "kim canh",
+        "context": "time",
+        "frequency": 247,
+        "note": "Auto-extracted from corpus (freq: 247)"
+      },
+      {
+        "zh": "日常",
+        "vn_correct": "hàng ngày",
+        "vn_wrong": "nhật thường",
+        "context": "time",
+        "frequency": 237,
+        "note": "Auto-extracted from corpus (freq: 237)"
+      },
+      {
+        "zh": "期間",
+        "vn_correct": "khoảng thời gian",
+        "vn_wrong": "kỳ gian",
+        "context": "time",
+        "frequency": 237,
+        "note": "Auto-extracted from corpus (freq: 237)"
+      },
+      {
+        "zh": "前原君",
+        "vn_correct": "Maehara-kun",
+        "vn_wrong": "Tiền Nguyên quân",
+        "context": "time",
+        "frequency": 234,
+        "note": "Auto-extracted from corpus (freq: 234)"
+      },
+      {
+        "zh": "午後",
+        "vn_correct": "buổi chiều",
+        "vn_wrong": "ngọ hậu",
+        "context": "time",
+        "frequency": 231,
+        "note": "Auto-extracted from corpus (freq: 231)"
+      },
+      {
+        "zh": "二年生",
+        "vn_correct": "học sinh năm hai",
+        "vn_wrong": "nhị niên sinh",
+        "context": "time",
+        "frequency": 230,
+        "note": "Auto-extracted from corpus (freq: 230)"
+      },
+      {
+        "zh": "昼食",
+        "vn_correct": "bữa trưa",
+        "vn_wrong": "trú thực",
+        "context": "time",
+        "frequency": 222,
+        "note": "Auto-extracted from corpus (freq: 222)"
+      },
+      {
+        "zh": "空間",
+        "vn_correct": "không gian",
+        "vn_wrong": "không gian",
+        "context": "time",
+        "frequency": 221,
+        "note": "Auto-extracted from corpus (freq: 221)"
+      },
+      {
+        "zh": "先日",
+        "vn_correct": "mấy ngày trước",
+        "vn_wrong": "tiên nhật",
+        "context": "time",
+        "frequency": 218,
+        "note": "Auto-extracted from corpus (freq: 218)"
+      },
+      {
+        "zh": "学時",
+        "vn_correct": "thời học",
+        "vn_wrong": "học thời",
+        "context": "time",
+        "frequency": 211,
+        "note": "Auto-extracted from corpus (freq: 211)"
+      },
+      {
+        "zh": "直前",
+        "vn_correct": "ngay trước đó",
+        "vn_wrong": "trực tiền",
+        "context": "time",
+        "frequency": 211,
+        "note": "Auto-extracted from corpus (freq: 211)"
+      },
+      {
+        "zh": "週末",
+        "vn_correct": "cuối tuần",
+        "vn_wrong": "tuần mạt",
+        "context": "time",
+        "frequency": 203,
+        "note": "Auto-extracted from corpus (freq: 203)"
+      },
+      {
+        "zh": "二日",
+        "vn_correct": "hai ngày",
+        "vn_wrong": "nhị nhật",
+        "context": "time",
+        "frequency": 201,
+        "note": "Auto-extracted from corpus (freq: 201)"
+      },
+      {
+        "zh": "一週",
+        "vn_correct": "một tuần",
+        "vn_wrong": "nhất tuần",
+        "context": "time",
+        "frequency": 200,
+        "note": "Auto-extracted from corpus (freq: 200)"
+      },
+      {
+        "zh": "一週間",
+        "vn_correct": "một tuần",
+        "vn_wrong": "nhất tuần gian",
+        "context": "time",
+        "frequency": 199,
+        "note": "Auto-extracted from corpus (freq: 199)"
+      },
+      {
+        "zh": "学時代",
+        "vn_correct": "thời học sinh",
+        "vn_wrong": "học thời đại",
+        "context": "time",
+        "frequency": 197,
+        "note": "Auto-extracted from corpus (freq: 197)"
+      },
+      {
+        "zh": "当日",
+        "vn_correct": "hôm đó",
+        "vn_wrong": "đương nhật",
+        "context": "time",
+        "frequency": 197,
+        "note": "Auto-extracted from corpus (freq: 197)"
+      },
+      {
+        "zh": "日本語",
+        "vn_correct": "tiếng Nhật",
+        "vn_wrong": "Nhật Bản ngữ",
+        "context": "time",
+        "frequency": 189,
+        "note": "Auto-extracted from corpus (freq: 189)"
+      },
+      {
+        "zh": "朝食",
+        "vn_correct": "bữa sáng",
+        "vn_wrong": "triều thực",
+        "context": "time",
+        "frequency": 188,
+        "note": "Auto-extracted from corpus (freq: 188)"
+      },
+      {
+        "zh": "中学時",
+        "vn_correct": "thời trung học",
+        "vn_wrong": "trung học thời",
+        "context": "time",
+        "frequency": 187,
+        "note": "Auto-extracted from corpus (freq: 187)"
+      },
+      {
+        "zh": "中学時代",
+        "vn_correct": "thời trung học",
+        "vn_wrong": "trung học thời đại",
+        "context": "time",
+        "frequency": 187,
+        "note": "Auto-extracted from corpus (freq: 187)"
+      },
+      {
+        "zh": "事前",
+        "vn_correct": "trước",
+        "vn_wrong": "sự tiền",
+        "context": "time",
+        "frequency": 187,
+        "note": "Auto-extracted from corpus (freq: 187)"
+      },
+      {
+        "zh": "年上",
+        "vn_correct": "lớn tuổi hơn",
+        "vn_wrong": "niên thượng",
+        "context": "time",
+        "frequency": 186,
+        "note": "Auto-extracted from corpus (freq: 186)"
+      },
+      {
+        "zh": "午前",
+        "vn_correct": "buổi sáng",
+        "vn_wrong": "ngọ tiền",
+        "context": "time",
+        "frequency": 185,
+        "note": "Auto-extracted from corpus (freq: 185)"
+      },
+      {
+        "zh": "今朝",
+        "vn_correct": "sáng nay",
+        "vn_wrong": "kim triều",
+        "context": "time",
+        "frequency": 184,
+        "note": "Auto-extracted from corpus (freq: 184)"
+      },
+      {
+        "zh": "三日",
+        "vn_correct": "ba ngày",
+        "vn_wrong": "tam nhật",
+        "context": "time",
+        "frequency": 183,
+        "note": "Auto-extracted from corpus (freq: 183)"
+      },
+      {
+        "zh": "日目",
+        "vn_correct": "ngày thứ",
+        "vn_wrong": "nhật mục",
+        "context": "time",
+        "frequency": 180,
+        "note": "Auto-extracted from corpus (freq: 180)"
+      },
+      {
+        "zh": "初日",
+        "vn_correct": "ngày đầu",
+        "vn_wrong": "sơ nhật",
+        "context": "time",
+        "frequency": 176,
+        "note": "Auto-extracted from corpus (freq: 176)"
+      },
+      {
+        "zh": "年齢",
+        "vn_correct": "tuổi",
+        "vn_wrong": "niên linh",
+        "context": "time",
+        "frequency": 172,
+        "note": "Auto-extracted from corpus (freq: 172)"
+      },
+      {
+        "zh": "世間",
+        "vn_correct": "xã hội",
+        "vn_wrong": "thế gian",
+        "context": "time",
+        "frequency": 168,
+        "note": "Auto-extracted from corpus (freq: 168)"
+      },
+      {
+        "zh": "時計",
+        "vn_correct": "đồng hồ",
+        "vn_wrong": "thời kế",
+        "context": "time",
+        "frequency": 166,
+        "note": "Auto-extracted from corpus (freq: 166)"
+      },
+      {
+        "zh": "時刻",
+        "vn_correct": "thời khắc",
+        "vn_wrong": "thời khắc",
+        "context": "time",
+        "frequency": 164,
+        "note": "Auto-extracted from corpus (freq: 164)"
+      },
+      {
+        "zh": "日一",
+        "vn_correct": "ngày một",
+        "vn_wrong": "nhật nhất",
+        "context": "time",
+        "frequency": 160,
+        "note": "Auto-extracted from corpus (freq: 160)"
+      },
+      {
+        "zh": "後半",
+        "vn_correct": "nửa sau",
+        "vn_wrong": "hậu bán",
+        "context": "time",
+        "frequency": 160,
+        "note": "Auto-extracted from corpus (freq: 160)"
+      },
+      {
+        "zh": "証明",
+        "vn_correct": "chứng minh",
+        "vn_wrong": "chứng minh",
+        "context": "time",
+        "frequency": 159,
+        "note": "Auto-extracted from corpus (freq: 159)"
+      },
+      {
+        "zh": "年前",
+        "vn_correct": "năm trước",
+        "vn_wrong": "niên tiền",
+        "context": "time",
+        "frequency": 152,
+        "note": "Auto-extracted from corpus (freq: 152)"
+      },
+      {
+        "zh": "隙間",
+        "vn_correct": "khe hở",
+        "vn_wrong": "khích gian",
+        "context": "time",
+        "frequency": 147,
+        "note": "Auto-extracted from corpus (freq: 147)"
+      },
+      {
+        "zh": "十年",
+        "vn_correct": "mười năm",
+        "vn_wrong": "thập niên",
+        "context": "time",
+        "frequency": 146,
+        "note": "Auto-extracted from corpus (freq: 146)"
+      },
+      {
+        "zh": "駅前",
+        "vn_correct": "trước ga",
+        "vn_wrong": "dịch tiền",
+        "context": "time",
+        "frequency": 144,
+        "note": "Auto-extracted from corpus (freq: 144)"
+      },
+      {
+        "zh": "日曜",
+        "vn_correct": "chủ nhật",
+        "vn_wrong": "nhật diệu",
+        "context": "time",
+        "frequency": 142,
+        "note": "Auto-extracted from corpus (freq: 142)"
+      },
+      {
+        "zh": "前提",
+        "vn_correct": "tiền đề",
+        "vn_wrong": "tiền đề",
+        "context": "time",
+        "frequency": 141,
+        "note": "Auto-extracted from corpus (freq: 141)"
+      },
+      {
+        "zh": "土曜日",
+        "vn_correct": "thứ bảy",
+        "vn_wrong": "thổ diệu nhật",
+        "context": "time",
+        "frequency": 136,
+        "note": "Auto-extracted from corpus (freq: 136)"
+      },
+      {
+        "zh": "二時",
+        "vn_correct": "hai giờ",
+        "vn_wrong": "nhị thời",
+        "context": "time",
+        "frequency": 134,
+        "note": "Auto-extracted from corpus (freq: 134)"
+      },
+      {
+        "zh": "三年生",
+        "vn_correct": "học sinh năm ba",
+        "vn_wrong": "tam niên sinh",
+        "context": "time",
+        "frequency": 132,
+        "note": "Auto-extracted from corpus (freq: 132)"
+      },
+      {
+        "zh": "数年",
+        "vn_correct": "vài năm",
+        "vn_wrong": "số niên",
+        "context": "time",
+        "frequency": 130,
+        "note": "Auto-extracted from corpus (freq: 130)"
+      },
+      {
+        "zh": "年間",
+        "vn_correct": "trong năm",
+        "vn_wrong": "niên gian",
+        "context": "time",
+        "frequency": 129,
+        "note": "Auto-extracted from corpus (freq: 129)"
+      },
+      {
+        "zh": "中間",
+        "vn_correct": "giữa",
+        "vn_wrong": "trung gian",
+        "context": "time",
+        "frequency": 120,
+        "note": "Auto-extracted from corpus (freq: 120)"
+      }
+    ],
+    "places": [
+      {
+        "zh": "部屋",
+        "vn_correct": "phòng",
+        "vn_wrong": "bộ ốc",
+        "context": "places",
+        "frequency": 3582,
+        "note": "Auto-extracted from corpus (freq: 3582)"
+      },
+      {
+        "zh": "学校",
+        "vn_correct": "trường học",
+        "vn_wrong": "học hiệu",
+        "context": "places",
+        "frequency": 3356,
+        "note": "Auto-extracted from corpus (freq: 3356)"
+      },
+      {
+        "zh": "場所",
+        "vn_correct": "địa điểm",
+        "vn_wrong": "trường sở",
+        "context": "places",
+        "frequency": 1749,
+        "note": "Auto-extracted from corpus (freq: 1749)"
+      },
+      {
+        "zh": "高校",
+        "vn_correct": "cấp ba",
+        "vn_wrong": "cao hiệu",
+        "context": "places",
+        "frequency": 1418,
+        "note": "Auto-extracted from corpus (freq: 1418)"
+      },
+      {
+        "zh": "学生",
+        "vn_correct": "học sinh",
+        "vn_wrong": "học sinh",
+        "context": "places",
+        "frequency": 1149,
+        "note": "Auto-extracted from corpus (freq: 1149)"
+      },
+      {
+        "zh": "場合",
+        "vn_correct": "trường hợp",
+        "vn_wrong": "trường hợp",
+        "context": "places",
+        "frequency": 1114,
+        "note": "Auto-extracted from corpus (freq: 1114)"
+      },
+      {
+        "zh": "全部",
+        "vn_correct": "tất cả",
+        "vn_wrong": "toàn bộ",
+        "context": "places",
+        "frequency": 1079,
+        "note": "Auto-extracted from corpus (freq: 1079)"
+      },
+      {
+        "zh": "校生",
+        "vn_correct": "học sinh",
+        "vn_wrong": "hiệu sinh",
+        "context": "places",
+        "frequency": 831,
+        "note": "Auto-extracted from corpus (freq: 831)"
+      },
+      {
+        "zh": "学園",
+        "vn_correct": "học viện",
+        "vn_wrong": "học viên",
+        "context": "places",
+        "frequency": 813,
+        "note": "Auto-extracted from corpus (freq: 813)"
+      },
+      {
+        "zh": "部活",
+        "vn_correct": "câu lạc bộ",
+        "vn_wrong": "bộ hoạt",
+        "context": "places",
+        "frequency": 811,
+        "note": "Auto-extracted from corpus (freq: 811)"
+      },
+      {
+        "zh": "中学",
+        "vn_correct": "cấp hai",
+        "vn_wrong": "trung học",
+        "context": "places",
+        "frequency": 694,
+        "note": "Auto-extracted from corpus (freq: 694)"
+      },
+      {
+        "zh": "部分",
+        "vn_correct": "phần",
+        "vn_wrong": "bộ phận",
+        "context": "places",
+        "frequency": 664,
+        "note": "Auto-extracted from corpus (freq: 664)"
+      },
+      {
+        "zh": "高校生",
+        "vn_correct": "học sinh cấp ba",
+        "vn_wrong": "cao hiệu sinh",
+        "context": "places",
+        "frequency": 654,
+        "note": "Auto-extracted from corpus (freq: 654)"
+      },
+      {
+        "zh": "立場",
+        "vn_correct": "vị trí",
+        "vn_wrong": "lập trường",
+        "context": "places",
+        "frequency": 519,
+        "note": "Auto-extracted from corpus (freq: 519)"
+      },
+      {
+        "zh": "登校",
+        "vn_correct": "đi học",
+        "vn_wrong": "đăng hiệu",
+        "context": "places",
+        "frequency": 473,
+        "note": "Auto-extracted from corpus (freq: 473)"
+      },
+      {
+        "zh": "部員",
+        "vn_correct": "thành viên",
+        "vn_wrong": "bộ viên",
+        "context": "places",
+        "frequency": 455,
+        "note": "Auto-extracted from corpus (freq: 455)"
+      },
+      {
+        "zh": "修学",
+        "vn_correct": "học tập",
+        "vn_wrong": "tu học",
+        "context": "places",
+        "frequency": 418,
+        "note": "Auto-extracted from corpus (freq: 418)"
+      },
+      {
+        "zh": "修学旅",
+        "vn_correct": "chuyến đi học tập",
+        "vn_wrong": "tu học lữ",
+        "context": "places",
+        "frequency": 417,
+        "note": "Auto-extracted from corpus (freq: 417)"
+      },
+      {
+        "zh": "学旅",
+        "vn_correct": "chuyến đi học",
+        "vn_wrong": "học lữ",
+        "context": "places",
+        "frequency": 417,
+        "note": "Auto-extracted from corpus (freq: 417)"
+      },
+      {
+        "zh": "部室",
+        "vn_correct": "phòng câu lạc bộ",
+        "vn_wrong": "bộ thất",
+        "context": "places",
+        "frequency": 417,
+        "note": "Auto-extracted from corpus (freq: 417)"
+      },
+      {
+        "zh": "留学",
+        "vn_correct": "du học",
+        "vn_wrong": "lưu học",
+        "context": "places",
+        "frequency": 396,
+        "note": "Auto-extracted from corpus (freq: 396)"
+      },
+      {
+        "zh": "会場",
+        "vn_correct": "hội trường",
+        "vn_wrong": "hội trường",
+        "context": "places",
+        "frequency": 392,
+        "note": "Auto-extracted from corpus (freq: 392)"
+      },
+      {
+        "zh": "大学",
+        "vn_correct": "đại học",
+        "vn_wrong": "đại học",
+        "context": "places",
+        "frequency": 390,
+        "note": "Auto-extracted from corpus (freq: 390)"
+      },
+      {
+        "zh": "一部",
+        "vn_correct": "một phần",
+        "vn_wrong": "nhất bộ",
+        "context": "places",
+        "frequency": 365,
+        "note": "Auto-extracted from corpus (freq: 365)"
+      },
+      {
+        "zh": "小学",
+        "vn_correct": "tiểu học",
+        "vn_wrong": "tiểu học",
+        "context": "places",
+        "frequency": 358,
+        "note": "Auto-extracted from corpus (freq: 358)"
+      },
+      {
+        "zh": "留学生",
+        "vn_correct": "du học sinh",
+        "vn_wrong": "lưu học sinh",
+        "context": "places",
+        "frequency": 298,
+        "note": "Auto-extracted from corpus (freq: 298)"
+      },
+      {
+        "zh": "女留学",
+        "vn_correct": "nữ du học sinh",
+        "vn_wrong": "nữ lưu học",
+        "context": "places",
+        "frequency": 296,
+        "note": "Auto-extracted from corpus (freq: 296)"
+      },
+      {
+        "zh": "女留学生",
+        "vn_correct": "nữ du học sinh",
+        "vn_wrong": "nữ lưu học sinh",
+        "context": "places",
+        "frequency": 296,
+        "note": "Auto-extracted from corpus (freq: 296)"
+      },
+      {
+        "zh": "少女留学",
+        "vn_correct": "nữ du học sinh",
+        "vn_wrong": "thiếu nữ lưu học",
+        "context": "places",
+        "frequency": 296,
+        "note": "Auto-extracted from corpus (freq: 296)"
+      },
+      {
+        "zh": "店員",
+        "vn_correct": "nhân viên",
+        "vn_wrong": "điếm viên",
+        "context": "places",
+        "frequency": 286,
+        "note": "Auto-extracted from corpus (freq: 286)"
+      },
+      {
+        "zh": "部長",
+        "vn_correct": "trưởng bộ phận",
+        "vn_wrong": "bộ trưởng",
+        "context": "places",
+        "frequency": 284,
+        "note": "Auto-extracted from corpus (freq: 284)"
+      },
+      {
+        "zh": "屋上",
+        "vn_correct": "sân thượng",
+        "vn_wrong": "ốc thượng",
+        "context": "places",
+        "frequency": 269,
+        "note": "Auto-extracted from corpus (freq: 269)"
+      },
+      {
+        "zh": "校舎",
+        "vn_correct": "tòa nhà trường",
+        "vn_wrong": "hiệu xá",
+        "context": "places",
+        "frequency": 268,
+        "note": "Auto-extracted from corpus (freq: 268)"
+      },
+      {
+        "zh": "校内",
+        "vn_correct": "trong trường",
+        "vn_wrong": "hiệu nội",
+        "context": "places",
+        "frequency": 264,
+        "note": "Auto-extracted from corpus (freq: 264)"
+      },
+      {
+        "zh": "学期",
+        "vn_correct": "học kỳ",
+        "vn_wrong": "học kỳ",
+        "context": "places",
+        "frequency": 225,
+        "note": "Auto-extracted from corpus (freq: 225)"
+      },
+      {
+        "zh": "小学生",
+        "vn_correct": "học sinh tiểu học",
+        "vn_wrong": "tiểu học sinh",
+        "context": "places",
+        "frequency": 214,
+        "note": "Auto-extracted from corpus (freq: 214)"
+      },
+      {
+        "zh": "進学",
+        "vn_correct": "tiến học",
+        "vn_wrong": "tiến học",
+        "context": "places",
+        "frequency": 209,
+        "note": "Auto-extracted from corpus (freq: 209)"
+      },
+      {
+        "zh": "中学生",
+        "vn_correct": "học sinh cấp hai",
+        "vn_wrong": "trung học sinh",
+        "context": "places",
+        "frequency": 198,
+        "note": "Auto-extracted from corpus (freq: 198)"
+      },
+      {
+        "zh": "校生活",
+        "vn_correct": "đời sống học đường",
+        "vn_wrong": "hiệu sinh hoạt",
+        "context": "places",
+        "frequency": 177,
+        "note": "Auto-extracted from corpus (freq: 177)"
+      },
+      {
+        "zh": "場面",
+        "vn_correct": "cảnh",
+        "vn_wrong": "trường diện",
+        "context": "places",
+        "frequency": 170,
+        "note": "Auto-extracted from corpus (freq: 170)"
+      },
+      {
+        "zh": "店内",
+        "vn_correct": "trong tiệm",
+        "vn_wrong": "điếm nội",
+        "context": "places",
+        "frequency": 168,
+        "note": "Auto-extracted from corpus (freq: 168)"
+      },
+      {
+        "zh": "屋敷",
+        "vn_correct": "dinh thự",
+        "vn_wrong": "ốc phu",
+        "context": "places",
+        "frequency": 166,
+        "note": "Auto-extracted from corpus (freq: 166)"
+      },
+      {
+        "zh": "芸部",
+        "vn_correct": "câu lạc bộ nghệ thuật",
+        "vn_wrong": "nghệ bộ",
+        "context": "places",
+        "frequency": 157,
+        "note": "Auto-extracted from corpus (freq: 157)"
+      },
+      {
+        "zh": "登場",
+        "vn_correct": "xuất hiện",
+        "vn_wrong": "đăng trường",
+        "context": "places",
+        "frequency": 153,
+        "note": "Auto-extracted from corpus (freq: 153)"
+      },
+      {
+        "zh": "近所",
+        "vn_correct": "hàng xóm",
+        "vn_wrong": "cận sở",
+        "context": "places",
+        "frequency": 149,
+        "note": "Auto-extracted from corpus (freq: 149)"
+      },
+      {
+        "zh": "文芸部",
+        "vn_correct": "câu lạc bộ văn nghệ",
+        "vn_wrong": "văn nghệ bộ",
+        "context": "places",
+        "frequency": 148,
+        "note": "Auto-extracted from corpus (freq: 148)"
+      },
+      {
+        "zh": "球部",
+        "vn_correct": "câu lạc bộ bóng",
+        "vn_wrong": "cầu bộ",
+        "context": "places",
+        "frequency": 142,
+        "note": "Auto-extracted from corpus (freq: 142)"
+      },
+      {
+        "zh": "野球部",
+        "vn_correct": "câu lạc bộ bóng chày",
+        "vn_wrong": "dã cầu bộ",
+        "context": "places",
+        "frequency": 136,
+        "note": "Auto-extracted from corpus (freq: 136)"
+      },
+      {
+        "zh": "校一",
+        "vn_correct": "nhất trường",
+        "vn_wrong": "hiệu nhất",
+        "context": "places",
+        "frequency": 131,
+        "note": "Auto-extracted from corpus (freq: 131)"
+      },
+      {
+        "zh": "通学",
+        "vn_correct": "đi học",
+        "vn_wrong": "thông học",
+        "context": "places",
+        "frequency": 129,
+        "note": "Auto-extracted from corpus (freq: 129)"
+      },
+      {
+        "zh": "広場",
+        "vn_correct": "quảng trường",
+        "vn_wrong": "quảng trường",
+        "context": "places",
+        "frequency": 128,
+        "note": "Auto-extracted from corpus (freq: 128)"
+      },
+      {
+        "zh": "小学校",
+        "vn_correct": "trường tiểu học",
+        "vn_wrong": "tiểu học hiệu",
+        "context": "places",
+        "frequency": 128,
+        "note": "Auto-extracted from corpus (freq: 128)"
+      },
+      {
+        "zh": "街川",
+        "vn_correct": "Machikawa",
+        "vn_wrong": "Nhai Xuyên",
+        "context": "places",
+        "frequency": 126,
+        "note": "Auto-extracted from corpus (freq: 126)"
+      },
+      {
+        "zh": "所属",
+        "vn_correct": "thuộc về",
+        "vn_wrong": "sở thuộc",
+        "context": "places",
+        "frequency": 124,
+        "note": "Auto-extracted from corpus (freq: 124)"
+      },
+      {
+        "zh": "店長",
+        "vn_correct": "quản lý cửa hàng",
+        "vn_wrong": "điếm trưởng",
+        "context": "places",
+        "frequency": 121,
+        "note": "Auto-extracted from corpus (freq: 121)"
+      },
+      {
+        "zh": "校長",
+        "vn_correct": "hiệu trưởng",
+        "vn_wrong": "hiệu trưởng",
+        "context": "places",
+        "frequency": 118,
+        "note": "Auto-extracted from corpus (freq: 118)"
+      },
+      {
+        "zh": "脱衣所",
+        "vn_correct": "phòng thay đồ",
+        "vn_wrong": "thoát y sở",
+        "context": "places",
+        "frequency": 117,
+        "note": "Auto-extracted from corpus (freq: 117)"
+      },
+      {
+        "zh": "衣所",
+        "vn_correct": "phòng thay đồ",
+        "vn_wrong": "y sở",
+        "context": "places",
+        "frequency": 117,
+        "note": "Auto-extracted from corpus (freq: 117)"
+      },
+      {
+        "zh": "校則",
+        "vn_correct": "nội quy trường",
+        "vn_wrong": "hiệu tắc",
+        "context": "places",
+        "frequency": 117,
+        "note": "Auto-extracted from corpus (freq: 117)"
+      },
+      {
+        "zh": "喫茶店",
+        "vn_correct": "quán cà phê",
+        "vn_wrong": "ngật trà điếm",
+        "context": "places",
+        "frequency": 115,
+        "note": "Auto-extracted from corpus (freq: 115)"
+      },
+      {
+        "zh": "茶店",
+        "vn_correct": "quán trà",
+        "vn_wrong": "trà điếm",
+        "context": "places",
+        "frequency": 115,
+        "note": "Auto-extracted from corpus (freq: 115)"
+      },
+      {
+        "zh": "下校",
+        "vn_correct": "tan học",
+        "vn_wrong": "hạ hiệu",
+        "context": "places",
+        "frequency": 113,
+        "note": "Auto-extracted from corpus (freq: 113)"
+      },
+      {
+        "zh": "海学",
+        "vn_correct": "trường ven biển",
+        "vn_wrong": "hải học",
+        "context": "places",
+        "frequency": 111,
+        "note": "Auto-extracted from corpus (freq: 111)"
+      },
+      {
+        "zh": "海学校",
+        "vn_correct": "trường ven biển",
+        "vn_wrong": "hải học hiệu",
+        "context": "places",
+        "frequency": 111,
+        "note": "Auto-extracted from corpus (freq: 111)"
+      },
+      {
+        "zh": "臨海学",
+        "vn_correct": "trường ven biển",
+        "vn_wrong": "lâm hải học",
+        "context": "places",
+        "frequency": 111,
+        "note": "Auto-extracted from corpus (freq: 111)"
+      },
+      {
+        "zh": "臨海学校",
+        "vn_correct": "trường ven biển",
+        "vn_wrong": "lâm hải học hiệu",
+        "context": "places",
+        "frequency": 111,
+        "note": "Auto-extracted from corpus (freq: 111)"
+      },
+      {
+        "zh": "道具",
+        "vn_correct": "dụng cụ",
+        "vn_wrong": "đạo cụ",
+        "context": "places",
+        "frequency": 109,
+        "note": "Auto-extracted from corpus (freq: 109)"
+      },
+      {
+        "zh": "現場",
+        "vn_correct": "hiện trường",
+        "vn_wrong": "hiện trường",
+        "context": "places",
+        "frequency": 109,
+        "note": "Auto-extracted from corpus (freq: 109)"
+      },
+      {
+        "zh": "上部",
+        "vn_correct": "phần trên",
+        "vn_wrong": "thượng bộ",
+        "context": "places",
+        "frequency": 104,
+        "note": "Auto-extracted from corpus (freq: 104)"
+      },
+      {
+        "zh": "学校一",
+        "vn_correct": "nhất trường",
+        "vn_wrong": "học hiệu nhất",
+        "context": "places",
+        "frequency": 102,
+        "note": "Auto-extracted from corpus (freq: 102)"
+      },
+      {
+        "zh": "修羅場",
+        "vn_correct": "tình huống căng thẳng",
+        "vn_wrong": "tu la trường",
+        "context": "places",
+        "frequency": 101,
+        "note": "Auto-extracted from corpus (freq: 101)"
+      },
+      {
+        "zh": "羅場",
+        "vn_correct": "trường chiến",
+        "vn_wrong": "la trường",
+        "context": "places",
+        "frequency": 101,
+        "note": "Auto-extracted from corpus (freq: 101)"
+      },
+      {
+        "zh": "校門",
+        "vn_correct": "cổng trường",
+        "vn_wrong": "hiệu môn",
+        "context": "places",
+        "frequency": 100,
+        "note": "Auto-extracted from corpus (freq: 100)"
+      },
+      {
+        "zh": "高校生活",
+        "vn_correct": "đời sống cấp ba",
+        "vn_wrong": "cao hiệu sinh hoạt",
+        "context": "places",
+        "frequency": 95,
+        "note": "Auto-extracted from corpus (freq: 95)"
+      },
+      {
+        "zh": "学式",
+        "vn_correct": "lễ nhập học",
+        "vn_wrong": "học thức",
+        "context": "places",
+        "frequency": 91,
+        "note": "Auto-extracted from corpus (freq: 91)"
+      },
+      {
+        "zh": "退学",
+        "vn_correct": "bỏ học",
+        "vn_wrong": "thoái học",
+        "context": "places",
+        "frequency": 89,
+        "note": "Auto-extracted from corpus (freq: 89)"
+      },
+      {
+        "zh": "数学",
+        "vn_correct": "toán học",
+        "vn_wrong": "số học",
+        "context": "places",
+        "frequency": 89,
+        "note": "Auto-extracted from corpus (freq: 89)"
+      },
+      {
+        "zh": "屋台",
+        "vn_correct": "quầy hàng",
+        "vn_wrong": "ốc đài",
+        "context": "places",
+        "frequency": 89,
+        "note": "Auto-extracted from corpus (freq: 89)"
+      },
+      {
+        "zh": "新学",
+        "vn_correct": "học kỳ mới",
+        "vn_wrong": "tân học",
+        "context": "places",
+        "frequency": 86,
+        "note": "Auto-extracted from corpus (freq: 86)"
+      },
+      {
+        "zh": "呂場",
+        "vn_correct": "phòng tắm",
+        "vn_wrong": "lữ trường",
+        "context": "places",
+        "frequency": 84,
+        "note": "Auto-extracted from corpus (freq: 84)"
+      },
+      {
+        "zh": "風呂場",
+        "vn_correct": "phòng tắm",
+        "vn_wrong": "phong lữ trường",
+        "context": "places",
+        "frequency": 84,
+        "note": "Auto-extracted from corpus (freq: 84)"
+      },
+      {
+        "zh": "陸上部",
+        "vn_correct": "câu lạc bộ điền kinh",
+        "vn_wrong": "lục thượng bộ",
+        "context": "places",
+        "frequency": 82,
+        "note": "Auto-extracted from corpus (freq: 82)"
+      },
+      {
+        "zh": "学校生",
+        "vn_correct": "học sinh",
+        "vn_wrong": "học hiệu sinh",
+        "context": "places",
+        "frequency": 81,
+        "note": "Auto-extracted from corpus (freq: 81)"
+      },
+      {
+        "zh": "学校生活",
+        "vn_correct": "đời sống học đường",
+        "vn_wrong": "học hiệu sinh hoạt",
+        "context": "places",
+        "frequency": 81,
+        "note": "Auto-extracted from corpus (freq: 81)"
+      },
+      {
+        "zh": "校中",
+        "vn_correct": "trong trường",
+        "vn_wrong": "hiệu trung",
+        "context": "places",
+        "frequency": 81,
+        "note": "Auto-extracted from corpus (freq: 81)"
+      },
+      {
+        "zh": "屋根",
+        "vn_correct": "mái nhà",
+        "vn_wrong": "ốc căn",
+        "context": "places",
+        "frequency": 78,
+        "note": "Auto-extracted from corpus (freq: 78)"
+      },
+      {
+        "zh": "新学期",
+        "vn_correct": "học kỳ mới",
+        "vn_wrong": "tân học kỳ",
+        "context": "places",
+        "frequency": 78,
+        "note": "Auto-extracted from corpus (freq: 78)"
+      },
+      {
+        "zh": "水泳部",
+        "vn_correct": "câu lạc bộ bơi",
+        "vn_wrong": "thủy vịnh bộ",
+        "context": "places",
+        "frequency": 78,
+        "note": "Auto-extracted from corpus (freq: 78)"
+      },
+      {
+        "zh": "泳部",
+        "vn_correct": "câu lạc bộ bơi",
+        "vn_wrong": "vịnh bộ",
+        "context": "places",
+        "frequency": 78,
+        "note": "Auto-extracted from corpus (freq: 78)"
+      },
+      {
+        "zh": "大学生",
+        "vn_correct": "sinh viên",
+        "vn_wrong": "đại học sinh",
+        "context": "places",
+        "frequency": 76,
+        "note": "Auto-extracted from corpus (freq: 76)"
+      },
+      {
+        "zh": "道路",
+        "vn_correct": "đường",
+        "vn_wrong": "đạo lộ",
+        "context": "places",
+        "frequency": 75,
+        "note": "Auto-extracted from corpus (freq: 75)"
+      },
+      {
+        "zh": "剣道",
+        "vn_correct": "kiếm đạo",
+        "vn_wrong": "kiếm đạo",
+        "context": "places",
+        "frequency": 72,
+        "note": "Auto-extracted from corpus (freq: 72)"
+      },
+      {
+        "zh": "浴場",
+        "vn_correct": "phòng tắm",
+        "vn_wrong": "dục trường",
+        "context": "places",
+        "frequency": 70,
+        "note": "Auto-extracted from corpus (freq: 70)"
+      },
+      {
+        "zh": "二学",
+        "vn_correct": "học kỳ hai",
+        "vn_wrong": "nhị học",
+        "context": "places",
+        "frequency": 68,
+        "note": "Auto-extracted from corpus (freq: 68)"
+      },
+      {
+        "zh": "転校",
+        "vn_correct": "chuyển trường",
+        "vn_wrong": "chuyển hiệu",
+        "context": "places",
+        "frequency": 67,
+        "note": "Auto-extracted from corpus (freq: 67)"
+      },
+      {
+        "zh": "二学期",
+        "vn_correct": "học kỳ hai",
+        "vn_wrong": "nhị học kỳ",
+        "context": "places",
+        "frequency": 67,
+        "note": "Auto-extracted from corpus (freq: 67)"
+      },
+      {
+        "zh": "編集部",
+        "vn_correct": "ban biên tập",
+        "vn_wrong": "biên tập bộ",
+        "context": "places",
+        "frequency": 64,
+        "note": "Auto-extracted from corpus (freq: 64)"
+      },
+      {
+        "zh": "集部",
+        "vn_correct": "ban biên tập",
+        "vn_wrong": "tập bộ",
+        "context": "places",
+        "frequency": 64,
+        "note": "Auto-extracted from corpus (freq: 64)"
+      },
+      {
+        "zh": "中学校",
+        "vn_correct": "trường cấp hai",
+        "vn_wrong": "trung học hiệu",
+        "context": "places",
+        "frequency": 63,
+        "note": "Auto-extracted from corpus (freq: 63)"
+      },
+      {
+        "zh": "谷部",
+        "vn_correct": "Tanibu",
+        "vn_wrong": "Cốc Bộ",
+        "context": "places",
+        "frequency": 63,
+        "note": "Auto-extracted from corpus (freq: 63)"
+      }
+    ],
+    "titles": [
+      {
+        "zh": "先生",
+        "vn_correct": "thầy/cô",
+        "vn_wrong": "tiên sinh",
+        "context": "titles",
+        "frequency": 4255,
+        "note": "Auto-extracted from corpus (freq: 4255)"
+      },
+      {
+        "zh": "生徒",
+        "vn_correct": "học sinh",
+        "vn_wrong": "sinh đồ",
+        "context": "titles",
+        "frequency": 2906,
+        "note": "Auto-extracted from corpus (freq: 2906)"
+      },
+      {
+        "zh": "先輩",
+        "vn_correct": "tiền bối",
+        "vn_wrong": "tiên bối",
+        "context": "titles",
+        "frequency": 2904,
+        "note": "Auto-extracted from corpus (freq: 2904)"
+      },
+      {
+        "zh": "生徒会",
+        "vn_correct": "hội học sinh",
+        "vn_wrong": "sinh đồ hội",
+        "context": "titles",
+        "frequency": 1278,
+        "note": "Auto-extracted from corpus (freq: 1278)"
+      },
+      {
+        "zh": "生活",
+        "vn_correct": "cuộc sống",
+        "vn_wrong": "sinh hoạt",
+        "context": "titles",
+        "frequency": 981,
+        "note": "Auto-extracted from corpus (freq: 981)"
+      },
+      {
+        "zh": "柳君",
+        "vn_correct": "Yanagi-kun",
+        "vn_wrong": "Liễu quân",
+        "context": "titles",
+        "frequency": 821,
+        "note": "Auto-extracted from corpus (freq: 821)"
+      },
+      {
+        "zh": "青柳君",
+        "vn_correct": "Aoyagi-kun",
+        "vn_wrong": "Thanh Liễu quân",
+        "context": "titles",
+        "frequency": 820,
+        "note": "Auto-extracted from corpus (freq: 820)"
+      },
+      {
+        "zh": "樹君",
+        "vn_correct": "Itsuki-kun",
+        "vn_wrong": "Thụ quân",
+        "context": "titles",
+        "frequency": 745,
+        "note": "Auto-extracted from corpus (freq: 745)"
+      },
+      {
+        "zh": "真樹君",
+        "vn_correct": "Masaki-kun",
+        "vn_wrong": "Chân Thụ quân",
+        "context": "titles",
+        "frequency": 745,
+        "note": "Auto-extracted from corpus (freq: 745)"
+      },
+      {
+        "zh": "先程",
+        "vn_correct": "vừa nãy",
+        "vn_wrong": "tiên trình",
+        "context": "titles",
+        "frequency": 629,
+        "note": "Auto-extracted from corpus (freq: 629)"
+      },
+      {
+        "zh": "教師",
+        "vn_correct": "giáo viên",
+        "vn_wrong": "giáo sư",
+        "context": "titles",
+        "frequency": 612,
+        "note": "Auto-extracted from corpus (freq: 612)"
+      },
+      {
+        "zh": "優先",
+        "vn_correct": "ưu tiên",
+        "vn_wrong": "ưu tiên",
+        "context": "titles",
+        "frequency": 590,
+        "note": "Auto-extracted from corpus (freq: 590)"
+      },
+      {
+        "zh": "王太",
+        "vn_correct": "thái tử",
+        "vn_wrong": "vương thái",
+        "context": "titles",
+        "frequency": 536,
+        "note": "Auto-extracted from corpus (freq: 536)"
+      },
+      {
+        "zh": "彼氏",
+        "vn_correct": "bạn trai",
+        "vn_wrong": "bỉ thị",
+        "context": "titles",
+        "frequency": 494,
+        "note": "Auto-extracted from corpus (freq: 494)"
+      },
+      {
+        "zh": "誕生",
+        "vn_correct": "ra đời",
+        "vn_wrong": "đản sinh",
+        "context": "titles",
+        "frequency": 466,
+        "note": "Auto-extracted from corpus (freq: 466)"
+      },
+      {
+        "zh": "術師",
+        "vn_correct": "pháp sư",
+        "vn_wrong": "thuật sư",
+        "context": "titles",
+        "frequency": 459,
+        "note": "Auto-extracted from corpus (freq: 459)"
+      },
+      {
+        "zh": "魔術師",
+        "vn_correct": "pháp sư",
+        "vn_wrong": "ma thuật sư",
+        "context": "titles",
+        "frequency": 457,
+        "note": "Auto-extracted from corpus (freq: 457)"
+      },
+      {
+        "zh": "也君",
+        "vn_correct": "Nari-kun",
+        "vn_wrong": "Dã quân",
+        "context": "titles",
+        "frequency": 443,
+        "note": "Auto-extracted from corpus (freq: 443)"
+      },
+      {
+        "zh": "王国",
+        "vn_correct": "vương quốc",
+        "vn_wrong": "vương quốc",
+        "context": "titles",
+        "frequency": 413,
+        "note": "Auto-extracted from corpus (freq: 413)"
+      },
+      {
+        "zh": "生徒会長",
+        "vn_correct": "hội trưởng",
+        "vn_wrong": "sinh đồ hội trưởng",
+        "context": "titles",
+        "frequency": 403,
+        "note": "Auto-extracted from corpus (freq: 403)"
+      },
+      {
+        "zh": "嬢様",
+        "vn_correct": "tiểu thư",
+        "vn_wrong": "nương dạng",
+        "context": "titles",
+        "frequency": 389,
+        "note": "Auto-extracted from corpus (freq: 389)"
+      },
+      {
+        "zh": "一生",
+        "vn_correct": "cả đời",
+        "vn_wrong": "nhất sinh",
+        "context": "titles",
+        "frequency": 361,
+        "note": "Auto-extracted from corpus (freq: 361)"
+      },
+      {
+        "zh": "涼也君",
+        "vn_correct": "Ryouya-kun",
+        "vn_wrong": "Lương Dã quân",
+        "context": "titles",
+        "frequency": 361,
+        "note": "Auto-extracted from corpus (freq: 361)"
+      },
+      {
+        "zh": "生徒会室",
+        "vn_correct": "phòng hội học sinh",
+        "vn_wrong": "sinh đồ hội thất",
+        "context": "titles",
+        "frequency": 332,
+        "note": "Auto-extracted from corpus (freq: 332)"
+      },
+      {
+        "zh": "奏汰君",
+        "vn_correct": "Kanata-kun",
+        "vn_wrong": "Tấu Thái quân",
+        "context": "titles",
+        "frequency": 330,
+        "note": "Auto-extracted from corpus (freq: 330)"
+      },
+      {
+        "zh": "汰君",
+        "vn_correct": "Ta-kun",
+        "vn_wrong": "Thái quân",
+        "context": "titles",
+        "frequency": 330,
+        "note": "Auto-extracted from corpus (freq: 330)"
+      },
+      {
+        "zh": "優先生",
+        "vn_correct": "thầy Yuu",
+        "vn_wrong": "Ưu tiên sinh",
+        "context": "titles",
+        "frequency": 328,
+        "note": "Auto-extracted from corpus (freq: 328)"
+      },
+      {
+        "zh": "美優先",
+        "vn_correct": "Miyuu",
+        "vn_wrong": "Mỹ Ưu tiên",
+        "context": "titles",
+        "frequency": 328,
+        "note": "Auto-extracted from corpus (freq: 328)"
+      },
+      {
+        "zh": "美優先生",
+        "vn_correct": "cô Miyuu",
+        "vn_wrong": "Mỹ Ưu tiên sinh",
+        "context": "titles",
+        "frequency": 328,
+        "note": "Auto-extracted from corpus (freq: 328)"
+      },
+      {
+        "zh": "庭教師",
+        "vn_correct": "gia sư",
+        "vn_wrong": "đình giáo sư",
+        "context": "titles",
+        "frequency": 296,
+        "note": "Auto-extracted from corpus (freq: 296)"
+      },
+      {
+        "zh": "級生",
+        "vn_correct": "bạn cùng lớp",
+        "vn_wrong": "cấp sinh",
+        "context": "titles",
+        "frequency": 279,
+        "note": "Auto-extracted from corpus (freq: 279)"
+      },
+      {
+        "zh": "沢君",
+        "vn_correct": "Sawa-kun",
+        "vn_wrong": "Trạch quân",
+        "context": "titles",
+        "frequency": 267,
+        "note": "Auto-extracted from corpus (freq: 267)"
+      },
+      {
+        "zh": "滝沢君",
+        "vn_correct": "Takizawa-kun",
+        "vn_wrong": "Long Trạch quân",
+        "context": "titles",
+        "frequency": 267,
+        "note": "Auto-extracted from corpus (freq: 267)"
+      },
+      {
+        "zh": "原君",
+        "vn_correct": "Hara-kun",
+        "vn_wrong": "Nguyên quân",
+        "context": "titles",
+        "frequency": 234,
+        "note": "Auto-extracted from corpus (freq: 234)"
+      },
+      {
+        "zh": "皆様",
+        "vn_correct": "mọi người",
+        "vn_wrong": "giai dạng",
+        "context": "titles",
+        "frequency": 230,
+        "note": "Auto-extracted from corpus (freq: 230)"
+      },
+      {
+        "zh": "同級生",
+        "vn_correct": "bạn cùng lớp",
+        "vn_wrong": "đồng cấp sinh",
+        "context": "titles",
+        "frequency": 198,
+        "note": "Auto-extracted from corpus (freq: 198)"
+      },
+      {
+        "zh": "俺様",
+        "vn_correct": "ta đây",
+        "vn_wrong": "ngã dạng",
+        "context": "titles",
+        "frequency": 192,
+        "note": "Auto-extracted from corpus (freq: 192)"
+      },
+      {
+        "zh": "代先",
+        "vn_correct": "thầy Yo",
+        "vn_wrong": "đại tiên",
+        "context": "titles",
+        "frequency": 189,
+        "note": "Auto-extracted from corpus (freq: 189)"
+      },
+      {
+        "zh": "代先生",
+        "vn_correct": "thầy Yo",
+        "vn_wrong": "đại tiên sinh",
+        "context": "titles",
+        "frequency": 189,
+        "note": "Auto-extracted from corpus (freq: 189)"
+      },
+      {
+        "zh": "神代先",
+        "vn_correct": "thầy Kamishiro",
+        "vn_wrong": "Thần Đại tiên",
+        "context": "titles",
+        "frequency": 189,
+        "note": "Auto-extracted from corpus (freq: 189)"
+      },
+      {
+        "zh": "神代先生",
+        "vn_correct": "thầy Kamishiro",
+        "vn_wrong": "Thần Đại tiên sinh",
+        "context": "titles",
+        "frequency": 189,
+        "note": "Auto-extracted from corpus (freq: 189)"
+      },
+      {
+        "zh": "川君",
+        "vn_correct": "Kawa-kun",
+        "vn_wrong": "Xuyên quân",
+        "context": "titles",
+        "frequency": 182,
+        "note": "Auto-extracted from corpus (freq: 182)"
+      },
+      {
+        "zh": "小都里先",
+        "vn_correct": "thầy Kotsuri",
+        "vn_wrong": "Tiểu Đô Lý tiên",
+        "context": "titles",
+        "frequency": 182,
+        "note": "Auto-extracted from corpus (freq: 182)"
+      },
+      {
+        "zh": "都里先",
+        "vn_correct": "thầy Tsuri",
+        "vn_wrong": "Đô Lý tiên",
+        "context": "titles",
+        "frequency": 182,
+        "note": "Auto-extracted from corpus (freq: 182)"
+      },
+      {
+        "zh": "都里先生",
+        "vn_correct": "thầy Tsuri",
+        "vn_wrong": "Đô Lý tiên sinh",
+        "context": "titles",
+        "frequency": 182,
+        "note": "Auto-extracted from corpus (freq: 182)"
+      },
+      {
+        "zh": "里先",
+        "vn_correct": "thầy Sato",
+        "vn_wrong": "Lý tiên",
+        "context": "titles",
+        "frequency": 182,
+        "note": "Auto-extracted from corpus (freq: 182)"
+      },
+      {
+        "zh": "里先生",
+        "vn_correct": "thầy Sato",
+        "vn_wrong": "Lý tiên sinh",
+        "context": "titles",
+        "frequency": 182,
+        "note": "Auto-extracted from corpus (freq: 182)"
+      },
+      {
+        "zh": "同様",
+        "vn_correct": "tương tự",
+        "vn_wrong": "đồng dạng",
+        "context": "titles",
+        "frequency": 172,
+        "note": "Auto-extracted from corpus (freq: 172)"
+      },
+      {
+        "zh": "指先",
+        "vn_correct": "đầu ngón tay",
+        "vn_wrong": "chỉ tiên",
+        "context": "titles",
+        "frequency": 159,
+        "note": "Auto-extracted from corpus (freq: 159)"
+      },
+      {
+        "zh": "魔王",
+        "vn_correct": "ma vương",
+        "vn_wrong": "ma vương",
+        "context": "titles",
+        "frequency": 159,
+        "note": "Auto-extracted from corpus (freq: 159)"
+      },
+      {
+        "zh": "一生懸",
+        "vn_correct": "hết sức",
+        "vn_wrong": "nhất sinh huyền",
+        "context": "titles",
+        "frequency": 153,
+        "note": "Auto-extracted from corpus (freq: 153)"
+      },
+      {
+        "zh": "一生懸命",
+        "vn_correct": "hết sức",
+        "vn_wrong": "nhất sinh huyền mệnh",
+        "context": "titles",
+        "frequency": 153,
+        "note": "Auto-extracted from corpus (freq: 153)"
+      },
+      {
+        "zh": "生懸",
+        "vn_correct": "hết sức",
+        "vn_wrong": "sinh huyền",
+        "context": "titles",
+        "frequency": 153,
+        "note": "Auto-extracted from corpus (freq: 153)"
+      },
+      {
+        "zh": "生懸命",
+        "vn_correct": "hết sức",
+        "vn_wrong": "sinh huyền mệnh",
+        "context": "titles",
+        "frequency": 153,
+        "note": "Auto-extracted from corpus (freq: 153)"
+      },
+      {
+        "zh": "主張",
+        "vn_correct": "chủ trương",
+        "vn_wrong": "chủ trương",
+        "context": "titles",
+        "frequency": 147,
+        "note": "Auto-extracted from corpus (freq: 147)"
+      },
+      {
+        "zh": "絡先",
+        "vn_correct": "liên lạc",
+        "vn_wrong": "lạc tiên",
+        "context": "titles",
+        "frequency": 141,
+        "note": "Auto-extracted from corpus (freq: 141)"
+      },
+      {
+        "zh": "連絡先",
+        "vn_correct": "liên lạc",
+        "vn_wrong": "liên lạc tiên",
+        "context": "titles",
+        "frequency": 141,
+        "note": "Auto-extracted from corpus (freq: 141)"
+      },
+      {
+        "zh": "生産",
+        "vn_correct": "sản xuất",
+        "vn_wrong": "sinh sản",
+        "context": "titles",
+        "frequency": 138,
+        "note": "Auto-extracted from corpus (freq: 138)"
+      },
+      {
+        "zh": "金君",
+        "vn_correct": "Kane-kun",
+        "vn_wrong": "Kim quân",
+        "context": "titles",
+        "frequency": 133,
+        "note": "Auto-extracted from corpus (freq: 133)"
+      },
+      {
+        "zh": "黒金君",
+        "vn_correct": "Kurogane-kun",
+        "vn_wrong": "Hắc Kim quân",
+        "context": "titles",
+        "frequency": 133,
+        "note": "Auto-extracted from corpus (freq: 133)"
+      },
+      {
+        "zh": "園寺君",
+        "vn_correct": "Entera-kun",
+        "vn_wrong": "Viên Tự quân",
+        "context": "titles",
+        "frequency": 131,
+        "note": "Auto-extracted from corpus (freq: 131)"
+      },
+      {
+        "zh": "寺君",
+        "vn_correct": "Tera-kun",
+        "vn_wrong": "Tự quân",
+        "context": "titles",
+        "frequency": 131,
+        "note": "Auto-extracted from corpus (freq: 131)"
+      },
+      {
+        "zh": "西園寺君",
+        "vn_correct": "Saionji-kun",
+        "vn_wrong": "Tây Viên Tự quân",
+        "context": "titles",
+        "frequency": 131,
+        "note": "Auto-extracted from corpus (freq: 131)"
+      },
+      {
+        "zh": "転生",
+        "vn_correct": "chuyển sinh",
+        "vn_wrong": "chuyển sinh",
+        "context": "titles",
+        "frequency": 131,
+        "note": "Auto-extracted from corpus (freq: 131)"
+      },
+      {
+        "zh": "野先",
+        "vn_correct": "tiền bối Noya",
+        "vn_wrong": "Dã tiên",
+        "context": "titles",
+        "frequency": 129,
+        "note": "Auto-extracted from corpus (freq: 129)"
+      },
+      {
+        "zh": "父様",
+        "vn_correct": "cha",
+        "vn_wrong": "phụ dạng",
+        "context": "titles",
+        "frequency": 128,
+        "note": "Auto-extracted from corpus (freq: 128)"
+      },
+      {
+        "zh": "野先輩",
+        "vn_correct": "tiền bối Noya",
+        "vn_wrong": "Dã tiên bối",
+        "context": "titles",
+        "frequency": 126,
+        "note": "Auto-extracted from corpus (freq: 126)"
+      },
+      {
+        "zh": "瀬野先",
+        "vn_correct": "tiền bối Seno",
+        "vn_wrong": "Lại Dã tiên",
+        "context": "titles",
+        "frequency": 123,
+        "note": "Auto-extracted from corpus (freq: 123)"
+      },
+      {
+        "zh": "瀬野先輩",
+        "vn_correct": "tiền bối Seno",
+        "vn_wrong": "Lại Dã tiên bối",
+        "context": "titles",
+        "frequency": 123,
+        "note": "Auto-extracted from corpus (freq: 123)"
+      },
+      {
+        "zh": "本先",
+        "vn_correct": "tiền bối Moto",
+        "vn_wrong": "Bản tiên",
+        "context": "titles",
+        "frequency": 113,
+        "note": "Auto-extracted from corpus (freq: 113)"
+      },
+      {
+        "zh": "発生",
+        "vn_correct": "phát sinh",
+        "vn_wrong": "phát sinh",
+        "context": "titles",
+        "frequency": 111,
+        "note": "Auto-extracted from corpus (freq: 111)"
+      },
+      {
+        "zh": "姫様",
+        "vn_correct": "công chúa",
+        "vn_wrong": "cơ dạng",
+        "context": "titles",
+        "frequency": 111,
+        "note": "Auto-extracted from corpus (freq: 111)"
+      },
+      {
+        "zh": "本先輩",
+        "vn_correct": "tiền bối Moto",
+        "vn_wrong": "Bản tiên bối",
+        "context": "titles",
+        "frequency": 111,
+        "note": "Auto-extracted from corpus (freq: 111)"
+      },
+      {
+        "zh": "次君",
+        "vn_correct": "Tsugu-kun",
+        "vn_wrong": "Thứ quân",
+        "context": "titles",
+        "frequency": 110,
+        "note": "Auto-extracted from corpus (freq: 110)"
+      },
+      {
+        "zh": "零次君",
+        "vn_correct": "Reiji-kun",
+        "vn_wrong": "Linh Thứ quân",
+        "context": "titles",
+        "frequency": 110,
+        "note": "Auto-extracted from corpus (freq: 110)"
+      },
+      {
+        "zh": "松本先",
+        "vn_correct": "tiền bối Matsumoto",
+        "vn_wrong": "Tùng Bản tiên",
+        "context": "titles",
+        "frequency": 107,
+        "note": "Auto-extracted from corpus (freq: 107)"
+      },
+      {
+        "zh": "松本先輩",
+        "vn_correct": "tiền bối Matsumoto",
+        "vn_wrong": "Tùng Bản tiên bối",
+        "context": "titles",
+        "frequency": 107,
+        "note": "Auto-extracted from corpus (freq: 107)"
+      },
+      {
+        "zh": "先頭",
+        "vn_correct": "đầu tiên",
+        "vn_wrong": "tiên đầu",
+        "context": "titles",
+        "frequency": 106,
+        "note": "Auto-extracted from corpus (freq: 106)"
+      },
+      {
+        "zh": "陽君",
+        "vn_correct": "Haru-kun",
+        "vn_wrong": "Dương quân",
+        "context": "titles",
+        "frequency": 105,
+        "note": "Auto-extracted from corpus (freq: 105)"
+      },
+      {
+        "zh": "高生",
+        "vn_correct": "học sinh cấp ba",
+        "vn_wrong": "cao sinh",
+        "context": "titles",
+        "frequency": 103,
+        "note": "Auto-extracted from corpus (freq: 103)"
+      },
+      {
+        "zh": "宮君",
+        "vn_correct": "Miya-kun",
+        "vn_wrong": "Cung quân",
+        "context": "titles",
+        "frequency": 102,
+        "note": "Auto-extracted from corpus (freq: 102)"
+      },
+      {
+        "zh": "灰宮君",
+        "vn_correct": "Haimiya-kun",
+        "vn_wrong": "Khôi Cung quân",
+        "context": "titles",
+        "frequency": 101,
+        "note": "Auto-extracted from corpus (freq: 101)"
+      },
+      {
+        "zh": "新谷先",
+        "vn_correct": "tiền bối Shintani",
+        "vn_wrong": "Tân Cốc tiên",
+        "context": "titles",
+        "frequency": 101,
+        "note": "Auto-extracted from corpus (freq: 101)"
+      },
+      {
+        "zh": "新谷先輩",
+        "vn_correct": "tiền bối Shintani",
+        "vn_wrong": "Tân Cốc tiên bối",
+        "context": "titles",
+        "frequency": 101,
+        "note": "Auto-extracted from corpus (freq: 101)"
+      },
+      {
+        "zh": "谷先",
+        "vn_correct": "tiền bối Tani",
+        "vn_wrong": "Cốc tiên",
+        "context": "titles",
+        "frequency": 101,
+        "note": "Auto-extracted from corpus (freq: 101)"
+      },
+      {
+        "zh": "谷先輩",
+        "vn_correct": "tiền bối Tani",
+        "vn_wrong": "Cốc tiên bối",
+        "context": "titles",
+        "frequency": 101,
+        "note": "Auto-extracted from corpus (freq: 101)"
+      },
+      {
+        "zh": "王様",
+        "vn_correct": "vua",
+        "vn_wrong": "vương dạng",
+        "context": "titles",
+        "frequency": 99,
+        "note": "Auto-extracted from corpus (freq: 99)"
+      },
+      {
+        "zh": "神様",
+        "vn_correct": "thần",
+        "vn_wrong": "thần dạng",
+        "context": "titles",
+        "frequency": 98,
+        "note": "Auto-extracted from corpus (freq: 98)"
+      },
+      {
+        "zh": "澤先",
+        "vn_correct": "thầy Sawa",
+        "vn_wrong": "Trạch tiên",
+        "context": "titles",
+        "frequency": 96,
+        "note": "Auto-extracted from corpus (freq: 96)"
+      },
+      {
+        "zh": "澤先生",
+        "vn_correct": "thầy Sawa",
+        "vn_wrong": "Trạch tiên sinh",
+        "context": "titles",
+        "frequency": 96,
+        "note": "Auto-extracted from corpus (freq: 96)"
+      },
+      {
+        "zh": "花澤先",
+        "vn_correct": "thầy Hanazawa",
+        "vn_wrong": "Hoa Trạch tiên",
+        "context": "titles",
+        "frequency": 96,
+        "note": "Auto-extracted from corpus (freq: 96)"
+      },
+      {
+        "zh": "花澤先生",
+        "vn_correct": "thầy Hanazawa",
+        "vn_wrong": "Hoa Trạch tiên sinh",
+        "context": "titles",
+        "frequency": 96,
+        "note": "Auto-extracted from corpus (freq: 96)"
+      },
+      {
+        "zh": "白川君",
+        "vn_correct": "Shirakawa-kun",
+        "vn_wrong": "Bạch Xuyên quân",
+        "context": "titles",
+        "frequency": 93,
+        "note": "Auto-extracted from corpus (freq: 93)"
+      },
+      {
+        "zh": "玲君",
+        "vn_correct": "Rei-kun",
+        "vn_wrong": "Linh quân",
+        "context": "titles",
+        "frequency": 90,
+        "note": "Auto-extracted from corpus (freq: 90)"
+      },
+      {
+        "zh": "笹川君",
+        "vn_correct": "Sasagawa-kun",
+        "vn_wrong": "Địa Xuyên quân",
+        "context": "titles",
+        "frequency": 89,
+        "note": "Auto-extracted from corpus (freq: 89)"
+      },
+      {
+        "zh": "様隼",
+        "vn_correct": "Hayabusa-sama",
+        "vn_wrong": "dạng Tuấn",
+        "context": "titles",
+        "frequency": 85,
+        "note": "Auto-extracted from corpus (freq: 85)"
+      },
+      {
+        "zh": "自主",
+        "vn_correct": "tự chủ",
+        "vn_wrong": "tự chủ",
+        "context": "titles",
+        "frequency": 83,
+        "note": "Auto-extracted from corpus (freq: 83)"
+      },
+      {
+        "zh": "優等生",
+        "vn_correct": "học sinh giỏi",
+        "vn_wrong": "ưu đẳng sinh",
+        "context": "titles",
+        "frequency": 82,
+        "note": "Auto-extracted from corpus (freq: 82)"
+      },
+      {
+        "zh": "等生",
+        "vn_correct": "học sinh giỏi",
+        "vn_wrong": "đẳng sinh",
+        "context": "titles",
+        "frequency": 82,
+        "note": "Auto-extracted from corpus (freq: 82)"
+      },
+      {
+        "zh": "陸君",
+        "vn_correct": "Riku-kun",
+        "vn_wrong": "Lục quân",
+        "context": "titles",
+        "frequency": 82,
+        "note": "Auto-extracted from corpus (freq: 82)"
+      }
+    ],
+    "general": [
+      {
+        "zh": "彼女",
+        "vn_correct": "cô ấy",
+        "vn_wrong": "bỉ nữ",
+        "context": "general",
+        "frequency": 10247,
+        "note": "Auto-extracted from corpus (freq: 10247)"
+      },
+      {
+        "zh": "自分",
+        "vn_correct": "bản thân",
+        "vn_wrong": "tự phân",
+        "context": "general",
+        "frequency": 7178,
+        "note": "Auto-extracted from corpus (freq: 7178)"
+      },
+      {
+        "zh": "将悟",
+        "vn_correct": "Shougo",
+        "vn_wrong": "Tương Ngộ",
+        "context": "general",
+        "frequency": 6639,
+        "note": "Auto-extracted from corpus (freq: 6639)"
+      },
+      {
+        "zh": "本当",
+        "vn_correct": "thật sự",
+        "vn_wrong": "bản đương",
+        "context": "general",
+        "frequency": 6404,
+        "note": "Auto-extracted from corpus (freq: 6404)"
+      },
+      {
+        "zh": "一緒",
+        "vn_correct": "cùng nhau",
+        "vn_wrong": "nhất tự",
+        "context": "general",
+        "frequency": 5500,
+        "note": "Auto-extracted from corpus (freq: 5500)"
+      },
+      {
+        "zh": "丈夫",
+        "vn_correct": "không sao",
+        "vn_wrong": "trượng phu",
+        "context": "general",
+        "frequency": 3464,
+        "note": "Auto-extracted from corpus (freq: 3464)"
+      },
+      {
+        "zh": "大丈",
+        "vn_correct": "không sao",
+        "vn_wrong": "đại trượng",
+        "context": "general",
+        "frequency": 3453,
+        "note": "Auto-extracted from corpus (freq: 3453)"
+      },
+      {
+        "zh": "大丈夫",
+        "vn_correct": "không sao",
+        "vn_wrong": "đại trượng phu",
+        "context": "general",
+        "frequency": 3451,
+        "note": "Auto-extracted from corpus (freq: 3451)"
+      },
+      {
+        "zh": "天海",
+        "vn_correct": "Amami",
+        "vn_wrong": "Thiên Hải",
+        "context": "general",
+        "frequency": 3148,
+        "note": "Auto-extracted from corpus (freq: 3148)"
+      },
+      {
+        "zh": "乃枝",
+        "vn_correct": "Noe",
+        "vn_wrong": "Nãi Chi",
+        "context": "general",
+        "frequency": 2745,
+        "note": "Auto-extracted from corpus (freq: 2745)"
+      },
+      {
+        "zh": "真樹",
+        "vn_correct": "Masaki",
+        "vn_wrong": "Chân Thụ",
+        "context": "general",
+        "frequency": 2702,
+        "note": "Auto-extracted from corpus (freq: 2702)"
+      },
+      {
+        "zh": "相手",
+        "vn_correct": "đối phương",
+        "vn_wrong": "tương thủ",
+        "context": "general",
+        "frequency": 2680,
+        "note": "Auto-extracted from corpus (freq: 2680)"
+      },
+      {
+        "zh": "頑張",
+        "vn_correct": "cố gắng",
+        "vn_wrong": "ngoan trương",
+        "context": "general",
+        "frequency": 2671,
+        "note": "Auto-extracted from corpus (freq: 2671)"
+      },
+      {
+        "zh": "以上",
+        "vn_correct": "trở lên",
+        "vn_wrong": "dĩ thượng",
+        "context": "general",
+        "frequency": 2644,
+        "note": "Auto-extracted from corpus (freq: 2644)"
+      },
+      {
+        "zh": "視線",
+        "vn_correct": "ánh mắt",
+        "vn_wrong": "thị tuyến",
+        "context": "general",
+        "frequency": 2634,
+        "note": "Auto-extracted from corpus (freq: 2634)"
+      },
+      {
+        "zh": "藍那",
+        "vn_correct": "Aina",
+        "vn_wrong": "Lam Na",
+        "context": "general",
+        "frequency": 2574,
+        "note": "Auto-extracted from corpus (freq: 2574)"
+      },
+      {
+        "zh": "絶対",
+        "vn_correct": "tuyệt đối",
+        "vn_wrong": "tuyệt đối",
+        "context": "general",
+        "frequency": 2315,
+        "note": "Auto-extracted from corpus (freq: 2315)"
+      },
+      {
+        "zh": "問題",
+        "vn_correct": "vấn đề",
+        "vn_wrong": "vấn đề",
+        "context": "general",
+        "frequency": 2260,
+        "note": "Auto-extracted from corpus (freq: 2260)"
+      },
+      {
+        "zh": "亜利",
+        "vn_correct": "Ari",
+        "vn_wrong": "Á Lợi",
+        "context": "general",
+        "frequency": 2187,
+        "note": "Auto-extracted from corpus (freq: 2187)"
+      },
+      {
+        "zh": "亜利沙",
+        "vn_correct": "Arisa",
+        "vn_wrong": "Á Lợi Sa",
+        "context": "general",
+        "frequency": 2187,
+        "note": "Auto-extracted from corpus (freq: 2187)"
+      },
+      {
+        "zh": "利沙",
+        "vn_correct": "Risa",
+        "vn_wrong": "Lợi Sa",
+        "context": "general",
+        "frequency": 2187,
+        "note": "Auto-extracted from corpus (freq: 2187)"
+      },
+      {
+        "zh": "普通",
+        "vn_correct": "bình thường",
+        "vn_wrong": "phổ thông",
+        "context": "general",
+        "frequency": 2167,
+        "note": "Auto-extracted from corpus (freq: 2167)"
+      },
+      {
+        "zh": "笑顔",
+        "vn_correct": "nụ cười",
+        "vn_wrong": "tiếu nhan",
+        "context": "general",
+        "frequency": 2076,
+        "note": "Auto-extracted from corpus (freq: 2076)"
+      },
+      {
+        "zh": "無理",
+        "vn_correct": "không được",
+        "vn_wrong": "vô lý",
+        "context": "general",
+        "frequency": 1988,
+        "note": "Auto-extracted from corpus (freq: 1988)"
+      },
+      {
+        "zh": "意味",
+        "vn_correct": "ý nghĩa",
+        "vn_wrong": "ý vị",
+        "context": "general",
+        "frequency": 1941,
+        "note": "Auto-extracted from corpus (freq: 1941)"
+      },
+      {
+        "zh": "真凛",
+        "vn_correct": "Marin",
+        "vn_wrong": "Chân Lẫm",
+        "context": "general",
+        "frequency": 1867,
+        "note": "Auto-extracted from corpus (freq: 1867)"
+      },
+      {
+        "zh": "一番",
+        "vn_correct": "nhất",
+        "vn_wrong": "nhất phiên",
+        "context": "general",
+        "frequency": 1839,
+        "note": "Auto-extracted from corpus (freq: 1839)"
+      },
+      {
+        "zh": "緒奈",
+        "vn_correct": "Ona",
+        "vn_wrong": "Tự Nại",
+        "context": "general",
+        "frequency": 1837,
+        "note": "Auto-extracted from corpus (freq: 1837)"
+      },
+      {
+        "zh": "理由",
+        "vn_correct": "lý do",
+        "vn_wrong": "lý do",
+        "context": "general",
+        "frequency": 1805,
+        "note": "Auto-extracted from corpus (freq: 1805)"
+      },
+      {
+        "zh": "少女",
+        "vn_correct": "thiếu nữ",
+        "vn_wrong": "thiếu nữ",
+        "context": "general",
+        "frequency": 1733,
+        "note": "Auto-extracted from corpus (freq: 1733)"
+      },
+      {
+        "zh": "必要",
+        "vn_correct": "cần thiết",
+        "vn_wrong": "tất yếu",
+        "context": "general",
+        "frequency": 1726,
+        "note": "Auto-extracted from corpus (freq: 1726)"
+      },
+      {
+        "zh": "勉強",
+        "vn_correct": "học tập",
+        "vn_wrong": "miễn cường",
+        "context": "general",
+        "frequency": 1652,
+        "note": "Auto-extracted from corpus (freq: 1652)"
+      },
+      {
+        "zh": "仕事",
+        "vn_correct": "công việc",
+        "vn_wrong": "sĩ sự",
+        "context": "general",
+        "frequency": 1581,
+        "note": "Auto-extracted from corpus (freq: 1581)"
+      },
+      {
+        "zh": "教室",
+        "vn_correct": "lớp học",
+        "vn_wrong": "giáo thất",
+        "context": "general",
+        "frequency": 1548,
+        "note": "Auto-extracted from corpus (freq: 1548)"
+      },
+      {
+        "zh": "普段",
+        "vn_correct": "bình thường",
+        "vn_wrong": "phổ đoạn",
+        "context": "general",
+        "frequency": 1542,
+        "note": "Auto-extracted from corpus (freq: 1542)"
+      },
+      {
+        "zh": "姫乃",
+        "vn_correct": "Himeno",
+        "vn_wrong": "Cơ Nãi",
+        "context": "general",
+        "frequency": 1503,
+        "note": "Auto-extracted from corpus (freq: 1503)"
+      },
+      {
+        "zh": "当然",
+        "vn_correct": "đương nhiên",
+        "vn_wrong": "đương nhiên",
+        "context": "general",
+        "frequency": 1489,
+        "note": "Auto-extracted from corpus (freq: 1489)"
+      },
+      {
+        "zh": "仕方",
+        "vn_correct": "cách",
+        "vn_wrong": "sĩ phương",
+        "context": "general",
+        "frequency": 1437,
+        "note": "Auto-extracted from corpus (freq: 1437)"
+      },
+      {
+        "zh": "最初",
+        "vn_correct": "lúc đầu",
+        "vn_wrong": "tối sơ",
+        "context": "general",
+        "frequency": 1433,
+        "note": "Auto-extracted from corpus (freq: 1433)"
+      },
+      {
+        "zh": "仲良",
+        "vn_correct": "thân thiết",
+        "vn_wrong": "trọng lương",
+        "context": "general",
+        "frequency": 1362,
+        "note": "Auto-extracted from corpus (freq: 1362)"
+      },
+      {
+        "zh": "準備",
+        "vn_correct": "chuẩn bị",
+        "vn_wrong": "chuẩn bị",
+        "context": "general",
+        "frequency": 1323,
+        "note": "Auto-extracted from corpus (freq: 1323)"
+      },
+      {
+        "zh": "以外",
+        "vn_correct": "ngoại trừ",
+        "vn_wrong": "dĩ ngoại",
+        "context": "general",
+        "frequency": 1318,
+        "note": "Auto-extracted from corpus (freq: 1318)"
+      },
+      {
+        "zh": "正直",
+        "vn_correct": "thành thật",
+        "vn_wrong": "chính trực",
+        "context": "general",
+        "frequency": 1307,
+        "note": "Auto-extracted from corpus (freq: 1307)"
+      },
+      {
+        "zh": "一度",
+        "vn_correct": "một lần",
+        "vn_wrong": "nhất độ",
+        "context": "general",
+        "frequency": 1302,
+        "note": "Auto-extracted from corpus (freq: 1302)"
+      },
+      {
+        "zh": "結婚",
+        "vn_correct": "kết hôn",
+        "vn_wrong": "kết hôn",
+        "context": "general",
+        "frequency": 1302,
+        "note": "Auto-extracted from corpus (freq: 1302)"
+      },
+      {
+        "zh": "徒会",
+        "vn_correct": "hội học sinh",
+        "vn_wrong": "đồ hội",
+        "context": "general",
+        "frequency": 1278,
+        "note": "Auto-extracted from corpus (freq: 1278)"
+      },
+      {
+        "zh": "状況",
+        "vn_correct": "tình hình",
+        "vn_wrong": "trạng huống",
+        "context": "general",
+        "frequency": 1270,
+        "note": "Auto-extracted from corpus (freq: 1270)"
+      },
+      {
+        "zh": "全然",
+        "vn_correct": "hoàn toàn",
+        "vn_wrong": "toàn nhiên",
+        "context": "general",
+        "frequency": 1247,
+        "note": "Auto-extracted from corpus (freq: 1247)"
+      },
+      {
+        "zh": "不安",
+        "vn_correct": "bất an",
+        "vn_wrong": "bất an",
+        "context": "general",
+        "frequency": 1219,
+        "note": "Auto-extracted from corpus (freq: 1219)"
+      },
+      {
+        "zh": "佳純",
+        "vn_correct": "Kasumi",
+        "vn_wrong": "Giai Thuần",
+        "context": "general",
+        "frequency": 1208,
+        "note": "Auto-extracted from corpus (freq: 1208)"
+      },
+      {
+        "zh": "美少",
+        "vn_correct": "thiếu nữ đẹp",
+        "vn_wrong": "mỹ thiếu",
+        "context": "general",
+        "frequency": 1205,
+        "note": "Auto-extracted from corpus (freq: 1205)"
+      },
+      {
+        "zh": "会長",
+        "vn_correct": "hội trưởng",
+        "vn_wrong": "hội trưởng",
+        "context": "general",
+        "frequency": 1192,
+        "note": "Auto-extracted from corpus (freq: 1192)"
+      },
+      {
+        "zh": "美少女",
+        "vn_correct": "mỹ thiếu nữ",
+        "vn_wrong": "mỹ thiếu nữ",
+        "context": "general",
+        "frequency": 1189,
+        "note": "Auto-extracted from corpus (freq: 1189)"
+      },
+      {
+        "zh": "可能",
+        "vn_correct": "có thể",
+        "vn_wrong": "khả năng",
+        "context": "general",
+        "frequency": 1187,
+        "note": "Auto-extracted from corpus (freq: 1187)"
+      },
+      {
+        "zh": "予定",
+        "vn_correct": "dự định",
+        "vn_wrong": "dự định",
+        "context": "general",
+        "frequency": 1176,
+        "note": "Auto-extracted from corpus (freq: 1176)"
+      },
+      {
+        "zh": "十分",
+        "vn_correct": "mười phút",
+        "vn_wrong": "thập phân",
+        "context": "general",
+        "frequency": 1160,
+        "note": "Auto-extracted from corpus (freq: 1160)"
+      },
+      {
+        "zh": "料理",
+        "vn_correct": "nấu ăn",
+        "vn_wrong": "liệu lý",
+        "context": "general",
+        "frequency": 1144,
+        "note": "Auto-extracted from corpus (freq: 1144)"
+      },
+      {
+        "zh": "確認",
+        "vn_correct": "xác nhận",
+        "vn_wrong": "xác nhận",
+        "context": "general",
+        "frequency": 1137,
+        "note": "Auto-extracted from corpus (freq: 1137)"
+      },
+      {
+        "zh": "全員",
+        "vn_correct": "tất cả",
+        "vn_wrong": "toàn viên",
+        "context": "general",
+        "frequency": 1131,
+        "note": "Auto-extracted from corpus (freq: 1131)"
+      },
+      {
+        "zh": "距離",
+        "vn_correct": "khoảng cách",
+        "vn_wrong": "cự ly",
+        "context": "general",
+        "frequency": 1124,
+        "note": "Auto-extracted from corpus (freq: 1124)"
+      },
+      {
+        "zh": "意外",
+        "vn_correct": "bất ngờ",
+        "vn_wrong": "ý ngoại",
+        "context": "general",
+        "frequency": 1122,
+        "note": "Auto-extracted from corpus (freq: 1122)"
+      },
+      {
+        "zh": "結果",
+        "vn_correct": "kết quả",
+        "vn_wrong": "kết quả",
+        "context": "general",
+        "frequency": 1119,
+        "note": "Auto-extracted from corpus (freq: 1119)"
+      },
+      {
+        "zh": "背中",
+        "vn_correct": "lưng",
+        "vn_wrong": "bội trung",
+        "context": "general",
+        "frequency": 1115,
+        "note": "Auto-extracted from corpus (freq: 1115)"
+      },
+      {
+        "zh": "猫姫",
+        "vn_correct": "Nekohime",
+        "vn_wrong": "Miêu Cơ",
+        "context": "general",
+        "frequency": 1092,
+        "note": "Auto-extracted from corpus (freq: 1092)"
+      },
+      {
+        "zh": "写真",
+        "vn_correct": "ảnh",
+        "vn_wrong": "tả chân",
+        "context": "general",
+        "frequency": 1080,
+        "note": "Auto-extracted from corpus (freq: 1080)"
+      },
+      {
+        "zh": "最近",
+        "vn_correct": "gần đây",
+        "vn_wrong": "tối cận",
+        "context": "general",
+        "frequency": 1073,
+        "note": "Auto-extracted from corpus (freq: 1073)"
+      },
+      {
+        "zh": "何度",
+        "vn_correct": "bao nhiêu lần",
+        "vn_wrong": "hà độ",
+        "context": "general",
+        "frequency": 1052,
+        "note": "Auto-extracted from corpus (freq: 1052)"
+      },
+      {
+        "zh": "理解",
+        "vn_correct": "hiểu",
+        "vn_wrong": "lý giải",
+        "context": "general",
+        "frequency": 1045,
+        "note": "Auto-extracted from corpus (freq: 1045)"
+      },
+      {
+        "zh": "両手",
+        "vn_correct": "hai tay",
+        "vn_wrong": "lưỡng thủ",
+        "context": "general",
+        "frequency": 1044,
+        "note": "Auto-extracted from corpus (freq: 1044)"
+      },
+      {
+        "zh": "反応",
+        "vn_correct": "phản ứng",
+        "vn_wrong": "phản ứng",
+        "context": "general",
+        "frequency": 1039,
+        "note": "Auto-extracted from corpus (freq: 1039)"
+      },
+      {
+        "zh": "存在",
+        "vn_correct": "tồn tại",
+        "vn_wrong": "tồn tại",
+        "context": "general",
+        "frequency": 1035,
+        "note": "Auto-extracted from corpus (freq: 1035)"
+      },
+      {
+        "zh": "大変",
+        "vn_correct": "khó khăn",
+        "vn_wrong": "đại biến",
+        "context": "general",
+        "frequency": 1035,
+        "note": "Auto-extracted from corpus (freq: 1035)"
+      },
+      {
+        "zh": "完全",
+        "vn_correct": "hoàn toàn",
+        "vn_wrong": "hoàn toàn",
+        "context": "general",
+        "frequency": 1034,
+        "note": "Auto-extracted from corpus (freq: 1034)"
+      },
+      {
+        "zh": "大事",
+        "vn_correct": "quan trọng",
+        "vn_wrong": "đại sự",
+        "context": "general",
+        "frequency": 1030,
+        "note": "Auto-extracted from corpus (freq: 1030)"
+      },
+      {
+        "zh": "雰囲",
+        "vn_correct": "không khí",
+        "vn_wrong": "phân vi",
+        "context": "general",
+        "frequency": 1029,
+        "note": "Auto-extracted from corpus (freq: 1029)"
+      },
+      {
+        "zh": "多分",
+        "vn_correct": "có lẽ",
+        "vn_wrong": "đa phân",
+        "context": "general",
+        "frequency": 1023,
+        "note": "Auto-extracted from corpus (freq: 1023)"
+      },
+      {
+        "zh": "内容",
+        "vn_correct": "nội dung",
+        "vn_wrong": "nội dung",
+        "context": "general",
+        "frequency": 1020,
+        "note": "Auto-extracted from corpus (freq: 1020)"
+      },
+      {
+        "zh": "意識",
+        "vn_correct": "ý thức",
+        "vn_wrong": "ý thức",
+        "context": "general",
+        "frequency": 1016,
+        "note": "Auto-extracted from corpus (freq: 1016)"
+      },
+      {
+        "zh": "練習",
+        "vn_correct": "luyện tập",
+        "vn_wrong": "luyện tập",
+        "context": "general",
+        "frequency": 1008,
+        "note": "Auto-extracted from corpus (freq: 1008)"
+      },
+      {
+        "zh": "咲奈",
+        "vn_correct": "Sakina",
+        "vn_wrong": "Tiếu Nại",
+        "context": "general",
+        "frequency": 998,
+        "note": "Auto-extracted from corpus (freq: 998)"
+      },
+      {
+        "zh": "水着",
+        "vn_correct": "đồ bơi",
+        "vn_wrong": "thủy trước",
+        "context": "general",
+        "frequency": 995,
+        "note": "Auto-extracted from corpus (freq: 995)"
+      },
+      {
+        "zh": "女性",
+        "vn_correct": "phụ nữ",
+        "vn_wrong": "nữ tính",
+        "context": "general",
+        "frequency": 993,
+        "note": "Auto-extracted from corpus (freq: 993)"
+      },
+      {
+        "zh": "一応",
+        "vn_correct": "tạm thời",
+        "vn_wrong": "nhất ứng",
+        "context": "general",
+        "frequency": 990,
+        "note": "Auto-extracted from corpus (freq: 990)"
+      },
+      {
+        "zh": "俺達",
+        "vn_correct": "bọn tao",
+        "vn_wrong": "ngã đạt",
+        "context": "general",
+        "frequency": 987,
+        "note": "Auto-extracted from corpus (freq: 987)"
+      },
+      {
+        "zh": "実際",
+        "vn_correct": "thực tế",
+        "vn_wrong": "thực tế",
+        "context": "general",
+        "frequency": 976,
+        "note": "Auto-extracted from corpus (freq: 976)"
+      },
+      {
+        "zh": "想像",
+        "vn_correct": "tưởng tượng",
+        "vn_wrong": "tưởng tượng",
+        "context": "general",
+        "frequency": 972,
+        "note": "Auto-extracted from corpus (freq: 972)"
+      },
+      {
+        "zh": "里緒",
+        "vn_correct": "Rio",
+        "vn_wrong": "Lý Tự",
+        "context": "general",
+        "frequency": 966,
+        "note": "Auto-extracted from corpus (freq: 966)"
+      },
+      {
+        "zh": "里緒奈",
+        "vn_correct": "Riona",
+        "vn_wrong": "Lý Tự Nại",
+        "context": "general",
+        "frequency": 966,
+        "note": "Auto-extracted from corpus (freq: 966)"
+      },
+      {
+        "zh": "東雲",
+        "vn_correct": "Shinonome",
+        "vn_wrong": "Đông Vân",
+        "context": "general",
+        "frequency": 965,
+        "note": "Auto-extracted from corpus (freq: 965)"
+      },
+      {
+        "zh": "荒江",
+        "vn_correct": "Arae",
+        "vn_wrong": "Hoang Giang",
+        "context": "general",
+        "frequency": 960,
+        "note": "Auto-extracted from corpus (freq: 960)"
+      },
+      {
+        "zh": "結構",
+        "vn_correct": "khá",
+        "vn_wrong": "kết cấu",
+        "context": "general",
+        "frequency": 938,
+        "note": "Auto-extracted from corpus (freq: 938)"
+      },
+      {
+        "zh": "告白",
+        "vn_correct": "thổ lộ",
+        "vn_wrong": "cáo bạch",
+        "context": "general",
+        "frequency": 938,
+        "note": "Auto-extracted from corpus (freq: 938)"
+      },
+      {
+        "zh": "朱莉",
+        "vn_correct": "Akari",
+        "vn_wrong": "Chu Lý",
+        "context": "general",
+        "frequency": 924,
+        "note": "Auto-extracted from corpus (freq: 924)"
+      },
+      {
+        "zh": "青柳",
+        "vn_correct": "Aoyagi",
+        "vn_wrong": "Thanh Liễu",
+        "context": "general",
+        "frequency": 920,
+        "note": "Auto-extracted from corpus (freq: 920)"
+      },
+      {
+        "zh": "康貴",
+        "vn_correct": "Yasutaka",
+        "vn_wrong": "Khang Quý",
+        "context": "general",
+        "frequency": 918,
+        "note": "Auto-extracted from corpus (freq: 918)"
+      },
+      {
+        "zh": "春風",
+        "vn_correct": "gió xuân",
+        "vn_wrong": "xuân phong",
+        "context": "general",
+        "frequency": 916,
+        "note": "Auto-extracted from corpus (freq: 916)"
+      },
+      {
+        "zh": "能性",
+        "vn_correct": "khả năng",
+        "vn_wrong": "năng tính",
+        "context": "general",
+        "frequency": 905,
+        "note": "Auto-extracted from corpus (freq: 905)"
+      },
+      {
+        "zh": "世界",
+        "vn_correct": "thế giới",
+        "vn_wrong": "thế giới",
+        "context": "general",
+        "frequency": 901,
+        "note": "Auto-extracted from corpus (freq: 901)"
+      },
+      {
+        "zh": "状態",
+        "vn_correct": "trạng thái",
+        "vn_wrong": "trạng thái",
+        "context": "general",
+        "frequency": 899,
+        "note": "Auto-extracted from corpus (freq: 899)"
+      },
+      {
+        "zh": "可能性",
+        "vn_correct": "khả năng",
+        "vn_wrong": "khả năng tính",
+        "context": "general",
+        "frequency": 896,
+        "note": "Auto-extracted from corpus (freq: 896)"
+      }
+    ]
+  }
+}

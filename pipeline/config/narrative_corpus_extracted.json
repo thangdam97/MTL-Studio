@@ -1,0 +1,32 @@
+{
+  "metadata": {
+    "version": "1.0",
+    "generated": "2026-02-03",
+    "source": "Professional JP→EN EPUB translations (~130 volumes)",
+    "total_fid_patterns": 0,
+    "total_show_patterns": 0,
+    "total_filter_samples": 0
+  },
+  "free_indirect_discourse_corpus": {
+    "description": "Real-world examples of Free Indirect Discourse in professional translations",
+    "examples": []
+  },
+  "show_dont_tell_corpus": {
+    "description": "Physical manifestations of emotions (Show) instead of emotion labels (Tell)",
+    "by_emotion": {}
+  },
+  "filter_word_elimination_corpus": {
+    "description": "Examples of sentences with/without filter words for comparison",
+    "samples": []
+  },
+  "psychic_distance_corpus": {
+    "description": "Sentences classified by psychic distance level (John Gardner scale)",
+    "levels": {
+      "level_1_maximum": [],
+      "level_2_distant": [],
+      "level_3_close": [],
+      "level_4_very_close": [],
+      "level_5_first_person": []
+    }
+  }
+}

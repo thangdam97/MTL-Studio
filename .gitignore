@@ -31,6 +31,16 @@ auditing/
 # Context files (legacy continuity system)
 **/.context/
 
+# Cache directories (dictionary lookups, API responses)
+pipeline/cache/
+**/cache/
+
+# ChromaDB vector stores (auto-rebuilt from source)
+chroma_sino_vn/
+chroma_english_patterns/
+pipeline/chroma_sino_vn/
+pipeline/chroma_english_patterns/
+
 # ============================================
 # DOCUMENTATION - INTERNAL/DEVELOPMENT NOTES
 # ============================================
@@ -52,14 +62,38 @@ UNIVERSAL_CONTINUITY_PACK_DESIGN.md
 VERIFICATION_REPORT.md
 AUDIT_AGENT.md
 
+# Analysis and build documents (internal investigation notes)
+pipeline/96_TO_99_QUALITY_GAP_ANALYSIS.md
+pipeline/BUILD_1CCA_ANALYSIS_PSEUDO_PARTICLES.md
+pipeline/BUILD_1CCA_BEFORE_AFTER_COMPARISON.md
+pipeline/ENGLISH_PARTICLE_EQUIVALENT_EXPLORATION.md
+pipeline/ENGLISH_PSEUDO_PARTICLE_IMPLEMENTATION.md
+pipeline/ENGLISH_PSEUDO_PARTICLE_IMPLEMENTATION_COMPLETE.md
+pipeline/ENGLISH_PSEUDO_PARTICLE_INTEGRATION_SUMMARY.md
+pipeline/IDIOM_LOCALIZATION_INTEGRATION.md
+pipeline/THE_EDITOR_THRESHOLD_ANALYSIS.md
+pipeline/*_ANALYSIS*.md
+pipeline/*_INTEGRATION*.md
+
+# Schema documentation (moved to docs/)
+pipeline/SCHEMA_*.md
+pipeline/DIALOGUE_*.md
+
 # Audit reports
 AUDIT_REPORT*.md
 AUDIT_REPORT*.txt
 *_COMPARISON_REPORT.md
 MTL_STUDIO vs YEN_PRESS.md
+Multimodal_Integration_Report.md
+Multimodal_Integration_Report.docx
 
 # Security audit (V4.0 pre-release)
 !SECURITY_AUDIT_V4.md
+
+# Rebuild logs
+rebuild_index.log
+safety_fallback_test.log
+*.log
 
 # ============================================
 # TEST SCRIPTS AND DEVELOPMENT AIDS

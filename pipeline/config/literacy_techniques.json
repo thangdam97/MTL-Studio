@@ -1,0 +1,772 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "version": "1.0",
+  "description": "Literary narrative techniques configuration for AI-driven transcreation. This JSON alters Gemini's default translation behavior by activating specific narrative latent spaces, transforming word-for-word translation into literary prose.",
+  "metadata": {
+    "purpose": "Define narrative voice, psychic distance, and sensory focus for consistent literary output",
+    "tier": 1,
+    "scope": "language_agnostic",
+    "applies_to": [
+      "EN",
+      "VN"
+    ],
+    "last_updated": "2026-02-03",
+    "version": "1.1",
+    "corpus_integrated": true,
+    "corpus_examples_count": {
+      "fid": 15,
+      "show_dont_tell": 2,
+      "psychic_distance_shifts": 7
+    }
+  },
+  "narrative_techniques": {
+    "first_person": {
+      "label": "Ngôi thứ nhất (First Person - 'Tôi/I')",
+      "description": "Creates the most direct emotional connection with readers. The narrator is the protagonist or a witness within the story.",
+      "subtechniques": {
+        "unreliable_narrator": {
+          "label_en": "Unreliable Narrator",
+          "label_vn": "Người kể chuyện không đáng tin",
+          "definition": "The narrator deliberately or unconsciously misleads the reader through self-deception, limited perception (child, mentally unstable character), or deliberate lies. Forces readers to infer truth from subtext.",
+          "instruction": "When translating, preserve ambiguities and contradictions. Do not clarify what the character misunderstands. Let the reader detect the unreliability through subtle inconsistencies.",
+          "banned_phrases": [
+            "actually",
+            "in reality",
+            "the truth was",
+            "to be honest"
+          ],
+          "trigger_markers": [
+            "Character makes false assumptions",
+            "Memory sequences that contradict earlier events",
+            "Defensive or justifying language"
+          ]
+        },
+        "stream_of_consciousness": {
+          "label_en": "Stream of Consciousness",
+          "label_vn": "Dòng ý thức",
+          "definition": "Records continuous flow of character's thoughts, emotions, and memories without strict logical order or grammatical structure. Often fragmented, associative, and impressionistic.",
+          "instruction": "Preserve sentence fragments, run-on sentences, and abrupt topic shifts. Do not sanitize into proper grammar. Maintain the raw, unfiltered quality of internal thought.",
+          "allowed_structures": [
+            "Sentence fragments",
+            "Em-dashes for interrupted thoughts",
+            "Ellipses for trailing thoughts",
+            "Repetition for emphasis or obsession"
+          ],
+          "banned_fixes": [
+            "Do not add subjects to fragments",
+            "Do not complete interrupted sentences",
+            "Do not reorder thoughts for logic"
+          ]
+        },
+        "peripheral_narrator": {
+          "label_en": "Peripheral Narrator",
+          "label_vn": "Người kể chuyện quan sát",
+          "definition": "The 'I' character is not the protagonist but a witness observing and recounting the central character's story (e.g., Nick Carraway in The Great Gatsby).",
+          "instruction": "Maintain psychological distance between narrator and protagonist. The narrator describes the protagonist from outside, with limited access to their inner thoughts. Use speculative language when inferring emotions.",
+          "speculative_verbs": [
+            "seemed to",
+            "appeared to",
+            "must have felt",
+            "I imagine"
+          ],
+          "banned_access": [
+            "Do not write the protagonist's direct thoughts",
+            "Do not use absolute emotional statements about the protagonist"
+          ]
+        },
+        "confessional_narrative": {
+          "label_en": "Confessional Narrative",
+          "label_vn": "Tự sự tâm tình",
+          "definition": "The narrator directly addresses the reader, breaking the fourth wall. Creates intimacy and immediacy, as if the narrator is confiding in or confessing to the reader.",
+          "instruction": "Preserve direct addresses to the reader. Use second-person pronouns strategically. Maintain the conversational, intimate tone.",
+          "allowed_addresses": [
+            "Reader, ...",
+            "You must understand...",
+            "I confess...",
+            "Perhaps you think..."
+          ],
+          "tone": "intimate, conversational, self-aware"
+        }
+      }
+    },
+    "third_person": {
+      "label": "Ngôi thứ ba (Third Person - 'Anh ấy/Cô ấy/He/She')",
+      "description": "The most common narrative voice, offering flexibility in psychic distance and scope of knowledge.",
+      "subtechniques": {
+        "third_person_limited": {
+          "label_en": "Third Person Limited",
+          "label_vn": "Ngôi thứ ba hạn tri",
+          "definition": "The narrator penetrates the thoughts and emotions of only ONE character per scene or throughout the entire work. The reader knows only what that character knows.",
+          "instruction": "Filter all sensory details and descriptions through the focal character's perception. Use the character's vocabulary and biases to describe objective reality. Avoid filter words ('she saw', 'he felt').",
+          "psychic_distance": "close",
+          "filter_removal": {
+            "enabled": true,
+            "banned_filters": [
+              "she saw",
+              "he heard",
+              "she felt",
+              "he noticed",
+              "she wondered",
+              "he thought",
+              "she sensed"
+            ],
+            "instruction": "Transform filter phrases into direct perception. 'She saw the rain' becomes 'Rain lashed the windows.'"
+          },
+          "vocabulary_infection": {
+            "enabled": true,
+            "instruction": "Use the focal character's internal vocabulary to describe external reality. If the character is poetic, describe a tree as 'gnarled sentinel'. If cynical, 'dead wood'."
+          },
+          "sensory_focus": "high",
+          "sentence_pacing": "variable"
+        },
+        "third_person_omniscient": {
+          "label_en": "Third Person Omniscient",
+          "label_vn": "Ngôi thứ ba toàn tri",
+          "definition": "The narrator is god-like, knowing all thoughts, emotions, past, and future of all characters. Often includes philosophical or moral commentary from the narrator.",
+          "instruction": "Establish the narrator as a distinct, authoritative voice. Allow direct narrator commentary on characters' actions and motivations. Use elevated, literary diction.",
+          "psychic_distance": "far",
+          "narrator_voice": {
+            "enabled": true,
+            "tone": "wise, philosophical, sometimes ironic",
+            "allowed_intrusions": [
+              "Little did she know...",
+              "Years later, he would remember...",
+              "If only they had understood...",
+              "The truth was simpler than either realized..."
+            ]
+          },
+          "scope": "all_characters",
+          "temporal_scope": "past_present_future"
+        },
+        "third_person_objective": {
+          "label_en": "Third Person Objective / Camera / Fly on the Wall",
+          "label_vn": "Ngôi thứ ba khách quan",
+          "definition": "The narrator describes only external actions, dialogue, and settings without ever accessing any character's internal thoughts or emotions. Pure observation.",
+          "instruction": "Eliminate all internal thoughts, emotions, and motivations. Report only observable behavior and dialogue. Let the reader infer emotions from actions and speech.",
+          "psychic_distance": "maximum",
+          "banned_content": [
+            "Internal thoughts",
+            "Emotional states (unless explicitly shown through action)",
+            "Motivations or intentions",
+            "Unobservable sensory data"
+          ],
+          "allowed_content": [
+            "Dialogue",
+            "Physical actions",
+            "Visible expressions (frown, smile, but not 'sad smile' unless context makes it clear)",
+            "Environmental description"
+          ],
+          "tone": "detached, clinical, observational"
+        },
+        "head_hopping": {
+          "label_en": "Head-Hopping",
+          "label_vn": "Nhảy đầu",
+          "definition": "A variant (often considered an error if poorly executed) where the narrator jumps between different characters' perspectives within the same scene without clear separation. Requires masterful control to avoid confusion.",
+          "instruction": "CAUTION: Only use if the source material clearly employs this technique. When shifting POV within a scene, use subtle transition markers (paragraph breaks, character names, distinct voice shifts).",
+          "warning": "High risk of reader confusion. Requires distinct character voices and careful transition management.",
+          "transition_markers": [
+            "Paragraph break + character name in first sentence",
+            "Distinct sentence rhythm/vocabulary per character",
+            "Physical action that signals POV shift"
+          ],
+          "best_practices": [
+            "Limit to 2-3 POV characters per scene",
+            "Ensure each character has a distinct internal voice",
+            "Avoid rapid-fire switches (stay with each character for at least 2-3 paragraphs)"
+          ]
+        }
+      }
+    },
+    "free_indirect_discourse": {
+      "label": "Free Indirect Discourse",
+      "label_vn": "Gián tiếp tự do",
+      "description": "A hybrid technique where the narrator's voice merges with a character's thoughts and speech patterns without using quotation marks or explicit tags ('she thought'). Blends third-person narration with first-person intimacy.",
+      "instruction": "Merge the narrator's grammatical third-person structure with the character's vocabulary, syntax, and emotional tone. Remove all filter words. Let the character's subjectivity color objective description.",
+      "examples": {
+        "standard_third": "She looked at the rain. She felt sad.",
+        "free_indirect": "The rain fell in relentless sheets. How miserable. How perfectly, utterly miserable.",
+        "explanation": "The second example uses third-person grammar but first-person emotional directness without 'she thought'."
+      },
+      "key_features": [
+        "Third-person pronouns (she/he/they)",
+        "Character's internal vocabulary and sentence rhythm",
+        "No quotation marks",
+        "No filter words ('thought', 'felt', 'wondered')",
+        "Emotional immediacy of first person"
+      ],
+      "ideal_for_genres": [
+        "Shoujo romance (e.g., Kimi ni Todoke)",
+        "Literary fiction",
+        "Character-driven drama",
+        "Coming-of-age narratives"
+      ]
+    }
+  },
+  "psychic_distance_levels": {
+    "description": "Defines how close the narrative voice is to the character's consciousness. Adapted from John Gardner's psychic distance scale.",
+    "levels": {
+      "level_1_maximum_distance": {
+        "description": "Narrator is far from all characters, often describing them from outside or above (e.g., 'In the kingdom of X, there lived a girl named Y').",
+        "example": "It was the city of London in the year 1850.",
+        "instruction": "Use distant, objective, historical or geographic framing. Avoid character-specific details.",
+        "tone": "impersonal, grand, historical"
+      },
+      "level_2_distant": {
+        "description": "Narrator introduces a specific character but remains outside their mind.",
+        "example": "Sawako walked down the hallway, her footsteps silent.",
+        "instruction": "Describe character from outside. Use their name or third-person pronouns. No access to thoughts.",
+        "tone": "observational, factual"
+      },
+      "level_3_close": {
+        "description": "Narrator enters the character's mind but maintains some separation through filter words.",
+        "example": "Sawako felt her heart pounding. She noticed Kazehaya approaching.",
+        "instruction": "Use filter words sparingly. Begin transitioning toward the character's perspective.",
+        "filter_words": [
+          "felt",
+          "noticed",
+          "thought",
+          "wondered"
+        ]
+      },
+      "level_4_very_close": {
+        "description": "Narrator fully inhabits the character's perception without filter words. Free Indirect Discourse.",
+        "example": "Her heart pounded. Kazehaya was approaching—oh no, what should she do?",
+        "instruction": "Remove all filter words. Use character's vocabulary and emotional tone. Maintain third-person grammar.",
+        "tone": "intimate, immediate, subjective"
+      },
+      "level_5_first_person": {
+        "description": "Full first-person narration. Maximum intimacy.",
+        "example": "My heart pounded. Kazehaya was approaching—oh no, what should I do?",
+        "instruction": "Use first-person pronouns. Direct access to thoughts and emotions.",
+        "tone": "confessional, immediate, subjective"
+      }
+    },
+    "default_recommendation": {
+      "shoujo_romance": "level_4_very_close",
+      "literary_fiction": "level_4_very_close",
+      "action_adventure": "level_2_distant",
+      "epic_fantasy": "level_2_distant or level_1_maximum_distance",
+      "psychological_thriller": "level_4_very_close or level_5_first_person"
+    }
+  },
+  "sensory_focus_modes": {
+    "high": {
+      "description": "Emphasize sensory details (sight, sound, touch, smell, taste) filtered through character perception.",
+      "instruction": "Translate sensory descriptions with rich, specific vocabulary. Avoid generic sensory words ('nice smell' → 'sweet jasmine', 'loud noise' → 'ear-splitting crash').",
+      "ideal_for": [
+        "Shoujo romance",
+        "Horror",
+        "Literary fiction"
+      ]
+    },
+    "medium": {
+      "description": "Balance sensory details with action and dialogue.",
+      "instruction": "Include sensory details when they serve character development or atmosphere. Avoid overloading.",
+      "ideal_for": [
+        "Contemporary fiction",
+        "Mystery",
+        "YA"
+      ]
+    },
+    "low": {
+      "description": "Minimize sensory details. Focus on action, dialogue, and plot progression.",
+      "instruction": "Translate sensory details only when critical to understanding. Prioritize clarity and pacing.",
+      "ideal_for": [
+        "Thriller",
+        "Action",
+        "Fast-paced adventure"
+      ]
+    }
+  },
+  "sentence_pacing": {
+    "variable": {
+      "description": "Mix short and long sentences to create rhythm and emotional emphasis.",
+      "instruction": "Use short sentences for tension, urgency, or impact. Use longer sentences for contemplation, description, or complex emotion. Do not homogenize sentence length.",
+      "example": {
+        "bad": "She was scared. She ran away. She hid behind the tree.",
+        "good": "She was scared. Heart hammering, she bolted for the nearest cover and pressed her back against the rough bark of an oak tree, struggling to quiet her breathing."
+      }
+    },
+    "staccato": {
+      "description": "Predominantly short, punchy sentences. Creates tension, urgency, or cynicism.",
+      "instruction": "Translate with short, declarative sentences. Avoid flowery language.",
+      "ideal_for": [
+        "Noir",
+        "Hardboiled detective",
+        "Action thrillers"
+      ]
+    },
+    "flowing": {
+      "description": "Predominantly longer, complex sentences. Creates a contemplative, lyrical, or dreamy atmosphere.",
+      "instruction": "Translate with complex, compound sentences. Use commas and semicolons. Embrace subordinate clauses.",
+      "ideal_for": [
+        "Literary fiction",
+        "Romance",
+        "Philosophical narratives"
+      ]
+    }
+  },
+  "show_dont_tell": {
+    "enabled": true,
+    "description": "Fundamental creative writing principle: Reveal character emotions and traits through actions, dialogue, and sensory details rather than direct statements.",
+    "banned_tell_phrases": [
+      "She was angry",
+      "He felt sad",
+      "She was beautiful",
+      "He was nervous",
+      "She was in love"
+    ],
+    "show_alternatives": {
+      "She was angry": "Her jaw clenched. She slammed the door.",
+      "He felt sad": "He stared at the empty chair, throat tight.",
+      "She was beautiful": "Heads turned as she walked by.",
+      "He was nervous": "His palms were slick with sweat.",
+      "She was in love": "Her heart leapt every time his name appeared on her phone."
+    },
+    "instruction": "When translating emotional states, default to showing through physical reactions, internal sensations, or behavioral cues unless the source material explicitly tells."
+  },
+  "genre_specific_presets": {
+    "shoujo_romance": {
+      "narrative_technique": "third_person_limited",
+      "use_free_indirect_discourse": true,
+      "psychic_distance": "level_4_very_close",
+      "sensory_focus": "high",
+      "sentence_pacing": "variable",
+      "show_dont_tell": true,
+      "emotional_vocabulary": "poetic, delicate, introspective"
+    },
+    "noir_hardboiled": {
+      "narrative_technique": "first_person",
+      "psychic_distance": "level_5_first_person",
+      "sensory_focus": "medium",
+      "sentence_pacing": "staccato",
+      "show_dont_tell": true,
+      "emotional_vocabulary": "cynical, terse, world-weary"
+    },
+    "epic_fantasy": {
+      "narrative_technique": "third_person_omniscient",
+      "psychic_distance": "level_1_maximum_distance",
+      "sensory_focus": "medium",
+      "sentence_pacing": "flowing",
+      "show_dont_tell": false,
+      "narrator_voice": "wise, elevated, archaic diction"
+    },
+    "psychological_horror": {
+      "narrative_technique": "first_person or third_person_limited",
+      "use_unreliable_narrator": true,
+      "psychic_distance": "level_4_very_close",
+      "sensory_focus": "high",
+      "sentence_pacing": "variable",
+      "show_dont_tell": true,
+      "emotional_vocabulary": "unsettling, fragmented, paranoid"
+    }
+  },
+  "integration_notes": {
+    "tier": 1,
+    "load_priority": "before_language_specific_configs",
+    "scope": "Apply to both EN and VN translation workflows",
+    "usage": "These techniques are not just translation rules—they are 'creative transcreation' directives that activate specific narrative latent spaces in Gemini 2.5 Pro, transforming mechanical translation into literary prose."
+  },
+  "real_world_jp_en_corpus": {
+    "description": "Real examples from MTL Studio translations showing literary techniques in action",
+    "source": "MTL Studio JP→EN paired translations",
+    "total_volumes": 46,
+    "generated": "2026-02-03",
+    "free_indirect_discourse_examples": {
+      "description": "EN paragraphs showing direct perception without filter words (felt/saw/thought)",
+      "instruction": "Use character emotional vocabulary to describe reality directly, without mediation",
+      "pattern": "Direct emotional perception without filter words (felt/saw/thought)",
+      "examples": [
+        {
+          "text": "Frost-san's eyes narrowed suspiciously as she stared me down.",
+          "source_volume": "孤高の華と呼ばれる英国美少女、義妹になったら不器用に甘えてきた 1_20260125_0164",
+          "chapter": "CHAPTER_02"
+        },
+        {
+          "text": "My heart pounded at her expression as I forced a smile and spoke.",
+          "source_volume": "孤高の華と呼ばれる英国美少女、義妹になったら不器用に甘えてきた 1_20260125_0164",
+          "chapter": "CHAPTER_06"
+        },
+        {
+          "text": "When I said that—her eyes widened again, and she buried her face.",
+          "source_volume": "孤高の華と呼ばれる英国美少女、義妹になったら不器用に甘えてきた 4_20260126_2172",
+          "chapter": "CHAPTER_07"
+        },
+        {
+          "text": "*Thump-thump.* Her heart pounded… She knew this was wrong, she knew she was betraying her daughters, but Sakina couldn't stop herself.",
+          "source_volume": "男嫌いな美人姉妹を名前も告げずに助けたら一体どうなる？2_20260127_024a",
+          "chapter": "CHAPTER_05"
+        },
+        {
+          "text": "Sitoen's eyes narrowed. My sudden silence must have worried her.",
+          "source_volume": "隣国から来た嫁が可愛すぎてどうしよう。ー冬熊と呼ばれる俺が相手で本当にいいのか！？ー【電子版特典付】_20260127_211e",
+          "chapter": "CHAPTER_03"
+        },
+        {
+          "text": "Seeing our group, the young man's eyes widened. But even that was a subtle reaction. His swollen eyelids barely lifted.",
+          "source_volume": "隣国から来た嫁が可愛すぎてどうしよう。ー冬熊と呼ばれる俺が相手で本当にいいのか！？ー【電子版特典付】_20260127_211e",
+          "chapter": "CHAPTER_03"
+        },
+        {
+          "text": "When I asked that, Shimizu-san's eyes widened as if she'd been slapped.",
+          "source_volume": "(迷子になっていた幼女を助けたら、お隣に住む美少女留学生が家に遊びに来るようになった件について (2)_20260126_1478",
+          "chapter": "CHAPTER_04"
+        },
+        {
+          "text": "Spotting her best friend, her purple eyes widened, and she called out.",
+          "source_volume": "貴族令嬢。俺にだけなつく_20260119_1d74",
+          "chapter": "CHAPTER_02"
+        },
+        {
+          "text": "The moment I answered, her golden eyes narrowed. The first emotion I could read from her was 'suspicion'.",
+          "source_volume": "貴族令嬢。俺にだけなつく_20260119_1d74",
+          "chapter": "CHAPTER_04"
+        },
+        {
+          "text": "Her eyes narrowed as she approached and started poking my sides with her finger. Ugh, the guilt is way stronger than the sense of accomplishment…!",
+          "source_volume": "弓道部の美人な先輩が、俺の部屋でお腹出して寝てる_20260129_165c",
+          "chapter": "CHAPTER_05"
+        },
+        {
+          "text": "The mother's eyes widened, but she quickly let out a small laugh.",
+          "source_volume": "男嫌いな美人姉妹を名前も告げずに助けたら一体どうなる？1_20260127_1cca",
+          "chapter": "CHAPTER_05"
+        },
+        {
+          "text": "Sana glared at Shintarou, her guard up and her eyes narrowed.",
+          "source_volume": "年上幼馴染と再会したら、姉妹で俺の取り合いが始まった　どっちがいいか、試してみる？_20260125_038e",
+          "chapter": "CHAPTER_04"
+        },
+        {
+          "text": "Momo-nee's voice rose with delight. Even in the darkness, I could tell her eyes were sparkling, and sitting next to her, my heart pounded a little.",
+          "source_volume": "年上幼馴染と再会したら、姉妹で俺の取り合いが始まった　どっちがいいか、試してみる？_20260125_038e",
+          "chapter": "CHAPTER_05"
+        },
+        {
+          "text": "Akari-chan's gaze darted about in a slight panic. She squeezed my hand just a little tighter—and gave a small nod.",
+          "source_volume": "友人に500円貸したら借金のカタに妹をよこしてきたのだけれど、俺は一体どうすればいいんだろう_20260129_205c",
+          "chapter": "CHAPTER_06"
+        },
+        {
+          "text": "His heart pounded, and he frantically tried to back away.",
+          "source_volume": "この中に1人、妹がいる! 4_20260201_0523",
+          "chapter": "CHAPTER_04"
+        }
+      ]
+    },
+    "show_dont_tell_examples": {
+      "description": "JP emotion labels transformed into EN physical manifestations",
+      "instruction": "When JP uses emotion words, translate as physical sensations/actions",
+      "pattern": "JP emotion labels → EN physical manifestations",
+      "examples": [
+        {
+          "jp_original": "\"焦らないでゆっくり色んな楽しいことをしよう。夏になったら海とかお祭り、色々あるでしょ？\"",
+          "en_transcreation": "Then Kurumi's eyes widened.",
+          "emotion": "happy",
+          "source_volume": "Innocent Looking Yandere_20260201_07a4",
+          "chapter": "CHAPTER_11"
+        },
+        {
+          "jp_original": "俺はそんな不安を抱きながら、腕の中でご機嫌となったエマちゃんを抱えてシャーロットさんと共にスーパーへと向かうのだった。",
+          "en_transcreation": "When Emma apologized, Charlotte's eyes widened in surprise.",
+          "emotion": "nervous",
+          "source_volume": "(迷子になっていた幼女を助けたら、お隣に住む美少女留学生が家に遊びに来るようになった件について (1)_20260126_25b4",
+          "chapter": "CHAPTER_04"
+        }
+      ]
+    },
+    "psychic_distance_shifts_examples": {
+      "description": "JP distant narration brought closer in EN (Free Indirect Discourse)",
+      "instruction": "Remove quotative markers and thought-reporting to create intimacy",
+      "pattern": "JP distant narration → EN very close (Free Indirect Discourse)",
+      "examples": [
+        {
+          "jp_original": "今は夏休み終盤なので、これくらいなら遊んでいる学生も多いと思うが…。",
+          "en_transcreation": "Frost-san's eyes narrowed suspiciously as she stared me down.",
+          "jp_distance": "distant (quotative markers)",
+          "en_distance": "very_close (direct perception)",
+          "shift": "jp_distant_to_en_close",
+          "source_volume": "孤高の華と呼ばれる英国美少女、義妹になったら不器用に甘えてきた 1_20260125_0164",
+          "chapter": "CHAPTER_02"
+        },
+        {
+          "jp_original": "相変わらず、まじめすぎるというか、なんというか…。",
+          "en_transcreation": "My heart pounded at her expression as I forced a smile and spoke.",
+          "jp_distance": "distant (quotative markers)",
+          "en_distance": "very_close (direct perception)",
+          "shift": "jp_distant_to_en_close",
+          "source_volume": "孤高の華と呼ばれる英国美少女、義妹になったら不器用に甘えてきた 1_20260125_0164",
+          "chapter": "CHAPTER_06"
+        },
+        {
+          "jp_original": "純粋なシアと立場を気にしないエレナは相性がよく、お互いに気を許している仲なのだ。",
+          "en_transcreation": "Spotting her best friend, her purple eyes widened, and she called out.",
+          "jp_distance": "distant (quotative markers)",
+          "en_distance": "very_close (direct perception)",
+          "shift": "jp_distant_to_en_close",
+          "source_volume": "貴族令嬢。俺にだけなつく_20260119_1d74",
+          "chapter": "CHAPTER_02"
+        },
+        {
+          "jp_original": "俺はそんな不安を抱きながら、腕の中でご機嫌となったエマちゃんを抱えてシャーロットさんと共にスーパーへと向かうのだった。",
+          "en_transcreation": "When Emma apologized, Charlotte's eyes widened in surprise.",
+          "jp_distance": "distant (quotative markers)",
+          "en_distance": "very_close (direct perception)",
+          "shift": "jp_distant_to_en_close",
+          "source_volume": "(迷子になっていた幼女を助けたら、お隣に住む美少女留学生が家に遊びに来るようになった件について (1)_20260126_25b4",
+          "chapter": "CHAPTER_04"
+        },
+        {
+          "jp_original": "まぁシャーロットさんが何を好きになろうと、彼女の勝手だからいいのだけど…。",
+          "en_transcreation": "*Thump*—enthralled by Charlotte's smile and words, my heart pounded in my chest.",
+          "jp_distance": "distant (quotative markers)",
+          "en_distance": "very_close (direct perception)",
+          "shift": "jp_distant_to_en_close",
+          "source_volume": "(迷子になっていた幼女を助けたら、お隣に住む美少女留学生が家に遊びに来るようになった件について (1)_20260126_25b4",
+          "chapter": "CHAPTER_04"
+        },
+        {
+          "jp_original": "\"態度で勘違いされやすいけど、まっすぐでいい奴なんだよ。というか、野球馬鹿だな。野球のことしか頭にないって感じで、練習は人一倍真剣に取り組んでいるんだ\"",
+          "en_transcreation": "Sophia's eyes widened and she froze, staring at me.",
+          "jp_distance": "distant (quotative markers)",
+          "en_distance": "very_close (direct perception)",
+          "shift": "jp_distant_to_en_close",
+          "source_volume": "孤高の華と呼ばれる英国美少女、義妹になったら不器用に甘えてきた 2_20260126_015c",
+          "chapter": "CHAPTER_04"
+        },
+        {
+          "jp_original": "『一生懸命に尽くしたいと思えるご主人様だから』という意味を持ったものなのだから。",
+          "en_transcreation": "It was no wonder Tetra's eyes widened.",
+          "jp_distance": "distant (quotative markers)",
+          "en_distance": "very_close (direct perception)",
+          "shift": "jp_distant_to_en_close",
+          "source_volume": "お世話した王女様、ずっとくっついてくる【電子特典付き】_20260202_0cc3",
+          "chapter": "CHAPTER_13"
+        }
+      ]
+    },
+    "common_patterns_identified": {
+      "eyes_widened": {
+        "description": "Most common FID pattern: Direct perception without \"she saw\"",
+        "frequency": "Very high",
+        "example_count": 12,
+        "pattern": "Her eyes widened (NOT: She saw her eyes widen)"
+      },
+      "heart_pounded": {
+        "description": "Emotional state shown through physical sensation",
+        "frequency": "High",
+        "example_count": 7,
+        "pattern": "My heart pounded/skipped/raced (NOT: I felt my heart pounding)"
+      }
+    },
+    "comedic_timing_examples": {
+      "description": "ICL samples for handling comedy in JP→EN translation. These patterns activate comedic latent spaces while maintaining natural English humor delivery.",
+      "source_volume": "幼馴染で婚約者なふたりが恋人をめざす話1_20260116_d594bb",
+      "instruction": "Comedy in Japanese light novels often relies on timing, misdirection, and deadpan delivery. Preserve the comedic beat structure: setup → pause (em-dash or ellipsis) → punchline. Use parenthetical asides for narrator commentary.",
+      "techniques": {
+        "subverted_expectation": {
+          "description": "Build romantic/emotional tension, then deflate with mundane reveal. The humor comes from the gap between expectation and reality.",
+          "pattern": "Romantic setup → beat → absurd/mundane punchline",
+          "examples": [
+            {
+              "context": "Sleeping girl murmurs while MC touches her cheek",
+              "en": "\"…Unyaa. —love you…♪\"\n\n\"…\"\n\n—she murmured, her face blissful.\n\nI knew she was just talking in her sleep, but it caught me off guard and made my heart skip a beat… for a second.\n\nMitsuki grabbed my hand, her \"smile\" turning into a charmless \"smirk,\" and then she brought her mouth closer—\n\n\"…Uheheh. Time to dig innn…\"\n\nShe loved it (as in, food).",
+              "technique_notes": "The parenthetical '(as in, food)' delivers the punchline with deadpan narrator clarification. The ellipsis before 'for a second' creates the comedic beat.",
+              "chapter": "CHAPTER_01 (Prologue)"
+            }
+          ]
+        },
+        "literary_parody_recontextualization": {
+          "description": "Reference famous literary/cultural works, then recontextualize them absurdly. The humor comes from the cognitive dissonance.",
+          "pattern": "Recognizable quote → question about meaning → absurd literal interpretation",
+          "examples": [
+            {
+              "context": "Girl wakes up grumpy, quotes Shakespeare",
+              "en": "\"…Oh Yuuya, Yuuya, wherefore art thou Yuuya…?\"\n\nHer very first words upon waking up were a line from Romeo and Juliet.\n\n\"…Is there any meaning to that statement?\"\n\n\"To paraphrase—'I was having a good dream, why'd you wake me up, you idiot?'\"\n\n\"Then wake from your dream, Juliet Mitsuki. And you owe Shakespeare an apology.\"\n\n\"…But you woke me up right as I was about to take a bite out of a daikon-sized boiled crab leg…\"\n\nSo, \"wherefore art thou Yuuya?\" equals \"why are you not a crab?\"\n\n…I can't say I wouldn't mind having a dream like that myself.",
+              "technique_notes": "The narrator's deadpan summary 'wherefore art thou Yuuya = why are you not a crab' is the comedic peak. Preserve the logical chain that leads to absurdity.",
+              "chapter": "CHAPTER_01 (Prologue)"
+            }
+          ]
+        },
+        "synchronized_response_comedy": {
+          "description": "Two characters responding in perfect unison, often with matter-of-fact absurdity. Visual: double quotes with matched text.",
+          "pattern": "Question → \"\"Synchronized answer\"\" → bewildered third party",
+          "examples": [
+            {
+              "context": "Director asks about their relationship",
+              "en": "\"…I was wondering what exactly the relationship between you two is.\"\n\n\"\"We're engaged?\"\"\n\n\"…No, that's not what I meant.\"\n\nWe both answered the obvious question in perfect sync, which only seemed to make her look like her headache was getting worse.",
+              "technique_notes": "Double quotes \"\" signal synchronized speech. The question mark makes it funnier—they're confused why she's asking the obvious.",
+              "chapter": "CHAPTER_04 (Chapter 1)"
+            },
+            {
+              "context": "Asked if they've been intimate",
+              "en": "\"\"Oh, so that's what this is about. We haven't done it, you know?\"\"\n\n\"Could you please try to be a little more subtle?! I-I mean, yes, that is what I wanted to ask, but…\"",
+              "technique_notes": "Matter-of-fact delivery of embarrassing topic in perfect sync amplifies the comedy through contrast with the flustered adult.",
+              "chapter": "CHAPTER_04 (Chapter 1)"
+            }
+          ]
+        },
+        "awkward_pivot_comedy": {
+          "description": "Conversation veers into uncomfortable territory, character tries to escape but makes it worse. Deadpan narrator commentary.",
+          "pattern": "Normal question → unexpectedly intimate answer → failed recovery → narrator aside",
+          "examples": [
+            {
+              "context": "MC asks about expense discrepancy",
+              "en": "\"I was just looking at the household accounts… and I have a question about last month. Can you put your hand on your heart and think if anything comes to mind?\"\n\nAs instructed, Mitsuki actually placed her hand on her chest and started to think.\n\n\"Hmm, last month…? —Oh!\"\n\n\"Did something happen? I don't think it's anything bad, but I'd like to hear what's going on—\"\n\nI said to Mitsuki, who seemed to have remembered something… and a slightly smug look appeared on her face.\n\n\"Yup. My cup size went up.\"\n\n\"—Huh, seriously? …Wait, that's not what I meant!\"\n\nI reacted without thinking—but \"put your hand on your heart\" wasn't meant to be taken so literally.",
+              "technique_notes": "The narrator's rueful clarification at the end ('wasn't meant to be taken so literally') provides the comedic button. His initial honest reaction ('seriously?') before catching himself is key.",
+              "chapter": "CHAPTER_09 (Chapter 2)"
+            },
+            {
+              "context": "Follow-up on lingerie topic",
+              "en": "\"—I'm not complaining or doubting you or anything, I'm just curious… how much does women's underwear cost?\"\n\nIt was knowledge a guy wouldn't normally have, so I was genuinely just a little curious—\n\n\"Hmm? You interested in women's lingerie, Yuuya?\"\n\n\"Don't phrase it like that!\"",
+              "technique_notes": "The reframe from innocent curiosity to 'interested in lingerie' is classic boke-tsukkomi. Preserve the straight man's outraged reaction.",
+              "chapter": "CHAPTER_09 (Chapter 2)"
+            }
+          ]
+        },
+        "married_couple_meta_comedy": {
+          "description": "Characters are told they act like a married couple, respond in ways that prove the point. Self-aware humor.",
+          "pattern": "Third party observation → synchronized denial → action that proves the point",
+          "examples": [
+            {
+              "context": "Director comments on their dynamic",
+              "en": "\"…If a young man and woman are close enough to be called that, I would think it's only natural for certain desires and impulses to grow stronger, wouldn't you…?\"\n\n\"\"Hmm…\"\"\n\nIt's not that we don't *want* to do it, and it's not like we don't have those desires, but…\n\nAfter a moment of thought, I looked over at Mitsuki, and our eyes met.\n\nI could tell from her gaze that she was thinking the same thing. We nodded at each other.\n\n\"\"We're used to it?\"\"\n\n\"…Never mind. Please excuse me.\"\n\nTsuyuki-san's expression seemed to say, \"I can't take any more of this.\"\n\nNot understanding what she meant, we just tilted our heads in unison again.",
+              "technique_notes": "The final 'tilted heads in unison' while claiming not to understand is the comedic button—they're proving her point while being oblivious.",
+              "chapter": "CHAPTER_04 (Chapter 1)"
+            }
+          ]
+        },
+        "deadpan_narrator_aside": {
+          "description": "Narrator breaks from scene to deliver dry commentary, often in em-dashes or separate paragraph.",
+          "pattern": "Scene action → —Narrator commentary in em-dashes—",
+          "examples": [
+            {
+              "context": "After getting his hand almost bitten",
+              "en": "\"…Just wake up already!\"\n\nBefore her wide-open mouth could clamp down, I yanked my hand away. I used that same hand to give her a light *smack* on the forehead as I raised my voice, getting serious about waking her up.\n\n—Please forgive me if my voice got a little rough there. It couldn't be helped.",
+              "technique_notes": "The em-dash intro signals narrator breaking fourth wall to address reader directly. Apologetic tone contrasts with justified exasperation.",
+              "chapter": "CHAPTER_01 (Prologue)"
+            },
+            {
+              "context": "Describing fiancée's sleep state",
+              "en": "…There wasn't a single trace of the prim and proper atmosphere that earned her the title of \"sheltered noble lady.\"\n\nAs a side note, the reason Mitsuki prefers a futon in a Japanese-style room over a bed is—\n\n*\"I just love that feeling of security, knowing you can roll over as much as you want without any borders!\"*\n\n…The thought of just fixing her sleeping habits never seems to occur to her, which I think is very \"her.\"",
+              "technique_notes": "Italicized quote within narration delivers her voice, followed by dry narrator observation. The ellipsis before the final line creates comedic timing.",
+              "chapter": "CHAPTER_01 (Prologue)"
+            }
+          ]
+        }
+      },
+      "comedic_timing_rules": {
+        "em_dash_for_beats": "Use em-dashes (—) to create comedic pauses before punchlines or interruptions",
+        "ellipsis_for_processing": "Use ellipsis (…) when character/narrator is processing absurdity",
+        "parenthetical_clarification": "Use parentheticals for deadpan narrator corrections: 'She loved it (as in, food)'",
+        "double_quotes_for_sync": "Use \"\" (no space) for perfectly synchronized dialogue",
+        "preserve_tsukkomi": "Keep straight-man reactions sharp and immediate: 'Don't phrase it like that!'",
+        "italics_for_internal": "Use *italics* for internal monologue that contrasts with external dialogue"
+      }
+    },
+    "sarcasm_and_irony_examples": {
+      "description": "Japanese often uses polite/positive words (ありがたい, 素晴らしい) sarcastically. Context determines tone—internal monologue, eye-roll moments, or contrast with situation signals irony. English needs explicit markers: italics, 'oh-so-', 'just peachy', or dry follow-up commentary.",
+      "techniques": {
+        "polite_sarcasm": {
+          "pattern": "Polite/grateful expression in obviously frustrating situation",
+          "jp_markers": "ありがたい (arigatai), 素晴らしい (subarashii), お陰様で (okage-sama de)",
+          "en_strategies": [
+            "*oh-so-helpful* / *oh-so-wonderful* (italicized for sarcasm)",
+            "just peachy / just great / just fantastic (American sarcasm)",
+            "how very thoughtful / how terribly considerate (British irony)",
+            "bless their heart (Southern US backhanded compliment)"
+          ],
+          "examples": [
+            {
+              "jp": "というありがたい作戦をいただいたので",
+              "en_literal": "the grateful strategy we received",
+              "en_sarcastic": "the *oh-so-helpful* plan of",
+              "context": "Leader gives useless battle strategy ('Go WHOOSH and BAM!')",
+              "why_sarcastic": "The strategy is gibberish nonsense—'grateful' is clearly ironic"
+            },
+            {
+              "jp": "お陰様でこんな目に遭いました",
+              "en_literal": "thanks to you, this happened to me",
+              "en_sarcastic": "*Oh, I'm just thrilled* to be in this situation / Thanks a bunch for *this* mess",
+              "context": "Blaming someone for a problem while using polite gratitude language",
+              "why_sarcastic": "お陰様で (okage-sama de) is a grateful idiom, but context shows blame"
+            }
+          ]
+        },
+        "deadpan_narrator_sarcasm": {
+          "pattern": "Narrator describes absurd situation with straight-faced understatement",
+          "en_strategies": [
+            "Dry observation after absurdity: '…naturally.'",
+            "Understatement: 'slightly concerning' for disaster",
+            "Rhetorical question: 'As one does, apparently.'",
+            "Follow-up with contrasting reality"
+          ],
+          "examples": [
+            {
+              "jp": "ファンの方々からのありがたいお布施である。",
+              "en_literal": "the grateful offerings from fans",
+              "en_improved": "Generous donations from our fans. / The fans' hard-earned money, graciously given.",
+              "context": "Kaguya counting virtual currency donations, getting greedy",
+              "why_awkward": "'Grateful offerings' sounds religious/archaic. 'Generous donations' or 'hard-earned money' adds subtle irony before Kaguya's greed"
+            },
+            {
+              "jp": "これは普通の高校生活である。",
+              "en_literal": "This is a normal high school life.",
+              "en_sarcastic": "Just your average, everyday high school experience. / Totally normal. Nothing to see here.",
+              "context": "After describing completely absurd supernatural event",
+              "why_sarcastic": "Narrator claiming normalcy after obvious chaos = deadpan irony"
+            }
+          ]
+        },
+        "internal_monologue_eyeroll": {
+          "pattern": "Character's internal thought contradicts polite external behavior",
+          "en_strategies": [
+            "Italicized internal reaction: *Right. Sure. Definitely.*",
+            "Sarcastic paraphrase: '…or so they claimed.'",
+            "Thought bubble contrast: Said 'thank you,' thought 'yeah right'"
+          ],
+          "examples": [
+            {
+              "jp": "「ありがとう」と言いながら内心では（うるさい）と思った。",
+              "en_literal": "While saying 'thank you,' internally thought (shut up)",
+              "en_improved": "\"Thank you,\" I said sweetly. *How delightful.* / \"Thanks,\" I lied. *Just what I needed.*",
+              "context": "Character forced to accept unwanted help/advice",
+              "technique": "Italicized internal sarcasm immediately after polite dialogue creates contrast"
+            }
+          ]
+        },
+        "situational_irony": {
+          "pattern": "Outcome opposite of expectation, often with 'as expected' structure",
+          "jp_markers": "案の定 (an no jou = as expected), やっぱり (yappari = just as I thought)",
+          "en_strategies": [
+            "Naturally... (when outcome is unnatural)",
+            "Of course... (when it's absurd)",
+            "As one would expect... (when it's completely unexpected)"
+          ],
+          "examples": [
+            {
+              "jp": "案の定、彼女は約束を忘れていた。",
+              "en_literal": "As expected, she forgot the promise",
+              "en_context_dependent": "Naturally, she'd forgotten. / Of *course* she forgot. (italics if narrator is exasperated)",
+              "context": "If it's the 5th time she forgot, use 'Naturally' or 'Of course' sarcastically",
+              "technique": "Adverb at sentence start + italics on key word = sarcastic emphasis"
+            }
+          ]
+        }
+      },
+      "sarcasm_detection_rules": {
+        "context_clues": "If 'ありがたい' appears with: useless action, gibberish speech, obvious inconvenience, exasperated narrator → SARCASM. If genuine gratitude context (donations received, help appreciated) → LITERAL.",
+        "tone_markers": "Internal monologue (心の中 kokoro no naka), exasperated narration, follow-up complaint → signals sarcasm",
+        "contrast_check": "Does the 'grateful' thing cause problems? Is the speaker annoyed? Is the narrator eye-rolling? → Use sarcastic translation",
+        "politeness_level": "Overly polite language in casual/frustrated context = likely sarcasm. Match formality level to detect."
+      },
+      "translation_workflow": {
+        "step_1": "Identify ありがたい / 素晴らしい / お陰様で",
+        "step_2": "Check context: Is situation genuinely positive or negative?",
+        "step_3": "Check tone: Internal monologue? Narrator commentary? Dialogue with follow-up complaint?",
+        "step_4_genuine": "If genuine: 'grateful', 'thankful', 'I appreciate', 'generous'",
+        "step_4_sarcastic": "If sarcastic: *oh-so-[adjective]*, 'just [peachy/great]', 'How [thoughtful/kind]' (with capital H for irony), italics for emphasis"
+      }
+    }
+  }
+}

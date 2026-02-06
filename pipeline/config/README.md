@@ -537,9 +537,27 @@ pipeline/config/
 | Phase | Integration Point | Features Used |
 |-------|-------------------|---------------|
 | **Phase 1: Librarian** | EPUB extraction | CJK validation (optional pre-check) |
-| **Phase 2: Translator** | Post-translation | AI-ism detection, Echo Detection, CJK cleanup |
+| **Phase 2: Translator** | Post-translation | AI-ism detection, Echo Detection, CJK cleanup, **Safety Fallback** |
 | **Phase 3: Critics** | Quality audit | Pattern validation, clustering analysis |
 | **Phase 4: Builder** | Final assembly | Pre-build validation |
+
+### Safety Fallback Integration (Phase 2)
+
+**Validated with Volume 1420**:
+- Ch1-16: API Level 0 (standard) ✅
+- Ch17-21: Web Gemini Fallback ✅
+- Quality: A+ grade (97.5/100)
+
+**Four-Tier Fallback System**:
+1. Level 0: gemini-2.5-pro + cached_content
+2. Level 1: gemini-2.5-flash + system_instruction  
+3. Level 2: gemini-2.5-pro + context flush (Amnesia Protocol)
+4. **Web Gemini**: Manual fallback with BLOCKED document generation
+
+When API fails, the system generates `BLOCKED/CHAPTER_XX_BLOCKED.md` with:
+- Translation prompt optimized for Web Gemini
+- Full Japanese source text
+- CLI instructions explaining why and how to proceed
 
 ### Python Integration
 

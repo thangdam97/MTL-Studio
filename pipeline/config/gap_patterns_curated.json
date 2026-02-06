@@ -1,0 +1,454 @@
+{
+    "version": "2.0",
+    "description": "Curated Gap A/B/C patterns - Hand-selected for Gemini 2.5 Pro semantic analysis",
+    "curator": "Manual semantic analysis via Gemini 2.5 Pro",
+    "last_updated": "2026-02-01",
+    "gap_a_emotion_action": {
+        "description": "Emotion + Action patterns requiring sentence surgery (≤3 JP sentences)",
+        "temperature": 0.4,
+        "model": "gemini-2.5-pro",
+        "patterns": {
+            "dialogue": [
+                {
+                    "jp": "「……真樹、大丈夫？　私がいなくて、寂しくなって泣いちゃいたりしない？」",
+                    "emotion": "寂しさ (loneliness)",
+                    "action": "泣く (cry)",
+                    "context_type": "teasing concern",
+                    "surgery_note": "The trailing emotion + action creates a rhetorical question - preserve teasing tone"
+                },
+                {
+                    "jp": "「真樹、落ち込む前に、とにかく自分の名前見つけよ。まだ先生たちのミスで名前が入ってない可能性もあるし」",
+                    "emotion": "落ち込み (dejection)",
+                    "action": "見つける (find)",
+                    "context_type": "encouraging redirect",
+                    "surgery_note": "Emotion acknowledged then redirected to action - keep the pivot structure"
+                },
+                {
+                    "jp": "「い、いや別にしてない、けど……」",
+                    "emotion": "恥ずかしさ (embarrassment)",
+                    "action": "否定 (denial)",
+                    "context_type": "tsundere deflection",
+                    "surgery_note": "Stuttering + denial + trailing off = classic tsundere - preserve hesitation markers"
+                }
+            ],
+            "narrative": [
+                {
+                    "jp": "親友と離れ離れになり、初めのうちは落ち込んでいた天海さんだったものの、持ち前の切り替えの早さで、いつもの溌溂とした笑顔を取り戻している。",
+                    "emotion": "落ち込み→回復 (dejection→recovery)",
+                    "action": "笑顔を取り戻す (regain smile)",
+                    "context_type": "emotional transition",
+                    "surgery_note": "Contrast structure (A→B) - preserve the pivot with 'ものの'"
+                },
+                {
+                    "jp": "学年トップ５に入る成績の海と違って当落線上にいたので、もちろんこうなることも覚悟の上ではあったけれど……とはいえ、実際に自分の名前がないことを確認すると、さすがに落ち込みはするわけで。",
+                    "emotion": "落ち込み (dejection)",
+                    "action": "確認する (confirm)",
+                    "context_type": "anticipated disappointment",
+                    "surgery_note": "Layered hedging (覚悟の上/とはいえ/さすがに) - each layer adds nuance"
+                },
+                {
+                    "jp": "同時に、それまでは感じなかった言いようのない緊張がどっと押し寄せてきた。",
+                    "emotion": "緊張 (tension)",
+                    "action": "押し寄せる (surge)",
+                    "context_type": "sudden onset",
+                    "surgery_note": "Physical metaphor for emotion - どっと conveys overwhelming force"
+                }
+            ]
+        },
+        "detection_markers": {
+            "emotion_words": {
+                "寂し": {
+                    "en": "lonely",
+                    "intensity": "medium"
+                },
+                "落ち込": {
+                    "en": "dejected",
+                    "intensity": "medium"
+                },
+                "緊張": {
+                    "en": "tense",
+                    "intensity": "high"
+                },
+                "不安": {
+                    "en": "anxious",
+                    "intensity": "medium"
+                },
+                "嬉し": {
+                    "en": "happy",
+                    "intensity": "medium"
+                },
+                "楽し": {
+                    "en": "fun/enjoyable",
+                    "intensity": "low"
+                },
+                "恥ずかし": {
+                    "en": "embarrassed",
+                    "intensity": "medium"
+                },
+                "悔し": {
+                    "en": "frustrated",
+                    "intensity": "high"
+                },
+                "怖": {
+                    "en": "scared",
+                    "intensity": "high"
+                },
+                "悲し": {
+                    "en": "sad",
+                    "intensity": "high"
+                }
+            },
+            "action_pairs": {
+                "泣": "crying action - often paired with sad/lonely",
+                "笑": "laughing/smiling - often recovery or masking",
+                "走": "running - often urgency or escape",
+                "震": "trembling - physical manifestation of emotion",
+                "見": "looking/watching - often paired with longing",
+                "言": "speaking - often with hesitation",
+                "座": "sitting - often stillness with emotion",
+                "立": "standing - often sudden action"
+            }
+        }
+    },
+    "gap_b_ruby_jokes": {
+        "description": "Ruby visual jokes requiring preservation or TL notes",
+        "model": "gemini-2.5-pro",
+        "categories": {
+            "kira_kira_names": {
+                "description": "Outlandish kanji with unexpected readings (DQN names)",
+                "note": "Kira-kira names use katakana readings or creative kanji-reading mismatches",
+                "examples": [
+                    {
+                        "kanji": "光宙",
+                        "ruby": "ぴかちゅう",
+                        "en_approach": "TL note: 'Pikachu' - written with kanji meaning 'light' and 'space'",
+                        "humor_type": "Pokemon reference"
+                    },
+                    {
+                        "kanji": "愛梨",
+                        "ruby": "ラブリ",
+                        "en_approach": "TL note: 'Lovely' (written with kanji 'love' + 'pear')",
+                        "humor_type": "English loanword in katakana"
+                    },
+                    {
+                        "kanji": "愛",
+                        "ruby": "らぶ",
+                        "en_approach": "Could use 'Love' as name with note about kanji",
+                        "humor_type": "English loanword forcing"
+                    },
+                    {
+                        "kanji": "心愛",
+                        "ruby": "ここあ",
+                        "en_approach": "Cocoa (with note: written as 'heart-love')",
+                        "humor_type": "cute naming convention"
+                    },
+                    {
+                        "kanji": "美音",
+                        "ruby": "りずむ",
+                        "en_approach": "Rhythm (with note: written as 'beautiful sound')",
+                        "humor_type": "musical naming"
+                    },
+                    {
+                        "kanji": "星",
+                        "ruby": "スター",
+                        "en_approach": "Star (katakana reading of English word)",
+                        "humor_type": "direct English translation"
+                    },
+                    {
+                        "kanji": "月",
+                        "ruby": "ムーン",
+                        "en_approach": "Moon (katakana reading of English word)",
+                        "humor_type": "direct English translation"
+                    },
+                    {
+                        "kanji": "天使",
+                        "ruby": "エンジェル",
+                        "en_approach": "Angel (katakana reading)",
+                        "humor_type": "direct English translation"
+                    }
+                ],
+                "detection_patterns": [
+                    "Katakana ruby on kanji names (most common indicator)",
+                    "Character introduction with unusual reading",
+                    "Reaction showing surprise at name",
+                    "Commentary about modern naming trends (キラキラネーム)",
+                    "English loanwords as readings",
+                    "Pokemon/Anime character name references"
+                ],
+                "common_themes": [
+                    "Love/Emotion: ラブ, ハート, キュート, スイート",
+                    "Royalty: プリンセス, キング, クイーン, プリンス",
+                    "Celestial: スター, ムーン, サン, スカイ",
+                    "Nature: オーシャン, フラワー, スノー",
+                    "Light: ライト, シャイン, グロー",
+                    "Precious: ダイヤ, ルビー, パール, ジュエル",
+                    "Angels: エンジェル, セラフ, ヘブンリー"
+                ]
+            },
+            "archaic_readings": {
+                "description": "Classical/literary kanji with standard readings",
+                "examples_from_corpus": [
+                    {
+                        "kanji": "頷",
+                        "ruby": "うなず",
+                        "en": "nod"
+                    },
+                    {
+                        "kanji": "訝",
+                        "ruby": "いぶか",
+                        "en": "suspicious look"
+                    },
+                    {
+                        "kanji": "俯",
+                        "ruby": "うつむ",
+                        "en": "look down"
+                    },
+                    {
+                        "kanji": "窺",
+                        "ruby": "うかが",
+                        "en": "peek/gauge"
+                    },
+                    {
+                        "kanji": "瞼",
+                        "ruby": "まぶた",
+                        "en": "eyelid"
+                    },
+                    {
+                        "kanji": "呟",
+                        "ruby": "つぶや",
+                        "en": "mutter"
+                    },
+                    {
+                        "kanji": "躊躇",
+                        "ruby": "ちゅうちょ",
+                        "en": "hesitate"
+                    }
+                ],
+                "treatment": "Standard translation - ruby is for Japanese readers' convenience"
+            },
+            "deliberate_misreadings": {
+                "description": "Kanji with intentionally wrong furigana for humor/effect",
+                "examples": [
+                    {
+                        "kanji": "世界",
+                        "ruby": "せかい",
+                        "actual_ruby": "こいつら",
+                        "context": "When 'world' is read as 'these guys' to show character's worldview",
+                        "en_approach": "Use italics or <small> for the ironic reading"
+                    },
+                    {
+                        "kanji": "仲間",
+                        "ruby": "なかま",
+                        "actual_ruby": "ごみ",
+                        "context": "Sardonic character calling 'comrades' as 'trash'",
+                        "en_approach": "'friends' <small>(garbage)</small>"
+                    }
+                ]
+            },
+            "double_meaning_ruby": {
+                "description": "Ruby that adds subtext/irony to the base kanji",
+                "examples": [
+                    {
+                        "kanji": "愛",
+                        "ruby": "あい",
+                        "subtext_ruby": "しょうゆう",
+                        "context": "When 'love' is actually 'possession'",
+                        "en_approach": "love (read: ownership)"
+                    }
+                ]
+            }
+        }
+    },
+    "gap_c_sarcasm_subtext": {
+        "description": "Sarcasm and subtext patterns requiring creative translation",
+        "temperature": 1.0,
+        "model": "gemini-2.5-pro",
+        "confidence_threshold": 0.85,
+        "archetypes": {
+            "TSUNDERE": {
+                "description": "Denies feelings while showing them through actions",
+                "markers": [
+                    "別に...ない (It's not like...)",
+                    "誰が...なんて (Who would ever...)",
+                    "そんなわけない (That's not true at all)",
+                    "Stuttering: あ、あの / ち、ちがう",
+                    "Trailing off: ...けど / ...だけど"
+                ],
+                "curated_examples": [
+                    {
+                        "jp": "「い、いや別にしてない、けど……」",
+                        "context_before": "「あ、いまちょっとドキッとしたでしょ？」",
+                        "context_after": "「え～？　ウソウソ、強がりはよくないな～？」",
+                        "subtext": "Obviously did feel something, embarrassed to admit",
+                        "translation_approach": "Preserve stutter, preserve trailing off, let denial ring hollow"
+                    },
+                    {
+                        "jp": "「べ、別にあんたのためじゃないんだからね！」",
+                        "subtext": "Absolutely is for them, classic tsundere deflection",
+                        "translation_approach": "Keep stutter, 'It's not like I did it for YOU or anything!' - italics on 'you'"
+                    }
+                ],
+                "confidence": 0.95
+            },
+            "KUUDERE": {
+                "description": "Emotionally flat delivery hiding deeper feelings",
+                "markers": [
+                    "Minimal punctuation",
+                    "Short sentences",
+                    "そう (Flat 'I see')",
+                    "Lack of emotional markers"
+                ],
+                "curated_examples": [
+                    {
+                        "jp": "「そう」",
+                        "context": "After receiving heartfelt confession",
+                        "subtext": "Processing intense emotions behind flat exterior",
+                        "translation_approach": "'I see.' - Period, no elaboration, let reader infer"
+                    }
+                ],
+                "confidence": 0.85
+            },
+            "RHETORICAL_SARCASM": {
+                "description": "Questions that aren't really questions",
+                "markers": [
+                    "～じゃない？ (Isn't it?)",
+                    "～でしょ？ (Right?)",
+                    "誰が～って言った？ (Who said...?)"
+                ],
+                "curated_examples": [
+                    {
+                        "jp": "そんなの、誰がどう見ても可愛いに決まっているのだ。",
+                        "subtext": "Asserting opinion as obvious fact",
+                        "translation_approach": "Obviously she's cute—anyone with eyes could see that."
+                    }
+                ],
+                "confidence": 0.90
+            },
+            "IRONIC_SELF_DEPRECATION": {
+                "description": "Putting oneself down while actually criticizing others/situation",
+                "markers": [
+                    "俺なんか (Someone like me)",
+                    "私みたいな (Someone like me)",
+                    "どうせ (Anyway/After all)"
+                ],
+                "curated_examples": [
+                    {
+                        "jp": "「いや、私みたいなのがいたら、絶対盛り下がるし」",
+                        "context": "Refusing to participate in class event",
+                        "subtext": "Testing whether others will contradict, also genuinely self-aware",
+                        "translation_approach": "Keep the self-aware edge: 'Having someone like me around would just kill the mood anyway.'"
+                    }
+                ],
+                "confidence": 0.88
+            }
+        },
+        "detection_patterns": {
+            "stuttering": [
+                "[あ-んア-ン]、[あ-んア-ン]",
+                "[あ-んア-ン]っ、"
+            ],
+            "hedging": [
+                "まあ[、。]",
+                "ちょっと[、。]",
+                "なんか[、。]",
+                "一応[、。]"
+            ],
+            "contradiction_markers": [
+                "けど[、。…]",
+                "だけど[、。…]",
+                "でも[、。…]",
+                "ただ[、。…]"
+            ],
+            "tsundere_patterns": [
+                "別に.{0,20}(ない|ねー|ねぇ)(けど|が|でも|わけ)?",
+                "誰が.{0,20}(なんて|って)(言った|思った)?",
+                "そんな(わけ|こと)ない"
+            ]
+        }
+    },
+    "implementation_notes": {
+        "gap_a_surgery": {
+            "when_to_apply": "JP sentences with emotion+action where ≤3 sentences but EN requires restructuring",
+            "gemini_prompt_template": "Analyze this Japanese passage for emotion-action pairing. If restructuring improves English flow while preserving the emotional beat, suggest surgery. Temperature 0.4 for conservative changes.",
+            "safety_check": "Never apply to passages >3 JP sentences without explicit human approval"
+        },
+        "gap_b_ruby": {
+            "when_to_apply": "All ruby annotations during EPUB processing",
+            "classification_flow": [
+                "1. Check if kira-kira name (unusual reading for common kanji)",
+                "2. Check if archaic reading (standard - no special treatment)",
+                "3. Check if deliberate misreading (ironic subtext)",
+                "4. Check if double-meaning (added layer)"
+            ],
+            "gemini_prompt_template": "Classify this ruby annotation: kanji={kanji}, ruby={ruby}, context={context}. Return category and suggested EN treatment."
+        },
+        "gap_c_subtext": {
+            "when_to_apply": "Dialogue lines matching sarcasm detection patterns",
+            "gemini_prompt_template": "Analyze this dialogue for subtext. Speaker archetype hints: {markers_found}. What is the character actually feeling vs saying? Temperature 1.0 for creative interpretation.",
+            "confidence_filter": "Only surface to human review if confidence ≥0.85"
+        }
+    },
+    "warning_thresholds": {
+        "_comment": "Recalibrated 2026-02-01 after 095d audit - reduced false positives by ~30%",
+        "gap_c_critical_risk": {
+            "description": "Threshold for flagging Gap C (subtext) as CRITICAL_RISK in metadata",
+            "old_threshold": 0.60,
+            "new_threshold": 0.75,
+            "rationale": "Previous threshold caused false alarms on 095d (phone anxiety, depression protocol were both well-translated despite being flagged)"
+        },
+        "dialect_detection": {
+            "description": "Confidence threshold for flagging regional dialect preservation warnings",
+            "threshold": 0.70,
+            "dialects_tracked": [
+                "kansai",
+                "tohoku",
+                "kyushu",
+                "okinawa",
+                "hiroshima"
+            ],
+            "markers": {
+                "kansai": [
+                    "や(で|ねん|ん|わ)$",
+                    "ホンマ",
+                    "なんでやねん",
+                    "おおきに",
+                    "せやな"
+                ],
+                "tohoku": [
+                    "だべ",
+                    "んだ$",
+                    "べ$",
+                    "だっぺ"
+                ],
+                "kyushu": [
+                    "たい$",
+                    "ばい$",
+                    "けん$",
+                    "っちゃ"
+                ],
+                "okinawa": [
+                    "さー$",
+                    "からさー",
+                    "だはず"
+                ],
+                "hiroshima": [
+                    "じゃけん",
+                    "じゃけぇ",
+                    "のう$"
+                ]
+            }
+        },
+        "trauma_framing": {
+            "description": "Confidence threshold for flagging trauma/PTSD content handling",
+            "old_threshold": 0.50,
+            "new_threshold": 0.70,
+            "rationale": "Phone avoidance and depression scenes in 095d were flagged as critical but handled correctly - raise threshold to reduce false positives"
+        },
+        "depression_protocol": {
+            "description": "Threshold for flagging 'flowery language' risk in depressive scenes",
+            "old_threshold": 0.55,
+            "new_threshold": 0.72,
+            "rationale": "095d Ch7 rain scene was flagged but correctly maintained flat affect - recalibrate to trust translator more"
+        }
+    }
+}

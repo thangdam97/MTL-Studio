@@ -1,0 +1,274 @@
+{
+    "version": "1.0",
+    "description": "Vietnamese comedy pattern library for humor markers and comedic timing preservation",
+    "last_updated": "2026-02-04",
+    "typography_comedy": {
+        "caps_emphasis": {
+            "description": "ALL CAPS for peak emotional reactions",
+            "usage": "Extreme excitement, shock, or comedic climax",
+            "examples": [
+                "DỄ THƯƠNGGGGGGGGGGGGGGGGGGGGG!",
+                "KHÔNG THỂ NÀO!",
+                "TẠI SAO LẠI LÀ TÔI!?"
+            ],
+            "guidelines": [
+                "Use sparingly (max 1-2 per chapter)",
+                "Reserve for genuine peak moments",
+                "Often combined with extended vowels"
+            ]
+        },
+        "extended_vowels": {
+            "description": "Stretched vowels for emphasis or whining",
+            "usage": "Dramatic reactions, prolonged emotions",
+            "patterns": {
+                "excitement": [
+                    "DỄZZZZZ THƯƠNG",
+                    "ĐẸPPPPPP"
+                ],
+                "whining": [
+                    "Saoooo~",
+                    "Khônggggg~"
+                ],
+                "shock": [
+                    "Hảaaaa!?",
+                    "Gìiiii!?"
+                ]
+            },
+            "guidelines": [
+                "Match length to intensity of emotion",
+                "3-5 repeated letters is typical",
+                "10+ for extreme comedic effect"
+            ]
+        },
+        "tilde_trailing": {
+            "description": "~ for playful, teasing, or relieved tone",
+            "usage": "Teasing, relief, playful speech",
+            "examples": [
+                "Phù~, may quá~",
+                "Lâu rồi không gặp nhỉ~",
+                "Ể~, buồn thế~",
+                "Được rồi, cố lên nào~"
+            ],
+            "character_affinity": [
+                "teasing_older_sister",
+                "playful_girlfriend",
+                "relieved_protagonist"
+            ]
+        },
+        "ellipsis_timing": {
+            "description": "... for dramatic pauses, trailing thoughts, or comedic timing",
+            "patterns": {
+                "panic_trail": "Khoan... khoan đã...",
+                "realization": "À... ra là vậy...",
+                "awkward_pause": "Ừm... thì...",
+                "comedic_beat": "Đó là... cái gì vậy?"
+            },
+            "guidelines": [
+                "Use for internal thought trails",
+                "Creates reading rhythm for comedy",
+                "3 dots standard, can extend to 6 for longer pauses"
+            ]
+        }
+    },
+    "verbal_comedy_patterns": {
+        "tsukkomi_interjection": {
+            "description": "Straight-man retort to absurd situation",
+            "vietnamese_equivalents": [
+                "Làm gì có chuyện đó!",
+                "Không phải vậy!",
+                "Đâu có!",
+                "Cái gì mà [X] chứ!",
+                "Giỡn hả!",
+                "Nói gì vậy!?"
+            ],
+            "example_context": "Partner says something absurd, protagonist retorts",
+            "delivery": "Quick, snappy, often with ! or !?"
+        },
+        "rhetorical_denial": {
+            "description": "Denying obvious truth for comedy",
+            "patterns": [
+                "Không, tôi không có nghĩ là... [admits thought]",
+                "Đâu phải là tôi... [exactly what they're doing]",
+                "Không, không phải! Chỉ là... [same thing different words]"
+            ],
+            "examples": [
+                "Không, tôi không có nghĩ là cả ba chị em đều 'to' đâu. Chỉ là nhìn thấy sợi dây chuyền thôi!",
+                "Đâu phải là tôi sợ sự trói buộc của Kurumi hay gì đâu… Ừm, không sao đâu..."
+            ]
+        },
+        "self_aware_meta": {
+            "description": "Character acknowledges absurdity of situation",
+            "patterns": [
+                "Mình đang làm gì thế này...",
+                "Tại sao mọi chuyện lại thành ra thế này?",
+                "Đây không phải là [genre] sao?",
+                "Nếu đây là [situation], thì..."
+            ],
+            "examples": [
+                "Mình, đang hẹn hò với Amasaki đúng không? Tức là b-b-b-b-bạn gái!",
+                "Tại sao mọi chuyện lại thành ra thế này?"
+            ]
+        },
+        "hyperbolic_teen_expression": {
+            "description": "Exaggerated teen reactions for comedy",
+            "patterns": [
+                "Giờ tôi chết cũng được.",
+                "Tôi có thể bay lên mất.",
+                "Đây là tội chết!",
+                "Trời sắp sập rồi!",
+                "[Action] thì đời tôi coi như xong."
+            ],
+            "guidelines": [
+                "Use for positive overwhelm, not actual despair",
+                "Follow with comedic deflation"
+            ]
+        },
+        "stuttering_for_comedy": {
+            "description": "Stuttered speech showing nervousness/overwhelm",
+            "patterns": {
+                "embarrassment": "b-b-b-b-bạn gái!",
+                "denial": "K-Không... cũng không hẳn là vậy...",
+                "panic": "Kh-Kh-Kh-Khoan, l-l-l-l-làm sao đây"
+            },
+            "guidelines": [
+                "Preserve original stuttering pattern",
+                "More letters = more overwhelmed",
+                "Use hyphen between repeated sounds"
+            ]
+        },
+        "abrupt_topic_change": {
+            "description": "Character changes topic to escape awkwardness",
+            "patterns": [
+                "Mà thôi, chuyện đó không quan trọng.",
+                "Thôi thì cũng không quan trọng.",
+                "À mà nói đúng hơn thì—",
+                "Anyway, [new topic]"
+            ],
+            "comedic_effect": "Reader knows character is deflecting"
+        }
+    },
+    "situational_comedy": {
+        "misunderstanding_escalation": {
+            "description": "Character spirals into wrong conclusion",
+            "structure": [
+                "Initial observation",
+                "Jump to conclusion",
+                "Elaborate on wrong conclusion",
+                "More elaboration getting more absurd",
+                "Reality check deflates everything"
+            ],
+            "example": "Đùa à → Không, đây là thật → Chắc là trò chơi khăm → Họ đang nấp ở đâu đó → Không ai xuất hiện → À, ra không phải"
+        },
+        "internal_vs_external": {
+            "description": "Contrast between thoughts and spoken words",
+            "pattern": "[Internal panic/commentary] vs [Calm spoken response]",
+            "markers": {
+                "internal": "Italics or separate paragraph",
+                "transition": "Tôi thầm nghĩ vậy, nhưng miệng lại nói:"
+            }
+        },
+        "delayed_reaction": {
+            "description": "Character takes time to process, then explodes",
+            "structure": [
+                "Event happens",
+                "Character responds normally",
+                "Beat/pause (...)",
+                "Delayed explosion: 'KHOAN ĐÃ!'"
+            ]
+        },
+        "wrong_priority": {
+            "description": "Character focuses on absurd detail instead of main issue",
+            "examples": [
+                "Focus on whether to call ambulance (117 vs 119) instead of actual emergency",
+                "Worrying about smell of sweat during romantic moment",
+                "Calculating fine for making girl cry instead of comforting her"
+            ]
+        }
+    },
+    "character_specific_comedy": {
+        "protagonist_anxiety_spiral": {
+            "markers": [
+                "Khoan",
+                "Hả?",
+                "Gì đây?",
+                "Không không",
+                "Làm sao đây"
+            ],
+            "structure": "Short → questions → more questions → peak panic → deflation",
+            "example_flow": [
+                "Hả? Chuyện gì thế này?",
+                "Khoan, cái này... không ổn rồi?",
+                "Một mỹ thiếu nữ đang khóc và trước mặt cô ấy là tôi...",
+                "Rõ ràng là trông như tôi đã làm cậu ấy khóc còn gì!",
+                "Có nên gọi xe cấp cứu không? Ừm, 117 thì phải?",
+                "Khoan, xe cấp cứu là cái quái gì chứ."
+            ]
+        },
+        "deadpan_friend_responses": {
+            "description": "Blunt, unamused responses for contrast",
+            "patterns": [
+                "...Thế à.",
+                "Ông lạc quan quá rồi đấy.",
+                "Tôi không hiểu ông nói gì.",
+                "Haizz, đồ ngốc."
+            ],
+            "effect": "Grounds protagonist's chaos"
+        },
+        "yandere_sweet_scary_contrast": {
+            "description": "Sweet words with scary undertones",
+            "patterns": {
+                "sweet_surface": "Em tin Souta mà. ♥",
+                "scary_undertone": "Anh sẽ không bao giờ bỏ trốn, đúng không?",
+                "transition": "Smile + scary aura described in narration"
+            }
+        }
+    },
+    "sound_effects_and_onomatopoeia": {
+        "description": "Vietnamese adaptations of Japanese sound effects",
+        "patterns": {
+            "heart_pounding": "thình thịch",
+            "gulp": "ực",
+            "sigh": "hầy / haizz",
+            "surprised": "hả / ể / ủa",
+            "impact": "rầm / bịch / cạch",
+            "sparkle": "lấp lánh (describe, don't onomatopoeia)",
+            "awkward_silence": "..."
+        },
+        "guidelines": [
+            "Prefer Vietnamese onomatopoeia over Japanese",
+            "Some can be kept: 'Uwa~' for surprised/impressed",
+            "Convert katakana effects to Vietnamese equivalents"
+        ]
+    },
+    "formatting_for_comedy": {
+        "paragraph_breaks": {
+            "use_for": "Comedic timing - beat between setup and punchline",
+            "example": "Setup paragraph.\n\n...Punchline paragraph."
+        },
+        "one_liner_emphasis": {
+            "use_for": "Standalone comedic thoughts",
+            "format": "Short sentence as its own paragraph",
+            "example": "\n\nĐúng là tội chết.\n\n"
+        },
+        "question_answer_self_talk": {
+            "format": "Question? [Space] Answer.",
+            "example": "Gì đây, cậu ấy thích tôi à? À, đã tỏ tình rồi thì chắc là vậy rồi."
+        }
+    },
+    "anti_patterns": {
+        "comedy_killers": [
+            "Over-explaining the joke",
+            "Using formal vocabulary in casual comedy",
+            "Losing stuttering patterns from source",
+            "Smoothing out awkward speech that's deliberately awkward",
+            "Translating sound effects too literally",
+            "Adding narration that tells us something is funny"
+        ],
+        "examples_to_avoid": [
+            "❌ 'Anh ấy nói vậy khiến cả lớp cười.' (telling it's funny)",
+            "✅ 'Cả lớp được một trận cười vỡ bụng.' (showing reaction)",
+            "❌ 'Cô ấy nói một cách ngượng ngùng.' (telling emotion)",
+            "✅ 'B-Bạn trai ạ…? Ch-Chuyện đó thì… em không có, ạ…?' (showing through speech)"
+        ]
+    }
+}

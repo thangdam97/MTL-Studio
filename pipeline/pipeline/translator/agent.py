@@ -24,6 +24,7 @@ from pipeline.translator.per_chapter_workflow import PerChapterWorkflow
 from pipeline.config import get_target_language, get_language_config
 from pipeline.post_processor.format_normalizer import FormatNormalizer
 from pipeline.post_processor.cjk_cleaner import CJKArtifactCleaner, format_results_report
+from modules.gap_integration import GapIntegrationEngine
 
 
 @dataclass
@@ -53,7 +54,8 @@ logging.basicConfig(
 logger = logging.getLogger("TranslatorAgent")
 
 class TranslatorAgent:
-    def __init__(self, work_dir: Path, target_language: str = None, enable_continuity: bool = False):
+    def __init__(self, work_dir: Path, target_language: str = None, enable_continuity: bool = False,
+                 enable_gap_analysis: bool = False, enable_multimodal: bool = False):
         """
         Initialize TranslatorAgent.
 
@@ -63,10 +65,16 @@ class TranslatorAgent:
                             If None, uses current target language from config.
             enable_continuity: Enable schema extraction and continuity features (default: False).
                              ⚠️  ALPHA EXPERIMENTAL - Highly unstable, may cause interruptions.
+            enable_gap_analysis: Enable semantic gap analysis (Week 2-3 integration).
+                               Detects and guides translation of emotion+action, ruby jokes, and sarcasm.
+            enable_multimodal: Enable multimodal visual context injection (default: False).
+                             Injects pre-baked visual analysis into translation prompts.
+                             Requires Phase 1.6 (mtl.py phase1.6) to have been run first.
         """
         self.work_dir = work_dir
         self.manifest_path = work_dir / "manifest.json"
         self.enable_continuity = enable_continuity
+        self.enable_gap_analysis = enable_gap_analysis
 
         # Language configuration
         self.target_language = target_language if target_language else get_target_language()
@@ -80,11 +88,29 @@ class TranslatorAgent:
             logger.warning("   This feature may cause interruptions and requires manual schema review.")
         else:
             logger.info("✓ Using standard translation mode (continuity disabled)")
+        
+        if enable_gap_analysis:
+            logger.info("✓ Gap analysis enabled (Week 2-3 integration)")
+            logger.info("  Semantic gaps will be detected and guide translation decisions")
 
         if not self.manifest_path.exists():
             raise FileNotFoundError(f"Manifest not found at {self.manifest_path}")
 
         self.manifest = self._load_manifest()
+        
+        # Auto-detect enable_multimodal from config.yaml if not explicitly set
+        if not enable_multimodal:
+            from pipeline.config import get_config_section
+            translation_config = get_config_section('translation')
+            enable_multimodal = translation_config.get('enable_multimodal', False)
+            if enable_multimodal:
+                logger.info("✓ Multimodal translation enabled (config.yaml)")
+        
+        self.enable_multimodal = enable_multimodal
+
+        if self.enable_multimodal:
+            logger.info("✓ Multimodal visual analysis active")
+            logger.info("  Pre-baked visual context will be injected into translation prompts")
 
         # Detect and offer continuity pack injection (only if continuity enabled)
         if enable_continuity:
@@ -113,15 +139,19 @@ class TranslatorAgent:
         # Initialize PromptLoader with target language
         self.prompt_loader = PromptLoader(target_language=self.target_language)
         
-        # Load style guide for Vietnamese translations (multi-genre semantic selection)
+        # Load style guide for Vietnamese translations (genre-specific selection)
         if self.target_language in ['vi', 'vn']:
-            logger.info("Loading Vietnamese style guide system (experimental)...")
+            logger.info("Loading Vietnamese style guide system...")
             try:
                 # Extract publisher from manifest if available
                 publisher = self.manifest.get('publisher_id', 'overlap')
                 
-                # Load all genres for maximum flexibility (AI chooses appropriate rules per scene)
-                self.prompt_loader.load_style_guide(genres=None, publisher=publisher)
+                # Determine genre from manifest metadata (default to romcom for modern settings)
+                genre_from_manifest = self.manifest.get('genre', 'romcom_school_life')
+                genres_to_load = [genre_from_manifest] if genre_from_manifest else ['romcom_school_life']
+                
+                # Load specific genre (not all genres - avoids fantasy rules in modern romcom)
+                self.prompt_loader.load_style_guide(genres=genres_to_load, publisher=publisher)
             except Exception as e:
                 logger.warning(f"Failed to load style guide: {e}")
                 logger.warning("Continuing without style guide (translation quality may be reduced)")
@@ -174,8 +204,49 @@ class TranslatorAgent:
         self.processor = ChapterProcessor(
             self.client,
             self.prompt_loader,
-            self.context_manager
+            self.context_manager,
+            target_language=self.target_language
         )
+
+        # Initialize multimodal visual cache if enabled
+        self.visual_cache_manager = None
+        if self.enable_multimodal:
+            try:
+                from modules.multimodal.cache_manager import VisualCacheManager
+                self.visual_cache_manager = VisualCacheManager(work_dir)
+                if self.visual_cache_manager.has_cache():
+                    stats = self.visual_cache_manager.get_cache_stats()
+                    logger.info(f"✓ Visual cache loaded: {stats['total']} entries "
+                               f"({stats['cached']} cached, {stats['safety_blocked']} blocked, "
+                               f"{stats['manual_override']} manual)")
+                    # Connect to processor
+                    self.processor.enable_multimodal = True
+                    self.processor.visual_cache = self.visual_cache_manager
+                else:
+                    logger.warning("⚠️  No visual cache found. Run 'mtl.py phase0 <volume_id>' first.")
+                    logger.warning("   Continuing without multimodal context (text-only mode)")
+                    self.enable_multimodal = False
+            except Exception as e:
+                logger.warning(f"Failed to initialize multimodal: {e}")
+                logger.warning("Continuing without multimodal context")
+                self.enable_multimodal = False
+
+        # Initialize gap analyzer if enabled (Week 2-3 integration)
+        if self.enable_gap_analysis:
+            try:
+                from modules.gap_integration import GapIntegrationEngine
+                self.gap_analyzer = GapIntegrationEngine(self.work_dir, target_language=self.target_language)
+                # Enable gap analysis in processor
+                self.processor.enable_gap_analysis = True
+                self.processor.gap_analyzer = self.gap_analyzer
+                logger.info("✓ Gap analyzer initialized and connected to processor")
+            except Exception as e:
+                logger.warning(f"Failed to initialize gap analyzer: {e}")
+                logger.warning("Continuing without gap analysis")
+                self.enable_gap_analysis = False
+                self.gap_analyzer = None
+        else:
+            self.gap_analyzer = None
 
         # Translation Log
         self.log_path = work_dir / "translation_log.json"
@@ -560,6 +631,38 @@ class TranslatorAgent:
         """
         logger.info(f"Starting translation for volume in {self.work_dir}")
         
+        # ===== PRE-FLIGHT VALIDATION: v3.6 Manifest Check =====
+        schema_version = self.manifest.get("schema_version", "unknown")
+        if schema_version == "v3.6_enhanced":
+            logger.info("Detected v3.6 enhanced schema - running manifest validator...")
+            validator_script = Path(__file__).parent.parent.parent / "scripts" / "validate_manifest_v3_6.py"
+            manifest_path = self.work_dir / "manifest.json"
+            
+            if validator_script.exists():
+                import subprocess
+                result = subprocess.run(
+                    ["python3", str(validator_script), str(manifest_path)],
+                    capture_output=True,
+                    text=True
+                )
+                
+                # Print validator output
+                print(result.stdout)
+                
+                if result.returncode != 0:
+                    logger.warning(
+                        "Manifest validation found issues. "
+                        "Translation can proceed but quality may be affected."
+                    )
+                    response = input("Continue anyway? (y/N): ")
+                    if response.lower() != 'y':
+                        logger.info("Translation cancelled by user.")
+                        return
+                else:
+                    logger.info("✓ Manifest validation passed - ready for quality translation")
+            else:
+                logger.warning(f"Validator script not found at {validator_script}")
+        
         # Check prerequisite
         librarian_status = self.manifest.get("pipeline_state", {}).get("librarian", {}).get("status")
         if librarian_status != "completed":
@@ -567,9 +670,13 @@ class TranslatorAgent:
             # Proceed with warning? Or stop? Let's stop to be safe unless forced (not imp yet)
             # For now, just warn.
         
+        # Support both v2 (chapters at root) and v3.5 (chapters under structure)
         manifest_chapters = self.manifest.get("chapters", [])
         if not manifest_chapters:
-            logger.error("No chapters found in manifest")
+            manifest_chapters = self.manifest.get("structure", {}).get("chapters", [])
+        
+        if not manifest_chapters:
+            logger.error("No chapters found in manifest (checked both root and structure.chapters)")
             return
 
         # Filter chapters if specific list provided
@@ -808,6 +915,16 @@ class TranslatorAgent:
             except Exception as e:
                 logger.warning(f"CJK artifact detection failed: {e}")
             
+            # Run automated audit system (v2.0 - 3 subagents)
+            logger.info("\n" + "="*60)
+            logger.info("POST-PROCESSING: Automated Quality Audit (v2.0)")
+            logger.info("="*60)
+            try:
+                self._run_quality_audit()
+            except Exception as e:
+                logger.warning(f"Quality audit failed: {e}")
+                logger.warning("Continuing without audit report...")
+            
             # Finalize continuity pack (aggregate all chapter snapshots)
             logger.info("\nFinalizing continuity pack...")
             try:
@@ -835,6 +952,95 @@ class TranslatorAgent:
         if self.client.enable_caching:
             logger.info("Clearing context cache...")
             self.client.clear_cache()
+    
+    def _run_quality_audit(self) -> None:
+        """
+        Run the automated quality audit system (v2.0).
+        
+        Executes 3 subagents in sequence:
+        1. Fidelity Auditor - Content preservation check
+        2. Integrity Auditor - Names, terms, formatting validation
+        3. Prose Auditor - English naturalness via Grammar RAG
+        
+        Then aggregates results into final report.
+        """
+        try:
+            # Import auditors (lazy import to avoid circular deps)
+            from auditors import FidelityAuditor, IntegrityAuditor, ProseAuditor, FinalAuditor
+        except ImportError:
+            logger.warning("Audit system not available (auditors module not found)")
+            logger.warning("Run: pip install -e . or ensure auditors/ is in PYTHONPATH")
+            return
+        
+        # Create audits output directory
+        audit_dir = self.work_dir / "audits"
+        audit_dir.mkdir(exist_ok=True)
+        
+        # Config directory for Grammar RAG
+        config_dir = Path(__file__).parent.parent.parent / "config"
+        
+        logger.info(f"Audit output directory: {audit_dir}")
+        
+        # === SUBAGENT 1: Fidelity Auditor ===
+        logger.info("\n🔍 Running Subagent 1: Content Fidelity Audit...")
+        try:
+            fidelity_auditor = FidelityAuditor(self.work_dir)
+            fidelity_report = fidelity_auditor.save_report(audit_dir)
+            logger.info(f"✅ Fidelity audit complete: {fidelity_report}")
+        except Exception as e:
+            logger.error(f"❌ Fidelity audit failed: {e}")
+        
+        # === SUBAGENT 2: Integrity Auditor ===
+        logger.info("\n✍️ Running Subagent 2: Content Integrity Audit...")
+        try:
+            integrity_auditor = IntegrityAuditor(self.work_dir)
+            integrity_report = integrity_auditor.save_report(audit_dir)
+            logger.info(f"✅ Integrity audit complete: {integrity_report}")
+        except Exception as e:
+            logger.error(f"❌ Integrity audit failed: {e}")
+        
+        # === SUBAGENT 3: Prose Auditor ===
+        logger.info("\n💬 Running Subagent 3: Prose Quality Audit...")
+        try:
+            prose_auditor = ProseAuditor(self.work_dir, config_dir)
+            prose_report = prose_auditor.save_report(audit_dir)
+            logger.info(f"✅ Prose audit complete: {prose_report}")
+        except Exception as e:
+            logger.error(f"❌ Prose audit failed: {e}")
+        
+        # === FINAL AGGREGATION ===
+        logger.info("\n📊 Running Final Auditor: Report Aggregation...")
+        try:
+            final_auditor = FinalAuditor(audit_dir, self.work_dir)
+            json_path, md_path = final_auditor.save_reports(audit_dir)
+            
+            # Display final result
+            import json
+            with open(json_path, 'r', encoding='utf-8') as f:
+                summary = json.load(f)
+            
+            grade = summary.get("grade", "?")
+            score = summary.get("scores", {}).get("final", 0)
+            verdict = summary.get("verdict", "UNKNOWN")
+            
+            logger.info("")
+            logger.info("╔════════════════════════════════════════════════════════════╗")
+            logger.info(f"║  AUDIT COMPLETE                                           ║")
+            logger.info(f"║  Grade: {grade:<5}  Score: {score:>5.1f}/100  Verdict: {verdict:<14} ║")
+            logger.info("╚════════════════════════════════════════════════════════════╝")
+            logger.info(f"\n📄 Full report: {md_path}")
+            
+            # Store audit result in manifest
+            self.manifest["pipeline_state"]["translator"]["audit_result"] = {
+                "grade": grade,
+                "score": score,
+                "verdict": verdict,
+                "report_path": str(md_path)
+            }
+            self._save_manifest()
+            
+        except Exception as e:
+            logger.error(f"❌ Final aggregation failed: {e}")
 
     def generate_report(self) -> TranslationReport:
         """Generate a summary report of the translation."""
@@ -876,7 +1082,8 @@ def run_translator(
     chapters: Optional[List[str]] = None,
     force: bool = False,
     work_base: Optional[Path] = None,
-    enable_continuity: bool = False
+    enable_continuity: bool = False,
+    enable_multimodal: bool = False
 ) -> TranslationReport:
     """
     Main entry point for Translator agent.
@@ -887,6 +1094,7 @@ def run_translator(
         force: Force re-translation of completed chapters.
         work_base: Base working directory (defaults to WORK/).
         enable_continuity: Enable schema extraction and continuity features (ALPHA - unstable).
+        enable_multimodal: Enable multimodal visual context injection.
 
     Returns:
         TranslationReport with results.
@@ -899,7 +1107,7 @@ def run_translator(
     if not volume_dir.exists():
         raise FileNotFoundError(f"Volume directory not found: {volume_dir}")
 
-    agent = TranslatorAgent(volume_dir, enable_continuity=enable_continuity)
+    agent = TranslatorAgent(volume_dir, enable_continuity=enable_continuity, enable_multimodal=enable_multimodal)
     agent.translate_volume(clean_start=force, chapters=chapters)
     return agent.generate_report()
 
@@ -911,7 +1119,11 @@ def main():
     parser.add_argument("--force", action="store_true", help="Force re-translation of completed chapters")
     parser.add_argument("--enable-continuity", action="store_true", 
                        help="[ALPHA] Enable schema extraction and continuity (experimental, unstable)")
-    
+    parser.add_argument("--enable-gap-analysis", action="store_true",
+                       help="Enable semantic gap analysis (Week 2-3 integration) for improved translation quality")
+    parser.add_argument("--enable-multimodal", action="store_true",
+                       help="Enable multimodal visual context injection (requires Phase 1.6)")
+
     args = parser.parse_args()
     
     # Locate work dir
@@ -928,7 +1140,9 @@ def main():
         sys.exit(1)
         
     try:
-        agent = TranslatorAgent(volume_dir, enable_continuity=args.enable_continuity)
+        agent = TranslatorAgent(volume_dir, enable_continuity=args.enable_continuity,
+                               enable_gap_analysis=args.enable_gap_analysis,
+                               enable_multimodal=args.enable_multimodal)
         agent.translate_volume(clean_start=args.force, chapters=args.chapters)
     except Exception as e:
         logger.exception("Translator Agent crashed")

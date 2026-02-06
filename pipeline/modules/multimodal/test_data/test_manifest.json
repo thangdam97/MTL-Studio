@@ -1,0 +1,224 @@
+{
+    "version": "3.0",
+    "volume_id": "1d46",
+    "title": "他校の氷姫を助けたら、お友達から始める事になりました",
+    "title_en": "After Helping the Ice Princess from Another School, We Decided to Start as Friends",
+    "created_at": "2026-02-05T15:06:59.792248",
+    "metadata": {
+        "author": "皐月　陽龍",
+        "publisher": "株式会社ＫＡＤＯＫＡＷＡ",
+        "source_language": "ja",
+        "target_language": "en"
+    },
+    "character_registry": {
+        "Nagi": "Shinonome Nagi (東雲凪) - The 'Ice Princess'. White hair, blue eyes, dignified and reserved. Adopted daughter of a prominent family. Male trauma from groping incident.",
+        "Souta": "Minori Souta (海以蒼太) - The protagonist. Ordinary-looking male student, kind-hearted, observant. Lives alone in Tokyo.",
+        "Eiji": "Makizaka Eiji (巻坂瑛二) - Souta's best friend. Outgoing, playful, dating Kirika.",
+        "Kirika": "Nishizawa Kirika (西沢桐花) - Eiji's girlfriend. Chestnut-colored wavy hair, cheerful personality.",
+        "Hikaru": "Hayama Hikaru (葉山ひかる) - Nagi's classmate and friend. Energetic, protective of Nagi."
+    },
+    "assets": {
+        "cover": "cover.jpg",
+        "kuchie": [
+            "kuchie-001.jpg",
+            "kuchie-002.jpg",
+            "kuchie-003.jpg",
+            "kuchie-004.jpg",
+            "kuchie-005.jpg",
+            "kuchie-006.jpg"
+        ]
+    },
+    "illustrations": {
+        "illust-001": {
+            "id": "illust-001",
+            "filename": "illust-001.jpg",
+            "original_name": "i-019.jpg",
+            "chapter": 1,
+            "line": 211,
+            "scene_context": "First formal meeting on the train. Nagi sits next to Souta and greets him the morning after he saved her from the groper.",
+            "characters": [
+                "Nagi",
+                "Souta"
+            ],
+            "scene_position": "introduction",
+            "visual_focus": "Nagi's blue eyes and white hair as she greets Souta. Close proximity, intimate framing.",
+            "expected_emotions": [
+                "curious",
+                "grateful",
+                "slightly nervous"
+            ]
+        },
+        "illust-002": {
+            "id": "illust-002",
+            "filename": "illust-002.jpg",
+            "original_name": "i-078.jpg",
+            "chapter": 1,
+            "line": 1755,
+            "scene_context": "Mont Blanc jealousy scene. Nagi sees Souta eating parfait with Kirika (Eiji's girlfriend) through a café window. She misunderstands the relationship.",
+            "characters": [
+                "Nagi",
+                "Souta",
+                "Kirika"
+            ],
+            "scene_position": "climax",
+            "visual_focus": "Nagi witnessing Souta with another woman. Expression of hidden pain, heartbreak.",
+            "expected_emotions": [
+                "jealousy",
+                "heartbreak",
+                "suppressed pain"
+            ],
+            "chronological_warning": true,
+            "spoiler_prevention_note": "Illustration shows Nagi's anguished expression but text builds to this moment. Forecast mood, don't describe her tears/pain until text confirms."
+        },
+        "illust-003": {
+            "id": "illust-003",
+            "filename": "illust-003.jpg",
+            "original_name": "i-100.jpg",
+            "chapter": 1,
+            "line": 2339,
+            "scene_context": "Hayama making a punching gesture at Souta, playfully threatening him about treating Nagi well.",
+            "characters": [
+                "Hikaru",
+                "Souta"
+            ],
+            "scene_position": "comedic",
+            "visual_focus": "Hayama's energetic, protective stance.",
+            "expected_emotions": [
+                "playful",
+                "protective",
+                "comedic"
+            ]
+        },
+        "illust-004": {
+            "id": "illust-004",
+            "filename": "illust-004.jpg",
+            "original_name": "i-113.jpg",
+            "chapter": 1,
+            "line": 2635,
+            "scene_context": "The 'It's a secret' scene. Nagi puts a finger to her lips and smiles mysteriously when Souta asks what she wants from him.",
+            "characters": [
+                "Nagi"
+            ],
+            "scene_position": "emotional_peak",
+            "visual_focus": "Nagi's rare smile, finger to lips in 'shh' gesture. Eyes sparkling with hidden meaning.",
+            "expected_emotions": [
+                "playful",
+                "mysterious",
+                "anticipation",
+                "hidden affection"
+            ],
+            "literary_significance": "This is the moment Souta realizes he's falling for her. The illustration captures her breaking through her 'Ice Princess' facade."
+        },
+        "illust-005": {
+            "id": "illust-005",
+            "filename": "illust-005.jpg",
+            "original_name": "i-182.jpg",
+            "chapter": 2,
+            "line": 1803,
+            "scene_context": "Three piercing gazes directed at Souta.",
+            "characters": [
+                "Nagi",
+                "Hikaru",
+                "unknown"
+            ],
+            "scene_position": "comedic_tension"
+        },
+        "illust-006": {
+            "id": "illust-006",
+            "filename": "illust-006.jpg",
+            "original_name": "i-209.jpg",
+            "chapter": 2,
+            "line": 2475,
+            "scene_context": "Nagi performing Japanese traditional dance.",
+            "characters": [
+                "Nagi"
+            ],
+            "scene_position": "showcase"
+        },
+        "illust-007": {
+            "id": "illust-007",
+            "filename": "illust-007.jpg",
+            "original_name": "i-251.jpg",
+            "chapter": 3,
+            "line": 787,
+            "scene_context": "Kiss scene.",
+            "characters": [
+                "Nagi",
+                "Souta"
+            ],
+            "scene_position": "climax"
+        },
+        "illust-008": {
+            "id": "illust-008",
+            "filename": "illust-008.jpg",
+            "original_name": "i-282.jpg",
+            "chapter": 3,
+            "line": 1595,
+            "scene_context": "Help me, Eiji moment.",
+            "characters": [
+                "Nagi",
+                "Eiji"
+            ],
+            "scene_position": "dramatic"
+        },
+        "illust-009": {
+            "id": "illust-009",
+            "filename": "illust-009.jpg",
+            "original_name": "i-312.jpg",
+            "chapter": 3,
+            "line": 2353,
+            "scene_context": "Proposal scene.",
+            "characters": [
+                "Nagi",
+                "Souta"
+            ],
+            "scene_position": "climax"
+        }
+    },
+    "character_references": {
+        "nagi": {
+            "path": "kuchie/kuchie-001.jpg",
+            "filename": "kuchie-001.jpg",
+            "description": "Shinonome Nagi - White hair, blue eyes, elegant features",
+            "features": [
+                "white_hair",
+                "blue_eyes",
+                "foreign_appearance",
+                "elegant_posture"
+            ]
+        },
+        "souta": {
+            "path": "kuchie/kuchie-002.jpg",
+            "filename": "kuchie-002.jpg",
+            "description": "Minori Souta - Ordinary male student appearance",
+            "features": [
+                "dark_hair",
+                "average_build",
+                "kind_expression"
+            ]
+        }
+    },
+    "test_cases": {
+        "description": "Three prose segments selected for Multimodal Processor testing",
+        "segments": [
+            {
+                "id": "test_001_first_meeting",
+                "illustration_id": "illust-001",
+                "scene": "First train meeting - Good morning",
+                "focus": "Character introduction, establishing visual identity"
+            },
+            {
+                "id": "test_002_mont_blanc",
+                "illustration_id": "illust-002",
+                "scene": "Mont Blanc jealousy - Nagi sees Souta with Kirika",
+                "focus": "Emotional climax, spoiler prevention guardrail testing"
+            },
+            {
+                "id": "test_003_secret",
+                "illustration_id": "illust-004",
+                "scene": "It's a secret - Nagi's mysterious smile",
+                "focus": "Capturing subtle emotion, breaking Ice Princess facade"
+            }
+        ]
+    }
+}

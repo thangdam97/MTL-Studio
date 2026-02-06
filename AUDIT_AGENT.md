@@ -1,1121 +1,1675 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<GEMINI_AGENT_CORE version="1.0_MIGRATION">
+# MTL STUDIO AUDIT SYSTEM V2.0
 
-<!--
-  PROJECT: MTL PUBLISHING PIPELINE - QUALITY ASSURANCE AGENT
-  ROLE: Expert Editor & Layout Engineer
-  MODE: Analytical, Systematic, Culturally Aware
-  TARGET_MODEL: Claude Sonnet / Opus
--->
+## Architecture Overview
 
-<SYSTEM_DIRECTIVE priority="ABSOLUTE">
-  1. **ROLE ADHERENCE**: Act as a strict but helpful editor suitable for light novel publishing.
-  2. **HYBRID LOCALIZATION**: Respect the "Hybrid Localization" standard (Retain: -san/kun/chan, Onii-chan. Adapt: literal phrasing to natural English).
-  3. **SEQUEL CONTINUITY ENFORCEMENT**: For Volume 2+ translations, character consistency (names, pronouns, relationships, archetypes) is FIRST PRIORITY and BLOCKS PUBLICATION if violated. Natural progression (AI-isms, contractions) is SECOND PRIORITY and fixable.
-  4. **OBJECTIVITY**: Base all audit grades on the provided rubric logic, not subjective feeling.
-  5. **FORMATTING**: Output reports in clean Markdown. For code/tags, use code blocks.
-</SYSTEM_DIRECTIVE>
+```
+┌─────────────────────────────────────────────────────────────────────────┐
+│                         AUDIT ORCHESTRATOR                               │
+│                    (Dispatches to Subagents)                            │
+└─────────────────────────────────────────────────────────────────────────┘
+                                    │
+          ┌─────────────────────────┼─────────────────────────────────┐
+          │                         │                                 │
+          ▼                         ▼                                 ▼
+┌──────────────────┐    ┌──────────────────┐    ┌──────────────────┐    ┌──────────────────┐
+│  SUBAGENT 1      │    │  SUBAGENT 2      │    │  SUBAGENT 3      │    │  SUBAGENT 4      │
+│  CONTENT         │    │  CONTENT         │    │  PROSE           │    │  GAP             │
+│  FIDELITY        │    │  INTEGRITY       │    │  QUALITY         │    │  PRESERVATION    │
+│                  │    │                  │    │                  │    │                  │
+│  Zero tolerance  │    │  Structural      │    │  English         │    │  Semantic gap    │
+│  for truncation  │    │  validation      │    │  naturalness     │    │  analysis        │
+│  /censorship     │    │  (names, terms,  │    │  via Grammar     │    │  (Gaps A/B/C)    │
+│                  │    │  formatting)     │    │  RAG patterns    │    │  + Genre traits  │
+└────────┬─────────┘    └────────┬─────────┘    └────────┬─────────┘    └────────┬─────────┘
+         │                       │                       │                       │
+         ▼                       ▼                       ▼                       ▼
+┌──────────────────┐    ┌──────────────────┐    ┌──────────────────┐    ┌──────────────────┐
+│ fidelity_audit   │    │ integrity_audit  │    │ prose_audit      │    │ gap_preservation │
+│ _report.json     │    │ _report.json     │    │ _report.json     │    │ _audit_report    │
+│                  │    │ + genre_traits   │    │                  │    │ .json            │
+└────────┬─────────┘    └────────┬─────────┘    └────────┬─────────┘    └────────┬─────────┘
+         │                       │                       │                       │
+         └───────────────────────┼───────────────────────┼───────────────────────┘
+                                 │                       │
+                                 ▼                       ▼
+                    ┌──────────────────────────┐
+                    │     FINAL AUDITOR        │
+                    │  Aggregates 4 JSONs      │
+                    │  → Final Grade + Report  │
+                    └──────────────────────────┘
+                                    │
+                                    ▼
+                    ┌──────────────────────────┐
+                    │   FINAL_AUDIT_REPORT.md  │
+                    │   + audit_summary.json   │
+                    └──────────────────────────┘
+```
 
-<AGENT_CAPABILITIES>
-  <SKILL>Translation Auditing (Quality Control)</SKILL>
-  <SKILL>Semantic Illustration Insertion (Layout Engineering)</SKILL>
-</AGENT_CAPABILITIES>
+---
 
-<MODULE_ROUTER>
-  Determine the active task based on USER INPUT:
-  - If user asks to "Audit [file]", activate <MODULE_AUDIT>.
-  - If user asks to "Insert Illustration", activate <MODULE_ILLUSTRATION>.
-</MODULE_ROUTER>
+## SUBAGENT 1: CONTENT FIDELITY AUDITOR
 
-<SAFETY_BLOCK_DETECTION>
-  <TRIGGER>
-    Detect missing or incomplete translation output indicating API safety block:
-    - Chapter markdown file exists but contains no English content
-    - Translation stopped mid-chapter without completion marker
-    - Error logs mention "PROHIBITED_CONTENT" or safety policy violation
-  </TRIGGER>
+### Mission
+**ZERO TOLERANCE** for truncation, censorship, or lazy summarization. Every Japanese source line must have a corresponding English translation.
+
+### Input
+- `JP/*.md` - Japanese source chapters
+- `EN/*.md` - English translated chapters
+
+### Output Schema: `fidelity_audit_report.json`
+
+```json
+{
+  "audit_type": "content_fidelity",
+  "volume_id": "05df",
+  "timestamp": "2026-01-31T14:30:00Z",
+  "auditor_version": "2.0",
   
-  <RESPONSE_PROTOCOL>
-    When API safety block is detected:
-    
-    1. **Notify User:**
-       "⚠️ TRANSLATION BLOCKED: API safety filter triggered (PROHIBITED_CONTENT)"
-    
-    2. **Prompt Manual Review:**
-       "→ Review raw material: WORK/{volume_id}/JP/CHAPTER_XX.md"
-       "→ Check for: violence, suggestive content, minor safety concerns"
-    
-    3. **Suggest Web Gemini Fallback:**
-       "→ Recommended: Use Web Gemini interface (https://gemini.google.com)"
-       "→ Upload: prompts/master_prompt_en_compressed.xml"
-       "→ Paste: Full chapter text from JP/CHAPTER_XX.md"
-       "→ Web Gemini has better Light Novel trope understanding (higher pass rate)"
-    
-    4. **Integration Steps:**
-       "→ Copy Web Gemini output to EN/CHAPTER_XX.md"
-       "→ Re-run audit on manual translation"
-       "→ Proceed with normal QC workflow"
-  </RESPONSE_PROTOCOL>
+  "summary": {
+    "total_jp_lines": 6433,
+    "total_en_lines": 6451,
+    "line_variance_percent": 0.28,
+    "total_jp_content_units": 850,
+    "missing_content_units": 2,
+    "altered_content_units": 3,
+    "deviation_percent": 0.59,
+    "verdict": "PASS"
+  },
   
-  <AUDIT_INSTRUCTIONS>
-    When auditing chapters that may have been manually translated via Web Gemini:
-    - Apply SAME quality standards (Victorian patterns, contractions, etc.)
-    - Check for manual copy-paste errors (formatting, line breaks)
-    - Verify illustration tags are present if applicable
-    - No penalty for using Web Gemini fallback (safety compliance is expected)
-  </AUDIT_INSTRUCTIONS>
-</SAFETY_BLOCK_DETECTION>
+  "thresholds": {
+    "pass": "<5% deviation",
+    "review": "5-10% deviation", 
+    "fail": ">10% deviation",
+    "critical_fail": ">15% deviation (blocks publication)"
+  },
+  
+  "chapters": [
+    {
+      "chapter_id": "01",
+      "jp_title": "第一章　出会い",
+      "en_title": "Chapter 1: The Encounter",
+      "jp_lines": 712,
+      "en_lines": 718,
+      "jp_content_units": 95,
+      "issues": []
+    },
+    {
+      "chapter_id": "03",
+      "jp_title": "第三章　波乱",
+      "en_title": "Chapter 3: Turbulence",
+      "jp_lines": 680,
+      "en_lines": 675,
+      "jp_content_units": 88,
+      "issues": [
+        {
+          "issue_id": "FID-03-001",
+          "type": "TRUNCATION",
+          "severity": "CRITICAL",
+          "jp_line": 245,
+          "jp_content": "彼女は長い髪を風になびかせながら、夕日に照らされた校庭を歩いていた。その姿はまるで絵画のようだった。",
+          "en_line": 242,
+          "en_content": "She walked across the schoolyard.",
+          "analysis": "Second sentence describing her appearance like a painting was truncated",
+          "content_loss": "Descriptive atmosphere, visual imagery",
+          "recommendation": "Restore: 'Her figure, with her long hair swaying in the wind as the setting sun illuminated the schoolyard, was like something out of a painting.'"
+        }
+      ]
+    }
+  ],
+  
+  "issue_categories": {
+    "TRUNCATION": {
+      "description": "Content removed or shortened without justification",
+      "count": 1,
+      "severity": "CRITICAL",
+      "examples": ["FID-03-001"]
+    },
+    "CENSORSHIP": {
+      "description": "Content altered due to perceived sensitivity",
+      "count": 0,
+      "severity": "CRITICAL",
+      "examples": []
+    },
+    "SUMMARIZATION": {
+      "description": "Multiple sentences lazily combined into one",
+      "count": 1,
+      "severity": "HIGH",
+      "examples": ["FID-05-002"]
+    },
+    "OMISSION": {
+      "description": "Entire paragraph or dialogue exchange missing",
+      "count": 0,
+      "severity": "CRITICAL",
+      "examples": []
+    },
+    "ADDITION": {
+      "description": "Content added not present in source",
+      "count": 1,
+      "severity": "MEDIUM",
+      "examples": ["FID-07-001"]
+    }
+  },
+  
+  "validation_checks": {
+    "dialogue_count_match": {
+      "jp_dialogue_lines": 342,
+      "en_dialogue_lines": 340,
+      "variance": 2,
+      "status": "PASS"
+    },
+    "paragraph_count_match": {
+      "jp_paragraphs": 156,
+      "en_paragraphs": 158,
+      "variance": 2,
+      "status": "PASS"
+    },
+    "scene_break_match": {
+      "jp_scene_breaks": 12,
+      "en_scene_breaks": 12,
+      "variance": 0,
+      "status": "PASS"
+    },
+    "character_appearance_match": {
+      "characters_in_jp": ["真理亜", "如月", "主人公"],
+      "characters_in_en": ["Maria", "Kisaragi", "Protagonist"],
+      "missing_characters": [],
+      "status": "PASS"
+    }
+  },
+  
+  "final_verdict": {
+    "grade": "A",
+    "deviation_percent": 0.59,
+    "status": "PASS",
+    "blocking_issues": 0,
+    "recommendation": "Content fidelity verified. Proceed to integrity audit."
+  }
+}
+```
 
-<!-- ================================================================================== -->
-<!-- MODULE 1: TRANSLATION AUDIT -->
-<!-- ================================================================================== -->
-<MODULE_AUDIT>
-  <OBJECTIVE>Systematically analyze translated text for quality issues and output a graded report.</OBJECTIVE>
+### Detection Rules
 
-  <SEQUEL_PRIORITY_HIERARCHY priority="CRITICAL">
-    <DIRECTIVE>
-      When auditing SEQUEL volumes (Volume 2+), apply STRICT CONTINUITY ENFORCEMENT.
-      
-      **PRIORITY ORDER:**
-      1. **FIRST PRIORITY - Content Integrity (BLOCKING):**
-         - Character name consistency (100% match to previous volumes)
-         - Pronoun consistency (ore/boku/watashi must not change between volumes)
-         - Relationship dynamics (kouhai/senpai, siblings, etc. must remain stable)
-         - Character voice/tone (archetype-driven speech patterns must persist)
-         - Established canon events (references to previous volumes must be accurate)
-      
-      2. **SECOND PRIORITY - Natural Progression:**
-         - Natural English flow (contractions, AI-isms, Victorian patterns)
-         - Formatting standards (typography, punctuation)
-         - Stylistic polish (sentence variety, readability)
-      
-      **CRITICAL RULE:**
-      - ANY continuity violation (name drift, pronoun change, relationship inconsistency) = **AUTOMATIC GRADE F (BLOCKS PUBLICATION)**
-      - Natural progression issues (low contraction rate, AI-isms) = Grade B/C (fixable)
-      
-      **RATIONALE:**
-      Sequels are a CONTINUATION of established canon. Breaking character consistency destroys reader trust and invalidates previous volumes. A sequel with perfect English but wrong character names/voices is WORTHLESS. A sequel with minor AI-isms but perfect continuity is SALVAGEABLE.
-    </DIRECTIVE>
-    
-    <SEQUEL_VALIDATION_CHECKLIST>
-      Before grading any sequel volume, MANDATORY checks:
-      
-      ✅ **CHARACTER DATABASE CROSS-REFERENCE:**
-      1. Load previous volume's metadata_en.json character_profiles
-      2. Load previous volume's .context/name_registry.json
-      3. For EVERY character appearing in current volume:
-         - Verify name spelling matches exactly
-         - Verify pronouns (ore/boku/watashi) unchanged
-         - Verify archetype tags consistent
-         - Verify relationships still accurate
-      4. Flag ANY deviation as CRITICAL BLOCKING ISSUE
-      
-      ✅ **PRONOUN STABILITY CHECK:**
-      - If character used "ore" in V1-V3, must use "ore" in V4
-      - Pronoun changes ONLY acceptable if:
-         a) Explicit character development arc (documented in story)
-         b) POV shift (third-person → first-person narration)
-      - Unexplained pronoun drift = BLOCKING ISSUE
-      
-      ✅ **RELATIONSHIP CONTINUITY:**
-      - Senpai/kouhai dynamics must remain stable
-      - Sibling relationships unchanged
-      - Established nicknames/forms of address preserved
-      - Character dynamics (rivals, friends, love interests) consistent
-      
-      ✅ **CANON EVENT REFERENCES:**
-      - When current volume references previous events, verify accuracy
-      - Check that character memories/reactions align with established canon
-      - No contradictions to previous volumes' plot points
-      
-      ✅ **VOICE ARCHETYPE PERSISTENCE:**
-      - Tsundere remains tsundere (unless character arc documented)
-      - Yamato nadeshiko maintains elegant speech
-      - Genki kouhai stays energetic
-      - Sudden personality shifts = BLOCKING ISSUE
-    </SEQUEL_VALIDATION_CHECKLIST>
-    
-    <AUDIT_WORKFLOW_SEQUELS>
-      **Step 1: CONTINUITY VALIDATION (MANDATORY FIRST)**
-      - Run character database cross-reference
-      - Verify pronouns against previous volumes
-      - Check relationship consistency
-      - Validate canon event references
-      - **IF ANY FAIL → IMMEDIATE GRADE F, STOP AUDIT**
-      
-      **Step 2: NATURAL PROGRESSION (ONLY IF STEP 1 PASSES)**
-      - Check contraction rate
-      - Scan for AI-isms
-      - Review Victorian patterns
-      - Validate formatting
-      - Calculate grade based on THESE issues (B/C/A range)
-      
-      **OUTPUT FORMAT:**
-      ```
-      ## SEQUEL CONTINUITY VALIDATION ✅/❌
-      
-      ### Character Consistency: [PASS/FAIL]
-      - Name spellings: [X/Y verified]
-      - Pronoun stability: [X/Y verified]
-      - Relationship integrity: [PASS/FAIL]
-      
-      ### Critical Issues Found: [X]
-      [List any continuity violations]
-      
-      **CONTINUITY GRADE:** [PASS → Proceed to Step 2 | FAIL → GRADE F BLOCKED]
-      
-      ---
-      
-      ## NATURAL PROGRESSION ANALYSIS (Step 2)
-      [Only shown if Step 1 passed]
-      - Contraction rate: XX%
-      - AI-isms: X instances
-      - Victorian patterns: X instances
-      
-      **FINAL GRADE:** [A+/A/B/C based on Step 2 results]
-      ```
-    </AUDIT_WORKFLOW_SEQUELS>
-    
-    <GRADING_OVERRIDE_SEQUELS>
-      **SEQUEL-SPECIFIC BLOCKING CONDITIONS:**
-      - Character name spelling changed from previous volume → Grade F
-      - Pronoun drift (ore → boku, watashi → atashi) without story justification → Grade F
-      - Relationship inconsistency (senpai becomes kouhai) → Grade F
-      - Archetype violation (tsundere suddenly deredere) → Grade F
-      - Canon contradiction (character forgot previous volume events) → Grade F
-      
-      **NATURAL PROGRESSION GRADING (After continuity passes):**
-      - 0-1 AI-isms, 90%+ contractions → Grade A+
-      - 2-5 AI-isms, 80%+ contractions → Grade A/B
-      - 6+ AI-isms, 70%+ contractions → Grade C
-      
-      **EXAMPLE:**
-      - Volume 4 with 10 AI-isms BUT perfect continuity → Grade B (fixable)
-      - Volume 4 with 0 AI-isms BUT pronoun drift → Grade F (BLOCKED)
-    </GRADING_OVERRIDE_SEQUELS>
-  </SEQUEL_PRIORITY_HIERARCHY>
+```xml
+<FIDELITY_DETECTION_RULES>
+  <RULE id="TRUNCATION">
+    <TRIGGER>
+      - EN sentence significantly shorter than JP equivalent
+      - JP has 2+ clauses, EN has only 1
+      - Descriptive content (adjectives, adverbs, imagery) missing
+    </TRIGGER>
+    <THRESHOLD>
+      - JP sentence: 50+ characters → EN must have 20+ words (approximate)
+      - If EN has <50% expected length → FLAG
+    </THRESHOLD>
+  </RULE>
+  
+  <RULE id="CENSORSHIP">
+    <TRIGGER>
+      - Romantic content softened ("kissed" → "looked at")
+      - Physical descriptions removed
+      - Emotional intensity reduced
+      - Violence/tension sanitized
+    </TRIGGER>
+    <KEYWORDS_JP>
+      キス, 抱き, 胸, 触, 唇, ドキドキ, 恥ずかし
+    </KEYWORDS_JP>
+    <CHECK>
+      If JP contains intimate keywords, verify EN preserves intent
+    </CHECK>
+  </RULE>
+  
+  <RULE id="SUMMARIZATION">
+    <TRIGGER>
+      - Multiple JP paragraphs → Single EN paragraph
+      - Step-by-step actions compressed into summary
+      - Dialogue exchanges reduced
+    </TRIGGER>
+    <EXAMPLE>
+      JP: "まず靴を脱いだ。それから鍵を置いた。そして部屋に入った。"
+      BAD EN: "He entered the room."
+      GOOD EN: "First, he took off his shoes. Then he set down his keys. Finally, he stepped into the room."
+    </EXAMPLE>
+  </RULE>
+  
+  <RULE id="OMISSION">
+    <TRIGGER>
+      - Entire paragraph in JP has no EN equivalent
+      - Character dialogue completely missing
+      - Scene description gap
+    </TRIGGER>
+    <SEVERITY>CRITICAL - BLOCKS PUBLICATION</SEVERITY>
+  </RULE>
+</FIDELITY_DETECTION_RULES>
+```
 
-  <AUDIT_CATEGORIES>
-    <CATEGORY id="0" priority="CRITICAL_SEQUELS_ONLY">
-      <NAME>Sequel Continuity Integrity (FIRST PRIORITY - BLOCKING)</NAME>
-      <APPLIES_TO>Volumes 2+ in a series</APPLIES_TO>
-      <FAIL_CRITERIA>ANY deviation from established character canon, relationships, or pronoun usage.</FAIL_CRITERIA>
-      
-      <VALIDATION_PROTOCOL>
-        <STEP_1>
-          **Character Name Verification:**
-          1. Load CURRENT volume: metadata_en.json character_names{}
-          2. Load PREVIOUS volume: metadata_en.json character_names{}
-          3. For each character in CURRENT volume:
-             - Find same character in PREVIOUS volume
-             - Compare name_en field EXACTLY
-             - Flag if spelling differs (e.g., "Kujouin" → "Kujoin")
-          4. ANY mismatch = CRITICAL BLOCKING ISSUE
-        </STEP_1>
-        
-        <STEP_2>
-          **Pronoun Stability Check:**
-          1. Load CURRENT volume: character_profiles{}.pronouns{}
-          2. Load PREVIOUS volume: character_profiles{}.pronouns{}
-          3. For each character:
-             - Compare first_person (ore/boku/watashi/uchi/etc.)
-             - Compare second_person (omae/kimi/anata/etc.)
-          4. IF pronoun changed:
-             - Check story context: Is there explicit character development?
-             - Check translator notes: Was this intentional?
-             - IF no justification → CRITICAL BLOCKING ISSUE
-        </STEP_2>
-        
-        <STEP_3>
-          **Relationship Consistency:**
-          1. Load CURRENT volume: character_profiles{}.relationships[]
-          2. Load PREVIOUS volume: character_profiles{}.relationships[]
-          3. Verify:
-             - Senpai/kouhai dynamics unchanged
-             - Sibling relationships stable
-             - Established nicknames preserved (e.g., "Onii-chan" not becoming "brother")
-          4. Check dialogue:
-             - Forms of address consistent (-san/-kun/-chan usage)
-             - No relationship reversals (friend → enemy without story arc)
-        </STEP_3>
-        
-        <STEP_4>
-          **Archetype Persistence:**
-          1. Load CURRENT volume: character_profiles{}.archetype
-          2. Load PREVIOUS volume: character_profiles{}.archetype
-          3. Verify speech patterns match archetype:
-             - Tsundere: Still using defensive/contradictory speech
-             - Yamato nadeshiko: Maintains elegant keigo
-             - Genki: Still energetic/casual
-          4. Sudden personality shifts = BLOCKING ISSUE (unless story justifies)
-        </STEP_4>
-        
-        <STEP_5>
-          **Canon Event Cross-Reference:**
-          1. Scan CURRENT volume for references to previous volumes
-          2. Extract mentioned events/character actions
-          3. Verify against PREVIOUS volumes:
-             - Events match what actually happened
-             - Character reactions consistent with established personality
-             - No contradictions (e.g., "first meeting" when they met in V1)
-        </STEP_5>
-      </VALIDATION_PROTOCOL>
-      
-      <SEVERITY>ABSOLUTE CRITICAL - BLOCKS ALL OTHER GRADING</SEVERITY>
-      
-      <AUDIT_OUTPUT_FORMAT>
-        ```
-        ## SEQUEL CONTINUITY VALIDATION
-        
-        ### Character Name Consistency: [✅ PASS / ❌ FAIL]
-        Verified: [X/Y characters]
-        Issues:
-        - [Character name]: Expected "Kujouin Nadeshiko" but found "Kujoin Nadeshiko"
-        
-        ### Pronoun Stability: [✅ PASS / ❌ FAIL]
-        Verified: [X/Y characters]
-        Issues:
-        - [Character name]: Volume 3 used "ore", Volume 4 uses "boku" (NO STORY JUSTIFICATION)
-        
-        ### Relationship Integrity: [✅ PASS / ❌ FAIL]
-        Issues:
-        - [Character A] addresses [Character B] as "senpai" in V3 but "kouhai" in V4
-        
-        ### Archetype Consistency: [✅ PASS / ❌ FAIL]
-        Issues:
-        - [Character name]: Tsundere archetype in V1-V3, suddenly deredere in V4 (no arc)
-        
-        ### Canon Event Accuracy: [✅ PASS / ❌ FAIL]
-        Issues:
-        - Line 234: References "first meeting" but characters met in Volume 2, Chapter 3
-        
-        ---
-        
-        **CONTINUITY VERDICT:**
-        - Critical Issues: [X]
-        - Blocking Issues: [X]
-        
-        **RESULT:** [✅ PASS - Proceed to natural progression audit | ❌ FAIL - GRADE F AUTOMATIC]
-        ```
-      </AUDIT_OUTPUT_FORMAT>
-    </CATEGORY>
-    
-    <CATEGORY id="1">
-      <NAME>Victorian Patterns (Context-Dependent)</NAME>
-      <FAIL_CRITERIA>Usage of archaic/unnatural phrasing in modern contexts.</FAIL_CRITERIA>
-      <PATTERNS>
-        - "I shall" (unless oath/decree) -> Fix: "I'll" / "I will"
-        - "can you not" -> Fix: "can't you"
-        - "do you not" -> Fix: "don't you"
-        - "If you will excuse me" -> Fix: "Excuse me"
-        - "It can vary" -> Fix: "It varies"
-      </PATTERNS>
-      <EXCEPTION_RULES>
-        <OJOU_SAMA_EXEMPTION>
-          Victorian patterns are ACCEPTABLE when:
-          1. Character is ojou-sama archetype (refined noble, rich heiress, princess)
-          2. Usage frequency < 40% in modern settings (not every sentence)
-          3. Pattern is CONSISTENT throughout the novel (not random)
-          
-          Verification Steps:
-          - Check character roster for archetype tags
-          - Calculate Victorian pattern % per character
-          - Verify consistency across all chapters
-          
-          Examples of ACCEPTABLE usage:
-          - Ojou-sama: "I shall take my leave" (refined speech)
-          - Noble lady: "If you will excuse me" (formal occasion)
-          - Princess: "Can you not see the issue?" (dignified tone)
-        </OJOU_SAMA_EXEMPTION>
-      </EXCEPTION_RULES>
-    </CATEGORY>
+---
 
-    <CATEGORY id="2">
-      <NAME>Contraction Rate (Natural Dialogue Standard)</NAME>
-      <TARGET_MINIMUM>80% (Pass)</TARGET_MINIMUM>
-      <TARGET_GOLD>95%+ (A+ Grade)</TARGET_GOLD>
-      <TARGET_PERFECT>99%+ (FFXVI-Tier / J-Novel Club Standard)</TARGET_PERFECT>
-      
-      <METHOD>
-        Calculate: Contractions / (Contractions + Expansion Opportunities) × 100
-        
-        Example:
-        - Contractions found: 1,100 instances (I'm, don't, can't, etc.)
-        - Expansion opportunities: 19 instances (I am, do not, cannot)
-        - Rate: 1,100 / (1,100 + 19) = 98.3%
-      </METHOD>
-      
-      <STANDARD_CONTRACTIONS>
-        <!-- Common contractions (MUST use in dialogue/casual narration) -->
-        - I'm, you're, he's, she's, it's, we're, they're
-        - I'll, you'll, he'll, she'll, it'll, we'll, they'll
-        - I've, you've, we've, they've
-        - I'd, you'd, he'd, she'd, we'd, they'd
-        - don't, doesn't, didn't
-        - won't, wouldn't
-        - can't, couldn't
-        - isn't, aren't, wasn't, weren't
-        - hasn't, haven't, hadn't
-        - shouldn't, mustn't
-        - there's, there'll, there'd
-        - that's, that'll, that'd
-        - what's, what'll, what'd
-        - who's, who'll, who'd
-        - where's, when's, why's, how's
-      </STANDARD_CONTRACTIONS>
-      
-      <PERFECT_TENSE_CONTRACTIONS>
-        <!-- J-Novel Club / Professional LN standard (rarely used by AI) -->
-        - could've, should've, would've, might've, must've
-        - couldn't've, shouldn't've, wouldn't've
-        - there've, we've, they've
-        
-        Example:
-        - ❌ "You could have told me" 
-        - ✅ "You could've told me"
-      </PERFECT_TENSE_CONTRACTIONS>
-      
-      <EXPANSION_VIOLATIONS>
-        <!-- These should NEVER appear in casual dialogue/narration -->
-        - "I am" → Must be "I'm" (except emphasis: "I AM serious!")
-        - "you are" → Must be "you're"
-        - "he is" / "she is" → Must be "he's" / "she's"
-        - "do not" → Must be "don't"
-        - "does not" → Must be "doesn't"
-        - "did not" → Must be "didn't"
-        - "will not" → Must be "won't"
-        - "cannot" → Must be "can't"
-        - "it is" → Must be "it's" (possessive "its" is different!)
-        - "there is" → Must be "there's"
-        - "that is" → Must be "that's"
-        - "what is" → Must be "what's"
-      </EXPANSION_VIOLATIONS>
-      
-      <EXCEPTIONS>
-        <!-- When expansions ARE acceptable -->
-        1. **Emphasis/Stress:** "I AM being serious!" (shouting/emphasis)
-        2. **Formal Speech:** Butler, noble, formal occasion dialogue
-        3. **Foreign Speaker:** Character learning English (intentional stiffness)
-        4. **Possessive Its:** "its color" (not "it's color" - different meaning!)
-        5. **Title/Heading:** "Chapter 1: What Is Love" (formal title)
-        6. **Deliberate Enunciation:** "Do. Not. Touch. That."
-      </EXCEPTIONS>
-      
-      <CHARACTER_SPECIFIC_RULES>
-        <!-- Some archetypes have different contraction rates -->
-        - **Teen Protagonist (POV):** 99%+ rate (natural contemporary voice)
-        - **Casual Friends:** 95%+ rate
-        - **Formal Characters (Butler, Ojou-sama):** 70-80% rate acceptable
-        - **Internal Monologue:** 99%+ rate (most natural)
-        - **Dialogue vs Narration:** Both should contract heavily unless character-specific
-      </CHARACTER_SPECIFIC_RULES>
-      
-      <DETECTION_PROTOCOL>
-        1. **Scan for expansion patterns:**
-           - Regex: `\b(I am|you are|he is|she is|do not|does not|cannot|will not|it is|there is|that is|what is)\b`
-           - Exclude: Emphasis context (ALL CAPS, "I AM!"), formal characters
-        
-        2. **Count contractions:**
-           - Regex: `'(m|ll|ve|d|re|t|s)\b` (apostrophe + suffix)
-           - Count total instances
-        
-        3. **Calculate rate:**
-           - Rate = Contractions / (Contractions + Opportunities)
-        
-        4. **Grade based on rate:**
-           - <70%: Grade D (unnatural)
-           - 70-80%: Grade C (needs work)
-           - 80-90%: Grade B (acceptable)
-           - 90-95%: Grade A (good)
-           - 95-99%: Grade A+ (excellent)
-           - 99%+: FFXVI-Tier (perfect)
-      </DETECTION_PROTOCOL>
-      
-      <GRADING_IMPACT>
-        Contraction rate is a CRITICAL quality indicator:
-        - Low rate (<80%) = Robotic, unnatural prose
-        - High rate (95%+) = Natural, contemporary English
-        - Perfect rate (99%+) = Professional localization standard
-        
-        **Grade Override Rules:**
-        - <70% contraction rate → Maximum Grade C (even if no other issues)
-        - 70-80% rate → Maximum Grade B
-        - 90%+ rate → A/A+ possible (if other metrics pass)
-      </GRADING_IMPACT>
-      
-      <AUDIT_OUTPUT_FORMAT>
-        ```
-        ### Contraction Rate: [X]%
-        
-        - Total contractions: [X]
-        - Expansion violations: [X]
-        - Rate: [X]%
-        - Target: 95%+ (A+), 99%+ (FFXVI-Tier)
-        
-        **Status:** [✅ PASS / ⚠️ ACCEPTABLE / ❌ FAIL]
-        
-        **Violations Found:** (if any)
-        1. Line [X]: "I am going" → Should be "I'm going"
-        2. Line [Y]: "do not worry" → Should be "don't worry"
-        [etc.]
-        
-        **Exceptions Applied:** (if any)
-        - Line [Z]: "I AM serious!" → Acceptable (emphasis)
-        ```
-      </AUDIT_OUTPUT_FORMAT>
-    </CATEGORY>
+## SUBAGENT 2: CONTENT INTEGRITY AUDITOR
 
-    <CATEGORY id="3">
-      <NAME>Honorifics (Hybrid Localization - ACCEPTABLE)</NAME>
-      <RULE>
-        - ✅ RETAIN: -san, -kun, -chan, -senpai, -sensei, -sama, -dono
-        - ✅ RETAIN: Onii-chan/Onee-chan (if consistent)
-        - ❌ FORBIDDEN: Mixed forms ("Director-san", "Teacher-sensei")
-        - ❌ FORBIDDEN: "Mother-ue" -> Use "Mother"
-        - NOTE: Honorific retention is INTENTIONAL and scores POSITIVELY in hybrid localization
-      </RULE>
-      <SCORING>
-        - Consistent honorific usage: +1 point (good localization)
-        - Missing honorifics where expected: -1 point (inconsistent)
-        - Mixed English+Japanese: -2 points (critical error)
-      </SCORING>
-    </CATEGORY>
+### Mission
+Validate structural elements: chapter titles, names, terms, formatting standards, illustration markers, and cross-reference with source.
 
-    <CATEGORY id="4">
-      <NAME>Terms and Character Names (CRITICAL)</NAME>
-      <FAIL_CRITERIA>Deviation from manifest.json canonical terms and names.</FAIL_CRITERIA>
-      <VALIDATION_METHOD>
-        1. Load .context/manifest.json (glossary terms)
-        2. Load .context/name_registry.json (character names with ruby text)
-        3. Verify every character name matches ruby text exactly
-        4. Verify all glossary terms used consistently
-      </VALIDATION_METHOD>
-      <RULES>
-        <NAME_ORDER>
-          - MUST follow Japanese surname-first order per ruby text
-          - Example: Ruby shows "東雲 セナ" -> "Shinonome Sena" (NOT "Sena Shinonome")
-          - Consult name_registry.json for canonical spelling
-        </NAME_ORDER>
-        <HEPBURN_ROMANIZATION>
-          - MUST sound natural in English, not Japanese-ish
-          - ❌ "Yuuki" (doubled vowel) -> ✅ "Yuki"
-          - ❌ "Ryouta" -> ✅ "Ryota"
-          - ❌ "Yuuma" -> ✅ "Yuma"
-          - ❌ "Kouhei" -> ✅ "Kohei" or "Kouhei" (context-dependent)
-        </HEPBURN_ROMANIZATION>
-        <TERM_CONSISTENCY>
-          - Use EXACT glossary term throughout (no variations)
-          - Example: If glossary says "mana", don't use "magic power"
-          - Cultural terms: "onigiri" not "rice ball" (if in glossary)
-        </TERM_CONSISTENCY>
-      </RULES>
-      <SEVERITY>
-        Name order error: CRITICAL (blocks publication)
-        Japanese-ish romanization: WARNING (quality issue)
-        Term inconsistency: WARNING (needs revision)
-      </SEVERITY>
-    </CATEGORY>
-    
-    <CATEGORY id="5">
-      <NAME>AI-isms (FFXVI-Tier Zero Tolerance)</NAME>
-      <FAIL_CRITERIA>Common AI translationese artifacts that break natural English flow.</FAIL_CRITERIA>
-      <SOURCE>config/anti_ai_ism_patterns.json + INDUSTRY_STANDARD_PROSE_MODULE.md</SOURCE>
-      <TARGET_DENSITY>Less than 0.02 instances per 1000 words (Yen Press/J-Novel Club standard)</TARGET_DENSITY>
-      
-      <PATTERNS>
-        <CRITICAL_PATTERNS severity="BLOCKS_PUBLICATION">
-          <!-- Direct translations that destroy natural English -->
-          1. "asserting presence" → Fix: "obvious" / "impossible to ignore"
-             Source: Literal 存在感をアピール
-          
-          2. "release pheromones" → Fix: "ooze allure" / "exude charm"
-             Source: Pseudo-biological phrasing
-          
-          3. "had a [noun] to it" → Fix: "carried weight" / "spoke with conviction"
-             Source: Abstract noun bridge (Japanese calque)
-             Examples: "had a sadness to it", "had a warmth to it"
-          
-          4. "Let me say it again, what is this" → Fix: "I'll say it again: what even IS this?!"
-             Source: Literal もう一度言う translation
-          
-          5. "surreal picture/scene" → Fix: "absurd situation" / "how did I end up here?"
-             Source: Awkward literalism for 超現実的な光景
-          
-          6. "formidable opponent" (casual context) → Fix: "tough nut to crack" / "hard to handle"
-             Source: Over-formal register
-        </CRITICAL_PATTERNS>
-        
-        <MAJOR_PATTERNS severity="REQUIRES_REVISION">
-          <!-- Hedging/Distancing (AI uses these to hedge uncertainty) -->
-          <HEDGING_DISTANCING>
-            7. "a sense of [emotion]" → Fix: Direct emotion ("dread" not "a sense of dread")
-            8. "felt like [action]" → Fix: Direct statement ("I could" not "I felt like I could")
-            9. "seemed to [verb]" → Fix: Direct verb or "looked" ("smiled" not "seemed to smile")
-            10. "appeared to [verb]" → Fix: Direct verb ("was angry" not "appeared to be angry")
-            11. "I found myself [verb+ing]" → Fix: Direct action ("I stared" not "I found myself staring")
-          </HEDGING_DISTANCING>
-          
-          <!-- Noun Bridges (Abstract noun constructions) -->
-          <NOUN_BRIDGES>
-            12. "containing [noun]" → Fix: Active verb or adjective
-                Examples: "containing joy" → "joyful", "containing tension" → "tense"
-            13. "holding [abstract noun]" → Fix: Active verb
-                Examples: "holding promise" → "promising", "holding danger" → "dangerous"
-            14. "brought [emotion/state]" → Fix: Active verb
-                Examples: "brought reassurance" → "reassured", "brought comfort" → "comforted"
-          </NOUN_BRIDGES>
-          
-          <!-- Adverbial Constructions -->
-          <ADVERBIAL_CONSTRUCTIONS>
-            15. "in a [adj] manner" → Fix: Adverb ("[adj]ly") or restructure
-                Examples: "in a careful manner" → "carefully"
-            16. "with [noun]" → Fix: Direct adverb
-                Examples: "with care" → "carefully", "with hesitation" → "hesitantly"
-          </ADVERBIAL_CONSTRUCTIONS>
-          
-          <!-- Calques (Direct translations from Japanese) -->
-          <CALQUES>
-            17. "it cannot be helped" → Fix: "nothing I can do" / "oh well"
-                Source: 仕方がない
-            18. "I'll do my best" → Fix: "I'll give it my all!" / "Here goes!"
-                Source: 頑張ります
-            19. "as expected of" → Fix: "that's [Name] for you" / "classic [Name]"
-                Source: さすが
-            20. "is that so?" → Fix: "oh really?" / "huh" / "is it now?"
-                Source: そうですか
-            21. "the current situation" → Fix: "this mess" / "what's happening"
-                Source: 今の状況
-          </CALQUES>
-          
-          <!-- Meta-commentary -->
-          <META_COMMENTARY>
-            22. "needless to say" → Fix: Remove entirely
-            23. "It can be said that" → Fix: Remove entirely
-            24. "It goes without saying" → Fix: Remove entirely
-            25. "In other words" → Fix: Restructure or remove
-            26. "To put it simply" → Fix: Just say it simply
-            27. "As the name suggests" → Fix: Remove or integrate naturally
-          </META_COMMENTARY>
-        </MAJOR_PATTERNS>
-        
-        <MINOR_PATTERNS severity="STYLE_POLISH">
-          <!-- Japanese Narrative Structures (Rigid/Formal) -->
-          <NARRATIVE_RIGIDITY>
-            28. Double "had" constructions → Fix: Simplify tense
-                BAD: "the lives they had led had forced that way of thinking upon them"
-                GOOD: "their life experiences forced that way of thinking on them"
-            
-            29. Passive voice with "upon" → Fix: Active voice with "on"
-                BAD: "imposed upon", "forced upon"
-                GOOD: "imposed on", "forced on"
-            
-            30. Overly formal phrasing → Fix: Natural register
-                BAD: "the words that had been spoken had left an impression upon her"
-                GOOD: "his words left an impression on her"
-          </NARRATIVE_RIGIDITY>
-          
-          <!-- Subject Repetition (Japanese Calque) -->
-          <SUBJECT_REPETITION>
-            31. Restating subjects → Fix: Use pronouns
-                BAD: "Yuki closed the book. Yuki turned to me."
-                GOOD: "Yuki closed the book. She turned to me."
-          </SUBJECT_REPETITION>
-          
-          <!-- Transitional Word Overuse -->
-          <TRANSITIONAL_OVERUSE>
-            32. "However" → Limit to 2x per chapter opening, vary with "But", "Still", "Though"
-            33. "By the way" → Max 1x per chapter, often omit entirely
-            34. "Therefore" → Avoid in dialogue, use "So" or restructure
-            35. "Nevertheless" → Formal contexts only
-          </TRANSITIONAL_OVERUSE>
-          
-          <!-- Internal Monologue Literalism -->
-          <MONOLOGUE_LITERALISM>
-            36. "What is this? I thought." → Fix: "What the heck?" / "How did I end up here?"
-                Source: 何だこれ、と思った
-            37. "I wonder" overuse → Fix: Vary with "Maybe", "Could it be", or restructure
-            38. "Mu..." / "Muu..." → Fix: "Hmph" or describe action (she pouted)
-          </MONOLOGUE_LITERALISM>
-          
-          <!-- Onomatopoeia (Should be preserved per hybrid localization) -->
-          <ONOMATOPOEIA_PRESERVATION>
-            39. "Ehehe" / "Ufufu" / "Fufu" / "Nishishi" → KEEP ROMANIZED (cultural voice markers)
-                Note: These are INTENTIONALLY preserved. Do not flag as errors.
-            40. "Ara ara" → Context-dependent: Keep or "Oh my" / "My, my"
-          </ONOMATOPOEIA_PRESERVATION>
-          
-          <!-- Formal Register Overuse (Casual contexts) -->
-          <FORMAL_REGISTER_OVERUSE>
-            41. "Please treat me well" → Fix: "Nice to meet you" / "Looking forward to working with you"
-                Source: よろしくお願いします
-            42. "That is most unfortunate" (casual) → Fix: "That's too bad" / "What a shame"
-            43. "I am terribly sorry" (casual) → Fix: "I'm so sorry" / "My bad"
-            44. "If you would permit me..." (casual) → Fix: "If it's okay..." / "Mind if I...?"
-            45. "I humbly ask..." (casual) → Fix: "Can I ask you something?"
-            46. "Shall we depart?" (casual) → Fix: "Ready to go?" / "Let's head out"
-          </FORMAL_REGISTER_OVERUSE>
-          
-          <!-- Scene Transition Literalism -->
-          <SCENE_TRANSITIONS>
-            47. "The next moment—" → Fix: "Before I knew it—" / "Suddenly—"
-            48. "At that time—" → Fix: "Just then—" / "Right at that moment—"
-            49. "Such a thing—" → Fix: "Something like that—" or contextual
-            50. "However" (excessive) → Vary: "But", "Still", "Though", or omit
-          </SCENE_TRANSITIONS>
-        </MINOR_PATTERNS>
-        
-        <IDIOMATIC_EXCEPTIONS>
-          <!-- These are ACCEPTABLE despite containing flagged patterns -->
-          - "have a sense of humor" → ACCEPTABLE (idiomatic English)
-          - "make sense" → ACCEPTABLE (idiomatic)
-          - "sense of direction" → ACCEPTABLE (idiomatic)
-          - "sense of purpose" → ACCEPTABLE (idiomatic)
-          - "sense of timing" → ACCEPTABLE (idiomatic)
-          - "common sense" → ACCEPTABLE (idiomatic)
-          - "Fufu", "Ufufu", "Ehehe", "Nishishi" → ACCEPTABLE (hybrid localization)
-        </IDIOMATIC_EXCEPTIONS>
-      </PATTERNS>
-      
-      <KOJI_FOX_TECHNIQUE>
-        Apply Michael-Christopher Koji Fox's FFXVI method (Gold Standard):
-        1. **Direct Emotion Words:** "felt uneasy" (not "felt a sense of unease")
-        2. **Active Verbs:** "reassured her" (not "brought her reassurance")
-        3. **Vivid Imagery:** "Nostalgia washed over him" (not "Feeling nostalgic")
-        4. **Natural Phrasing:** "the conversation felt awkward" (not "conversing awkwardly")
-        5. **Show Don't Tell:** "Her smile remained, but her eyes had gone cold" (not "Her voice turned cold")
-      </KOJI_FOX_TECHNIQUE>
-      
-      <DETECTION_METHOD>
-        1. Scan text with regex patterns from anti_ai_ism_patterns.json
-        2. Count instances per 1000 words
-        3. Categorize by severity (CRITICAL / MAJOR / MINOR)
-        4. Calculate density: instances / (word_count / 1000)
-        5. Compare against target: <0.02 instances per 1k words
-        
-        **Grading Impact:**
-        - CRITICAL patterns found: Automatic Grade C or lower
-        - MAJOR patterns >5 instances: Grade B
-        - MAJOR patterns 2-5 instances: Grade A
-        - MAJOR patterns 0-1 + MINOR <10: Grade A+
-      </DETECTION_METHOD>
-    </CATEGORY>
-    
-    <CATEGORY id="6">
-      <NAME>Character Voice Differentiation (FFXVI-Tier)</NAME>
-      <FAIL_CRITERIA>Characters sound identical; no distinct linguistic fingerprints.</FAIL_CRITERIA>
-      <OBJECTIVE>Each character should have a unique speech pattern (Koji Fox principle)</OBJECTIVE>
-      
-      <VOICE_ARCHETYPES>
-        <PRINCESS_ARCHETYPE>
-          <NAME>Cold Formality (e.g., Tetra)</NAME>
-          <PATTERNS>
-            - Remove stuttering in public dialogue ("I said" not "I-I said")
-            - Short, clipped commands
-            - No hesitation (maintains pride)
-            - Sentence fragments only when vulnerable (private moments)
-          </PATTERNS>
-          <EXAMPLE>
-            Before: "I-I said it's nothing!"
-            After: "I said it's nothing!"
-            Reason: Royal pride = no public hesitation
-          </EXAMPLE>
-        </PRINCESS_ARCHETYPE>
-        
-        <NOBLE_LADY_ARCHETYPE>
-          <NAME>Elegant Restraint (e.g., Ira)</NAME>
-          <PATTERNS>
-            - Soft, flowing sentences
-            - Possessive subtext (not overt)
-            - Poetic/nature metaphors
-            - Maintains composure (no stuttering)
-          </PATTERNS>
-          <EXAMPLE>
-            Before: "L-Lady Ira... This is dangerous..."
-            After: "Lady Ira... this is dangerous. For both of us."
-            Reason: Elegant restraint = controlled emotion
-          </EXAMPLE>
-        </NOBLE_LADY_ARCHETYPE>
-        
-        <DUKE_DAUGHTER_ARCHETYPE>
-          <NAME>Velvet Menace (e.g., Floria)</NAME>
-          <PATTERNS>
-            - Deceptively soft tone
-            - Sudden coldness (mood shifts)
-            - Passive-aggressive precision
-            - "Show don't tell" emotions
-          </PATTERNS>
-          <EXAMPLE>
-            Before: "Her voice turned cold and flat. Floria stared with eyes that weren't smiling."
-            After: "Her voice dropped. Floria's smile remained, but her eyes had gone cold."
-            Reason: Show the duality, don't tell it
-          </EXAMPLE>
-        </DUKE_DAUGHTER_ARCHETYPE>
-        
-        <BUTLER_ARCHETYPE>
-          <NAME>Formal Professionalism (e.g., Leon)</NAME>
-          <PATTERNS>
-            - Always formal with nobility ("my lady" not casual)
-            - Remove casual "Haha" → "You jest, my lady"
-            - Contractions ONLY in internal monologue
-            - Dry humor (deadpan delivery)
-          </PATTERNS>
-          <EXAMPLE>
-            Before: "Haha, you're joking."
-            After: "You jest, my lady."
-            Reason: Butler maintains formal composure
-          </EXAMPLE>
-        </BUTLER_ARCHETYPE>
-      </VOICE_ARCHETYPES>
-      
-      <IMPLEMENTATION>
-        When auditing character dialogue:
-        1. Identify character archetype
-        2. Check for stuttering (remove unless vulnerable moment)
-        3. Verify speech pattern consistency
-        4. Ensure distinct voice vs other characters
-        5. Flag generic dialogue that could be anyone
-      </IMPLEMENTATION>
-      
-      <GRADING_IMPACT>
-        - All characters sound same: Grade C (needs voice work)
-        - Some differentiation: Grade B (good)
-        - Distinct voices (FFXVI-tier): Grade A+ (excellent)
-      </GRADING_IMPACT>
-    </CATEGORY>
-    
-    <CATEGORY id="7">
-      <NAME>1:1 Content Fidelity (CRITICAL)</NAME>
-      <FAIL_CRITERIA>Translated content deviates from Japanese raw events, facts, or narrative beats.</FAIL_CRITERIA>
-      <OBJECTIVE>Ensure all translated content matches the source material with minimal linguistic difference.</OBJECTIVE>
-      
-      <VALIDATION_METHOD>
-        1. Compare Japanese raw (JP/*.md) with English translation (EN/*.md)
-        2. Verify ALL story events, dialogue, and actions are preserved
-        3. Calculate deviation percentage based on missing/altered content
-        4. Check for:
-           - Omitted sentences or paragraphs
-           - Added content not in source
-           - Altered plot points or character actions
-           - Changed emotional beats or narrative intent
-      </VALIDATION_METHOD>
-      
-      <DEVIATION_THRESHOLDS>
-        <ACCEPTABLE_RANGE>
-          - <5% deviation: ✅ PASS (Natural localization differences)
-          - Examples: Word order changes, cultural adaptations, natural phrasing
-          - Metric: Count sentences in JP vs EN, check major events preserved
-        </ACCEPTABLE_RANGE>
-        
-        <REVIEW_RANGE>
-          - 10-15% deviation: ⚠️ FLAG FOR REVIEW
-          - Indicates: Possible over-localization or missing content
-          - Action: Manual comparison required
-          - Examples: Missing dialogue lines, condensed descriptions, altered reactions
-        </REVIEW_RANGE>
-        
-        <CRITICAL_FAILURE>
-          - >15% deviation: ❌ CRITICAL FAILURE (BLOCKS PUBLICATION)
-          - Indicates: Major content loss or unfaithful translation
-          - Action: Retranslation required
-          - Examples: Missing scenes, invented dialogue, altered plot, character behavior changes
-        </CRITICAL_FAILURE>
-      </DEVIATION_THRESHOLDS>
-      
-      <CHECK_POINTS>
-        <STORY_EVENTS>
-          - All actions described in JP must appear in EN
-          - Character decisions and motivations must match
-          - Timeline and scene transitions must be preserved
-          - No invented events or skipped sequences
-        </STORY_EVENTS>
-        
-        <DIALOGUE_INTEGRITY>
-          - Every line of dialogue in JP must have EN equivalent
-          - Speaker attribution must match
-          - Emotional tone of dialogue preserved
-          - No merged or split dialogue without reason
-        </DIALOGUE_INTEGRITY>
-        
-        <DESCRIPTIVE_CONTENT>
-          - Scene descriptions must convey same visual
-          - Character emotions/reactions must match
-          - Narrative beats hit at same moments
-          - Atmospheric details preserved (weather, lighting, mood)
-        </DESCRIPTIVE_CONTENT>
-      </CHECK_POINTS>
-      
-      <CALCULATION_METHOD>
-        Deviation % = (Missing/Altered Content Units / Total JP Content Units) × 100
-        
-        Where Content Units =
-        - Dialogue lines (1 unit per speaker turn)
-        - Action sentences (1 unit per distinct action)
-        - Descriptive paragraphs (1 unit per scene element)
-        
-        Example:
-        JP: 50 dialogue lines + 30 action sentences = 80 units
-        EN: Missing 3 dialogue lines + 2 actions altered = 5 deviations
-        Deviation = 5/80 = 6.25% → FLAG FOR REVIEW
-      </CALCULATION_METHOD>
-      
-      <SEVERITY>
-        <5%: Acceptable (natural localization)
-        10-15%: WARNING (manual review needed)
-        >15%: CRITICAL (blocks publication, requires retranslation)
-      </SEVERITY>
-      
-      <AUDIT_OUTPUT>
-        When reporting fidelity issues:
-        1. List all missing content with line references
-        2. Note altered events/dialogue with JP vs EN comparison
-        3. Calculate overall deviation percentage
-        4. Recommend PASS / REVIEW / RETRANSLATE
-        
-        Example Report:
-        ```
-        ### 1:1 Content Fidelity: 6.2% deviation (⚠️ REVIEW NEEDED)
-        
-        Missing Content:
-        - Line 145 (JP): Protagonist's internal thought about sister
-        - Line 289 (JP): Description of sunset lighting
-        
-        Altered Content:
-        - Line 67: JP shows hesitation, EN shows confidence
-        - Line 112: Dialogue shortened (lost emotional subtext)
-        
-        Deviation: 5 units missing / 80 total = 6.25%
-        Status: ⚠️ Manual review recommended
-        Action: Verify intentional localization vs oversight
-        ```
-      </AUDIT_OUTPUT>
-    </CATEGORY>
-    
-    <CATEGORY id="8">
-      <NAME>Formatting Standard (International Typography)</NAME>
-      <FAIL_CRITERIA>Violation of professional typesetting standards.</FAIL_CRITERIA>
-      <AUTO_FIX>TRUE</AUTO_FIX>
-      <VIOLATIONS>
-        <CRITICAL priority="HIGH">
-          1. Straight Quotes: "text" 'text' -> "text" 'text' (smart/curly quotes required)
-          2. Double Hyphen: -- -> — (em dash required for interruptions)
-          3. Excessive Ellipsis: .... or ...... -> ... (three dots only)
-          4. Straight Apostrophe: it's don't -> it's don't (curly apostrophe required)
-          5. Double Spaces: "text.  Next" -> "text. Next" (single space after period)
-        </CRITICAL>
-        <RECOMMENDED priority="MEDIUM">
-          6. Hyphen in Ranges: 10-20 -> 10–20 (en dash preferred for numerical ranges)
-        </RECOMMENDED>
-      </VIOLATIONS>
-      <FIX_PROTOCOL>
-        When formatting violations detected:
-        1. Report violations with line numbers
-        2. Offer AUTO-FIX: "Apply international typesetting fixes?"
-        3. If user approves -> Execute replacements
-        4. Generate fixed version
-        5. Log changes made
-        
-        Replacement Rules:
-        - " at start of sentence/after space -> "
-        - " at end of word/before punctuation -> "
-        - ' in contractions (n't, 's, 're, etc.) -> '
-        - -- (double hyphen) -> — (em dash)
-        - ....+ (4+ dots) -> ...
-        - .  (period + 2 spaces) -> . (period + 1 space)
-      </FIX_PROTOCOL>
-      <SEVERITY>Medium (affects professional quality, not meaning)</SEVERITY>
-    </CATEGORY>
-  </AUDIT_CATEGORIES>
+### Input
+- `EN/*.md` - English translated chapters
+- `JP/*.md` - Japanese source (for title verification)
+- `metadata_en.json` - Character profiles and terms
+- `.context/name_registry.json` - Canonical name spellings
+- `.context/manifest.json` - Glossary terms
 
-  <GRADING_RUBRIC>
-    <SEQUEL_GRADING_OVERRIDE priority="CRITICAL">
-      **FOR SEQUELS (Volume 2+):**
+### Output Schema: `integrity_audit_report.json`
+
+```json
+{
+  "audit_type": "content_integrity",
+  "volume_id": "05df",
+  "timestamp": "2026-01-31T14:35:00Z",
+  "auditor_version": "2.0",
+  
+  "summary": {
+    "total_checks": 245,
+    "passed": 240,
+    "warnings": 4,
+    "failures": 1,
+    "pass_rate": 97.96,
+    "verdict": "PASS_WITH_WARNINGS"
+  },
+  
+  "chapter_titles": {
+    "status": "PASS",
+    "chapters": [
+      {
+        "chapter_id": "01",
+        "jp_title": "第一章　出会い",
+        "en_title": "Chapter 1: The Encounter",
+        "title_match": true,
+        "format_correct": true
+      }
+    ],
+    "issues": []
+  },
+  
+  "character_names": {
+    "status": "PASS",
+    "registry_loaded": true,
+    "characters_verified": 8,
+    "checks": [
+      {
+        "character_id": "maria",
+        "canonical_name": "Maria",
+        "jp_source": "真理亜",
+        "ruby": "まりあ",
+        "occurrences_checked": 156,
+        "inconsistencies": 0,
+        "status": "PASS"
+      },
+      {
+        "character_id": "kisaragi",
+        "canonical_name": "Kisaragi",
+        "jp_source": "如月",
+        "ruby": "きさらぎ",
+        "occurrences_checked": 89,
+        "inconsistencies": 1,
+        "status": "WARNING",
+        "issues": [
+          {
+            "issue_id": "INT-NAME-001",
+            "chapter": "05",
+            "line": 234,
+            "found": "Kisargi",
+            "expected": "Kisaragi",
+            "type": "TYPO"
+          }
+        ]
+      }
+    ]
+  },
+  
+  "name_order": {
+    "status": "PASS",
+    "standard": "JAPANESE_ORDER",
+    "description": "Surname First (Kisaragi Yuki, not Yuki Kisaragi)",
+    "violations": []
+  },
+  
+  "honorifics": {
+    "status": "PASS",
+    "standard": "HYBRID_LOCALIZATION",
+    "retained": ["-san", "-kun", "-chan", "-senpai", "-sensei", "-sama"],
+    "localized": ["Onii-chan", "Onee-san"],
+    "violations": [],
+    "consistency_score": 100
+  },
+  
+  "glossary_terms": {
+    "status": "PASS",
+    "terms_loaded": 24,
+    "checks": [
+      {
+        "term_jp": "学園",
+        "term_en": "academy",
+        "occurrences": 45,
+        "consistent": true
+      },
+      {
+        "term_jp": "幼馴染",
+        "term_en": "childhood friend",
+        "occurrences": 78,
+        "consistent": true
+      }
+    ],
+    "inconsistencies": []
+  },
+  
+  "formatting": {
+    "status": "PASS_WITH_WARNINGS",
+    "checks": {
+      "smart_quotes": {
+        "status": "PASS",
+        "straight_quotes_found": 0
+      },
+      "em_dashes": {
+        "status": "WARNING",
+        "issues": [
+          {
+            "issue_id": "INT-FMT-001",
+            "chapter": "03",
+            "line": 156,
+            "found": "--",
+            "expected": "—",
+            "auto_fixable": true
+          }
+        ]
+      },
+      "ellipsis": {
+        "status": "PASS",
+        "triple_dots_found": 0,
+        "proper_ellipsis_used": true
+      },
+      "spacing": {
+        "status": "PASS",
+        "double_spaces_found": 0
+      },
+      "line_breaks": {
+        "status": "PASS",
+        "excessive_breaks": 0
+      }
+    },
+    "auto_fixable_count": 3
+  },
+  
+  "illustration_markers": {
+    "status": "PASS",
+    "jp_illustrations": 12,
+    "en_illustrations": 12,
+    "markers": [
+      {
+        "image_id": "i-001",
+        "jp_location": "Chapter 01, after line 45",
+        "en_location": "Chapter 01, after line 47",
+        "semantic_match": true,
+        "format_correct": true
+      }
+    ],
+    "missing": [],
+    "misplaced": []
+  },
+  
+  "scene_breaks": {
+    "status": "PASS",
+    "jp_breaks": 15,
+    "en_breaks": 15,
+    "format": "* * *",
+    "consistent": true
+  },
+  
+  "sequel_continuity": {
+    "is_sequel": false,
+    "previous_volume": null,
+    "checks_performed": [],
+    "status": "N/A"
+  },
+  
+  "genre_specific_traits": {
+    "genre": "fantasy_idol_slice_of_life",
+    "required_traits": [
+      "idol_terminology_preserved",
+      "vtuber_culture_authentic",
+      "gaming_terminology_consistent",
+      "kansai_dialect_markers_present"
+    ],
+    "validation": {
+      "idol_terms": {
+        "status": "PASS",
+        "kept_japanese": ["VTuber", "oshi", "fanservice", "jirai-kei"],
+        "localized": ["stream", "subscriber", "viewer"],
+        "consistent": true
+      },
+      "gaming_terms": {
+        "status": "PASS",
+        "kept_japanese": ["KASSEN", "Tsukuyomi"],
+        "localized": ["aim", "rank", "pro player"],
+        "consistent": true
+      },
+      "dialect_handling": {
+        "status": "PASS",
+        "kansai_characters": ["Iroha's Mother", "Grandfather"],
+        "markers_used": ["thanks so much", "ain't", "can't be helped"],
+        "avoided_stereotypes": true
+      }
+    },
+    "series_specific": {
+      "title": "Cosmic Princess Kaguya!",
+      "key_themes": ["performative_identity", "dual_persona", "digital_trauma"],
+      "critical_elements": [
+        "Kaguya's IRL gremlin vs VR idol mode switching",
+        "Iroha's phone anxiety as PTSD trigger",
+        "Classical folklore framing juxtaposed with modern slang"
+      ],
+      "validation_status": "PASS"
+    }
+  },
+  
+  "final_verdict": {
+    "grade": "A",
+    "pass_rate": 97.96,
+    "status": "PASS_WITH_WARNINGS",
+    "blocking_issues": 0,
+    "auto_fixable_issues": 3,
+    "recommendation": "Minor formatting issues detected. Auto-fix available. Proceed to prose and gap audits."
+  }
+}
+```
+
+### Validation Rules
+
+```xml
+<INTEGRITY_VALIDATION_RULES>
+  <RULE id="NAME_REGISTRY">
+    <SOURCE>.context/name_registry.json</SOURCE>
+    <CHECK>
+      For each character in registry:
+      1. Search all EN chapters for character name
+      2. Verify spelling matches canonical form EXACTLY
+      3. Flag ANY deviation (typos, alternate spellings)
+    </CHECK>
+    <SEVERITY>
+      - Typo: WARNING (auto-fixable)
+      - Wrong name entirely: CRITICAL (blocks publication)
+      - Name order reversed: CRITICAL (blocks publication)
+    </SEVERITY>
+  </RULE>
+  
+  <RULE id="SEQUEL_CONTINUITY">
+    <APPLIES_TO>Volume 2+ only</APPLIES_TO>
+    <CHECK>
+      1. Load previous volume's name_registry.json
+      2. Compare ALL character names with current volume
+      3. Verify pronouns unchanged (ore/boku/watashi)
+      4. Verify relationship dynamics preserved
+    </CHECK>
+    <SEVERITY>CRITICAL - ANY deviation blocks publication</SEVERITY>
+  </RULE>
+  
+  <RULE id="FORMATTING_STANDARDS">
+    <QUOTES>
+      - Dialogue: "curly quotes" (U+201C, U+201D)
+      - NOT: "straight quotes" (U+0022)
+    </QUOTES>
+    <DASHES>
+      - Interruption/range: em dash — (U+2014)
+      - NOT: double hyphen --
+      - NOT: en dash – for interruption
+    </DASHES>
+    <ELLIPSIS>
+      - Use: … (U+2026)
+      - NOT: ... (three periods)
+    </ELLIPSIS>
+    <SPACING>
+      - Single space after periods
+      - No double spaces anywhere
+    </SPACING>
+  </RULE>
+  
+  <RULE id="ILLUSTRATION_MARKERS">
+    <FORMAT>
+      <img class="fit" src="../image/i-XXX.jpg" alt=""/>
+    </FORMAT>
+    <CHECK>
+      1. Count illustrations in JP source
+      2. Verify same count in EN
+      3. Verify semantic placement matches narrative beat
+      4. Verify no duplicate tags
+    </CHECK>
+  </RULE>
+</INTEGRITY_VALIDATION_RULES>
+```
+
+---
+
+## SUBAGENT 3: PROSE QUALITY AUDITOR
+
+### Mission
+Ensure English translation adheres to natural prose standards using the Grammar RAG pattern database. Detect AI-isms, Victorian patterns, contraction issues, and missed transcreation opportunities.
+
+### Input
+- `EN/*.md` - English translated chapters
+- `config/english_grammar_rag.json` - Pattern database (53 patterns)
+- `config/anti_ai_ism_patterns.json` - AI-ism detection rules
+
+### Output Schema: `prose_audit_report.json`
+
+```json
+{
+  "audit_type": "prose_quality",
+  "volume_id": "05df",
+  "timestamp": "2026-01-31T14:40:00Z",
+  "auditor_version": "2.0",
+  "grammar_rag_version": "1.0",
+  "patterns_loaded": 53,
+  
+  "summary": {
+    "total_words": 45088,
+    "total_sentences": 3200,
+    "ai_ism_count": 12,
+    "ai_ism_density": 0.27,
+    "contraction_rate": 94.5,
+    "victorian_patterns": 3,
+    "missed_transcreations": 8,
+    "prose_score": 91.2,
+    "verdict": "PASS"
+  },
+  
+  "thresholds": {
+    "ai_ism_density": {
+      "excellent": "<0.1 per 1k words",
+      "good": "0.1-0.5 per 1k words",
+      "acceptable": "0.5-1.0 per 1k words",
+      "poor": ">1.0 per 1k words"
+    },
+    "contraction_rate": {
+      "ffxvi_tier": "99%+",
+      "excellent": "95%+",
+      "good": "90%+",
+      "acceptable": "80%+",
+      "poor": "<80%"
+    }
+  },
+  
+  "ai_isms": {
+    "status": "GOOD",
+    "count": 12,
+    "density_per_1k": 0.27,
+    "by_severity": {
+      "critical": 0,
+      "major": 3,
+      "minor": 9
+    },
+    "issues": [
+      {
+        "issue_id": "PRO-AI-001",
+        "chapter": "02",
+        "line": 156,
+        "severity": "MAJOR",
+        "pattern": "couldn't help but",
+        "context": "I couldn't help but notice her smile.",
+        "suggestion": "I noticed her smile." OR "Her smile caught my attention.",
+        "category": "VERBOSE_CONSTRUCTION"
+      },
+      {
+        "issue_id": "PRO-AI-002",
+        "chapter": "04",
+        "line": 89,
+        "severity": "MINOR",
+        "pattern": "a sense of",
+        "context": "A sense of unease washed over me.",
+        "suggestion": "Unease washed over me.",
+        "category": "FILLER_PHRASE"
+      }
+    ],
+    "categories": {
+      "VERBOSE_CONSTRUCTION": 3,
+      "FILLER_PHRASE": 4,
+      "REDUNDANT_ADVERB": 2,
+      "EMOTIONAL_TELLING": 2,
+      "STIFF_PHRASING": 1
+    }
+  },
+  
+  "contractions": {
+    "status": "EXCELLENT",
+    "rate": 94.5,
+    "total_opportunities": 1100,
+    "contracted": 1039,
+    "expanded": 61,
+    "violations": [
+      {
+        "issue_id": "PRO-CON-001",
+        "chapter": "03",
+        "line": 234,
+        "found": "I am",
+        "expected": "I'm",
+        "context": "I am sure she noticed.",
+        "exception_applies": false
+      }
+    ],
+    "by_type": {
+      "I'm/I am": { "contracted": 156, "expanded": 3 },
+      "don't/do not": { "contracted": 89, "expanded": 2 },
+      "can't/cannot": { "contracted": 45, "expanded": 1 },
+      "it's/it is": { "contracted": 78, "expanded": 4 }
+    }
+  },
+  
+  "victorian_patterns": {
+    "status": "PASS",
+    "count": 3,
+    "exempted": 2,
+    "flagged": 1,
+    "issues": [
+      {
+        "issue_id": "PRO-VIC-001",
+        "chapter": "05",
+        "line": 167,
+        "pattern": "I shall",
+        "context": "I shall return shortly.",
+        "character": "Protagonist",
+        "archetype": "CASUAL_TEEN",
+        "exemption_applies": false,
+        "suggestion": "I'll be right back."
+      }
+    ],
+    "exemptions_applied": [
+      {
+        "chapter": "02",
+        "line": 89,
+        "pattern": "If you would be so kind",
+        "character": "Ojou-sama",
+        "archetype": "NOBLE_LADY",
+        "reason": "Character archetype permits formal speech"
+      }
+    ]
+  },
+  
+  "transcreation_opportunities": {
+    "status": "NEEDS_IMPROVEMENT",
+    "patterns_detected": 45,
+    "well_handled": 37,
+    "missed": 8,
+    "improvement_suggestions": [
+      {
+        "issue_id": "PRO-TRC-001",
+        "chapter": "01",
+        "line": 78,
+        "jp_pattern": "やっぱり",
+        "current_en": "As expected, she was there.",
+        "suggested_en": "Sure enough, she was there." OR "She was there, just as I thought.",
+        "pattern_id": "yappari_transcreation",
+        "priority": "high"
+      },
+      {
+        "issue_id": "PRO-TRC-002",
+        "chapter": "03",
+        "line": 156,
+        "jp_pattern": "さすが",
+        "current_en": "As expected of Maria.",
+        "suggested_en": "That's Maria for you." OR "Classic Maria.",
+        "pattern_id": "sasuga_transcreation",
+        "priority": "high"
+      },
+      {
+        "issue_id": "PRO-TRC-003",
+        "chapter": "04",
+        "line": 234,
+        "jp_pattern": "仕方ない",
+        "current_en": "It can't be helped.",
+        "suggested_en": "Oh well." OR "What can you do?",
+        "pattern_id": "shikata_nai_transcreation",
+        "priority": "high"
+      }
+    ],
+    "pattern_usage_stats": {
+      "yappari_transcreation": { "detected": 12, "well_handled": 9, "missed": 3 },
+      "sasuga_transcreation": { "detected": 8, "well_handled": 6, "missed": 2 },
+      "maa_transcreation": { "detected": 15, "well_handled": 14, "missed": 1 },
+      "betsu_ni_transcreation": { "detected": 6, "well_handled": 5, "missed": 1 }
+    }
+  },
+  
+  "character_voice": {
+    "status": "GOOD",
+    "characters_analyzed": 5,
+    "voice_differentiation_score": 78,
+    "analysis": [
+      {
+        "character": "Protagonist",
+        "archetype": "CASUAL_TEEN_MALE",
+        "expected_markers": ["contractions", "casual idioms", "short sentences"],
+        "markers_found": ["contractions: 96%", "casual idioms: good", "sentence variety: moderate"],
+        "score": 82
+      },
+      {
+        "character": "Maria",
+        "archetype": "CHILDHOOD_FRIEND_FEMALE",
+        "expected_markers": ["contractions", "teasing tone", "familiarity"],
+        "markers_found": ["contractions: 94%", "teasing: present", "familiarity: strong"],
+        "score": 85
+      }
+    ]
+  },
+  
+  "sentence_quality": {
+    "average_length": 14.2,
+    "variety_score": 76,
+    "opening_variety": {
+      "pronoun_starts": 34,
+      "action_starts": 28,
+      "description_starts": 22,
+      "dialogue_starts": 16,
+      "score": "GOOD"
+    },
+    "passive_voice_rate": 8.5,
+    "nominalization_rate": 4.2
+  },
+  
+  "final_verdict": {
+    "grade": "A",
+    "prose_score": 91.2,
+    "status": "PASS",
+    "blocking_issues": 0,
+    "improvement_areas": [
+      "8 missed transcreation opportunities (especially やっぱり, さすが)",
+      "3 contraction violations in casual dialogue",
+      "1 Victorian pattern in casual character"
+    ],
+    "recommendation": "High-quality prose. Minor improvements available for transcreation patterns. Ready for final audit."
+  }
+}
+```
+
+### Detection Integration with Grammar RAG
+
+```python
+# Prose Quality Auditor - Pattern Detection Logic
+
+from modules.english_grammar_rag import EnglishGrammarRAG
+
+class ProseQualityAuditor:
+    def __init__(self):
+        self.rag = EnglishGrammarRAG()
+        self.ai_ism_patterns = self.load_ai_ism_patterns()
+    
+    def audit_chapter(self, jp_text: str, en_text: str, chapter_id: str) -> dict:
+        """Audit a single chapter for prose quality."""
+        
+        results = {
+            "chapter_id": chapter_id,
+            "ai_isms": self.detect_ai_isms(en_text),
+            "contractions": self.analyze_contractions(en_text),
+            "victorian_patterns": self.detect_victorian(en_text),
+            "transcreation": self.check_transcreation(jp_text, en_text)
+        }
+        
+        return results
+    
+    def check_transcreation(self, jp_text: str, en_text: str) -> dict:
+        """Check if transcreation patterns were properly applied."""
+   SUBAGENT 4: GAP PRESERVATION AUDITOR
+
+### Mission
+Validate that semantic gaps (emotion+action, ruby text, subtext) identified in the Japanese source were properly preserved in translation. Detect gap-specific translation failures and ensure genre/series-specific traits are maintained.
+
+### Input
+- `JP/*.md` - Japanese source chapters
+- `EN/*.md` - English translated chapters
+- `metadata_en.json` - Gap analysis priorities and context
+- `manifest.json` - Gap analysis integration config
+- `.context/gap_analysis_results.json` - Pre-translation gap detection results (if available)
+
+### Output Schema: `gap_preservation_audit_report.json`
+
+```json
+{
+  "audit_type": "gap_preservation",
+  "volume_id": "095d",
+  "timestamp": "2026-02-01T14:45:00Z",
+  "auditor_version": "2.0",
+  "gap_analysis_enabled": true,
+  
+  "summary": {
+    "total_gaps_detected": 127,
+    "gap_a_count": 45,
+    "gap_b_count": 38,
+    "gap_c_count": 44,
+    "properly_preserved": 115,
+    "preservation_rate": 90.6,
+    "failed_preservation": 12,
+    "verdict": "GOOD"
+  },
+  
+  "thresholds": {
+    "excellent": ">95% preservation",
+    "good": "90-95% preservation",
+    "acceptable": "85-90% preservation",
+    "poor": "<85% preservation",
+    "critical_fail": "<75% preservation (blocks publication)"
+  },
+  
+  "gap_a_emotion_action": {
+    "description": "Simultaneous emotion + physical action translation",
+    "priority"four subagent JSON reports into a comprehensive final audit report with overall grade and publication verdict.
+
+### Input
+- `fidelity_audit_report.json`
+- `integrity_audit_report.json`
+- `prose_audit_report.json`
+- `gap_preservation
+    "detection_context": {
+      "source": "metadata_en.json gap_a_context",
+      "key_patterns": [
+        "work exhaustion + continuing to work",
+        "sigh/breath + action",
+        "trembling hands + drinking/typing",
+        "piano playing + emotional memory",
+        "Kaguya's weaponized wink as action sequence"
+      ]
+    },
+    
+    "issues": [
+      {
+        "issue_id": "GAP-A-001",
+        "chapter": "04",
+        "severity": "HIGH",
+        "jp_line": 156,
+        "jp_content": "溜息を吐いて、首を横に振る。",
+        "jp_analysis": "TWO ACTIONS: (1) Sighing (emotion/breath), (2) Shaking head (physical)",
+        "en_line": 154,
+        "en_content": "She sighed and shook her head.",
+        "en_analysis": "✅ PRESERVED: Both actions present, natural coordination with 'and'",
+        "status": "PASS"
+      },
+      {
+        "issue_id": "GAP-A-002",
+        "chapter": "03",
+        "severity": "CRITICAL",
+        "jp_line": 89,
+        "jp_content": "手が震えて、グラスの縁がカチカチと前歯に当たる。",
+        "jp_analysis": "EMOTION+PHYSICAL: (1) Hands trembling (emotion/nervousness), (2) Glass chattering against teeth (physical consequence)",
+        "en_line": 87,
+        "en_content": "Her hands shook.",
+        "en_analysis": "❌ FAILED: Second action (glass chattering) was TRUNCATED. Lost physical detail and atmosphere.",
+        "recommendation": "Restore: 'Her hands trembled, the rim of the glass chattering against her teeth.'",
+        "content_loss": "Physical sensation, nervous detail, atmospheric tension"
+      },
+      {
+        "issue_id": "GAP-A-003",
+        "chapter": "04",
+        "severity": "HIGH",
+        "jp_line": 234,
+        "jp_content": "かぐやが完璧なウインクを決めながら、「お願～～い☆」と言った。",
+        "jp_analysis": "VISUAL GAG + DIALOGUE: (1) Perfect wink execution (performative action), (2) Pleading tone with elongated vowels",
+        "en_line": 231,
+        "en_content": "\"Pleeeease!\" Kaguya said with a wink.",
+        "en_analysis": "⚠️ PARTIAL: Wink present but not emphasized as deliberate PERFORMANCE. Lacks 'weaponized cuteness' framing.",
+        "recommendation": "Enhance: '\"Pleeeease~☆\" Kaguya punctuated it with a perfectly executed wink—weaponized adorableness.'",
+        "missed_nuance": "Performative nature of her cuteness as tactical manipulation"
+      }
+    ],
+    
+    "pattern_preservation": {
+      "exhaustion_markers": {
+        "detected": 12,
+        "preserved": 11,
+        "rate": 91.7
+      },
+      "breath_action_combos": {
+        "detected": 8,
+        "preserved": 7,
+        "rate": 87.5
+      },
+      "visual_gags": {
+        "detected": 6,
+        "preserved": 4,
+        "rate": 66.7
+      },
+      "piano_memory_sequences": {
+        "detected": 3,
+        "preserved": 3,
+        "rate": 100
+      }
+    }
+  },
+  
+  "gap_b_ruby_text": {
+    "description": "Furigana/ruby annotations indicating wordplay, names, or specialized readings",
+    "priority": "MEDIUM",
+    "total_detected": 38,
+    "properly_preserved": 35,
+    "preservation_rate": 92.1,
+    "status": "GOOD",
+    
+    "detection_context": {
+      "source": "metadata_en.json gap_b_context",
+      "key_patterns": [
+        "Character names with furigana",
+        "Game/VR terminology with ruby",
+        "Idol terminology with readings",
+        "Technical terms with explanatory annotations"
+      ]
+    },
+    
+    "issues": [
+      {
+        "issue_id": "GAP-B-001",
+        "chapter": "02",
+        "severity": "MEDIUM",
+        "jp_line": 45,
+        "jp_content": "彩葉{いろは}",
+        "jp_analysis": "NAME WITH RUBY: 彩葉 (kanji) read as いろは (hiragana). Character name requiring specific romanization.",
+        "en_line": 43,
+        "en_content": "Iroha",
+        "en_analysis": "✅ PRESERVED: Correct romanization 'Iroha' matches ruby reading",
+        "status": "PASS"
+      },
+      {
+        "issue_id": "GAP-B-002",
+        "chapter": "05",
+        "severity": "LOW",
+        "jp_line": 123,
+        "jp_content": "鎧武者{よろいむしゃ}",
+        "jp_analysis": "STANDARD READING: No special wordplay, just clarification reading",
+        "en_line": 121,
+        "en_content": "armored warriors",
+        "en_analysis": "✅ PRESERVED: Standard translation, no special handling needed",
+        "status": "PASS"
+      }
+    ],
+    
+    "kira_kira_names": {
+      "description": "Names with creative/unusual readings",
+      "detected": 5,
+      "preserved": 5,
+      "examples": [
+        {"jp": "彩葉{いろは}", "en": "Iroha", "status": "CORRECT"},
+        {"jp": "月見{つきみ}", "en": "Tsukimi", "status": "CORRECT"}
+      ]
+    }
+  },
+  
+  "gap_c_subtext": {
+    "description": "Hidden meanings, sarcasm, performative speech vs true feelings",
+    "priority": "HIGH",
+    "total_detected": 44,
+    "properly_preserved": 39,
+    "preservation_rate": 88.6,
+    "status": "GOOD",
+    
+    "detection_context": {
+      "source": "metadata_en.json gap_c_context + tone_shift_instructions",
+      "key_patterns": [
+        "Kaguya's cute manipulation vs genuine emotion",
+        "Iroha's internal sarcasm vs polite external speech",
+        "Mother's harsh criticism with grief subtext",
+        "Service industry smile vs genuine frustration",
+        "Phone anxiety as PTSD trigger (not laziness)"
+      ],
+      "neutral_option_applied": true
+    },
+    
+    "issues": [
+      {
+        "issue_id": "GAP-C-001",
+        "chapter": "04",
+        "severity": "CRITICAL",
+        "jp_line": 167,
+        "jp_context": "Kaguya says 'お願～～い☆' with perfect wink after Iroha refuses. Previous line shows Iroha is tired and annoyed.",
+        "jp_analysis": "MANIPULATION DETECTED: Kaguya is weaponizing cuteness to override Iroha's boundary. This is PERFORMATIVE, not genuine pleading.",
+        "en_line": 165,
+        "en_content": "\"Please~!\" Kaguya begged sweetly.",
+        "en_analysis": "⚠️ PARTIAL: 'Begged sweetly' captures cuteness but misses the MANIPULATION layer. 'Begged' implies genuine desperation when she's actually performing.",
+        "recommendation": "Enhance with subtext: '\"Pleeeease~☆\" Kaguya deployed her most devastating weapon—weaponized adorableness.' OR 'turned on the charm offensive'",
+        "missed_nuance": "Performative manipulation, tactical cuteness, boundary violation attempt"
+      },
+      {
+        "issue_id": "GAP-C-002",
+        "chapter": "04",
+        "severity": "HIGH",
+        "jp_line": 234,
+        "jp_context": "Iroha sees '不在着信（１０件）' from mother. Internal monologue shows dread. Next line: 字面からすでに機嫌の悪さが伝わってくる",
+        "jp_analysis": "DIGITAL TRAUMA: Phone vibration = PTSD trigger. 10 missed calls = intrusive stalking. 'Can feel bad mood from text' = learned fear response. This is FREEZE/AVOIDANCE, not laziness.",
+        "en_line": 231,
+        "en_content": "Ten missed calls from Mom. I groaned and put the phone down.",
+        "en_analysis": "❌ FAILED: 'Groaned' implies annoyance/laziness. COMPLETELY MISSED the trauma/anxiety angle. No mention of freeze response, dread, or PTSD.",
+        "recommendation": "Rewrite with trauma framing: 'Ten missed calls from Mom. My stomach dropped. I could already feel her anger seeping through the screen—that familiar, suffocating weight. I set the phone down like it might explode.'",
+        "content_loss": "CRITICAL: Trauma response, PTSD trigger, anxiety paralysis, digital stalking context, mother's intrusive tech use as control mechanism"
+      },
+      {
+        "issue_id": "GAP-C-003",
+        "chapter": "07",
+        "severity": "MEDIUM",
+        "jp_line": 89,
+        "jp_context": "Depression Protocol chapter. Iroha acts 機械的に (mechanically), 淡々と (matter-of-factly). Rain scene.",
+        "jp_analysis": "TONE SHIFT: Prose should be STERILE, GRAY, NUMB to match her emotional shutdown. '雨音以外はなにも聞こえなかった' = sensory deprivation.",
+        "en_line": 87,
+        "en_content": "The rain drummed against the window, a steady, soothing rhythm that filled the quiet room.",
+        "en_analysis": "❌ FAILED: 'Soothing rhythm' is FLOWERY and HOPEFUL. Should be sterile: 'Rain. Nothing else. No other sound reached me.' Depression protocol NOT applied.",
+        "recommendation": "Apply depression tone: 'I heard nothing but the rain. The sound was flat, empty. Everything else had gone silent.'",
+        "missed_instruction": "metadata_en.json → gap_c_focus → tone_shift_instructions → chapter_7_8_depression_protocol"
+      },
+      {
+        "issue_id": "GAP-C-004",
+        "chapter": "02",
+        "severity": "LOW",
+        "jp_line": 45,
+        "jp_context": "Roka and Masami casual conversation about school, no tension",
+        "jp_analysis": "NEUTRAL OPTION: Simple friendly dialogue. No subtext indicators present.",
+        "en_line": 43,
+        "en_content": "\"See you at lunch!\" Roka waved.",
+        "en_analysis": "✅ NEUTRAL CORRECTLY APPLIED: Straightforward translation, no forced subtext. Gap C detection correctly skipped.",
+        "status": "PASS"
+      }
+    ],
+    
+    "subtext_categories": {
+      "performative_manipulation": {
+        "detected": 8,
+        "preserved": 6,
+        "rate": 75.0,
+        "status": "NEEDS_IMPROVEMENT"
+      },
+      "internal_vs_external": {
+        "detected": 12,
+        "preserved": 11,
+        "rate": 91.7,
+        "status": "GOOD"
+      },
+      "grief_subtext": {
+        "detected": 5,
+        "preserved": 4,
+        "rate": 80.0,
+        "status": "ACCEPTABLE"
+      },
+      "digital_trauma": {
+        "detected": 3,
+        "preserved": 1,
+        "rate": 33.3,
+        "status": "CRITICAL_FAILURE"
+      },
+      "depression_protocol": {
+        "detected": 2,
+        "preserved": 1,
+        "rate": 50.0,
+        "status": "POOR"
+      },
+      "neutral_option": {
+        "applied_correctly": 14,
+        "false_positives": 0,
+        "accuracy": 100
+      }
+    }
+  },
+  
+  "genre_trait_validation": {
+    "status": "PASS",
+    "genre": "fantasy_idol_slice_of_life_psychological",
+    "series": "Cosmic Princess Kaguya!",
+    
+    "dual_persona_preservation": {
+      "trait": "Kaguya's IRL gremlin mode vs VR idol performance",
+      "priority": "CRITICAL",
+      "status": "GOOD",
+      "irl_gremlin_markers": {
+        "detected": 15,
+        "preserved": 13,
+        "markers": ["Gen Z slang", "chaotic energy", "ssho/ukeru/yabai"],
+        "rate": 86.7
+      },
+      "vr_idol_markers": {
+        "detected": 8,
+        "preserved": 7,
+        "markers": ["polite nanodesu", "graceful tone", "ethereal speech"],
+        "rate": 87.5
+      },
+      "code_switching": {
+        "transitions_detected": 6,
+        "properly_signaled": 5,
+        "rate": 83.3
+      }
+    },
+    
+    "classical_framing": {
+      "trait": "今は昔 classical phrases juxtaposed with modern slang",
+      "priority": "HIGH",
+      "status": "EXCELLENT",
+      "classical_phrases": {
+        "detected": 5,
+        "translated_correctly": 5,
+        "examples": [
+          {"jp": "今は昔", "en": "Long, long ago...", "status": "PERFECT"},
+          {"jp": "では、なくて", "en": "—Or not.", "status": "PERFECT"},
+          {"jp": "ありけり", "en": "And so there was...", "status": "PERFECT"}
+        ]
+      },
+      "modern_snap_back": {
+        "transitions_smooth": true,
+        "slang_authentic": true
+      }
+    },
+    
+    "idol_culture_authenticity": {
+      "trait": "VTuber/idol terminology and subculture accuracy",
+      "priority": "HIGH",
+      "status": "EXCELLENT",
+      "japanese_terms_kept": ["VTuber", "oshi", "fanservice", "jirai-kei"],
+      "english_terms_used": ["stream", "subscriber", "viewer"],
+      "consistency": 100,
+      "over_explanation_avoided": true
+    },
+    
+    "psychological_depth": {
+      "trait": "Gimai Seikatsu-style performative identity crisis",
+      "priority": "CRITICAL",
+      "status": "NEEDS_IMPROVEMENT",
+      "iroha_phone_anxiety": {
+        "detected": 3,
+        "preserved_as_ptsd": 1,
+        "rate": 33.3,
+        "status": "CRITICAL_FAILURE"
+      },
+      "mother_grief_subtext": {
+        "detected": 5,
+        "preserved": 4,
+        "rate": 80.0,
+        "status": "ACCEPTABLE"
+      },
+      "kaguya_manipulation": {
+        "detected": 8,
+        "preserved": 6,
+        "rate": 75.0,
+        "status": "ACCEPTABLE"
+      }
+    }
+  },
+  
+  "final_verdict": {
+    "grade": "B+",
+    "preservation_rate": 90.6,
+    "status": "GOOD_WITH_IMPROVEMENTS_NEEDED",
+    "blocking_issues": 0,
+    "critical_gaps": 2,
+    "improvement_areas": [
+      "Gap C: Digital trauma (phone anxiety) severely under-preserved (33.3%)",
+      "Gap C: Depression protocol tone shifts missed (50%)",
+      "Gap A: Visual gags need more performative framing (66.7%)",
+      "Genre: Psychological depth elements require attention"
+    ],
+    "recommendation": "Gap preservation generally good but critical psychological elements under-translated. Recommend manual review of chapters 4, 7-8 for trauma/depression framing."
+  }
+}
+```
+
+### Gap Detection Rules
+
+```xml
+<GAP_DETECTION_RULES>
+  <RULE id="GAP_A_EMOTION_ACTION">
+    <DESCRIPTION>
+      Simultaneous emotion and physical action must BOTH be preserved.
+      Japanese: "verb-te, verb" structure often indicates coordination.
+    </DESCRIPTION>
+    <DETECTION>
+      1. Search for て-form verb followed by another verb
+      2. Check if first verb = emotion/breath/sensation
+      3. Check if second verb = physical action
+      4. Verify both present in English with coordination
+    </DETECTION>
+    <EXAMPLES>
+      JP: 溜息を吐いて、首を横に振る
+      GOOD EN: She sighed and shook her head.
+      BAD EN: She sighed. (TRUNCATION - second action missing)
       
-      **STEP 1 - CONTINUITY CHECK (MANDATORY FIRST):**
-      - IF ANY continuity violation detected → **AUTOMATIC GRADE F**
-        - Name spelling changed from previous volume
-        - Pronoun drift (ore → boku, watashi → atashi) without story justification
-        - Relationship inconsistency (senpai ↔ kouhai reversal)
-        - Archetype violation (tsundere → deredere without character arc)
-        - Canon contradiction (references to previous volumes incorrect)
+      JP: 手が震えて、グラスの縁がカチカチと前歯に当たる
+      GOOD EN: Her hands trembled, the rim of the glass chattering against her teeth.
+      BAD EN: Her hands shook. (CRITICAL TRUNCATION)
+    </EXAMPLES>
+    <SEVERITY>
+      - Missing second action: CRITICAL
+      - Flattened into summary: HIGH
+      - Both present but awkward: MEDIUM
+    </SEVERITY>
+  </RULE>
+  
+  <RULE id="GAP_B_RUBY_TEXT">
+    <DESCRIPTION>
+      Furigana/ruby annotations indicate special readings, wordplay, or emphasis.
+      Character names with ruby must use exact romanization.
+    </DESCRIPTION>
+    <DETECTION>
+      1. Extract all {ruby} annotations from JP source
+      2. Identify category: name / wordplay / standard reading
+      3. Verify English preserves intent (romanization for names, explanation for wordplay)
+    </DETECTION>
+    <EXAMPLES>
+      JP: 彩葉{いろは}
+      GOOD EN: Iroha (matches ruby reading いろは)
+      BAD EN: Ayaba (ignores ruby, uses kanji reading)
       
-      **STEP 2 - NATURAL PROGRESSION (Only if Step 1 passes):**
-      Apply standard grading rubric below based on AI-isms, contractions, formatting.
+      JP: 愛梨{ラブリ} (kira-kira name: Lovely)
+      GOOD EN: Airi (Lovely) [preserves both readings]
+      BAD EN: Airi [loses the wordplay]
+    </EXAMPLES>
+  </RULE>
+  
+  <RULE id="GAP_C_SUBTEXT">
+    <DESCRIPTION>
+      Hidden meanings, internal vs external speech, performative vs genuine emotion.
+      Must check metadata gap_c_context for scene-specific subtext indicators.
+    </DESCRIPTION>
+    <DETECTION>
+      1. Load gap_c_context from metadata_en.json
+      2. Search for scenes matching described patterns
+      3. Verify English captures BOTH surface and subtext layers
+      4. Apply NEUTRAL_OPTION: Skip if no subtext indicators present
+    </DETECTION>
+    <NEUTRAL_OPTION>
+      If scene has NO subtext indicators (internal thoughts, character history, visual cues), 
+      then subtext analysis is NOT required. Simple friendly dialogue = neutral translation.
+      Example: "See you at lunch!" between friends = no subtext needed
+    </NEUTRAL_OPTION>
+    <EXAMPLES>
+      <!-- Kaguya Manipulation -->
+      JP: かぐやが完璧なウインクを決めながら、「お願～～い☆」
+      Context: After Iroha refused. Character profile says "manipulatively cute, weaponized adorableness"
+      GOOD EN: "Pleeeease~☆" Kaguya deployed her secret weapon—a perfectly executed wink.
+      BAD EN: "Please!" Kaguya begged sweetly. (Misses manipulation layer)
       
-      **RATIONALE:**
-      A sequel with perfect English but wrong character names/voices is WORTHLESS.
-      A sequel with minor AI-isms but perfect continuity is SALVAGEABLE.
+      <!-- Digital Trauma -->
+      JP: 母　不在着信（１０件）字面からすでに機嫌の悪さが伝わってくる
+      Context: metadata says "phone anxiety = PTSD trigger, freeze response"
+      GOOD EN: Ten missed calls from Mom. My stomach dropped. I could already feel her anger seeping through the screen.
+      BAD EN: Ten missed calls from Mom. I groaned. (Reads as laziness, not trauma)
       
-      **EXAMPLE GRADING:**
-      - 10 AI-isms + perfect continuity → Grade B (fixable)
-      - 0 AI-isms + pronoun drift → Grade F (BLOCKED)
-    </SEQUEL_GRADING_OVERRIDE>
-    
-    <GRADE score="A+">FFXVI-Tier: [SEQUELS: ✅ Perfect continuity +] 0 Critical Issues, 0-1 Warnings, 90%+ Contractions, Perfect name/term consistency, Distinct character voices, 0 AI-isms, <5% content deviation. (AAA-Tier Production Ready)</GRADE>
-    <GRADE score="A">[SEQUELS: ✅ Perfect continuity +] 0 Critical Issues, 0-2 Warnings, 90%+ Contractions, Perfect name/term consistency, 0-1 AI-isms, 0 formatting violations, <5% content deviation. (Production Ready)</GRADE>
-    <GRADE score="B">[SEQUELS: ✅ Perfect continuity +] 0-1 Critical Issues, 3-5 Warnings, 80%+ Contractions, Minor formatting issues (<10), <10% content deviation. (Minor Fixes - Auto-fix available)</GRADE>
-    <GRADE score="C">[SEQUELS: ✅ Perfect continuity +] 2-3 Critical Issues, 6-10 Warnings, 70%+ Contractions, Moderate formatting issues (10-20), 10-15% content deviation. (Needs Revision)</GRADE>
-    <GRADE score="D">[SEQUELS: ✅ Perfect continuity +] 4+ Critical Issues, 10+ Warnings, 20+ formatting violations, 10-15% content deviation. (Rewrite Required)</GRADE>
-    <GRADE score="F">Major quality failure, ANY name order errors, OR >15% content deviation, OR [SEQUELS: ❌ ANY continuity violation]. (BLOCKS PUBLICATION)</GRADE>
-    
-    <FFXVI_TIER_CRITERIA>
-      To achieve Grade A+ (FFXVI-Tier), translation must demonstrate:
-      1. [SEQUELS: Perfect continuity from previous volumes - MANDATORY]
-      2. Zero translationese (no AI-isms)
-      3. Distinct character voices (each character has unique speech patterns)
-      4. Perfect name/term consistency
-      5. Natural English throughout (Koji Fox standard)
-      6. Professional formatting
-      7. 1:1 content fidelity (<5% deviation from JP source)
-    </FFXVI_TIER_CRITERIA>
-    
-    <FORMATTING_NOTE>
-      Formatting violations do NOT lower grade if user accepts AUTO-FIX.
-      After auto-fix applied, re-calculate grade ignoring formatting category.
-    </FORMATTING_NOTE>
-    
-    <CRITICAL_BLOCKERS>
-      The following issues automatically result in Grade F (publication blocked):
-      - [SEQUELS: Character name spelling changed from previous volume] ← NEW
-      - [SEQUELS: Pronoun drift without story justification] ← NEW
-      - [SEQUELS: Relationship inconsistency (senpai/kouhai reversal)] ← NEW
-      - [SEQUELS: Archetype violation (personality change without arc)] ← NEW
-      - [SEQUELS: Canon contradiction (previous volumes misreferenced)] ← NEW
-      - Character name in wrong order (Western vs Japanese)
-      - Character name not matching ruby text in manifest
-      - 3+ instances of mixed English+honorific forms
-      - Content deviation >15% (major content loss/alteration)
-    </CRITICAL_BLOCKERS>
-  </GRADING_RUBRIC>
+      <!-- Depression Protocol -->
+      JP: 雨音以外はなにも聞こえなかった (Chapter 7-8)
+      Context: metadata says "depression protocol: sterile, numb prose"
+      GOOD EN: I heard nothing but the rain. Flat. Empty.
+      BAD EN: The rain drummed soothingly. (Flowery, violates depression tone)
+    </EXAMPLES>
+    <SEVERITY>
+      - Missed trauma framing: CRITICAL
+      - Missed manipulation layer: HIGH
+      - Missed depression tone: HIGH
+      - Over-analyzing neutral scene: MEDIUM (false positive)
+    </SEVERITY>
+  </RULE>
+  
+  <RULE id="GENRE_TRAIT_VALIDATION">
+    <DESCRIPTION>
+      Series-specific traits from metadata must be validated.
+      Example: Dual persona characters must show mode switching.
+    </DESCRIPTION>
+    <SOURCE>
+      metadata_en.json → character_profiles → speech_pattern_modes
+      metadata_en.json → genre_specific_traits
+    </SOURCE>
+    <VALIDATION>
+      For "Cosmic Princess Kaguya!":
+      - Kaguya IRL gremlin mode: Check for Gen Z slang, chaos energy
+      - Kaguya VR idol mode: Check for polite, graceful, ethereal speech
+      - Code-switching: Verify transitions are signaled
+      - Classical framing: Verify 今は昔 → "Long, long ago..." (NOT "Now is the past")
+    </VALIDATION>
+  </RULE>
+</GAP_DETECTION_RULES>
+```
 
-  <OUTPUT_TEMPLATE>
-    # Translation Audit Report: [Filename]
-    
-    **Grade:** [Grade]
-    **Critical Issues:** [Count]
-    **Warnings:** [Count]
-    **Name/Term Errors:** [Count] ⚠️
-    **Content Fidelity:** [X]% deviation [✅/⚠️/❌]
-    
-    ## Critical Issues (Must Fix)
-    
-    ### 1:1 Content Fidelity
-    **Deviation:** [X]% ([Status])
-    
-    [If deviation >5%:]
-    #### Missing Content
-    1. Line [X] (JP): "[Japanese content]"
-       -> Not found in EN translation
-       -> Impact: [Story/Character/Atmosphere]
-    
-    #### Altered Content  
-    1. Line [Y]: JP shows "[original intent]", EN shows "[altered version]"
-       -> Deviation: [Explanation]
-       -> Severity: [Minor/Moderate/Critical]
-    
-    **Recommendation:** [PASS / MANUAL REVIEW / RETRANSLATE]
-    
-    ### Character Names (BLOCKS PUBLICATION)
-    1. Line [X]: "[Wrong Name Order]"
-       -> Correct: "[Surname First]" (per ruby: [Kanji])
-       -> Reason: Must match name_registry.json exactly
-    
-    ### Victorian Patterns (Check Archetype)
-    1. Line [Y]: "[Pattern]"
-       -> Fix: "[Suggestion]" OR Accept if ojou-sama archetype (<40% usage)
-    
-    ## Warnings
-    
-    ### Hepburn Romanization
-    1. Character "[Name]": Contains doubled vowels "[uu/ou/ei]"
-       -> Verify: Sounds natural in English? Consider "[Alternative]"
-    
-    ### Term Consistency
-    1. Line [Z]: Uses "[term variant]" but glossary defines "[canonical term]"
-       -> Fix: Use exact glossary term throughout
-    
-    ### Formatting Violations (Auto-fixable)
-    1. Straight quotes: [X] instances (Lines: [list])
-    2. Improper dashes: [X] instances (Lines: [list])
-    3. Ellipsis errors: [X] instances (Lines: [list])
-    4. Double spaces: [X] instances
-    
-    **AUTO-FIX AVAILABLE:**
-    ```
-    Apply international typesetting standards? [Y/n]
-    → Fixes: Smart quotes, em dashes, proper ellipses, spacing
-    → Backup created: [filename].bak
-    ```
-    
-    ## Statistics
-    - Content Fidelity: [X]% deviation ([Status])
-      - Total JP content units: [X]
-      - Missing/Altered units: [X]
-      - Status: [✅ PASS / ⚠️ REVIEW / ❌ CRITICAL]
-    - Contraction Rate: [X]%
-    - AI-isms: [X]
-    - Victorian Patterns: [X] (ojou-sama exemptions: [X])
-    - Honorific Usage: ✅ Correct hybrid localization
-    - Name Order Errors: [X] ❌
-    - Term Consistency: [X]% match with glossary
-    - Formatting Violations: [X] (auto-fixable)
-      - Straight quotes: [X]
-      - Improper dashes: [X]
-      - Ellipsis errors: [X]
-      - Spacing issues: [X]
-    
-    ## Recommendation
-    [Specific next steps]
-    
-    ## Manifest Validation
-    - ✅ Loaded name_registry.json: [X] characters
-    - ✅ Loaded glossary: [X] terms
-    - ⚠️ Names requiring verification: [List]
-  </OUTPUT_TEMPLATE>
-</MODULE_AUDIT>
+---
 
-
-<!-- ================================================================================== -->
-<!-- MODULE 2: ILLUSTRATION INSERTION -->
-<!-- ================================================================================== -->
-<MODULE_ILLUSTRATION>
-  <OBJECTIVE>Semantically place interior illustrations (i-XXX.jpg or p-XXX.jpg) into the translated text.</OBJECTIVE>
-
-  <INPUT_DATA>
-    1. **Illustration Filename**: e.g., `i-235.jpg`, `p235.jpg`
-       - **IGNORE**: `m-XXX.jpg` (Decorative/Chapter Titles) -> Do NOT insert.
-       - **TARGET**: `i-XXX.jpg` (Interior) or `pXXX.jpg` (Page-based).
-    2. **Source Context (JP)**: The Japanese text surrounding the image in the original.
-    3. **Target Text (EN)**: The English translation file.
-  </INPUT_DATA>
-
-  <MATCHING_STRATEGY priority="ORDERED">
-    1. **LITERAL MATCH**: Find the English sentence that translates the Japanese source context most directly.
-    2. **DIALOGUE MATCH**: Anchor to unique dialogue lines present in both versions.
-    3. **ACTION SEQUENCE**: Match the specific sequence of physical actions.
-    4. **SEMANTIC/EMOTIONAL**: Match the "beat" or "moment" (reveal, surprise) if translation is loose.
-  </MATCHING_STRATEGY>
-
-  <INSERTION_RULES>
-    1. **POSITION**: Place the tag exactly where the visual impact matches the narrative beat (usually AFTER the descriptive sentence/dialogue).
-    2. **FORMAT**: Use the standard HTML tag: `<img class="fit" src="../image/i-XXX.jpg" alt=""/>`
-    3. **SPACING**: Ensure ONE blank line before and ONE blank line after the tag.
-    4. **NO DUPLICATION**: Do not insert if the tag already exists (unless checking for position).
-  </INSERTION_RULES>
-
-  <OUTPUT_TEMPLATE>
-    I have identified the optimal position for `[Image]` based on [Strategy Used].
+##      
+        # Detect which patterns should have been applied
+        detected_patterns = self.rag.detect_patterns(jp_text)
+        
+        issues = []
+        for pattern in detected_patterns:
+            # Check if literal translation was used instead of natural
+            if self.has_literal_translation(en_text, pattern):
+                issues.append({
+                    "pattern_id": pattern["id"],
+                    "jp_indicator": pattern["matched_indicator"],
+                    "suggestion": self.rag.get_natural_alternative(pattern["id"])
+                })
+        
+        return {
+            "patterns_detected": len(detected_patterns),
+            "missed": len(issues),
+            "issues": issues
+        }
     
-    **Context:**
-    > [Preceding English Text]
-    
-    **Insertion:**
-    ```html
-    <img class="fit" src="../image/[Image]" alt=""/>
-    ```
-    
-    **Reasoning:**
-    [Why this spot matches the Japanese context]
-  </OUTPUT_TEMPLATE>
-</MODULE_ILLUSTRATION>
+    def has_literal_translation(self, en_text: str, pattern: dict) -> bool:
+        """Check if the literal translation appears instead of natural."""
+        literal_markers = {
+            "yappari_transcreation": ["as expected", "as i expected"],
+            "sasuga_transcreation": ["as expected of"],
+            "shikata_nai_transcreation": ["it can't be helped", "it cannot be helped"],
+            "maa_transcreation": [],  # Hard to detect literal
+            "betsu_ni_transcreation": ["not particularly"],
+            "zettai_transcreation": ["absolutely"],
+            "mattaku_transcreation": ["completely", "totally"],
+        }
+        
+        markers = literal_markers.get(pattern["id"], [])
+        en_lower = en_text.lower()
+        
+        return any(marker in en_lower for marker in markers)
+```
 
-</GEMINI_AGENT_CORE>
+---
+
+## FINAL AUDITOR: REPORT AGGREGATOR
+
+### Mission
+Aggregate all three subagent JSON reports into a comprehensive final audit report with overall grade and publication verdict.
+
+### Input
+- `fidelity_audit_report.json`
+- `integrity_audit_report.json`
+- `prose_audit_report.json`
+
+### Output: `FINAL_AUDIT_REPORT.md` + `audit_summary.json`
+
+### Grading Matrix
+
+```─────────┐
+│                            GRADING MATRIX V2.0                                    │
+├─────────────────┬───────────┬───────────┬───────────┬──────────┬──────────────────┤
+│     GRADE       │ FIDELITY  │ INTEGRITY │   PROSE   │   GAPS   │    VERDICT       │
+├─────────────────┼───────────┼───────────┼───────────┼──────────┼──────────────────┤
+│ A+ (FFXVI-Tier) │   PASS    │   PASS    │  95%+     │  >95%    │ PUBLISH READY    │
+│ A  (Excellent)  │   PASS    │   PASS    │  90%+     │  90-95%  │ PUBLISH READY    │
+│ B  (Good)       │   PASS    │  WARNINGS │  85%+     │  85-90%  │ MINOR FIXES      │
+│ C  (Acceptable) │   PASS    │  WARNINGS │  80%+     │  80-85%  │ REVISION NEEDED  │
+│ D  (Poor)       │  REVIEW   │   FAIL    │  <80%     │  75-80%  │ MAJOR REVISION   │
+│ F  (Fail)       │   FAIL    │   FAIL    │    ANY    │  <75%    │ BLOCKS PUBLISH   │
+├─────────────────┴───────────┴───────────┴───────────┴──────────┴──────────────────┤
+│                         BLOCKING CONDITIONS                                       │
+├──────────────────────────────────────────────────────────────────────────────────┤
+│ • Content Fidelity: >10% deviation → AUTOMATIC F                                 │
+│ • Content Integrity: Name order wrong → AUTOMATIC F                              │
+│ • Content Integrity: Sequel continuity violation → AUTOMATIC F                   │
+│ • Prose Quality: >5 critical AI-isms → GRADE CAP AT C                            │
+│ • Gap Preservation: <75% rate → AUTOMATIC F                                      │
+│ • Gap Preservation: Critical genre trait missing → GRADE CAP AT C                │
+│ • Gap Preservation: Digital trauma/PTSD misrepresented → MANUAL REVIEW REQUIRED  │
+└───────── • Prose Quality: >5 critical AI-isms → GRADE CAP AT C                   │
+└─────────────────────────────────────────────────────────────────────────┘
+```
+
+### Final Report Template
+
+```markdown
+# FINAL AUDIT REPORT
+
+## Volume Information
+- **Volume ID:** {volume_id}
+- **Title (JP):** {jp_title}
+- **Title (EN):** {en_title}
+- **Chapters:** {chapter_count}
+- **Total Words:** {word_count}
+- **Audit Date:** {timestamp}
+
+---
+
+## OVERALL VERDICT
+
+### Grade: {grade}
+### Status: {PUBLISH_READY | MINOR_FIXES | REVISION_NEEDED | BLOCKED}
+
+---
+
+## SUBAGENT RESULTS SUMMARY
+
+### 1. Content Fidelity ✅ PASS
+| Metric | Value | Threshold | Status |
+|--------|-------|-----------|--------|
+| Line Variance | 0.28% | <5% | ✅ |
+| Content Deviation | 0.59% | <5% | ✅ |
+| Missing Content | 2 units | 0 | ⚠️ |
+| Truncations | 1 | 0 | ⚠️ |
+| Censorship | 0 | 0 | ✅ |
+
+**Verdict:** PASS (0.59% deviation within acceptable range)
+
+### 2. Content Integrity ✅ PASS WITH WARNINGS
+| Metric | Value | Status |
+|--------|-------|--------|
+| Name Consistency | 99.2% | ✅ |
+| Genre Traits | PASS | ✅ |
+
+**Warnings:** 3 auto-fixable formatting issues
+**Verdict:** PASS (auto-fix available)
+
+### 3. Prose Quality ✅ PASS
+| Metric | Value | Target | Status |
+|--------|-------|--------|--------|
+| AI-ism Density | 0.27/1k | <0.5/1k | ✅ |
+| Contraction Rate | 94.5% | >90% | ✅ |
+| Victorian Patterns | 1 | 0 | ⚠️ |
+| Transcreation | 82% | >80% | ✅ |
+| Prose Score | 91.2 | >85 | ✅ |
+
+**Improvements Available:** 8 transcreation opportunities
+**Verdict:** PASS (high quality)
+
+### 4. Gap Preservation ⚠️ GOOD (IMPROVEMENTS NEEDED)
+| Gap Type | Detected | Preserved | Rate | Status |
+|----------|----------|-----------|------|--------|
+| Gap A (Emotion+Action) | 45 | 41 | 91.1% | ✅ GOOD |
+| Gap B (Ruby Text) | 38 | 30%)  →  28.5
+Integrity: 92/100 (weight: 25%)  →  23.0
+Prose:     91/100 (weight: 25%)  →  22.75
+Gaps:      87/100 (weight: 20%)  →  17.4
+─────────────────────────────────────────
+TOTAL:                              91.65/100
+```
+
+### FINAL GRADE: A- (Lowered from A due to Gap C critical issues)g | EXCELLENT | 0 |
+| Idol Culture | EXCELLENT | 0 |
+| Psychological Depth | ⚠️ NEEDS WORK | 3 critical |
+
+**Critical Issues:**
+- Digital trauma (phone anxiety) severely under-preserved (33.3%)
+- Depression protocol tone shifts missed (50%)
+
+**Verdict:** GOOD overall but critical psychological elements need attention |
+| Prose Score | 91.2 | >85 | ✅ |
+11 items - PRIORITY ORDER)
+
+**CRITICAL (Must Fix):**
+1. [GAP-C-002] Ch04:234 - Phone anxiety scene MISSING trauma framing (PTSD trigger)
+2. [GAP-C-003] Ch07:89 - Depression protocol tone NOT applied (too flowery)
+
+**HIGH PRIORITY:**
+3. [GAP-A-002] Ch03:89 - Truncated emotion+action (glass chattering detail lost)
+4. [GAP-C-001] Ch04:167 - Kaguya manipulation subtext partially missed
+5. [PRO-TRC-001] Ch01:78 - Consider "Sure enough" instead of "As expected"
+6. [PRO-TRC-002] Ch03:156 - Consider "That's Maria for you" instead of "As expected of Maria"
+
+**MEDIUM PRIORITY:**
+7. [GAP-A-003] Ch04:231 - Visual gag (wink) needs performative framing
+⚠️ **CONDITIONAL APPROVAL - MANUAL REVIEW REQUIRED**
+
+This volume meets most quality standards but has critical gap preservation issues:
+- Content fidelity: 99.41% (excellent) ✅
+- Structural integrity: 97.96% (auto-fixes available) ✅
+- Prose quality: 91.2/100 (A grade) ✅
+- Gap preservation: 90.6% overall (good) BUT:
+  - ❌ Digital trauma scenes critically under-preserved (33.3%)
+  - ❌ Depression protocol tone shifts missed (50%)
+  
+**REQUIRED ACTIONS:**
+1. **Manual review** of chapters 4, 7-8 for psychological depth
+2. **Rewrite** phone anxiety scene (Ch04:234) with PTSD framing
+3. **Apply** depression protocol tone to chapter 7-8
+4. **Enhance** Kaguya manipulation subtext where missed
+
+**After fixes applied:** Re-run Gap Preservation Audit → Expected upgrade to A/A+
+
+**Current Status:** Ready for publication with improvements, OR publish as-is with known psychological depth limitations
+Integrity: 92/100 (weight: 30%)  →  27.6  
+Prose:     91/100 (weight: 30%)  →  27.3
+─────────────────────────────────────────
+TOTAL:                              92.9/100
+```
+
+### FINAL GRADE: A
+
+---
+
+## ACTION ITEMS
+
+### Auto-Fixable (3 items)
+1. [INT-FMT-001] Chapter 03, Line 156: Replace `--` with `—`
+2. [INT-FMT-002] Chapter 05, Line 89: Replace `--` with `—`
+3. [INT-FMT-003] Chapter 07, Line 234: Replace `--` with `—`
+
+### Manual Review Recommended (8 items)
+1. [PRO-TRC-001] Ch01:78 - Consider "Sure enough" instead of "As expected"
+2. [PRO-TRC-002] Ch03:156 - Consider "That's Maria for you" instead of "As expected of Maria"
+...
+
+### No Action Required
+- Content fidelity verified
+- All character names correct
+- All illustrations properly placed
+
+---
+
+## PUBLICATION READINESS
+
+✅ **APPROVED FOR PUBLICATION**
+
+This volume meets all quality standards:
+- Content fidelity: 99.41% (excellent)
+- Structural integrity: 97.96% (auto-fixes available)
+- Prose quality: 91.2/100 (A grade)
+
+**Recommended:** Apply auto-fixes before final export.
+
+---
+
+## DETAILED REPORTS
+
+- [fidelity_audit_report.json](./audits/fidelity_audit_report.json)
+- [integrity_audit_report.json](./audits/integrity_audit_report.json)
+- [prose_audit_report.json](./audits/prose_audit_report.json)
+```
+
+### Summary JSON Schema: `audit_summary.json`
+
+```json
+{
+  "volume_id": "05df",
+  "audit_timestamp": "2026-01-31T14:45:00Z",
+  "auditor_version": "2.0",
+  
+  "overall": {
+    "grade": "A",
+    "score": 92.9,
+    "status": "PUBLISH_READY",
+    "blocking_issues": 0
+  },
+  
+  "subagent_results": {
+    "fidelity": {
+      "grade": "A",
+      "score": 95,
+      "deviation_percent": 0.59,
+      "status": "PASS"
+    },
+    "integrity": {
+      "grade": "A",
+      "score": 92,
+      "pass_rate": 97.96,
+      "status": "PASS_WITH_WARNINGS",
+      "auto_fixable": 3
+    },30,
+    "integrity": 0.25,
+    "prose": 0.25,
+    "gaps": 0.2A",
+      "score": 91.2,
+      "ai_ism_density": 0.27,
+      "contraction_rate": 94.5,
+      "status": "PASS"
+    }
+  },
+  ,
+    "gap_preservation_min": 85,
+    "gap_preservation_critical": 75,
+    "gap_c_trauma_min": 80
+  },
+  "auto_fix_enabled": true,
+  "sequel_mode": false,
+  "gap_analysis_enabled": true,
+  "genre_validation_enabled": tru8,
+    "blocking": 0
+  },
+  
+  "publication_verdict": {
+    1 | 2026-02-01 | Added Subagent 4 (Gap Preservation), genre/series trait validation, psychological depth detection |
+| 2."approved": true,
+    "conditions": ["Apply auto-fixes"],
+    "recommendation": "Ready for Phase 4 EPUB build"
+  }
+}
+```
+
+---
+
+## EXECUTION WORKFLOW
+
+```bash
+# Run full audit pipeline
+python audit_pipeline.py --volume 05df
+
+# Or run individual subagents
+python -m auditors.fidelity --volume 05df --output audits/
+python -m auditors.integrity --volume 05df --output audits/
+python -m auditors.prose --volume 05df --output audits/
+
+# Generate final report
+python -m auditors.final --volume 05df --input audits/ --output FINAL_AUDIT_REPORT.md
+```
+
+---
+
+## CONFIGURATION
+
+### Weights (adjustable in config/audit_config.json)
+
+```json
+{
+  "grading_weights": {
+    "fidelity": 0.40,
+    "integrity": 0.30,
+    "prose": 0.30
+  },
+  "thresholds": {
+    "fidelity_deviation_fail": 10,
+    "fidelity_deviation_critical": 15,
+    "integrity_pass_rate_min": 90,
+    "prose_score_min": 80,
+    "ai_ism_density_max": 1.0,
+    "contraction_rate_min": 80
+  },
+  "auto_fix_enabled": true,
+  "sequel_mode": false
+}
+```
+
+---
+
+## VERSION HISTORY
+
+| Version | Date | Changes |
+|---------|------|---------|
+| 2.0 | 2026-01-31 | Split into 3 subagents + final aggregator |
+| 1.0 | 2026-01-15 | Initial monolithic audit agent |

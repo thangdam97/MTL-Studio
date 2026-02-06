@@ -99,6 +99,61 @@
           "Character encoding issue",
           "Context window truncation"
         ]
+      },
+      {
+        "pattern": "(nhìn|xem|quan sát)様子",
+        "description": "Japanese 様子 (yousu - appearance/situation) leaked in Vietnamese context",
+        "example": "nhìn様子 của Emma",
+        "severity": "error",
+        "fix": "様子 → vẻ / bề ngoài / tình hình",
+        "source": "Vol 0b24 Ch01 Line 1049",
+        "date_discovered": "2026-02-02"
+      },
+      {
+        "pattern": "意外と",
+        "description": "Japanese 意外と (igai to - unexpectedly) leaked as compound",
+        "example": "Em意外と, ích kỷ",
+        "severity": "error",
+        "fix": "意外と → thực ra / ngoài mong đợi / thật ra",
+        "source": "Vol 0b24 Ch04 Line 2281, Ch05 Line 561",
+        "date_discovered": "2026-02-02"
+      },
+      {
+        "pattern": "ハードル",
+        "description": "Katakana ハードル (hurdle/barrier) not transcreated",
+        "example": "mộtハードル cao",
+        "severity": "error",
+        "fix": "ハードル → rào cản / trở ngại",
+        "source": "Vol 0b24 Ch01 Line 799",
+        "date_discovered": "2026-02-02"
+      },
+      {
+        "pattern": "有好感",
+        "description": "Chinese compound 有好感 (have good feelings) leaked",
+        "example": "người mình有好感",
+        "severity": "error",
+        "fix": "有好感 → có thiện cảm / có cảm tình tốt",
+        "source": "Vol 0b24 Ch03 Line 363",
+        "date_discovered": "2026-02-02"
+      },
+      {
+        "pattern": "ラブコメ",
+        "description": "Katakana ラブコメ (romcom/love comedy) not transcreated",
+        "example": "củaラブコメđó",
+        "severity": "error",
+        "fix": "ラブコメ → romcom / truyện tình cảm hài",
+        "source": "Vol 0b24 Ch05 Line 603",
+        "date_discovered": "2026-02-02"
+      },
+      {
+        "pattern": "([À-ỹa-zA-Z]+)[\\u4E00-\\u9FFF]{2,}",
+        "description": "Two+ character CJK compounds attached to Vietnamese words",
+        "example": "Em年頃で知, có nhiều",
+        "severity": "error",
+        "common_causes": [
+          "Partial word replacement by LLM",
+          "Japanese adjective not fully translated"
+        ]
       }
     ]
   },
@@ -123,7 +178,15 @@
       "少女": "thiếu nữ",
       "ドキドキ": "heart-pounding/thrilling (sound effect for heartbeat)",
       "dokidoki": "heart-pounding/thrilling",
-      "感動するほどではない": "nothing to write home about / not particularly impressive / not exactly moving"
+      "感動するほどではない": "nothing to write home about / not particularly impressive / not exactly moving",
+      "ありがたい作戦": "brilliant strategy (SARCASTIC) / oh what a wonderful plan (IRONIC)",
+      "ありがたい": "oh how wonderful (SARCASTIC) / oh great (IRONIC) / just peachy (SARCASTIC)",
+      "さすが": "as expected (can be sarcastic) / of course / naturally",
+      "流石": "as expected (can be sarcastic) / impressive (can be ironic)",
+      "素晴らしい": "wonderful (can be sarcastic) / fantastic (can be ironic) / just great (SARCASTIC)",
+      "最高": "the best (can be sarcastic) / perfect (can be ironic) / just perfect (SARCASTIC)",
+      "やったね": "yay (can be sarcastic) / how nice (IRONIC) / oh joy (SARCASTIC)",
+      "なるほど": "I see (can be dismissive) / uh-huh (SARCASTIC) / oh really (IRONIC)"
     },
     "common_korean_leaks": {
       "좌": "trái/ghế/giữa",
@@ -203,6 +266,21 @@
           "bad": "Not bad, but not exactly感動するほどではない…",
           "good": "Not bad, but nothing to write home about…",
           "explanation": "感動するほどではない (kandou suru hodo dewa nai) is a Japanese phrase meaning 'not particularly impressive/moving' - must be fully translated to natural English idiom"
+        },
+        {
+          "bad": "our leader Kaguya gave us theありがたい作戦 of,",
+          "good": "our leader Kaguya gave us the brilliant strategy of,",
+          "explanation": "ありがたい作戦 (arigatai sakusen) is SARCASTIC Japanese expression - literal 'grateful strategy' but means 'oh what a wonderful plan' (ironic). Context reveals sarcasm: the 'strategy' is just sound effects. Must translate with irony intact: 'brilliant strategy' (sarcasm clear from context)"
+        },
+        {
+          "bad": "Theさすが master gives us advice",
+          "good": "The oh-so-great master gives us advice",
+          "explanation": "さすが (sasuga) means 'as expected/impressive' but often used sarcastically in light novels - context determines if genuine or ironic"
+        },
+        {
+          "bad": "素晴らしい plan you got there",
+          "good": "What a wonderful plan you got there (sarcastic) / Oh great, another brilliant plan",
+          "explanation": "素晴らしい (subarashii) literally 'wonderful/splendid' - commonly used sarcastically in Japanese internet/otaku culture, similar to English 'oh great' or 'just fantastic'"
         }
       ]
     },
@@ -236,7 +314,8 @@
         "Suzufumi,这边这边",
         "様子 trong giờ câu lạc bộ",
         "thisドキドキ kind of thrill",
-        "Not bad, but not exactly感動するほどではない…"
+        "Not bad, but not exactly感動するほどではない…",
+        "our leader Kaguya gave us theありがたい作戦 of,"
       ],
       "root_cause": "Multi-language training data interference, incomplete translation, onomatopoeia not recognized, phrase boundary detection failure",
       "frequency": "moderate",
@@ -261,6 +340,24 @@
       "root_cause": "Compound word boundary detection failure",
       "frequency": "rare",
       "fix_difficulty": "moderate"
+    },
+    "type_5_sarcastic_expression_leak": {
+      "description": "Japanese sarcastic/ironic expressions left untranslated - common in otaku/internet culture",
+      "examples": [
+        "theありがたい作戦 of (the 'grateful strategy' - sarcastic)",
+        "Theさすが master (the 'as expected' master - ironic)",
+        "素晴らしい plan (wonderful plan - sarcastic)",
+        "最高 idea (the best idea - ironic)",
+        "やったね result (yay, what a result - sarcastic)"
+      ],
+      "root_cause": "LLM recognizes literal meaning but misses sarcastic tone, cultural context gap, irony not preserved in translation",
+      "frequency": "moderate in light novels, common in comedy/slice-of-life genres",
+      "fix_difficulty": "moderate (requires context analysis to determine if genuinely positive or sarcastic)",
+      "translation_guidelines": {
+        "detection": "Look for overly positive words (ありがたい, 素晴らしい, 最高, さすが) followed by obviously bad/silly content",
+        "strategy": "Translate with English sarcastic markers: 'oh what a...', 'just perfect', 'brilliant' (when context is negative)",
+        "preservation": "Maintain ironic tone - don't make sarcasm explicit with '(sarcastic)' tags unless absolutely necessary"
+      }
     }
   },
   "usage_instructions": {

@@ -1,7 +1,7 @@
 {
   "$schema": "./publisher_schema.json",
   "version": "2.0",
-  "last_updated": "2026-01-21T13:04:37.145156",
+  "last_updated": "2026-02-01T21:30:00.000000",
   "publishers": {
     "KADOKAWA": {
       "canonical_name": "KADOKAWA",
@@ -181,6 +181,89 @@
         "toc_handling": "standard",
         "chapter_merging": false,
         "filename_pattern": "chapter\\d+\\.xhtml"
+      }
+    },
+    "Kodansha": {
+      "canonical_name": "Kodansha",
+      "aliases": [
+        "Kodansha",
+        "講談社",
+        "株式会社講談社",
+        "Kodansha Ltd."
+      ],
+      "country": "JP",
+      "confidence": "confirmed",
+      "image_patterns": {
+        "cover": [
+          {
+            "pattern": "^cover\\.jpe?g$",
+            "flags": "i",
+            "priority": 1
+          }
+        ],
+        "kuchie": [
+          {
+            "pattern": "^p00[0-9]\\.jpe?g$",
+            "flags": "i",
+            "priority": 1,
+            "note": "p001-p009 reserved for kuchie"
+          },
+          {
+            "pattern": "^p00[0-9]-00[0-9]\\.jpe?g$",
+            "flags": "i",
+            "priority": 2,
+            "note": "Spreads like p002-003.jpg"
+          }
+        ],
+        "illustration": [
+          {
+            "pattern": "^p0[1-9]\\d\\.jpe?g$",
+            "flags": "i",
+            "priority": 1,
+            "note": "p010+ are inline illustrations"
+          },
+          {
+            "pattern": "^p[1-9]\\d+\\.jpe?g$",
+            "flags": "i",
+            "priority": 2
+          },
+          {
+            "pattern": "^profile\\.jpe?g$",
+            "flags": "i",
+            "priority": 3
+          },
+          {
+            "pattern": "^titlepage\\.jpe?g$",
+            "flags": "i",
+            "priority": 4
+          },
+          {
+            "pattern": "^end\\.jpe?g$",
+            "flags": "i",
+            "priority": 5,
+            "note": "End page illustration"
+          }
+        ]
+      },
+      "content_patterns": {
+        "toc_handling": "standard",
+        "chapter_merging": true,
+        "chapter_detection": {
+          "method": "heading_split",
+          "heading_patterns": [
+            "^###\\s+[１２３４５６７８９０]+$",
+            "^###\\s+\\d+$",
+            "^###\\s+プロローグ$",
+            "^###\\s+エピローグ$",
+            "^###\\s+あとがき$",
+            "^###\\s+序章$",
+            "^###\\s+終章$"
+          ],
+          "split_on_heading": true,
+          "note": "Kodansha EPUBs use continuous pagination (p-0012+) with ### N markers for chapters"
+        },
+        "filename_pattern": "p-\\d{4}\\.xhtml",
+        "content_start_pattern": "p-0012\\.xhtml"
       }
     },
     "SB Creative": {
@@ -408,6 +491,207 @@
           "p-cover\\.xhtml",
           "p-fmatter-\\d{3}\\.xhtml"
         ]
+      }
+    },
+    "Cobalt Bunko": {
+      "canonical_name": "Cobalt Bunko",
+      "aliases": [
+        "Cobalt Bunko",
+        "コバルト文庫",
+        "集英社コバルト文庫",
+        "Shueisha Cobalt Bunko",
+        "Cobalt",
+        "コバルト"
+      ],
+      "parent_publisher": "Shueisha",
+      "country": "JP",
+      "confidence": "confirmed",
+      "genre_specialization": "shoujo",
+      "description": "Shueisha's premier shoujo light novel imprint, established 1976. Known for emotionally introspective prose, romantic narratives, and premium illustrated editions (カラーイラスト付) featuring 10-20 full-page color frontispieces (kuchie).",
+      "image_patterns": {
+        "cover": [
+          {
+            "pattern": "^cover\\.(jpe?g|png)$",
+            "flags": "i",
+            "priority": 1
+          },
+          {
+            "pattern": "^image_rsrc[A-Z0-9]{3,4}\\.(jpe?g|png)$",
+            "flags": "i",
+            "priority": 2,
+            "note": "Cover may be first in rsrc sequence"
+          }
+        ],
+        "kuchie": [
+          {
+            "pattern": "^kuchie[-_]\\d{3}\\.jpe?g$",
+            "flags": "i",
+            "priority": 1,
+            "note": "Standardized kuchie naming"
+          },
+          {
+            "pattern": "^image_rsrc[A-Z0-9]{3,4}\\.(jpe?g|png)$",
+            "flags": "i",
+            "priority": 2,
+            "size_threshold_kb": 200,
+            "note": "Large (200KB+) rsrc images are typically color kuchie"
+          }
+        ],
+        "illustration": [
+          {
+            "pattern": "^image_rsrc[A-Z0-9]{3,4}\\.(jpe?g|png)$",
+            "flags": "i",
+            "priority": 1,
+            "size_threshold_kb": 100,
+            "note": "Small (<100KB) rsrc images are decorative ornaments"
+          },
+          {
+            "pattern": "^ornament[-_]\\d+\\.(jpe?g|png)$",
+            "flags": "i",
+            "priority": 2,
+            "note": "Chapter headers and scene break markers"
+          }
+        ]
+      },
+      "content_patterns": {
+        "toc_handling": "standard",
+        "chapter_merging": false,
+        "filename_pattern": "[a-zA-Z0-9]+\\.xhtml",
+        "kuchie_extraction": "spine",
+        "spine_kuchie_patterns": [
+          "^c[0-9A-Z]{2}\\.xhtml$"
+        ],
+        "standalone_illustration_detection": {
+          "max_lines": 20,
+          "max_size_bytes": 800,
+          "required_elements": [
+            "img"
+          ],
+          "exclude_text_content": true
+        }
+      },
+      "translation_guidance": {
+        "prose_style": "emotionally_introspective",
+        "pacing": "deliberate",
+        "focus": "internal_monologue",
+        "typical_features": [
+          "Detailed emotional landscapes",
+          "Sensory descriptions (visual, tactile, auditory)",
+          "Slow-burn romantic development",
+          "Character-driven rather than plot-driven",
+          "Emphasis on micro-emotions and subtle gestures"
+        ],
+        "avoid": [
+          "Punchy action-oriented dialogue",
+          "Rapid scene transitions",
+          "Exposition dumps",
+          "Over-explaining emotions"
+        ]
+      },
+      "fidelity_thresholds": {
+        "line_variance_acceptable": "0-8%",
+        "line_variance_review": "8-12%",
+        "line_variance_fail": ">12%",
+        "word_expansion_expected": "8-10x",
+        "compression_policy": "forbidden",
+        "notes": "Shoujo novels are MORE VERBOSE than kanji-heavy source material. Word expansion 8-10x JP→EN is expected and correct. Chapter 4-5% line variance natural due to honorific compression, but >12% signals actual content loss."
+      },
+      "atmosphere_validation": {
+        "markers_per_1000_words": {
+          "wind": {
+            "min": 2,
+            "target": 4,
+            "patterns": [
+              "breeze",
+              "wind",
+              "gust",
+              "rustling",
+              "flowing"
+            ]
+          },
+          "light": {
+            "min": 2,
+            "target": 5,
+            "patterns": [
+              "dazzling",
+              "sparkling",
+              "moonlight",
+              "glow",
+              "shimmer",
+              "shining"
+            ]
+          },
+          "temperature": {
+            "min": 1,
+            "target": 2,
+            "patterns": [
+              "warm",
+              "cold",
+              "chilly",
+              "cool",
+              "heat"
+            ]
+          },
+          "sound": {
+            "min": 2,
+            "target": 3,
+            "patterns": [
+              "chirping",
+              "rustling",
+              "whisper",
+              "silence",
+              "quiet",
+              "sound of"
+            ]
+          },
+          "texture": {
+            "min": 1,
+            "target": 2,
+            "patterns": [
+              "soft",
+              "rough",
+              "smooth",
+              "gentle",
+              "light"
+            ]
+          },
+          "color": {
+            "min": 1,
+            "target": 3,
+            "patterns": [
+              "pale",
+              "faint",
+              "vivid",
+              "dark",
+              "bright",
+              "colored"
+            ]
+          }
+        },
+        "kira_kira_moments": {
+          "min_per_chapter": 2,
+          "target_per_chapter": 5,
+          "patterns": [
+            "flower petals",
+            "sparkle",
+            "dancing",
+            "floating",
+            "drifting",
+            "fluttering"
+          ]
+        },
+        "micro_emotions": {
+          "show_dont_tell_ratio": 0.85,
+          "physical_reactions": [
+            "blushing",
+            "looking down",
+            "fidgeting",
+            "heart",
+            "chest felt",
+            "face grew"
+          ]
+        },
+        "notes": "Sensory atmosphere markers ARE the content in shoujo. Stripping these for brevity destroys genre authenticity."
       }
     }
   },

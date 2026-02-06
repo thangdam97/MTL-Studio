@@ -1,10 +1,14 @@
 {
     "_meta": {
-        "version": "2.0",
-        "description": "Anti-AI-ism patterns for prose quality detection with Echo Detection",
+        "version": "2.1",
+        "description": "Anti-AI-ism patterns for prose quality detection with Echo Detection and Japanese Grammar Exceptions",
         "target_density_per_1k_words": 0.02,
-        "reference": "RESEARCH_INDUSTRIAL_PRACTICES.md",
-        "last_updated": "2026-01-29",
+        "reference": "RESEARCH_INDUSTRIAL_PRACTICES.md + ai_ism_findings_1420.json",
+        "last_updated": "2026-01-30",
+        "changelog": {
+            "v2.1": "Added Japanese grammar exceptions from Vol.1420 analysis (48.5% false positive rate revealed need for whitelisting)",
+            "v2.0": "Added Echo Detection proximity penalties"
+        },
         "echo_detection": {
             "enabled": true,
             "description": "Proximity-based clustering detection - catches AI repetition within short distances",
@@ -160,11 +164,25 @@
                         "display": "seemed to [verb]",
                         "fix": "Use direct verb or 'looked': 'seemed to smile' → 'smiled' / 'seemed to be tired' → 'was tired'",
                         "source": "AI filter phrase - hedges definitive observations",
+                        "japanese_grammar_exception": {
+                            "whitelist_when_translating": [
+                                "ようだ",
+                                "みたい",
+                                "らしい",
+                                "そう"
+                            ],
+                            "explanation": "Japanese has explicit observation/inference markers that REQUIRE 'seemed to' translation",
+                            "examples": [
+                                "ショックを受けたようで → seemed to be in shock (LEGITIMATE)",
+                                "人気だったみたい → seemed to prefer (LEGITIMATE)"
+                            ],
+                            "verdict": "Accept when translating Japanese observation markers - NOT AI-ism"
+                        },
                         "proximity_penalty": {
                             "window": 100,
                             "action": "FLAG_ECHO",
                             "severity_override": "MAJOR",
-                            "fix_instruction": "Vary with: 'appeared', 'looked', direct observation, or remove entirely"
+                            "fix_instruction": "Vary with: 'appeared', 'looked', direct observation, or remove entirely (UNLESS translating Japanese observation marker)"
                         }
                     },
                     {
@@ -173,11 +191,19 @@
                         "display": "appeared to [verb]",
                         "fix": "Use direct statement: 'appeared to be angry' → 'was angry' / 'looked angry'",
                         "source": "AI filter phrase",
+                        "japanese_grammar_exception": {
+                            "whitelist_when_translating": [
+                                "らしい",
+                                "ようだ"
+                            ],
+                            "explanation": "Japanese inference markers may require 'appeared to'",
+                            "verdict": "Accept when translating Japanese observation markers"
+                        },
                         "proximity_penalty": {
                             "window": 100,
                             "action": "FLAG_ECHO",
                             "severity_override": "MAJOR",
-                            "fix_instruction": "Vary with: 'seemed', 'looked', specific detail, or direct statement"
+                            "fix_instruction": "Vary with: 'seemed', 'looked', specific detail, or direct statement (UNLESS translating Japanese marker)"
                         }
                     },
                     {
@@ -186,11 +212,23 @@
                         "display": "I found myself [verb]ing",
                         "fix": "Use direct action: 'I found myself staring' → 'I stared'",
                         "source": "AI filter phrase",
+                        "japanese_grammar_exception": {
+                            "whitelist_when_translating": [
+                                "いつの間にか",
+                                "気がつくと",
+                                "気づけば"
+                            ],
+                            "explanation": "Japanese has explicit unconscious/gradual action markers",
+                            "examples": [
+                                "いつの間にか手を握って → found myself holding his hand (LEGITIMATE)"
+                            ],
+                            "verdict": "Accept when translating Japanese unconscious action markers"
+                        },
                         "proximity_penalty": {
                             "window": 75,
                             "action": "FLAG_ECHO",
                             "severity_override": "CRITICAL",
-                            "fix_instruction": "Use direct verb - character has agency over their actions"
+                            "fix_instruction": "Use direct verb - character has agency (UNLESS translating いつの間にか)"
                         }
                     },
                     {
@@ -199,11 +237,24 @@
                         "display": "couldn't help but [verb]",
                         "fix": "Use direct action: 'couldn't help but smile' → 'smiled'",
                         "source": "AI passive agency removal - eliminates character intentionality",
+                        "japanese_grammar_exception": {
+                            "whitelist_when_translating": [
+                                "つい",
+                                "思わず",
+                                "～てしまう"
+                            ],
+                            "explanation": "Japanese has explicit involuntary/compulsion markers requiring this translation",
+                            "examples": [
+                                "つい見たくなって → couldn't help but want to see (LEGITIMATE)",
+                                "思わず声を上げてしまった → couldn't help but yelp (LEGITIMATE)"
+                            ],
+                            "verdict": "Accept when translating Japanese involuntary markers - this is CORRECT translation"
+                        },
                         "proximity_penalty": {
                             "window": 75,
                             "action": "FLAG_ECHO",
                             "severity_override": "CRITICAL",
-                            "fix_instruction": "Use direct verb - character chooses their reactions"
+                            "fix_instruction": "Use direct verb (UNLESS translating つい/思わず/～てしまう - then KEEP IT)"
                         }
                     },
                     {
@@ -224,7 +275,19 @@
                         "regex": "\\blooked like (?:he |she |they |it )?(?:could|was|were|might)\\b",
                         "display": "looked like [subject] could/was",
                         "fix": "Simplify: 'looked like she could cry' → 'looked ready to cry'",
-                        "source": "AI filter phrase"
+                        "source": "AI filter phrase",
+                        "japanese_grammar_exception": {
+                            "whitelist_when_translating": [
+                                "そう",
+                                "～ばかり"
+                            ],
+                            "explanation": "Japanese visual inference (そう) and imminent action (～ばかり) markers",
+                            "examples": [
+                                "入れそうなお風呂 → looked like it could fit ten people (LEGITIMATE)",
+                                "ヨダレを垂らさんばかり → looked like about to drool (LEGITIMATE)"
+                            ],
+                            "verdict": "Accept when translating Japanese visual inference or imminent action markers"
+                        }
                     }
                 ]
             },
@@ -236,7 +299,16 @@
                         "regex": "\\b[Tt]o be honest,?",
                         "display": "to be honest",
                         "fix": "Remove entirely - adds no value. If character voice requires hesitation, use 'honestly' sparingly",
-                        "source": "AI crutch phrase - pure filler"
+                        "source": "AI crutch phrase - pure filler",
+                        "japanese_grammar_exception": {
+                            "whitelist_when_translating": [
+                                "正直なところ",
+                                "正直",
+                                "実を言うと"
+                            ],
+                            "explanation": "Japanese has explicit honesty markers that may warrant this phrase",
+                            "verdict": "Accept ONLY when translating explicit Japanese honesty markers - otherwise AI filler"
+                        }
                     },
                     {
                         "id": "to_be_fair",
@@ -263,11 +335,25 @@
                         "display": "started to [verb]",
                         "fix": "Use direct verb: 'started to walk' → 'walked'",
                         "source": "AI process verb",
+                        "japanese_grammar_exception": {
+                            "whitelist_when_translating": [
+                                "～てくる (inceptive)",
+                                "～始める",
+                                "だんだん"
+                            ],
+                            "explanation": "Japanese has explicit inceptive/progressive constructions showing gradual development",
+                            "examples": [
+                                "胸がだんだんふくらんできて → chest has started to fill out (LEGITIMATE - puberty context)",
+                                "めくり上げていく → started to lift (LEGITIMATE - progressive upward motion)"
+                            ],
+                            "verdict": "Accept when translating Japanese progressive/inceptive aspect - CHECK JAPANESE SOURCE",
+                            "warning": "Often AI padding - verify Japanese uses inceptive construction before accepting"
+                        },
                         "proximity_penalty": {
                             "window": 100,
                             "action": "ESCALATE_TO_MAJOR",
                             "severity_override": "CRITICAL",
-                            "fix_instruction": "Use strong verb or vary with 'began', direct verb, or action description"
+                            "fix_instruction": "Use direct verb (UNLESS Japanese uses ～てくる/～始める progressive aspect)"
                         }
                     },
                     {
@@ -276,11 +362,23 @@
                         "display": "began to [verb]",
                         "fix": "Use direct verb: 'began to cry' → 'cried'",
                         "source": "AI process verb",
+                        "japanese_grammar_exception": {
+                            "whitelist_when_translating": [
+                                "～ていく (progressive)",
+                                "～始める"
+                            ],
+                            "explanation": "Japanese progressive aspect with -te iku shows sequential/continuous action",
+                            "examples": [
+                                "ボタンを外していく → began to undo buttons (LEGITIMATE - sequential button-by-button)",
+                                "持ち上げるようにしていく → began to lift (LEGITIMATE - difficult progressive action)"
+                            ],
+                            "verdict": "Accept when translating Japanese progressive aspect - CHECK JAPANESE SOURCE"
+                        },
                         "proximity_penalty": {
                             "window": 100,
                             "action": "ESCALATE_TO_MAJOR",
                             "severity_override": "CRITICAL",
-                            "fix_instruction": "Use direct verb or vary with 'started', action description"
+                            "fix_instruction": "Use direct verb (UNLESS Japanese uses ～ていく/～始める progressive)"
                         }
                     },
                     {
@@ -296,11 +394,24 @@
                         "display": "managed to [verb]",
                         "fix": "Use direct verb unless difficulty matters: 'managed to escape' → 'escaped'",
                         "source": "AI process verb",
+                        "japanese_grammar_exception": {
+                            "whitelist_when_translating": [
+                                "できた (potential form)",
+                                "なんとか",
+                                "うまく"
+                            ],
+                            "explanation": "Japanese potential form expressing difficult achievement or fortunate success",
+                            "examples": [
+                                "なぜあんな大胆なことができたのか → how I managed to do something so bold (LEGITIMATE)",
+                                "先手を打ててよかった → glad I managed to head her off (LEGITIMATE)"
+                            ],
+                            "verdict": "Accept when translating Japanese potential form with retrospective surprise/difficulty"
+                        },
                         "proximity_penalty": {
                             "window": 150,
                             "action": "ESCALATE_TO_MAJOR",
                             "severity_override": "MAJOR",
-                            "fix_instruction": "Replace with strong verb or distinct synonym showing effort/difficulty"
+                            "fix_instruction": "Replace with strong verb (UNLESS Japanese uses できた potential form expressing difficulty)"
                         }
                     }
                 ]
@@ -313,7 +424,15 @@
                         "regex": "\\bthe fact that\\b",
                         "display": "the fact that",
                         "fix": "Restructure: 'The fact that she came' → 'That she came'",
-                        "source": "AI nominalization"
+                        "source": "AI nominalization",
+                        "japanese_grammar_exception": {
+                            "note": "Japanese uses simple の nominalization without emphasis wrapper",
+                            "examples": [
+                                "真理亜と花音が恥ずかしがっているの → that Maria and Kanon were flustered (direct nominalization better)"
+                            ],
+                            "verdict": "Usually AI padding even with Japanese の - prefer gerund or direct nominalization",
+                            "severity": "MINOR AI-ism even when translating の nominalization"
+                        }
                     },
                     {
                         "id": "the_idea_that",
@@ -508,7 +627,17 @@
                         "regex": "\\bcould feel (?:that |the )?\\w+",
                         "display": "could feel [noun]",
                         "fix": "Show directly: 'could feel my heart racing' → 'My heart raced'",
-                        "source": "AI perception verb"
+                        "source": "AI perception verb",
+                        "web_gemini_note": {
+                            "finding": "Common sensory filter in Web Gemini (3x in Ch21)",
+                            "recommendation": "Replace with direct sensory description: 'I could feel her chest' → 'Her chest pressed against me'"
+                        },
+                        "proximity_penalty": {
+                            "window": 75,
+                            "action": "FLAG_ECHO",
+                            "severity_override": "MAJOR",
+                            "fix_instruction": "Use direct sensory description - more visceral and immediate"
+                        }
                     },
                     {
                         "id": "was_aware",
@@ -658,11 +787,17 @@
                         "display": "a bit",
                         "fix": "Common in casual speech but AI clusters it",
                         "source": "AI hedge word",
+                        "web_gemini_note": {
+                            "finding": "Most common translationese in Web Gemini v2.0 (9x in Ch17-21)",
+                            "density": "0.89 per 1k words in Web Gemini vs 0.05 in API",
+                            "explanation": "Web Gemini lacks full 280KB Anti-AI-ism pattern library",
+                            "recommendation": "Post-process Web Gemini chapters to remove excessive hedge phrases"
+                        },
                         "proximity_penalty": {
                             "window": 100,
                             "action": "FLAG_ECHO",
                             "severity_override": "MAJOR",
-                            "fix_instruction": "Vary with: 'somewhat', 'a little', 'slightly', or remove for directness"
+                            "fix_instruction": "Vary with: 'slightly', 'somewhat', specific degree, or remove entirely"
                         }
                     },
                     {
@@ -671,6 +806,10 @@
                         "display": "kind of",
                         "fix": "Casual hedge - acceptable in dialogue",
                         "source": "AI hedge word",
+                        "web_gemini_note": {
+                            "finding": "Second most common Web Gemini hedge phrase (4x in Ch17-21)",
+                            "explanation": "Web Gemini uses more hedging than API due to lacking condensed avoidance rules"
+                        },
                         "proximity_penalty": {
                             "window": 100,
                             "action": "FLAG_ECHO",
@@ -693,6 +832,89 @@
                     }
                 ]
             }
+        }
+    },
+    "VIETNAMESE_CRITICAL": {
+        "description": "Vietnamese-specific AI-ism patterns that block publication quality",
+        "target_language": "vi-VN",
+        "patterns": [
+            {
+                "id": "mot_cach_passive",
+                "regex": "một cách [a-zA-ZÀ-ỹ]+",
+                "display": "một cách [adverb]",
+                "fix": "Remove 'một cách' - use direct adverb modification. In 1st POV, convert ALL passive to active voice.",
+                "source": "Literal translation of Japanese 〜的に/〜ように patterns",
+                "severity": "CRITICAL",
+                "case_study": {
+                    "volume": "0b24",
+                    "instances_found": 79,
+                    "instances_removed": 79,
+                    "chapters_affected": "01-05",
+                    "date_discovered": "2026-02-02",
+                    "impact": "AI-ism density reduced from 3.71/1k to 2.33/1k words",
+                    "grade_improvement": "91.5 → 94.0 (A grade achieved)"
+                },
+                "examples": {
+                    "bad": [
+                        "Cô ấy nói một cách lạnh lùng → (passive construction creates psychological distance)",
+                        "Tôi quan sát một cách cẩn thận → (1st POV should be direct experience)",
+                        "Anh ta hành động một cách nhanh chóng → (verbose wrapper around adverb)"
+                    ],
+                    "good": [
+                        "Cô ấy nói lạnh lùng → (direct adverb modification)",
+                        "Tôi quan sát cẩn thận → (1st POV active voice)",
+                        "Anh ta hành động nhanh chóng → (direct expression)"
+                    ]
+                },
+                "rationale": "'một cách' is a Japanese calque that Vietnamese native speakers avoid. It creates artificial distance between narrator and action. In 1st person POV, passive voice is ALWAYS wrong - the narrator experiences events directly, not through observation.",
+                "detection_strategy": "Scan for 'một cách' + any Vietnamese adverb. Check POV: if 1st person (uses 'tôi', 'mình', 'tớ' pronouns), flag ALL passive constructions.",
+                "fix_instruction": "1. Remove 'một cách' wrapper completely. 2. Place adverb directly after verb. 3. If 1st POV, verify voice is active (narrator does action, not receives/observes it).",
+                "reference_documents": [
+                    "PROSE_OPTIMIZATION_REPORT.md",
+                    "AI_ISM_ANALYSIS.md",
+                    "AUDIT_REPORT_0b24.md"
+                ]
+            },
+            {
+                "id": "bi_duoc_first_person",
+                "regex": "\\b(?:[Tt]ôi|[Mm]ình|[Tt]ớ)\\s+(?:bị|được)\\s+[a-zA-ZÀ-ỹ]+",
+                "display": "[1st person pronoun] bị/được [verb]",
+                "fix": "Convert to active voice: narrator experiences action directly, not passively.",
+                "source": "First-person passive voice - violates POV immediacy principle",
+                "severity": "CRITICAL",
+                "rationale": "In Vietnamese 1st person narration, passive markers 'bị' (negative passive) and 'được' (positive passive) create psychological distance. The narrator should describe direct experience, not report on what happened to them as an observer.",
+                "examples": {
+                    "bad": [
+                        "Tôi được Charlotte khen ngợi → (narrator passively receives praise)",
+                        "Mình bị cô ấy mắng → (narrator reports being scolded as external event)",
+                        "Tớ được mời đến → (narrator passively invited)"
+                    ],
+                    "good": [
+                        "Charlotte khen ngợi tôi → (active: Charlotte does action to narrator)",
+                        "Cô ấy mắng mình → (active: she scolds me)",
+                        "Họ mời tớ đến → (active: they invite me)"
+                    ]
+                },
+                "detection_strategy": "Match 1st person pronouns (tôi/mình/tớ) + passive markers (bị/được) + verb. Verify POV is 1st person narration.",
+                "fix_instruction": "Restructure sentence to active voice: move actor to subject position, remove passive marker, keep narrator as object."
+            }
+        ],
+        "pov_detection": {
+            "first_person_markers": [
+                "tôi",
+                "mình",
+                "tớ",
+                "ta",
+                "chúng tôi",
+                "chúng mình"
+            ],
+            "passive_markers": [
+                "bị",
+                "được",
+                "bị ... bởi",
+                "được ... bởi"
+            ],
+            "rule": "In 1st person POV narration, ALL passive constructions must be converted to active voice for immediacy and natural Vietnamese prose."
         }
     }
 }

@@ -135,6 +135,7 @@ def phase_menu(volume_id: str) -> Optional[str]:
     choices = [
         questionary.Choice("Phase 1: Librarian (EPUB Extraction)", value="phase1"),
         questionary.Choice("Phase 1.5: Metadata (Title/Author Translation)", value="phase1.5"),
+        questionary.Choice("Phase 1.6: Multimodal Processor (Illustration Analysis)", value="phase1.6"),
         questionary.Choice("Phase 2: Translator (Gemini MT)", value="phase2"),
         questionary.Choice("Phase 3: Critics (Manual Review)", value="phase3"),
         questionary.Choice("Phase 4: Builder (EPUB Packaging)", value="phase4"),

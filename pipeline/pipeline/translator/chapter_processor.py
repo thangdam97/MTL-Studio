@@ -16,6 +16,16 @@ from pipeline.translator.context_manager import ContextManager
 from pipeline.translator.quality_metrics import QualityMetrics, AuditResult
 from pipeline.translator.config import get_generation_params, get_model_name, get_safety_settings
 from pipeline.translator.scene_break_formatter import SceneBreakFormatter
+from pipeline.post_processor.vn_cjk_cleaner import VietnameseCJKCleaner
+from modules.gap_integration import GapIntegrationEngine
+
+# Dialect detection (v1.0 - 2026-02-01)
+try:
+    from modules.dialect_detector import detect_chapter_dialects
+    DIALECT_DETECTION_AVAILABLE = True
+except ImportError:
+    DIALECT_DETECTION_AVAILABLE = False
+    detect_chapter_dialects = None
 
 logger = logging.getLogger(__name__)
 
@@ -35,22 +45,35 @@ class ChapterProcessor:
         self,
         gemini_client: GeminiClient,
         prompt_loader: PromptLoader,
-        context_manager: ContextManager
+        context_manager: ContextManager,
+        target_language: str = "en"
     ):
         self.client = gemini_client
         self.prompt_loader = prompt_loader
         self.context_manager = context_manager
+        self.target_language = target_language
         self.model_name = get_model_name()
         self.gen_params = get_generation_params()
         self.safety_settings = get_safety_settings()
-        
-        # Track if we've notified user about thinking log availability
-        self._thinking_log_notified = False
+
+        # Initialize Vietnamese CJK cleaner for post-processing (VN only)
+        self._vn_cjk_cleaner = None
+        if target_language.lower() in ['vi', 'vn']:
+            self._vn_cjk_cleaner = VietnameseCJKCleaner(strict_mode=True, log_substitutions=True)
+            logger.info("✓ Vietnamese CJK post-processor initialized (hard substitution enabled)")
         
         # Load character names from manifest.json for name consistency
         self.character_names = self._load_character_names()
         if self.character_names:
             logger.info(f"✓ Loaded {len(self.character_names)} character names from manifest")
+        
+        # Initialize gap analyzer (Week 2-3 integration)
+        self.gap_analyzer = None
+        self.enable_gap_analysis = False  # Will be enabled from agent if needed
+
+        # Initialize multimodal (visual context injection)
+        self.enable_multimodal = False  # Will be enabled from agent if needed
+        self.visual_cache = None  # VisualCacheManager, set by agent
     
     def _load_character_names(self) -> Dict[str, str]:
         """Load character names from manifest.json metadata_en."""
@@ -79,6 +102,103 @@ class ChapterProcessor:
         except Exception as e:
             logger.warning(f"Failed to load character names: {e}")
             return {}
+    
+    def _save_thinking_process(
+        self, 
+        chapter_id: str, 
+        thinking_content: str, 
+        output_path: Path,
+        visual_guidance: Optional[str] = None,
+        illustration_ids: Optional[list] = None
+    ) -> None:
+        """Save Gemini's thinking process to a separate markdown file.
+        
+        Args:
+            chapter_id: Chapter identifier (e.g., "chapter_01")
+            thinking_content: The thinking/reasoning content from Gemini
+            output_path: Path to the translated chapter file
+            visual_guidance: Optional visual context injected (multimodal)
+            illustration_ids: Optional list of illustration IDs processed
+        """
+        from pipeline.config import get_config_section
+        
+        gemini_config = get_config_section('gemini')
+        thinking_config = gemini_config.get('thinking_mode', {})
+        
+        if not thinking_config.get('save_to_file', False):
+            return
+        
+        # Create THINKING directory in the work folder
+        thinking_dir = output_path.parent.parent / thinking_config.get('output_dir', 'THINKING')
+        thinking_dir.mkdir(exist_ok=True)
+        
+        # Generate thinking file name based on chapter
+        thinking_file = thinking_dir / f"{chapter_id}_THINKING.md"
+        
+        # Create markdown content with metadata
+        from datetime import datetime
+        
+        # Build multimodal section if applicable
+        multimodal_section = ""
+        visual_thinking_section = ""
+        if self.enable_multimodal and visual_guidance:
+            illust_count = len(illustration_ids) if illustration_ids else 0
+            multimodal_section = f"""
+## 🎨 Multimodal Visual Context
+
+**Mode**: Dual-Model "CPU + GPU" Architecture
+**Illustrations Analyzed**: {illust_count}
+**Visual Cache**: Active
+
+### Art Director's Notes Injected
+
+The following visual analysis was provided to guide translation:
+
+```
+{visual_guidance[:2000]}{"..." if len(visual_guidance) > 2000 else ""}
+```
+
+---
+"""
+            # Include Gemini 3 Pro visual thinking log if available
+            if illustration_ids:
+                try:
+                    from modules.multimodal.prompt_injector import build_visual_thinking_log
+                    volume_path = output_path.parent.parent  # EN/chapter.md -> volume_dir
+                    visual_thinking_section = build_visual_thinking_log(illustration_ids, volume_path)
+                    if visual_thinking_section:
+                        visual_thinking_section = f"\n{visual_thinking_section}\n\n---\n"
+                except Exception as e:
+                    logger.debug(f"[THINKING] Could not include visual thinking log: {e}")
+        
+        markdown_content = f"""# Translation Reasoning Process
+
+**Chapter**: {chapter_id}
+**Generated**: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}
+**Model**: {self.client.model}
+**Target Language**: {self.target_language}
+**Multimodal Enabled**: {self.enable_multimodal}
+
+---
+{multimodal_section}{visual_thinking_section}
+## Gemini's Translation Reasoning
+
+This document contains the internal reasoning process that Gemini used while translating this chapter. This "thinking" output shows how the model analyzed the source text, made translation decisions, and considered context.
+
+---
+
+{thinking_content}
+
+---
+
+*This thinking process is automatically generated by Gemini 3/2.5 models and provides insight into the translation decision-making process.*
+"""
+        
+        # Write to file
+        with open(thinking_file, 'w', encoding='utf-8') as f:
+            f.write(markdown_content)
+        
+        logger.info(f"💭 Thinking process saved to: {thinking_file.relative_to(output_path.parent.parent.parent)}")
 
     def translate_chapter(
         self,
@@ -113,6 +233,54 @@ class ChapterProcessor:
             with open(source_path, 'r', encoding='utf-8') as f:
                 source_text = f.read()
             logger.debug(f"[VERBOSE] Source text length: {len(source_text)} characters")
+            
+            # === GAP ANALYSIS (Pre-Translation) ===
+            gap_flags = None
+            if self.enable_gap_analysis and self.gap_analyzer:
+                try:
+                    logger.info(f"[GAP] Running pre-translation gap analysis on {chapter_id}...")
+                    gap_report = self.gap_analyzer.analyze_chapter_pre_translation(
+                        chapter_id=chapter_id,
+                        jp_lines=source_text.split('\n'),
+                        en_lines=None  # Pre-translation, no EN output yet
+                    )
+                    
+                    if gap_report:
+                        gap_a_count = len(gap_report.gap_a_flags)
+                        gap_b_count = len(gap_report.gap_b_flags)
+                        gap_c_count = len(gap_report.gap_c_flags)
+                        total_gaps = gap_a_count + gap_b_count + gap_c_count
+                        
+                        if total_gaps > 0:
+                            logger.info(f"[GAP] Detected {total_gaps} gaps: A={gap_a_count}, B={gap_b_count}, C={gap_c_count}")
+                            gap_flags = {
+                                'gap_a': gap_report.gap_a_flags,
+                                'gap_b': gap_report.gap_b_flags,
+                                'gap_c': gap_report.gap_c_flags
+                            }
+                        else:
+                            logger.debug(f"[GAP] No gaps detected in {chapter_id}")
+                except Exception as e:
+                    logger.warning(f"[GAP] Gap analysis failed: {e}")
+                    logger.warning("[GAP] Continuing without gap guidance")
+            # === END GAP ANALYSIS ===
+
+            # === DIALECT DETECTION (v1.0 - 2026-02-01) ===
+            dialect_guidance = None
+            if DIALECT_DETECTION_AVAILABLE and detect_chapter_dialects:
+                try:
+                    logger.debug(f"[DIALECT] Scanning {chapter_id} for regional dialects...")
+                    has_dialects, dialect_text = detect_chapter_dialects(source_text, chapter_id)
+                    
+                    if has_dialects:
+                        logger.info(f"[DIALECT] Regional dialect(s) detected in {chapter_id}")
+                        dialect_guidance = dialect_text
+                    else:
+                        logger.debug(f"[DIALECT] No regional dialects detected in {chapter_id}")
+                except Exception as e:
+                    logger.warning(f"[DIALECT] Detection failed: {e}")
+                    logger.warning("[DIALECT] Continuing without dialect guidance")
+            # === END DIALECT DETECTION ===
 
             # Strip JP title if present (usually the first H1)
             # We preserve the original title for audit but send the rest to LLM
@@ -121,6 +289,149 @@ class ChapterProcessor:
             if jp_title_match:
                 source_content_only = source_text[jp_title_match.end():].strip()
                 logger.info(f"Stripped JP title for translation: {jp_title_match.group(1)}")
+
+            # === Kanji Disambiguation (Sino-Vietnamese Vector Search) ===
+            # Extract kanji compounds and query vector store for Vietnamese guidance
+            # Now with Context-Aware Disambiguation using surrounding sentences
+            sino_vn_guidance = None
+            context_str = ""  # Initialize early for kanji disambiguation (populated later at line 204)
+            if self.target_language in ['vi', 'vn']:  # Only for Vietnamese translations
+                try:
+                    from modules.kanji_extractor import extract_unique_compounds
+                    from modules.sino_vietnamese_store import SinoVietnameseStore
+                    
+                    logger.debug(f"[KANJI] Extracting kanji compounds for Sino-Vietnamese lookup...")
+                    
+                    # Extract top 30 most frequent kanji compounds (2-4 characters)
+                    kanji_terms = extract_unique_compounds(
+                        source_content_only, 
+                        min_length=2, 
+                        max_length=4,
+                        top_n=30
+                    )
+                    
+                    if kanji_terms:
+                        logger.debug(f"[KANJI] Found {len(kanji_terms)} kanji compounds: {kanji_terms[:5]}...")
+                        
+                        # Query vector store for disambiguation guidance
+                        # Now with CONTEXT-AWARE DISAMBIGUATION
+                        store = SinoVietnameseStore()
+                        
+                        # Extract first 3 sentences as context hint
+                        sentences = re.split(r'[。！？\n]', source_content_only)
+                        context_sentences = [s.strip() for s in sentences[:5] if s.strip()]
+                        context_hint = '。'.join(context_sentences[:3])
+                        
+                        # Get previous chapter context if available
+                        prev_context = ""
+                        if context_str:
+                            # Extract relevant context from continuity
+                            prev_context = context_str[:500] if len(context_str) > 500 else context_str
+                        
+                        sino_vn_guidance = store.get_bulk_guidance(
+                            terms=kanji_terms,
+                            genre="general",  # TODO: Extract genre from manifest metadata
+                            max_per_term=2,
+                            min_confidence=0.68,
+                            context=context_hint,  # Current chapter context
+                            prev_context=prev_context,  # Previous chapter context
+                            use_external_dict=True  # Enable external dictionary fallback
+                        )
+                        
+                        high_conf = len(sino_vn_guidance.get("high_confidence", []))
+                        medium_conf = len(sino_vn_guidance.get("medium_confidence", []))
+                        external_count = len(sino_vn_guidance.get("external_dict", []))
+                        lookup_stats = sino_vn_guidance.get("lookup_stats", {})
+                        
+                        logger.info(f"[KANJI] Sino-Vietnamese guidance: {high_conf} high, {medium_conf} medium, {external_count} external")
+                        logger.debug(f"[KANJI] Lookup stats: direct={lookup_stats.get('direct_hits', 0)}, vector={lookup_stats.get('vector_hits', 0)}, external={lookup_stats.get('external_hits', 0)}")
+                    else:
+                        logger.debug(f"[KANJI] No kanji compounds found in chapter")
+                        
+                except Exception as e:
+                    logger.warning(f"[KANJI] Sino-Vietnamese lookup failed: {e}")
+                    logger.warning("[KANJI] Continuing without kanji disambiguation")
+                    sino_vn_guidance = None
+
+            # === English Grammar Pattern Detection (Vector Search) ===
+            # Detect Japanese grammar patterns and query vector store for natural English equivalents
+            en_pattern_guidance = None
+            if self.target_language == 'en':  # English translations only
+                try:
+                    from modules.grammar_pattern_detector import detect_grammar_patterns
+                    from modules.english_pattern_store import EnglishPatternStore
+
+                    logger.debug(f"[GRAMMAR] Detecting Japanese patterns for natural English phrasing...")
+
+                    # Detect grammar patterns (けど, が, も, etc.)
+                    detected_patterns = detect_grammar_patterns(
+                        source_content_only,
+                        top_n=15,  # Top 15 most relevant patterns
+                        include_line_numbers=True
+                    )
+
+                    if detected_patterns:
+                        logger.debug(f"[GRAMMAR] Found {len(detected_patterns)} patterns")
+
+                        # Query vector store for natural English equivalents
+                        store = EnglishPatternStore()
+
+                        # Extract first 5 sentences as context hint
+                        sentences = re.split(r'[。！？\n]', source_content_only)
+                        context_sentences = [s.strip() for s in sentences[:5] if s.strip()]
+                        context_hint = '。'.join(context_sentences[:3])
+
+                        # Get previous chapter context if available
+                        prev_context = ""
+                        if context_str:
+                            # Extract relevant context from continuity
+                            prev_context = context_str[:500] if len(context_str) > 500 else context_str
+
+                        en_pattern_guidance = store.get_bulk_guidance(
+                            patterns=detected_patterns,
+                            context=context_hint,
+                            max_per_pattern=2,
+                            min_confidence=0.75
+                        )
+
+                        high_conf = len(en_pattern_guidance.get("high_confidence", []))
+                        medium_conf = len(en_pattern_guidance.get("medium_confidence", []))
+                        lookup_stats = en_pattern_guidance.get("lookup_stats", {})
+
+                        logger.info(f"[GRAMMAR] English pattern guidance: {high_conf} high, {medium_conf} medium")
+                        logger.debug(f"[GRAMMAR] Lookup stats: patterns_queried={lookup_stats.get('patterns_queried', 0)}")
+                    else:
+                        logger.debug(f"[GRAMMAR] No grammar patterns detected in chapter")
+
+                except Exception as e:
+                    logger.warning(f"[GRAMMAR] Pattern detection failed: {e}")
+                    logger.warning("[GRAMMAR] Continuing without grammar pattern guidance")
+                    en_pattern_guidance = None
+
+            # === MULTIMODAL VISUAL CONTEXT ===
+            visual_guidance = None
+            illustration_ids = []  # Track for thought logging
+            if self.enable_multimodal and self.visual_cache:
+                try:
+                    from modules.multimodal.segment_classifier import extract_all_illustration_ids
+                    from modules.multimodal.prompt_injector import build_chapter_visual_guidance
+
+                    illustration_ids = extract_all_illustration_ids(source_content_only)
+                    if illustration_ids:
+                        visual_guidance = build_chapter_visual_guidance(
+                            illustration_ids, self.visual_cache,
+                            manifest=self.visual_cache.get_manifest()
+                        )
+                        if visual_guidance:
+                            logger.info(f"[MULTIMODAL] Injecting visual context for {len(illustration_ids)} illustration(s)")
+                        else:
+                            logger.debug(f"[MULTIMODAL] No cached context found for illustrations: {illustration_ids}")
+                    else:
+                        logger.debug(f"[MULTIMODAL] No illustration markers found in {chapter_id}")
+                except Exception as e:
+                    logger.warning(f"[MULTIMODAL] Visual context extraction failed: {e}")
+                    logger.warning("[MULTIMODAL] Continuing without visual context")
+            # === END MULTIMODAL ===
 
             # 2. Build Prompt
             # Skip rebuilding system instruction if cache is available
@@ -143,10 +454,15 @@ class ChapterProcessor:
             # Construct User Message
             logger.debug(f"[VERBOSE] Building user prompt...")
             user_prompt = self._build_user_prompt(
-                chapter_id, 
-                source_content_only, 
+                chapter_id,
+                source_content_only,
                 context_str,
-                en_title
+                en_title,
+                sino_vn_guidance=sino_vn_guidance,
+                gap_flags=gap_flags,
+                dialect_guidance=dialect_guidance,  # v1.0 - Dialect detection
+                en_pattern_guidance=en_pattern_guidance,  # English grammar patterns
+                visual_guidance=visual_guidance
             )
             logger.debug(f"[VERBOSE] User prompt length: {len(user_prompt)} characters")
             
@@ -164,6 +480,16 @@ class ChapterProcessor:
                 cached_content=cached_content  # Inject cached schema for continuity
             )
             logger.debug(f"[VERBOSE] Gemini response received. Tokens: {response.input_tokens} in, {response.output_tokens} out")
+            
+            # Save thinking process to separate markdown file if enabled
+            if response.thinking_content:
+                self._save_thinking_process(
+                    chapter_id, 
+                    response.thinking_content, 
+                    output_path,
+                    visual_guidance=visual_guidance,
+                    illustration_ids=illustration_ids
+                )
             
             if not response.content:
                 return TranslationResult(
@@ -192,7 +518,21 @@ class ChapterProcessor:
             # Decision: Process text as is for now. If context update missing, we just log it.
             
             translated_body = response.content
-            
+
+            # === MULTIMODAL POST-CHECK: Analysis Leak Detection ===
+            if self.enable_multimodal and visual_guidance:
+                try:
+                    from modules.multimodal.analysis_detector import detect_analysis_leak
+                    leak_detected, leak_issues = detect_analysis_leak(translated_body)
+                    if leak_detected:
+                        logger.warning(f"[MULTIMODAL] Analysis leak detected in {chapter_id}:")
+                        for issue in leak_issues:
+                            logger.warning(f"  - {issue}")
+                        logger.warning("[MULTIMODAL] Output may contain analysis instead of translation")
+                except Exception as e:
+                    logger.debug(f"[MULTIMODAL] Leak detection failed: {e}")
+            # === END MULTIMODAL POST-CHECK ===
+
             # Post-process (cleanup markdown fences if any)
             cleaned_body = self._clean_output(translated_body)
             
@@ -207,37 +547,25 @@ class ChapterProcessor:
             if scene_break_count > 0:
                 logger.info(f"Formatted {scene_break_count} scene break(s) in {chapter_id}")
             
-            # 5. Save Thinking/CoT Log (if present)
-            thinking_content = getattr(response, 'thinking_content', None)
-            if thinking_content:
-                thinking_log_path = output_path.parent / f"{output_path.stem}_THINKING.md"
-                thinking_log_path.parent.mkdir(parents=True, exist_ok=True)
-                
-                with open(thinking_log_path, 'w', encoding='utf-8') as f:
-                    f.write(f"# Gemini Thinking Log: {chapter_id}\n\n")
-                    f.write(f"**Model:** `{response.model}`  \n")
-                    f.write(f"**Input Tokens:** {response.input_tokens:,}  \n")
-                    f.write(f"**Output Tokens:** {response.output_tokens:,}  \n")
-                    f.write(f"**Finish Reason:** {response.finish_reason}  \n")
-                    f.write(f"**Week 1 RAG Upgrades:** ANTI_TRANSLATIONESE v2.1, kanji_difficult.json (108 entries)\n\n")
-                    f.write("---\n\n")
-                    f.write("## Extended Thinking Process\n\n")
-                    f.write(thinking_content)
-                
-                logger.info(f"✓ Saved thinking log to {thinking_log_path.name}")
-            elif not self._thinking_log_notified:
-                # First run without thinking logs - notify user once
-                logger.info(f"ℹ️  Thinking logs not available with {response.model}")
-                logger.info(f"   (This is normal - most models don't expose reasoning chains)")
-                self._thinking_log_notified = True
-            
-            # 6. Quality Audit (Audit against full source for accuracy check)
+            # 5. Quality Audit (Audit against full source for accuracy check)
             audit = QualityMetrics.quick_audit(final_content, source_text)
             
             # 7. Save Translation Output
             output_path.parent.mkdir(parents=True, exist_ok=True)
             with open(output_path, 'w', encoding='utf-8') as f:
                 f.write(final_content)
+            
+            # 8. Post-Processing: Vietnamese CJK Hard Substitution (VN only)
+            cjk_cleaned_count = 0
+            if self._vn_cjk_cleaner:
+                clean_result = self._vn_cjk_cleaner.clean_file(output_path)
+                cjk_cleaned_count = clean_result.get('substitutions', 0)
+                remaining_leaks = clean_result.get('remaining_leaks', 0)
+                
+                if cjk_cleaned_count > 0:
+                    logger.info(f"✓ CJK post-processor: {cjk_cleaned_count} hard substitutions applied")
+                if remaining_leaks > 0:
+                    logger.warning(f"⚠ CJK post-processor: {remaining_leaks} unknown leaks remain (manual review needed)")
             
             return TranslationResult(
                 success=True,
@@ -253,20 +581,206 @@ class ChapterProcessor:
             return TranslationResult(False, output_path, error=str(e))
 
     def _build_user_prompt(
-        self, 
-        chapter_id: str, 
-        source_text: str, 
+        self,
+        chapter_id: str,
+        source_text: str,
         context_str: str,
-        chapter_title: Optional[str] = None
+        chapter_title: Optional[str] = None,
+        sino_vn_guidance: Optional[Dict] = None,
+        gap_flags: Optional[Dict] = None,
+        dialect_guidance: Optional[str] = None,  # v1.0 - Dialect detection
+        en_pattern_guidance: Optional[Dict] = None,  # English grammar patterns
+        visual_guidance: Optional[str] = None  # Multimodal visual context
     ) -> str:
         """Construct the user message part of the prompt."""
-        # Use PromptLoader's build_translation_prompt for proper name registry injection
-        return self.prompt_loader.build_translation_prompt(
+        # Build base prompt
+        base_prompt = self.prompt_loader.build_translation_prompt(
             source_text=source_text,
             chapter_title=chapter_title or chapter_id,
             previous_context=context_str if context_str else None,
             name_registry=self.character_names if self.character_names else None
         )
+        
+        # Inject Sino-Vietnamese guidance if available (Vietnamese translations only)
+        if sino_vn_guidance and sino_vn_guidance.get("high_confidence"):
+            guidance_section = self._format_sino_vietnamese_guidance(sino_vn_guidance)
+            # Insert guidance before the source text
+            base_prompt = f"{base_prompt}\n\n{guidance_section}"
+        
+        # Inject Gap Analysis guidance if available (Week 2-3 integration)
+        if gap_flags:
+            gap_guidance = self._format_gap_guidance(gap_flags)
+            if gap_guidance:
+                base_prompt = f"{base_prompt}\n\n{gap_guidance}"
+        
+        # Inject Dialect Detection guidance if available (v1.0 - 2026-02-01)
+        if dialect_guidance:
+            base_prompt = f"{base_prompt}\n\n{dialect_guidance}"
+
+        # Inject English grammar pattern guidance if available (English translations only)
+        if en_pattern_guidance and en_pattern_guidance.get("high_confidence"):
+            pattern_section = self._format_english_pattern_guidance(en_pattern_guidance)
+            # Insert guidance before the source text
+            base_prompt = f"{base_prompt}\n\n{pattern_section}"
+
+        # Inject multimodal visual context if available
+        if visual_guidance:
+            from modules.multimodal.prompt_injector import MULTIMODAL_STRICT_SUFFIX
+            base_prompt = f"{base_prompt}\n\n{visual_guidance}\n{MULTIMODAL_STRICT_SUFFIX}"
+
+        return base_prompt
+    
+    def _format_sino_vietnamese_guidance(self, guidance: Dict[str, Any]) -> str:
+        """Format Sino-Vietnamese guidance for prompt injection."""
+        lines = ["## Sino-Vietnamese Term Guidance", ""]
+        lines.append("The following Vietnamese translations for Sino-Vietnamese (Hán Việt) terms are recommended:")
+        lines.append("")
+        
+        # High confidence matches
+        for item in guidance.get("high_confidence", [])[:10]:  # Limit to top 10
+            hanzi = item["hanzi"]
+            vn = item["vn"]
+            meaning = item.get("meaning", "")
+            avoid = item.get("avoid", "")
+            
+            entry = f"- **{hanzi}** → **{vn}**"
+            if meaning:
+                entry += f" ({meaning})"
+            if avoid:
+                entry += f" [Avoid: {avoid}]"
+            lines.append(entry)
+        
+        lines.append("")
+        return "\n".join(lines)
+    
+    def _format_gap_guidance(self, gap_flags: Dict) -> str:
+        """
+        Format gap analysis guidance for prompt injection.
+        
+        Provides translator with critical context about:
+        - Gap A: Emotion+Action markers requiring special treatment
+        - Gap B: Ruby visual jokes and kira-kira names
+        - Gap C: Sarcasm/subtext markers
+        """
+        gap_a = gap_flags.get('gap_a', [])
+        gap_b = gap_flags.get('gap_b', [])
+        gap_c = gap_flags.get('gap_c', [])
+        
+        total_gaps = len(gap_a) + len(gap_b) + len(gap_c)
+        if total_gaps == 0:
+            return ""
+        
+        lines = ["## Translation Guidance: Semantic Gaps Detected", ""]
+        lines.append(f"This chapter contains **{total_gaps} semantic gap(s)** requiring special attention:")
+        lines.append("")
+        
+        # Gap A: Emotion + Action Surgery
+        if gap_a:
+            lines.append(f"### Gap A: Emotion+Action Markers ({len(gap_a)} instances)")
+            lines.append("The following lines contain emotional state markers combined with physical actions.")
+            lines.append("**Treatment:** Separate emotion from action. Translate emotion explicitly, keep action natural.")
+            lines.append("")
+            for flag in gap_a[:5]:  # Show top 5
+                line_num = flag.get('line_number', 'N/A')
+                context = flag.get('context', '')[:80]  # First 80 chars
+                lines.append(f"- **Line {line_num}:** `{context}...`")
+            if len(gap_a) > 5:
+                lines.append(f"  _(+{len(gap_a) - 5} more instances)_")
+            lines.append("")
+        
+        # Gap B: Ruby Visual Jokes
+        if gap_b:
+            lines.append(f"### Gap B: Ruby Visual Jokes ({len(gap_b)} instances)")
+            lines.append("The following lines contain ruby annotations with semantic significance:")
+            lines.append("")
+            
+            kira_kira_count = sum(1 for f in gap_b if f.get('ruby_type') == 'kira_kira')
+            char_name_count = sum(1 for f in gap_b if f.get('ruby_type') == 'character_name')
+            archaic_count = sum(1 for f in gap_b if f.get('ruby_type') == 'archaic')
+            
+            if kira_kira_count > 0:
+                lines.append(f"**Kira-kira Names ({kira_kira_count}):** Unusual character name readings with wordplay.")
+                lines.append("**Treatment:** Use romanized reading + TL note explaining the pun.")
+                for flag in [f for f in gap_b if f.get('ruby_type') == 'kira_kira'][:3]:
+                    kanji = flag.get('kanji', '')
+                    reading = flag.get('reading', '')
+                    lines.append(f"- `{kanji}{{読み: {reading}}}` → Add footnote explaining the name's meaning")
+                lines.append("")
+            
+            if char_name_count > 0:
+                lines.append(f"**Character Names ({char_name_count}):** Standard name rubies for pronunciation.")
+                lines.append("**Treatment:** Use established romanization from character roster.")
+                lines.append("")
+            
+            if archaic_count > 0:
+                lines.append(f"**Archaic Kanji ({archaic_count}):** Old-style readings for atmosphere.")
+                lines.append("**Treatment:** Use contextual English equivalent (e.g., 頷→nod, 呟→mutter).")
+                lines.append("")
+        
+        # Gap C: Sarcasm/Subtext
+        if gap_c:
+            lines.append(f"### Gap C: Sarcasm/Subtext Markers ({len(gap_c)} instances)")
+            lines.append("The following lines contain implicit meaning or tonal subtext:")
+            lines.append("**Treatment:** Add narrative clarification or adjust tone to convey hidden meaning.")
+            lines.append("")
+            for flag in gap_c[:5]:
+                line_num = flag.get('line_number', 'N/A')
+                context = flag.get('context', '')[:80]
+                marker = flag.get('marker_type', 'unknown')
+                lines.append(f"- **Line {line_num}** ({marker}): `{context}...`")
+            if len(gap_c) > 5:
+                lines.append(f"  _(+{len(gap_c) - 5} more instances)_")
+            lines.append("")
+        
+        lines.append("---")
+        lines.append("**Note:** These gaps are automatically detected. Use your judgment to preserve intent.")
+        lines.append("")
+
+        return "\n".join(lines)
+
+    def _format_english_pattern_guidance(self, guidance: Dict[str, Any]) -> str:
+        """
+        Format English grammar pattern guidance for prompt injection.
+
+        Provides translator with natural English phrasing suggestions for
+        detected Japanese grammar patterns.
+        """
+        lines = ["## Natural English Phrasing Guidance", ""]
+        lines.append("The following Japanese grammar patterns were detected in this chapter.")
+        lines.append("Consider using these natural English equivalents for more idiomatic phrasing:")
+        lines.append("")
+
+        # High confidence matches
+        high_confidence = guidance.get("high_confidence", [])
+        if not high_confidence:
+            return ""  # No high-confidence patterns to inject
+
+        for item in high_confidence[:8]:  # Limit to top 8 to avoid prompt bloat
+            jp_structure = item.get("japanese_structure", "")
+            en_pattern = item.get("english_pattern", "")
+            natural_ex = item.get("natural_example", "")
+            jp_ex = item.get("jp_example", "")
+            similarity = item.get("similarity", 0.0)
+
+            # Format pattern entry
+            entry = f"- **{jp_structure}** → **{en_pattern}**"
+            lines.append(entry)
+
+            # Add natural example if available
+            if natural_ex:
+                lines.append(f"  *Example:* \"{natural_ex}\"")
+
+            # Add confidence indicator for very high matches
+            if similarity >= 0.90:
+                lines.append(f"  _(High confidence: {similarity:.2f})_")
+
+            lines.append("")
+
+        lines.append("---")
+        lines.append("**Note:** Use these patterns to achieve natural, conversational English instead of literal translations.")
+        lines.append("")
+
+        return "\n".join(lines)
 
     def _clean_output(self, text: str) -> str:
         """Clean up LLM output (remove markdown code blocks if present)."""

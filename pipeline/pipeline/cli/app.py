@@ -198,6 +198,9 @@ class MTLApp:
         elif action == "build":
             success = self._run_phase4(volume_id)
 
+        elif action == "phase1.6":
+            success = self._run_phase1_6(volume_id)
+
         elif action == "run":
             success = self._run_phases_2_to_4(volume_id)
 
@@ -324,6 +327,19 @@ class MTLApp:
 
         console.print("\n[bold cyan]Phase 2: Translator[/bold cyan]")
         return controller.run_phase2(volume_id, chapters=chapters, force=force)
+
+    def _run_phase1_6(self, volume_id: str) -> bool:
+        """Run Phase 1.6 (Multimodal Processor) only."""
+        from scripts.mtl import PipelineController
+
+        controller = PipelineController(
+            work_dir=self.work_dir,
+            verbose=self.config.verbose_mode,
+        )
+
+        console.print("\n[bold cyan]Phase 1.6: Multimodal Processor[/bold cyan]")
+        console.print("[dim]Pre-baking illustration analysis with Gemini 3 Pro Vision...[/dim]")
+        return controller.run_phase1_6(volume_id, standalone=True)
 
     def _run_phase4(self, volume_id: str) -> bool:
         """Run Phase 4 (Builder) only."""

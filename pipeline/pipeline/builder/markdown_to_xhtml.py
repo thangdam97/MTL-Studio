@@ -18,7 +18,7 @@ except ImportError:
     SMARTYPANTS_AVAILABLE = False
     Attr = None
 
-from ..config import SCENE_BREAK_MARKER, ILLUSTRATION_PLACEHOLDER_PATTERN
+from ..config import SCENE_BREAK_MARKER, ILLUSTRATION_PLACEHOLDER_PATTERN, MARKDOWN_IMAGE_PATTERN
 from .config import COLLAPSE_BLANK_LINES, BLANK_LINE_FREQUENCY
 
 # Industry-standard image path (OEBPS format)
@@ -63,15 +63,16 @@ class MarkdownToXHTML:
         if para == "<blank>":
             return '<p><br/></p>'
 
-        # Check for illustration placeholder
-        if MarkdownToXHTML._is_illustration_placeholder(para):
+        # Check for standalone illustration placeholder (block-level)
+        stripped = para.strip()
+        if MarkdownToXHTML._is_illustration_placeholder(stripped):
             if skip_illustrations:
                 return ""
             else:
-                return MarkdownToXHTML._convert_illustration_placeholder(para)
+                return MarkdownToXHTML._convert_illustration_placeholder(stripped)
 
         # Check for scene break marker
-        if para.strip() == SCENE_BREAK_MARKER:
+        if stripped == SCENE_BREAK_MARKER:
             return '<p class="section-break">◆</p>'
 
         # Check if paragraph contains inline image tags (normalize and preserve them)
@@ -82,9 +83,14 @@ class MarkdownToXHTML:
                 return f'<p class="illustration">{para}</p>'
             return para
 
+        # Check for inline gaiji images within text (markdown format)
+        # These need to be converted but kept inline with surrounding text
+        content = para
+        if re.search(r'!\[gaiji\]\([^)]+\)', content):
+            content = MarkdownToXHTML._convert_inline_gaiji(content)
+
         # Apply smart quotes/dashes/ellipses FIRST (before XML escaping)
         # This ensures 100% typographic compliance even if AI agents output straight quotes
-        content = para
         if SMARTYPANTS_AVAILABLE:
             # STEP 1: Protect stacked dialogue (3+ consecutive quotes for multi-speaker chorus)
             stacked_quotes = []
@@ -172,16 +178,38 @@ class MarkdownToXHTML:
 
     @staticmethod
     def _is_illustration_placeholder(text: str) -> bool:
-        """Check if text contains an illustration placeholder."""
-        return bool(re.search(ILLUSTRATION_PLACEHOLDER_PATTERN, text))
+        """Check if text contains an illustration placeholder (legacy or markdown format)."""
+        # Legacy format: [ILLUSTRATION: filename]
+        if re.search(ILLUSTRATION_PLACEHOLDER_PATTERN, text):
+            return True
+        # Markdown format: ![illustration](filename) or ![gaiji](filename)
+        if re.search(MARKDOWN_IMAGE_PATTERN, text):
+            return True
+        return False
 
     @staticmethod
     def _convert_illustration_placeholder(text: str) -> str:
         """Convert illustration placeholder to XHTML img tag."""
+        # Try legacy format first: [ILLUSTRATION: filename]
         match = re.search(ILLUSTRATION_PLACEHOLDER_PATTERN, text)
         if match:
             filename = match.group(1)
             return f'<p class="illustration"><img class="insert" src="{IMAGES_PATH}/{filename}" alt=""/></p>'
+        
+        # Try markdown format: ![alt](filename)
+        match = re.search(MARKDOWN_IMAGE_PATTERN, text)
+        if match:
+            alt_type = match.group(1)  # 'illustration', 'gaiji', or ''
+            filename = match.group(2)
+            
+            if alt_type == 'gaiji':
+                # Gaiji: inline character - no wrapper paragraph, just the img
+                # Will be embedded inline within surrounding text
+                return f'<img class="gaiji" src="{IMAGES_PATH}/{filename}" alt=""/>'
+            else:
+                # Regular illustration - full block with wrapper
+                return f'<p class="illustration"><img class="insert" src="{IMAGES_PATH}/{filename}" alt=""/></p>'
+        
         return ""
 
     @staticmethod

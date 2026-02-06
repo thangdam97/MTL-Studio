@@ -1,0 +1,259 @@
+{
+  "metadata": {
+    "version": "1.0",
+    "date": "2026-02-05",
+    "description": "Lightweight idiom localization rules - trusts Gemini's zero-shot knowledge, provides activation conditions",
+    "philosophy": "Let Gemini decide HOW to localize, we decide WHEN to localize"
+  },
+
+  "activation_rules": {
+    "description": "Conditions that trigger idiom localization vs preservation",
+
+    "archetype_bias": {
+      "description": "Character personality determines localization aggressiveness",
+      "rules": {
+        "gyaru": {
+          "localization_weight": 0.9,
+          "rationale": "Casual, contemporary speech - always localize for natural flow",
+          "examples": [
+            "やっぱり → Of course (not 'As expected')",
+            "仕方がない → Whatever / Can't help it (not 'It can't be helped')"
+          ]
+        },
+        "tsundere": {
+          "localization_weight": 0.8,
+          "rationale": "Defensive, dismissive tone - localize for punch",
+          "examples": [
+            "うるさい → Shut up / Whatever (not 'You're noisy')",
+            "別に → Not like I care / Whatever (not 'Not particularly')"
+          ]
+        },
+        "genki": {
+          "localization_weight": 0.85,
+          "rationale": "Energetic, expressive - localize for impact",
+          "examples": [
+            "すごい → Amazing / Awesome (not 'Incredible')",
+            "やった → Yes! / Score! (not 'I did it')"
+          ]
+        },
+        "kuudere": {
+          "localization_weight": 0.3,
+          "rationale": "Minimal, literal speech - preserve authenticity",
+          "examples": [
+            "そうか → I see (minimal)",
+            "なるほど → Indeed / I understand (formal acceptable)"
+          ]
+        },
+        "ojou_sama": {
+          "localization_weight": 0.4,
+          "rationale": "Formal, refined speech - slight preservation bias",
+          "examples": [
+            "ごきげんよう → Good day (not 'How do you do')",
+            "恐れ入ります → Pardon me (formal but natural)"
+          ]
+        },
+        "dandere": {
+          "localization_weight": 0.6,
+          "rationale": "Shy, hesitant - neutral approach",
+          "examples": [
+            "あの → Um... / Uh... (natural hesitation)",
+            "ごめんなさい → Sorry / I'm sorry (simple)"
+          ]
+        },
+        "yandere": {
+          "localization_weight": 0.75,
+          "rationale": "Intense emotions - localize for dramatic impact",
+          "examples": [
+            "許さない → I won't forgive you / You're done (threatening)",
+            "愛してる → I love you (direct, intense)"
+          ]
+        },
+        "default_casual": {
+          "localization_weight": 0.7,
+          "rationale": "Standard casual speech - lean toward localization",
+          "examples": [
+            "まあ → Well / I guess",
+            "ちょっと → A bit / Kinda"
+          ]
+        },
+        "default_formal": {
+          "localization_weight": 0.5,
+          "rationale": "Standard formal speech - balanced approach",
+          "examples": [
+            "そうですね → That's right / I see",
+            "申し訳ございません → My apologies / I apologize"
+          ]
+        }
+      }
+    },
+
+    "context_multipliers": {
+      "description": "Scene context adjusts base archetype weight",
+      "rules": {
+        "comedic_scene": {
+          "multiplier": 1.2,
+          "rationale": "Comedy requires punchline clarity - boost localization",
+          "trigger_keywords": ["funny", "joke", "laugh", "comedic", "gag"]
+        },
+        "serious_scene": {
+          "multiplier": 0.8,
+          "rationale": "Serious moments preserve weight - reduce localization",
+          "trigger_keywords": ["serious", "grave", "important", "solemn"]
+        },
+        "romantic_scene": {
+          "multiplier": 1.1,
+          "rationale": "Romance needs natural flow - slight boost",
+          "trigger_keywords": ["confession", "love", "heart", "romantic", "date"]
+        },
+        "action_scene": {
+          "multiplier": 1.3,
+          "rationale": "Action needs immediacy - heavy localization",
+          "trigger_keywords": ["fight", "battle", "attack", "dodge", "run"]
+        },
+        "introspective_monologue": {
+          "multiplier": 0.9,
+          "rationale": "Internal thought can be more literal",
+          "trigger_keywords": ["thought", "wondered", "considered", "realized"]
+        }
+      }
+    },
+
+    "literacy_technique_triggers": {
+      "description": "Activate localization when literacy techniques apply",
+      "rules": {
+        "natural_dialogue_flow": {
+          "localization_weight": 0.8,
+          "condition": "dialogue_line",
+          "rationale": "Dialogue prioritizes natural speech over literal translation",
+          "gemini_instruction": "Translate this dialogue idiom to sound natural in casual English conversation. Prioritize how a native English speaker would express this feeling/reaction."
+        },
+        "pseudo_particle_compatibility": {
+          "localization_weight": 0.85,
+          "condition": "sentence_ending_particle_present",
+          "rationale": "Sentences with particles (よ、ね、な) should pair with localized idioms + pseudo-particles",
+          "gemini_instruction": "This sentence has a Japanese particle conveying tone. Localize the idiom AND add an appropriate English pseudo-particle (right?, seriously, you know, etc.) to match the tone.",
+          "examples": [
+            "やっぱりだよね → Of course, right? (localized + pseudo-particle 'right?')",
+            "仕方がないな → Can't help it, I guess (localized + pseudo-particle 'I guess')"
+          ]
+        },
+        "contraction_enforcement": {
+          "localization_weight": 0.75,
+          "condition": "casual_register",
+          "rationale": "Localized idioms pair naturally with contractions",
+          "gemini_instruction": "Use contracted forms (can't, won't, I'm) when localizing this idiom to match casual register."
+        },
+        "show_dont_tell": {
+          "localization_weight": 0.9,
+          "condition": "emotional_reaction",
+          "rationale": "Emotional idioms should be localized to show feeling vividly",
+          "gemini_instruction": "Translate this emotional idiom to convey the FEELING, not literal words. How would an English speaker naturally express this emotion?",
+          "examples": [
+            "心臓が飛び出しそう → My heart's pounding out of my chest (not 'My heart feels like it will jump out')",
+            "頭が真っ白になる → My mind went blank (not 'My head became pure white')"
+          ]
+        }
+      }
+    }
+  },
+
+  "common_idiom_patterns": {
+    "description": "Common patterns Gemini should recognize - guidance only, not exhaustive",
+    "patterns": {
+      "time_expressions": {
+        "examples": [
+          "久しぶり → Long time no see / Been a while",
+          "お疲れ様 → Good work / Thanks for your hard work",
+          "行ってきます → I'm off / Heading out",
+          "ただいま → I'm back / I'm home"
+        ],
+        "guidance": "Localize to natural English greetings - 'I'm off' not 'I'll go and come back'"
+      },
+      "agreement_expressions": {
+        "examples": [
+          "そうだね → Right / Yeah / That's true",
+          "なるほど → I see / Makes sense / Ah",
+          "やっぱり → Figures / Of course / Knew it"
+        ],
+        "guidance": "Use English discourse markers - 'Yeah' or 'Right', not 'That is so'"
+      },
+      "dismissive_expressions": {
+        "examples": [
+          "別に → Not really / Whatever / Not like I care",
+          "どうでもいい → Whatever / Don't care / Doesn't matter",
+          "うるさい → Shut up / Whatever / Quiet"
+        ],
+        "guidance": "Match dismissive tone - 'Whatever' is more natural than 'It doesn't matter to me'"
+      },
+      "surprise_reactions": {
+        "examples": [
+          "えっ → What? / Huh? / Wait",
+          "マジで → Seriously? / For real? / No way",
+          "ウソ → No way / You're kidding / What?"
+        ],
+        "guidance": "Use natural English exclamations - 'No way' not 'That's a lie'"
+      },
+      "embarrassment_expressions": {
+        "examples": [
+          "恥ずかしい → Embarrassing / So awkward / I'm mortified",
+          "やばい → Oh no / This is bad / Crap",
+          "どうしよう → What do I do? / Oh god / I'm screwed"
+        ],
+        "guidance": "Capture embarrassment naturally - 'So awkward' more natural than 'I feel embarrassed'"
+      }
+    }
+  },
+
+  "prompt_injection_template": {
+    "description": "Template for injecting localization rules into Gemini translation prompt",
+    "template": "# IDIOM LOCALIZATION RULES\n\nFor this character archetype ({archetype}), apply idiom localization with weight {weight}:\n\n**Localization Philosophy:**\n- Weight {weight}: {interpretation}\n- Context: {scene_context}\n- Literacy trigger: {literacy_trigger}\n\n**Instructions:**\n{gemini_instruction}\n\n**Examples for this archetype:**\n{examples}\n\n**Key Principle:**\nWe trust your zero-shot knowledge of Japanese idioms. You decide HOW to translate each idiom. We provide WHEN to localize (weight) and WHY (context). Translate idioms to sound like natural English speech that matches the character's personality, not literal dictionary definitions.\n",
+
+    "weight_interpretations": {
+      "0.0_to_0.3": "Preserve authenticity - use literal/formal translations when natural",
+      "0.3_to_0.5": "Slight preservation bias - formal but still natural English",
+      "0.5_to_0.7": "Balanced approach - localize common idioms, preserve unique ones",
+      "0.7_to_0.85": "Strong localization - prioritize natural English speech",
+      "0.85_to_1.0": "Maximum localization - always use natural English equivalents"
+    }
+  },
+
+  "integration_notes": {
+    "how_to_use": [
+      "1. Detect character archetype from manifest or dialogue context",
+      "2. Look up base localization_weight from archetype_bias",
+      "3. Apply context_multipliers if scene keywords match",
+      "4. Check if any literacy_technique_triggers apply",
+      "5. Inject final weight + instructions into Gemini prompt",
+      "6. Trust Gemini to translate idioms appropriately given the weight"
+    ],
+    "example_calculation": {
+      "scenario": "Gyaru character in comedic scene with sentence-ending particle",
+      "base_weight": 0.9,
+      "context_multiplier": 1.2,
+      "literacy_trigger": "pseudo_particle_compatibility (0.85)",
+      "final_weight": "max(0.9 * 1.2, 0.85) = 1.0 (capped)",
+      "result": "Maximum localization - translate idiom naturally + add pseudo-particle",
+      "example": "やっぱりだよね → Of course, right? (not 'As expected, it is')"
+    }
+  },
+
+  "gemini_trust_philosophy": {
+    "rationale": "Gemini 2.5 Pro has excellent zero-shot idiom knowledge from training. We don't need exhaustive idiom dictionaries. We need smart activation rules.",
+    "what_we_provide": [
+      "WHEN to localize (archetype + context weight)",
+      "WHY to localize (character personality, scene mood)",
+      "GUIDANCE on tone (formal vs casual, literal vs natural)"
+    ],
+    "what_gemini_provides": [
+      "HOW to translate each specific idiom",
+      "English equivalent that matches the weight/tone",
+      "Cultural adaptation creativity"
+    ],
+    "advantages": [
+      "Lightweight config (no 10,000-entry idiom dictionary)",
+      "Adapts to new idioms automatically (Gemini recognizes them)",
+      "Personal project friendly (easy to understand and modify)",
+      "Publisher-agnostic (weight adjusts for any style)"
+    ]
+  }
+}

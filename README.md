@@ -2,9 +2,9 @@
 
 **Machine Translation Publishing Pipeline for Japanese Light Novels**
 
-Version 4.5 LTS | Production Ready | February 2026
+Version 5.0 | Production Ready | February 2026
 
-> Multi-Language Support: English & Vietnamese | V4.5 Source Fidelity Champion | Literacy Techniques + Sarcasm Configuration + Character Profiles
+> Multi-Language Support: English & Vietnamese | Multimodal Vision + Vector Search | Literacy Techniques + Sarcasm Configuration + Character Profiles
 
 ---
 
@@ -18,22 +18,24 @@ Version 4.5 LTS | Production Ready | February 2026
 
 1. [Overview](#overview)
 2. [What's New in V4.5](#whats-new-in-v45)
-3. [System Architecture](#system-architecture)
-4. [Pipeline Phases](#pipeline-phases)
-5. [Installation](#installation)
-6. [Quick Start](#quick-start)
-7. [CLI Reference](#cli-reference)
-8. [Configuration](#configuration)
-9. [Publisher Profiles System](#publisher-profiles-system)
-10. [File Structure](#file-structure)
-11. [RAG Modules](#rag-modules)
-12. [Quality Control](#quality-control)
-13. [Troubleshooting](#troubleshooting)
-14. [API Reference](#api-reference)
+3. [Gemini 3 Pro Vision: Illustration Multimodal Processor](#-gemini-3-pro-vision-illustration-multimodal-processor)
+4. [Gemini Embedding: Vector Search Engine](#-gemini-embedding-vector-search-engine)
+5. [System Architecture](#system-architecture)
+6. [Pipeline Phases](#pipeline-phases)
+7. [Installation](#installation)
+8. [Quick Start](#quick-start)
+9. [CLI Reference](#cli-reference)
+10. [Configuration](#configuration)
+11. [Publisher Profiles System](#publisher-profiles-system)
+12. [File Structure](#file-structure)
+13. [RAG Modules](#rag-modules)
+14. [Quality Control](#quality-control)
+15. [Troubleshooting](#troubleshooting)
+16. [API Reference](#api-reference)
     - [Manifest Schema](#manifest-schema)
     - [Name Registry Schema](#name-registry-schema)
     - [Semantic Metadata Schema](#semantic-metadata-schema)
-15. [Performance Statistics](#performance-statistics)
+17. [Performance Statistics](#performance-statistics)
 
 ---
 
@@ -80,10 +82,110 @@ MTL Studio is a complete automated pipeline for translating Japanese Light Novel
 
 ---
 
+## What's New in V5.0
+
+### 🎯 Vision + Vector Intelligence: The Multimodal Breakthrough
+
+**February 7, 2026** - MTL Studio v5.0 introduces two game-changing subsystems that elevate translation from text-only analysis to **true contextual understanding**:
+
+#### 1. 🔮 Gemini 3 Pro Vision: Multimodal Illustration Processor (Phase 1.6)
+
+**The Problem**: Traditional MTL systems translate text in isolation, producing prose that contradicts the emotional tone visible in illustrations — cheerful dialogue for a sad illustration, or generic descriptions when the image shows specific actions.
+
+**The Solution**: 
+- **Art Director Agent** analyzes every illustration once per volume with Gemini 3 Pro Vision (ThinkingConfig HIGH)
+- Generates structured `visual_cache.json` with composition, emotional_delta, narrative_directives, spoiler_prevention
+- **Translator** receives "Art Director's Notes" as stylistic guidance (vocabulary calibration, not content invention)
+- **Canon Event Fidelity**: Illustrations inform *how* to translate (tone, atmosphere), never *what* to translate (plot events)
+
+**Impact**: 
+- Prose vocabulary now matches visual mood (e.g., "frozen" vs generic "sad" when illustration shows icy expression)
+- Dialogue tags calibrated to illustration emotion (soft/harsh, intimate/distant)
+- Spoiler prevention: Plot details visible in images but not yet confirmed in text are excluded
+- Cost efficiency: Vision analysis runs once; retranslation reuses cached results
+
+**Architecture**: Decoupled "bake assets once, render many times" design — Gemini 2.5 Pro never sees images, only structured JSON interpretations
+
+#### 2. 🧠 Gemini Embedding 001: Vector Search Engine (Phase 2)
+
+**The Problem**: Hardcoded grammar rules create brittle translation patterns; regex-based systems miss semantic nuance in Japanese discourse markers (やっぱり, けど...も, まあ).
+
+**The Solution**:
+- **Grammar Pattern Detector** scans JP source text (70+ regex across 9 categories)
+- **Embedding Engine** converts patterns to 3072-dimensional vectors via `gemini-embedding-001`
+- **ChromaDB** performs semantic similarity matching against 204 indexed EN patterns (28 categories)
+- **Confidence-based injection**: ≥0.78 HIGH → inject into prompt, ≥0.65 MED → log only, <0.65 → ignore
+
+**Impact**:
+- Natural English idioms for Japanese grammar structures (けど...も → "X is one thing, but Y...")
+- Transcreation of discourse markers (やっぱり → "sure enough", "I knew it" context-dependent)
+- Vietnamese Sino-Vietnamese disambiguation (道 → đạo/đường/đạo lý based on context)
+- Auto-rebuild: Empty ChromaDB triggers automatic index reconstruction from source JSON
+- Batch optimization: Single API call embeds all detected patterns per chapter
+
+**Architecture**: Real-time semantic lookup during Phase 2 with persistent vector store (HNSW index + cosine similarity)
+
+### 🔧 System Architecture Updates
+
+**Phase 1.6 (NEW)**: Art Director analyzes illustrations → `visual_cache.json` + thought logs  
+**Phase 2 (ENHANCED)**: 
+- Vector Search Init → ChromaDB load (204 EN + Sino-VN patterns)
+- Grammar Pattern Detection → semantic embedding → confidence injection
+- Multimodal injection → Art Director's Notes for illustrated chapters
+- Translation with RAG + Vector + Visual context → Gemini 2.5 Pro (486KB cached, TTL 60m)
+
+**Three-Pillar Translation Context**:
+1. **RAG Engine** (2.5MB knowledge base) — Character voices, localization primers, genre patterns
+2. **Vector Search** (semantic grammar guidance) — 70+ regex → 3072D embeddings → ChromaDB cosine match
+3. **Multimodal Cache** (visual context) — Illustration composition, emotion, narrative directives
+
+### 📊 New Technical Capabilities
+
+- **Hash-based cache invalidation**: Prompt + image + model hash triggers regeneration only when needed
+- **Batch embedding optimization**: 1 API call for N patterns vs N sequential calls (−2-3s latency per chapter)
+- **Auto-rebuild logic**: `EnglishPatternStore` detects empty ChromaDB and rebuilds from source JSON automatically
+- **Sliding window context**: Previous + current + next sentence for Sino-Vietnamese disambiguation
+- **ThinkingConfig reasoning capture**: `cache/thoughts/*.json` logs Gemini 3 Pro Vision's internal reasoning
+- **Canon name enforcement**: Post-processing replaces generic descriptions with manifest character names
+
+### 🎨 Production Validation
+
+**Multimodal Translation Enhancement** (Ice Princess Vol 2, 13 illustrations):
+- Forehead Flick (i-019): Split-panel emotion → ellipses for distress, upbeat markers for teasing
+- Fruit Offering (i-079): Soft smile → "intimate tone" vocabulary + domestic atmosphere
+- Mont Blanc Jealousy: Two-panel escalation → isolated `*Squeeze.*` with paragraph break
+
+**Vector Search Pattern Matching** (204 patterns indexed):
+```
+Input:  けど彼女は全然違った (But she was completely different)
+Match:  sim=0.686 | けど...も pattern | contrastive_comparison
+Output: "She's one thing, but [contrast]..." (idiomatic vs literal)
+```
+
+### ⚙️ Configuration
+
+```yaml
+# config.yaml
+translation:
+  enable_multimodal: true  # Auto-load visual_cache.json
+
+languages:
+  en:
+    grammar_rag:
+      enabled: true
+      vector_store:
+        persist_directory: ./chroma_english_patterns
+        collection_name: english_grammar_patterns
+```
+
+---
+
 ## What's New in V4.5
 
-### 🏆 Historic Milestone: Single-Pass Equals Multi-Pass Professional Editorial
+###  Historic Milestone: Single-Pass Equals Multi-Pass Professional Editorial
+
 **Google Drive**: https://drive.google.com/drive/folders/11yDkQgtyBHCwcDlInJ-sBlCAX3zN0g0I?usp=drive_link
+
 DISCLAIMER: We cannot distribute copyrighted material. The above link is for internal benchmarking only.
 
 **February 4, 2026** - MTL Studio v4.5 becomes the first automated translation system to achieve **source fidelity parity with professional publications** (95.75/100 vs 93.00/100) while matching editorial quality (93/100) in a **single automated pass** + cleanup.
@@ -147,7 +249,209 @@ character_profiles:
 - Character-specific humor preservation
 - Cultural marker retention (おかえり/ただいま home rituals)
 
-### 📊 Validated Performance Metrics
+---
+
+## Gemini 3 Pro Vision: Illustration Multimodal Processor
+
+**Status**: Deployed (Phase 1.6) | **Model**: `gemini-3-pro-preview` | **February 2026**
+
+> The multimodal processor **sees** every illustration in a volume and generates structured "Art Director's Notes" — a visual cache that the Translator reads to make visually-informed prose decisions, without ever seeing the images itself.
+
+### Architecture: The CPU + GPU Analogy
+
+The system splits visual understanding from translation into two specialized phases, mirroring how game engines separate asset baking from runtime rendering:
+
+```
+┌─────────────────────────────────────────────────────────────────────┐
+│  Phase 1.6 — "Art Director" (runs ONCE per volume)                 │
+│  Model: Gemini 3 Pro Vision + ThinkingConfig(HIGH)                 │
+│                                                                     │
+│  INPUT:  _assets/illustrations/*.jpg  (raw images)                 │
+│  OUTPUT: visual_cache.json            (structured analysis)        │
+│                                                                     │
+│  For each illustration:                                            │
+│    1. Send image + analysis prompt to Gemini 3 Pro Vision          │
+│    2. Model reasons about composition, emotion, character actions   │
+│    3. Output: JSON with narrative_directives + spoiler_prevention   │
+│    4. Cache with hash-based invalidation (prompt + image + model)  │
+└──────────────────────────────┬──────────────────────────────────────┘
+                               │
+                    visual_cache.json (persistent)
+                               │
+┌──────────────────────────────▼──────────────────────────────────────┐
+│  Phase 2 — "Translator" (runs per chapter)                         │
+│  Model: Gemini 2.5 Pro (text-only, cached context)                 │
+│                                                                     │
+│  When chapter contains [ILLUSTRATION: i-019.jpg]:                  │
+│    1. Prompt Injector reads visual_cache.json for i-019            │
+│    2. Formats as "Art Director's Notes" block                      │
+│    3. Injects into user prompt alongside JP source text            │
+│    4. Gemini 2.5 Pro translates with visual-informed vocabulary    │
+│                                                                     │
+│  Result: Prose calibrated to match illustration mood & action      │
+└─────────────────────────────────────────────────────────────────────┘
+```
+
+**Key insight**: Gemini 2.5 Pro never sees the image. It receives a structured JSON interpretation from Gemini 3 Pro Vision, formatted as stylistic guidance. This decouples the expensive vision analysis (run once) from the translation (run per chapter, potentially multiple times for retranslation).
+
+### What the Visual Cache Contains
+
+Each illustration entry in `visual_cache.json` provides five structured fields:
+
+```json
+{
+  "i-079": {
+    "status": "cached",
+    "model": "gemini-3-pro-preview",
+    "thinking_level": "HIGH",
+    "visual_ground_truth": {
+      "composition": "A medium shot centering on the female character's upper body,
+        utilizing a slightly high angle to emphasize her upward gaze and inviting posture.",
+      "emotional_delta": "Warmth, domestic intimacy, and casual affection, contrasting
+        the 'cool' imagery of her snowflake accessory with the cozy atmosphere.",
+      "key_details": {
+        "expression": "Soft, open-mouthed smile, slight blush, gentle eye contact.",
+        "action": "Right hand holding a wedge of fruit near her mouth, left hand
+          open palm-up in a gesture of offering.",
+        "atmosphere": "Relaxed, slice-of-life, date-like or domestic scenario."
+      },
+      "narrative_directives": [
+        "Ensure dialogue tags reflect a soft, intimate tone to match her gentle smile.",
+        "Emphasize the playfulness or casual intimacy of the feeding gesture.",
+        "Highlight the contrast between her 'cool' beauty (snowflake motif) and 'warm' expression.",
+        "Describe the specific hand gestures to ground the character's physical presence."
+      ]
+    },
+    "spoiler_prevention": {
+      "do_not_reveal_before_text": [
+        "The act of sharing food if it signifies a relationship milestone not yet reached"
+      ]
+    }
+  }
+}
+```
+
+| Field | Purpose |
+|-------|---------|
+| `composition` | Panel layout, framing, focal points — tells the translator *how* the scene is staged |
+| `emotional_delta` | Emotional contrasts and mood — calibrates vocabulary (e.g., "frozen" vs generic "sad") |
+| `key_details` | Character expressions, actions, atmosphere — grounds prose in physical specifics |
+| `narrative_directives` | 3-5 explicit instructions for how visual context should influence translation choices |
+| `spoiler_prevention` | Plot details visible in the image that the text hasn't confirmed yet — **do not translate** |
+
+### Art Director's Notes: How the Translator Receives Visual Context
+
+When a chapter contains `[ILLUSTRATION: i-079.jpg]`, the Prompt Injector formats the cached analysis as a structured block injected into the translation prompt:
+
+```
+=== CANON EVENT FIDELITY (ABSOLUTE PRIORITY) ===
+Art Director's Notes are STYLISTIC guides only.
+NEVER add events, actions, or dialogue from illustrations not in source text.
+✓ Use emotional tone vocabulary matching visual mood
+✓ Use atmosphere descriptors matching visual context
+✗ Do NOT add unwritten actions visible in the illustration
+✗ Do NOT reveal plot points the text hasn't confirmed
+=== END CANON EVENT FIDELITY ===
+
+=== VISUAL CONTEXT (Pre-Analyzed by Art Director) ===
+Illustrations with cached analysis: 1/1
+
+--- ART DIRECTOR'S NOTES [i-079] ---
+Scene Composition: A medium shot centering on the female character...
+Emotional Context: Warmth, domestic intimacy, casual affection...
+Key Visual Details:
+  - expression: Soft, open-mouthed smile, slight blush...
+  - action: Right hand holding a wedge of fruit near her mouth...
+Translation Directives:
+  - Ensure dialogue tags reflect a soft, intimate tone...
+  - Emphasize the playfulness of the feeding gesture...
+SPOILER PREVENTION: Do not mention: The act of sharing food if it signifies...
+--- END ART DIRECTOR'S NOTES ---
+```
+
+The Canon Event Fidelity directive ensures the translator uses illustrations as **vocabulary calibration**, not content invention. The illustration shows what the scene *looks* like; the source text determines what *happens*.
+
+### Canon Name Enforcement
+
+The visual cache integrates with the Librarian's ruby text extraction to enforce consistent character names:
+
+1. **Phase 1.6**: Gemini 3 Pro Vision may describe characters generically ("the tall male character")
+2. **Post-processing**: `CanonNameEnforcer` replaces generic descriptions with canon names from `manifest.json` character_profiles
+3. **Injection**: Art Director's Notes arrive at the Translator with correct names (e.g., "Souta" not "the male protagonist")
+
+### Cache Invalidation
+
+Each entry is hashed by three components: `prompt_hash + image_hash + model`. If any component changes (e.g., updated prompt, re-extracted image, new model version), the entry is regenerated. Unchanged illustrations are skipped with `[SKIP]` status.
+
+### Configuration
+
+Multimodal translation is controlled by a single setting in `config.yaml`:
+
+```yaml
+translation:
+  enable_multimodal: true  # Auto-load visual_cache.json for context-aware translation
+```
+
+When enabled, the Translator agent automatically:
+1. Loads `visual_cache.json` from the volume directory
+2. Scans each chapter for `[ILLUSTRATION: ...]` markers
+3. Injects Art Director's Notes for matching illustrations
+4. Falls back gracefully to text-only mode if no cache exists
+
+### Pipeline Integration
+
+| Phase | Command | Action |
+|-------|---------|--------|
+| **Phase 1.6** | `mtl.py phase1.6 <volume_id>` | Gemini 3 Pro Vision analyzes all illustrations → `visual_cache.json` |
+| **Phase 2** | `mtl.py phase2 <volume_id>` | Translator reads visual cache, injects Art Director's Notes per chapter |
+| **Full Pipeline** | `mtl.py run <epub>` | Phase 1.6 runs automatically before Phase 2 |
+
+### Thought Logging
+
+Gemini 3 Pro Vision's internal reasoning is captured in `cache/thoughts/*.json` for editorial review:
+
+```
+cache/thoughts/
+├── i-019_analysis.json    # ThinkingConfig reasoning for each illustration
+├── i-079_analysis.json
+├── i-121_analysis.json
+└── ...
+```
+
+When the translator saves its THINKING log, it includes the Art Director's visual reasoning alongside its own translation reasoning, creating a complete audit trail from visual analysis → prose decision.
+
+### Module Architecture
+
+| File | Purpose |
+|------|---------|
+| `modules/multimodal/asset_processor.py` | Phase 1.6 orchestrator — analyzes all illustrations with Gemini 3 Pro Vision |
+| `modules/multimodal/cache_manager.py` | Loads, saves, and queries `visual_cache.json` with hash-based invalidation |
+| `modules/multimodal/prompt_injector.py` | Formats cached analysis as Art Director's Notes for translation prompts |
+| `modules/multimodal/segment_classifier.py` | Extracts `[ILLUSTRATION: ...]` markers from chapter source text |
+| `modules/multimodal/integrity_checker.py` | Pre-flight validation: JP tags ↔ asset files ↔ manifest mapping |
+| `modules/multimodal/kuchie_visualizer.py` | Canon name injection and color plate visualization |
+| `modules/multimodal/thought_logger.py` | Captures Gemini 3 Pro Vision's ThinkingConfig reasoning |
+
+### Validated Results
+
+| Scene | Visual Element | Translation Enhancement |
+|-------|---------------|------------------------|
+| Forehead Flick (i-019) | Split-panel: distress vs teasing | Ellipses and fragmented monologue for top character; upbeat markers for bottom |
+| Fruit Offering (i-079) | Soft smile, feeding gesture | "Soft, intimate tone" vocabulary; casual domestic atmosphere |
+| Reunion (i-121) | Closed-eye smile, luggage | "Deep ease" and "lack of guard" descriptors; synchronized movement |
+| Mont Blanc Jealousy | Two-panel escalation | Isolated `*Squeeze.*` with paragraph break for emotional impact |
+| First Train Meeting | Shocked expression | "grinding screech of a rusted machine" (vs generic "creak") |
+
+### Safety & Error Handling
+
+- **Safety blocks**: If Gemini 3 Pro Vision refuses an illustration (content policy), a `safety_blocked` entry is cached with fallback text: "Visual analysis unavailable — use text-only context"
+- **Retry logic**: Transient API errors (429, 503) retry with exponential backoff (3s, 5s, 9s)
+- **Rate limiting**: Configurable delay between API calls (default: 3s)
+- **Graceful degradation**: If `visual_cache.json` doesn't exist, Phase 2 proceeds in text-only mode with no errors
+
+---
+
+### Validated Performance Metrics
 
 **Source Fidelity Analysis** (Japanese raw as authority):
 - Semantic accuracy: 96.2/100
@@ -172,9 +476,233 @@ character_profiles:
 
 ---
 
+## 🔍 Gemini Embedding: Vector Search Engine
+
+**Status**: Deployed (Phase 2) | **Model**: `gemini-embedding-001` | **Dimensions**: 3072 | **February 2026**
+
+> The Vector Search Engine converts Japanese grammar patterns and Sino-Vietnamese terminology into high-dimensional embedding vectors, enabling semantic similarity matching that guides the Translator toward natural phrasing — without hardcoded rules.
+
+### Architecture: Detect → Embed → Match → Inject
+
+The system operates as a real-time semantic lookup during Phase 2 translation. For each chapter, it detects Japanese grammar structures in the source text, embeds them as 3072-dimensional vectors via `gemini-embedding-001`, queries ChromaDB for the closest natural-language equivalents, and injects high-confidence matches into the translation prompt.
+
+```
+┌─────────────────────────────────────────────────────────────────────┐
+│  Grammar Pattern Detector (regex scan)                             │
+│                                                                     │
+│  INPUT:  Japanese source chapter text                              │
+│  OUTPUT: Top 15 detected patterns with category + context          │
+│                                                                     │
+│  Scans for 70+ regex patterns across 9 categories:                 │
+│    contrastive_comparison, dismissive_acknowledgment, intensifiers, │
+│    hedging, response_particles, natural_transitions,               │
+│    sentence_endings, emotional_nuance, action_emphasis             │
+└──────────────────────────────┬──────────────────────────────────────┘
+                               │
+┌──────────────────────────────▼──────────────────────────────────────┐
+│  Embedding Engine (gemini-embedding-001)                           │
+│                                                                     │
+│  Batch embeds all detected patterns in 1 API call                  │
+│  Input: "[context] [indicator] [chapter hint]"                     │
+│  Output: 3072-dimensional vectors per pattern                      │
+│                                                                     │
+│  Supports: Japanese, Chinese, Vietnamese, English (multilingual)   │
+└──────────────────────────────┬──────────────────────────────────────┘
+                               │
+┌──────────────────────────────▼──────────────────────────────────────┐
+│  ChromaDB Vector Store (cosine similarity)                         │
+│                                                                     │
+│  Persistent local storage with HNSW index                          │
+│  Collections:                                                      │
+│    english_grammar_patterns  → 204 patterns, 28 categories         │
+│    sino_vietnamese_patterns  → Sino-VN disambiguation (VN only)    │
+│                                                                     │
+│  Returns: similarity score (0.0 – 1.0) + pattern metadata          │
+└──────────────────────────────┬──────────────────────────────────────┘
+                               │
+┌──────────────────────────────▼──────────────────────────────────────┐
+│  Confidence-Based Injection                                        │
+│                                                                     │
+│  ≥ 0.78  HIGH confidence  → Inject into translation prompt         │
+│  ≥ 0.65  MEDIUM confidence → Log for analysis, don't inject        │
+│  < 0.65  LOW confidence   → Ignore completely                      │
+│                                                                     │
+│  Result: Translator receives natural English phrasing guidance      │
+│  alongside the Japanese source text                                │
+└─────────────────────────────────────────────────────────────────────┘
+```
+
+### English Grammar Pattern Store
+
+The primary vector store for JP→EN translation. Indexes patterns from `english_grammar_rag.json` (171KB, 3,384 lines) with structured metadata for category-filtered retrieval.
+
+**Pattern Structure** (indexed per example):
+
+```json
+{
+  "id": "one_thing_but",
+  "japanese_structure": "AはBだが、CもBだ",
+  "japanese_indicators": ["けど", "が", "も"],
+  "english_pattern": "X is one thing, but Y is [quality]",
+  "examples": [
+    {
+      "jp": "真理亜は変だが、如月さんも結構変だ",
+      "literal": "Maria's weird, but Kisaragi-san is pretty weird...",
+      "natural": "Maria's one thing, but Kisaragi-san is pretty weird..."
+    }
+  ],
+  "usage_rules": ["Use when comparing two items with shared quality"],
+  "priority": "high"
+}
+```
+
+**Embedding Strategy**: Each example is embedded as a composite string:
+```
+Structure: AはBだが、CもBだ | Indicators: けど, が, も | Example: 真理亜は変だが... | Natural EN: Maria's one thing...
+```
+This allows semantic matching against both the Japanese grammar structure and the natural English equivalent.
+
+**28 Indexed Categories**:
+
+| Category | Patterns | Example |
+|----------|----------|---------|
+| `high_frequency_transcreations` | 21 | やっぱり → "sure enough", "I knew it" |
+| `comedic_timing` | 9 | ツッコミ/ボケ patterns for humor preservation |
+| `emotional_nuance` | 9 | なんか, ちょっと, まさか → softeners, shock markers |
+| `action_emphasis` | 8 | てしまう → "ended up", てみる → "try doing" |
+| `sentence_endings` | 8 | だよね, じゃない, かな → tag questions, wonderings |
+| `tense_harmonization` | 4 | Past/present narrative consistency |
+| `contrastive_comparison` | 3 | けど...も → "X is one thing, but Y..." |
+| `conditional_restructuring` | 3 | たら, なら, ば → English conditional forms |
+| `perfect_aspect_nuances` | 3 | ていた, てあった → "had been", "was already" |
+| `modal_verb_subtleties` | 3 | かもしれない, はず → "might", "should" |
+| `redundancy_reduction` | 3 | Nominalization and wordiness cleanup |
+| *+ 17 more categories* | 120 | Parallel structure, subjunctive, inversion, etc. |
+
+### Sino-Vietnamese Disambiguation Store (Vietnamese Pipeline)
+
+A specialized vector store for the VN translation pipeline that resolves kanji/hanzi ambiguity using context-aware semantic matching.
+
+**Use Case**: The kanji 道 can mean "đạo" (spiritual path), "đường" (road), or "đạo lý" (principle) in Vietnamese. The system uses surrounding sentence context to select the correct Sino-Vietnamese reading.
+
+**Features**:
+- **Register-aware filtering**: formal/casual/literary registers
+- **Sliding window context**: Previous + current + next sentence for disambiguation
+- **Pinyin enhancement**: Romanization injected into embeddings for better Chinese text differentiation
+- **External dictionary fallback**: KanjiAPI integration when vector store has no match
+- **Higher thresholds**: 0.85 inject / 0.70 log (stricter than English due to tone complexity)
+
+**Persistence**: `chroma_sino_vn/` directory with dedicated `sino_vietnamese_patterns` collection.
+
+### Grammar Pattern Detector
+
+The regex-based front end that scans Japanese source text and feeds structured pattern data to the vector store.
+
+**Detection Coverage**: 70+ regex patterns across 9 categories:
+
+| Category | Patterns | Example Indicators |
+|----------|----------|--------------------|
+| `contrastive_comparison` | 5 | けど...も, だけでなく, どころか |
+| `dismissive_acknowledgment` | 4 | はともかく, は置いといて, はさておき |
+| `intensifiers` | 5 | めっちゃ, すごく, マジで |
+| `hedging` | 5 | かもしれない, だろう, 気がする |
+| `response_particles` | 5 | ああ, うん, なるほど, へえ |
+| `natural_transitions` | 4 | とにかく, ところで, まあ |
+| `sentence_endings` | 8 | だよね, じゃない, かな, っけ |
+| `emotional_nuance` | 9 | なんか, やっぱり, さすがに, まさか |
+| `action_emphasis` | 8 | てしまう, てみる, てくる, ておく |
+
+**Priority System**: `contrastive_comparison` and `dismissive_acknowledgment` are classified as high-priority (most likely to need idiomatic English equivalents vs literal translation).
+
+### Auto-Rebuild
+
+The `EnglishPatternStore` includes automatic index recovery. If the ChromaDB collection is found empty on initialization (e.g., after database deletion for an embedding model upgrade), the store automatically rebuilds from `english_grammar_rag.json` — no manual intervention required:
+
+```
+[GRAMMAR] Vector store is empty — auto-rebuilding from english_grammar_rag.json...
+  → contrastive_comparison: 3 patterns
+  → high_frequency_transcreations: 21 patterns
+  → comedic_timing: 9 patterns
+  ... (28 categories)
+[GRAMMAR] ✓ Auto-rebuild complete: 204 patterns across 28 categories
+```
+
+### Batch Embedding Optimization
+
+The `get_bulk_guidance()` method uses a single `embed_content` API call to generate embeddings for all detected patterns simultaneously, rather than N sequential calls:
+
+```python
+# 1 API call for 15 patterns instead of 15 separate calls
+query_embeddings = self.vector_store.embed_texts_batch(queries)
+```
+
+This reduces Phase 2 latency by ~2-3 seconds per chapter while respecting Gemini API rate limits.
+
+### Configuration
+
+Vector search is configured in `config.yaml` under each language's `grammar_rag` section:
+
+```yaml
+languages:
+  en:
+    grammar_rag:
+      enabled: true
+      config_file: config/english_grammar_rag.json
+      inject_mode: always
+      max_patterns_per_prompt: 8
+      vector_store:
+        persist_directory: ./chroma_english_patterns
+        collection_name: english_grammar_patterns
+```
+
+### Confidence Thresholds
+
+| Store | Inject Threshold | Log Threshold | Rationale |
+|-------|-----------------|---------------|------------|
+| **English Grammar** | ≥ 0.78 | ≥ 0.65 | Tuned for light novel genre; slightly relaxed from 0.82 default |
+| **Sino-Vietnamese** | ≥ 0.85 | ≥ 0.70 | Stricter due to tonal language complexity and false cognate risk |
+| **Core PatternVectorStore** | ≥ 0.82 | ≥ 0.65 | Generic baseline for new stores |
+
+The three-tier strategy (inject / log / ignore) prevents low-confidence matches from corrupting translation prompts while capturing uncertain matches for future training data.
+
+### Module Architecture
+
+| File | Purpose |
+|------|---------|
+| `modules/vector_search.py` | Core `PatternVectorStore` — ChromaDB + Gemini embedding integration |
+| `modules/english_pattern_store.py` | English-specific wrapper with category filtering + auto-rebuild |
+| `modules/sino_vietnamese_store.py` | Vietnamese-specific wrapper with register + pinyin enhancement |
+| `modules/grammar_pattern_detector.py` | Regex-based Japanese grammar pattern scanner (70+ patterns) |
+| `config/english_grammar_rag.json` | English grammar pattern source data (171KB, 204 indexed examples) |
+| `scripts/rebuild_english_vectors.py` | Manual rebuild utility for English pattern index |
+| `scripts/build_sino_vn_index.py` | Manual rebuild utility for Sino-Vietnamese index |
+
+### Pipeline Integration
+
+Vector search activates automatically during Phase 2 translation:
+
+```
+Phase 2 Chapter Processing:
+  1. Strip JP title from source text
+  2. [VN only] Extract kanji compounds → SinoVietnameseStore.get_bulk_guidance()
+  3. [EN only] detect_grammar_patterns() → EnglishPatternStore.get_bulk_guidance()
+  4. [Multimodal] Inject Art Director's Notes (if visual_cache exists)
+  5. Build translation prompt with all guidance injected
+  6. Send to Gemini 2.5 Pro for translation
+```
+
+The translator log reports guidance statistics per chapter:
+```
+[GRAMMAR] Found 15 patterns
+[GRAMMAR] English pattern guidance: 3 high, 7 medium
+[KANJI]  Sino-Vietnamese guidance: 5 high, 12 medium, 3 external
+```
+
+---
+
 ## What's New in V4.0 (Previous Release)
 
-### 🎭 Gap Moe Semantic Analysis
+### Gap Moe Semantic Analysis
 - **Behavioral Transition Detection**: Automatically identifies character personality shifts (e.g., yandere gap moe: cute→scary)
 - **Context-Aware Translation**: Preserves tonal whiplash in translations (flat delivery for intense moments, soft for cute scenes)
 - **Pattern Recognition**: Detects 4 core gap patterns:
@@ -247,20 +775,53 @@ character_profiles:
     │                             │                             ▲
     │                             │                             │
     ▼                             ▼                             │
-┌─────────────┐            ┌─────────────┐            ┌─────────────┐
-│  LIBRARIAN  │───────────►│  METADATA   │───────────►│ TRANSLATOR  │
-│   (Python)  │            │  PROCESSOR  │            │(Gemini API) │
-└─────────────┘            └─────────────┘            └──────┬──────┘
-                                                              │
-                                                              ▼
-┌─────────────┐                                        ┌─────────────┐
-│   BUILDER   │◄───────────────────────────────────────│   CRITICS   │
-│   (Python)  │                                        │ (IDE Agent) │
-└─────────────┘                                        └─────────────┘
-      │
-      ▼
-┌─────────────┐
-│  final.epub │
+┌─────────────┐            ┌─────────────┐                      │
+│  LIBRARIAN  │───────────►│  METADATA   │                      │
+│   (Python)  │            │  PROCESSOR  │                      │
+└──────┬──────┘            └──────┬──────┘                      │
+       │                          │                             │
+       │  _assets/illustrations/  │                             │
+       ▼                          ▼                             │
+┌─────────────────┐        ┌─────────────────────────────────┐  │
+│  ART DIRECTOR   │        │          TRANSLATOR             │  │
+│ Gemini 3 Pro    │        │        Gemini 2.5 Pro           │  │
+│   Vision        │        │                                 │  │
+│                 │        │  ┌───────────┐ ┌─────────────┐  │  │
+│ Analyzes every  │───────►│  │  Visual   │ │ RAG Engine  │  │  │
+│ illustration    │ visual │  │  Context  │ │  (2.5MB)    │  │  │
+│ → visual_cache  │ _cache │  │  Injector │ │ modules/    │  │  │
+│   .json         │ .json  │  └───────────┘ └─────────────┘  │  │
+└─────────────────┘        │                                 │  │
+                           │  ┌───────────┐ ┌─────────────┐  │  │
+┌─────────────────┐        │  │  Grammar  │ │  Embedding  │  │  │
+│  GRAMMAR PATTERN │───────►│  │  Pattern  │ │  Engine     │  │  │
+│  DETECTOR        │pattern │  │  Guidance │ │gemini-emb-  │  │  │
+│ 70+ regex across │ data   │  │  (inject) │ │  001 3072D  │  │  │
+│ 9 categories     │        │  └───────────┘ └──────┬──────┘  │  │
+└─────────────────┘        │                       │         │  │
+                           │                ┌──────▼──────┐  │  │
+                           │                │  ChromaDB   │  │  │
+                           │                │  204 EN +   │  │  │
+                           │                │  Sino-VN    │  │  │
+                           │                │  patterns   │  │  │
+                           │                └─────────────┘  │  │
+                           └────────────────┬────────────────┘  │
+                                            │                   │
+                                            ▼                   │
+                                     ┌─────────────┐           │
+                                     │  EN/*.md    │           │
+                                     │  (chapters) │           │
+                                     └──────┬──────┘           │
+                                            │                   │
+                                            ▼                   │
+┌─────────────┐                      ┌─────────────┐           │
+│   BUILDER   │◄─────────────────────│   CRITICS   │           │
+│   (Python)  │                      │ (IDE Agent) │           │
+└──────┬──────┘                      └─────────────┘           │
+       │                                                        │
+       ▼                                                        │
+┌─────────────┐                                                │
+│  final.epub │ ───────────────────────────────────────────────┘
 └─────────────┘
 ```
 
@@ -269,21 +830,34 @@ character_profiles:
 Agents communicate through a file-based protocol using `manifest.json` as the central state machine. Each agent reads the manifest, verifies predecessor completion, performs its work, and updates the manifest with its status.
 
 ```
-LIBRARIAN completes → manifest.json (librarian.status = "completed")
-                    → JP/*.md files created
-                    
-METADATA PROCESSOR  → manifest.json (metadata_processor.status = "completed")
-                    → metadata_en.json created
-                    
-TRANSLATOR reads    → checks librarian.status == "completed"
-                    → EN/*.md files created
-                    → manifest.json (translator.status = "completed")
-                    
-CRITICS reads       → checks translator.status == "completed"
-                    → QC/*.json reports created
-                    
-BUILDER reads       → assembles EPUB from all resources
-                    → OUTPUT/[title]_EN.epub
+LIBRARIAN completes   → manifest.json (librarian.status = "completed")
+                      → JP/*.md files created
+                      → _assets/illustrations/*.jpg extracted
+
+METADATA PROCESSOR    → manifest.json (metadata_processor.status = "completed")
+                      → metadata_en.json created
+
+ART DIRECTOR          → Gemini 3 Pro Vision analyzes all illustrations
+ (Phase 1.6)          → visual_cache.json created (hash-based invalidation)
+                      → cache/thoughts/*.json (reasoning traces)
+
+VECTOR SEARCH INIT    → EnglishPatternStore auto-rebuilds if empty
+ (Phase 2 startup)    → ChromaDB loaded: 204 EN patterns (28 categories)
+                      → SinoVietnameseStore loaded (VN pipeline only)
+                      → Embedding model: gemini-embedding-001 (3072D)
+
+TRANSLATOR reads      → checks librarian.status == "completed"
+                      → Grammar Pattern Detector scans JP source (70+ regex)
+                      → Vector Search injects high-confidence matches (≥0.78)
+                      → Art Director's Notes injected for illustrated chapters
+                      → EN/*.md files created
+                      → manifest.json (translator.status = "completed")
+
+CRITICS reads         → checks translator.status == "completed"
+                      → QC/*.json reports created
+
+BUILDER reads         → assembles EPUB from all resources
+                      → OUTPUT/[title]_EN.epub
 ```
 
 ---
@@ -336,31 +910,92 @@ WORK/[volume_id]/
 - `metadata_en.json` - Localized metadata configuration
 - Updated `manifest.json` with English titles
 
+### Phase 1.6: Art Director (Multimodal)
+
+**Purpose**: Analyze illustrations with Gemini 3 Pro Vision to generate visual context for the Translator
+
+**Components**:
+- `asset_processor.py` - Orchestrates Gemini 3 Pro Vision analysis for all illustrations
+- `cache_manager.py` - Hash-based `visual_cache.json` persistence and invalidation
+- `prompt_injector.py` - Formats cached analysis as Art Director's Notes
+- `integrity_checker.py` - Pre-flight validation (JP tags ↔ asset files ↔ manifest)
+- `thought_logger.py` - Captures Gemini 3 Pro Vision reasoning traces
+
+**Output**:
+- `visual_cache.json` - Structured visual analysis per illustration (composition, emotional_delta, narrative_directives, spoiler_prevention)
+- `cache/thoughts/*.json` - ThinkingConfig(HIGH) reasoning traces for editorial review
+
 ### Phase 2: Translator
 
-**Purpose**: Translate JP chapters to EN using Gemini API with RAG
+**Purpose**: Translate JP chapters to EN/VN using Gemini 2.5 Pro with RAG, Vector Search, and Multimodal Context
 
 **Translation Flow**:
 ```
-┌─────────────┐    ┌──────────────────┐    ┌─────────────┐
-│ JP/CHAPTER  │───►│   RAG Engine     │───►│ Gemini API  │
-│    .md      │    │ (2.5MB modules)  │    │      │
-└─────────────┘    └──────────────────┘    └──────┬──────┘
-                            │                      │
-                   ┌────────┴─────────┐           │
-                   ▼                  ▼           ▼
-             ┌──────────┐      ┌──────────┐ ┌──────────┐
-             │Character │      │Localization│ │EN(VN)/CHAPTER│
-             │ Voices   │      │  Primer   │ │   .md    │
-             └──────────┘      └──────────┘ └──────────┘
+┌─────────────────────────────────────────────────────────────────┐
+│                     JP/CHAPTER_XX.md                            │
+└──────────────────────────┬──────────────────────────────────────┘
+                           │
+          ┌────────────────┼────────────────┐
+          ▼                ▼                ▼
+┌──────────────┐  ┌──────────────┐  ┌──────────────────┐
+│ RAG Engine   │  │ Vector Search│  │ Multimodal Cache │
+│ (2.5MB)      │  │              │  │                  │
+│              │  │ JP source    │  │ visual_cache.json│
+│ • Character  │  │    │         │  │    │              │
+│   Voices     │  │    ▼         │  │    ▼              │
+│ • Localization│ │ Grammar      │  │ Art Director's   │
+│   Primer     │  │ Detector     │  │ Notes for each   │
+│ • Anti-AI-ism│  │ (70+ regex)  │  │ [ILLUSTRATION:]  │
+│ • Genre      │  │    │         │  │ in this chapter  │
+│   Module     │  │    ▼         │  │                  │
+│              │  │ gemini-emb-  │  │ • composition    │
+│              │  │ 001 (3072D)  │  │ • emotional_delta│
+│              │  │    │         │  │ • key_details    │
+│              │  │    ▼         │  │ • narrative_     │
+│              │  │ ChromaDB     │  │   directives     │
+│              │  │ cosine match │  │ • spoiler_       │
+│              │  │    │         │  │   prevention     │
+│              │  │    ▼         │  │                  │
+│              │  │ ≥0.78 HIGH   │  │                  │
+│              │  │  → inject    │  │                  │
+│              │  │ ≥0.65 MED    │  │                  │
+│              │  │  → log only  │  │                  │
+└──────┬───────┘  └──────┬───────┘  └────────┬─────────┘
+       │                 │                   │
+       └─────────────────┼───────────────────┘
+                         ▼
+              ┌─────────────────────┐
+              │   TRANSLATION       │
+              │   PROMPT            │
+              │                     │
+              │  System: RAG modules│
+              │  + Vector guidance  │
+              │  + Visual context   │
+              │  + 2-chapter lookback│
+              └──────────┬──────────┘
+                         ▼
+              ┌─────────────────────┐
+              │  Gemini 2.5 Pro     │
+              │  (cached context    │
+              │   486KB, TTL 60m)   │
+              └──────────┬──────────┘
+                         ▼
+              ┌─────────────────────┐
+              │  EN/CHAPTER_XX.md   │
+              │  + THINKING log     │
+              └─────────────────────┘
 ```
 
 **Key Features**:
 - Context-aware translation with 2-chapter lookback
-- Trope-aware Light Novel patterns
+- **Vector Search**: Grammar pattern detection → semantic embedding → confidence-based injection
+- **Multimodal**: Art Director's Notes injected for chapters with `[ILLUSTRATION:]` markers
+- Trope-aware Light Novel patterns via 2.5MB RAG knowledge base
 - Smart typography (curly quotes, em-dashes, proper ellipses)
-- Character name consistency enforcement
+- Character name consistency enforcement from manifest profiles
+- Batch embedding optimization (single API call for all detected patterns per chapter)
 - Safety block handling with fallback strategies
+- Context caching (486KB cached context with 60-minute TTL)
 
 ### Phase 3: Critics
 

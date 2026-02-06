@@ -19,7 +19,7 @@ from .spine_parser import SpineParser, Spine, SpineItem
 from .xhtml_to_markdown import XHTMLToMarkdownConverter, ConvertedChapter
 from .image_extractor import ImageExtractor, catalog_images
 from .ruby_extractor import extract_ruby_from_directory
-from .content_splitter import ContentSplitter
+from .content_splitter import ContentSplitter, KodanshaSplitter
 from .config import get_volume_structure, get_work_dir, get_pre_toc_detection_config
 from .publisher_profiles.manager import get_profile_manager, PublisherProfile
 
@@ -320,12 +320,41 @@ class LibrarianAgent:
         publisher_name = extraction.publisher_canonical
         publisher_profile = extraction.publisher_profile
 
-        # Check if we need to use spine fallback (minimal TOC)
+        # Hybrid spine fallback detection (Solution 3)
         toc_entry_count = len(toc.get_flat_list())
-        use_spine_fallback = profile_manager.should_use_spine_fallback(publisher_name, toc_entry_count)
-
+        UNIVERSAL_TOC_THRESHOLD = 3
+        
+        # Check 1: Is TOC suspiciously minimal?
+        is_minimal_toc = toc_entry_count <= UNIVERSAL_TOC_THRESHOLD
+        
+        # Check 2: Does TOC cover spine content files?
+        toc_coverage, missing_files = self._validate_toc_completeness(toc, spine)
+        is_incomplete_toc = toc_coverage < 0.5
+        
+        # Check 3: Publisher-specific config
+        is_publisher_minimal = profile_manager.should_use_spine_fallback(publisher_name, toc_entry_count)
+        
+        # Use spine fallback if ANY condition met
+        use_spine_fallback = is_minimal_toc or is_incomplete_toc or is_publisher_minimal
+        
+        # Track recovery reason for diagnostics
+        recovery_reasons = []
+        if is_minimal_toc:
+            recovery_reasons.append("minimal_toc")
+            print(f"     [WARNING] TOC has only {toc_entry_count} entries - likely corrupted")
+        if is_incomplete_toc:
+            recovery_reasons.append(f"incomplete_coverage_{int(toc_coverage*100)}%")
+            print(f"     [WARNING] TOC only covers {toc_coverage:.0%} of spine content ({len(missing_files)} files missing)")
+            if len(missing_files) <= 5:
+                print(f"     [WARNING] Missing from TOC: {sorted(missing_files)}")
+            else:
+                print(f"     [WARNING] Missing from TOC: {sorted(list(missing_files)[:5])} ... and {len(missing_files)-5} more")
+        if is_publisher_minimal:
+            recovery_reasons.append("publisher_config")
+            print(f"     [INFO] Publisher {publisher_name} uses minimal TOC pattern")
+        
         if use_spine_fallback:
-            print(f"     [INFO] TOC has only {toc_entry_count} entries - using spine fallback for chapter detection")
+            print(f"     [INFO] Using spine-based chapter detection")
 
         # Step 4: Convert chapters to markdown (with content merging)
         print("\n[STEP 4/5] Converting chapters to markdown...")
@@ -355,6 +384,25 @@ class LibrarianAgent:
                 converter
             )
         print(f"     Converted {len(chapters)} chapters")
+        
+        # Post-process: Check for Kodansha heading-based splitting
+        heading_split_config = profile_manager.get_heading_split_config(publisher_name)
+        if heading_split_config and heading_split_config.get("split_on_heading", False):
+            chapters = self._apply_heading_split(
+                chapters,
+                source_dir,
+                heading_split_config.get("heading_patterns", [])
+            )
+            print(f"     [KODANSHA] Re-split into {len(chapters)} chapters using heading markers")
+        
+        # Collect all inline illustrations referenced in chapters
+        chapter_illustrations = set()
+        for ch in chapters:
+            if hasattr(ch, 'illustrations') and ch.illustrations:
+                for img in ch.illustrations:
+                    chapter_illustrations.add(img)
+        if chapter_illustrations:
+            print(f"     Found {len(chapter_illustrations)} inline illustrations in chapters")
 
         # Step 4.5: Extract kuchie from spine (AUTHORITATIVE ORDER)
         print("\n[STEP 4.5/6] Extracting kuchie from spine...")
@@ -413,6 +461,34 @@ class LibrarianAgent:
         
         # Merge filename mappings
         filename_mapping.update(kuchie_filename_mapping)
+        
+        # Copy chapter-referenced inline illustrations (gaiji + illustrations from content)
+        # These may not be detected by pattern-based image extractor (e.g., Gagaga Bunko uses numbered filenames)
+        import shutil
+        illust_dir = assets_dir / "illustrations"
+        illust_dir.mkdir(parents=True, exist_ok=True)
+        
+        # Exclude kuchie images from inline illustrations
+        chapter_illustrations_to_copy = chapter_illustrations - spine_kuchie_originals
+        copied_illustrations = []
+        
+        for img_filename in chapter_illustrations_to_copy:
+            # Try to find the image in content_dir
+            for images_folder in ['images', 'image', 'Images', 'IMAGES']:
+                src_path = extraction.content_dir / images_folder / img_filename
+                if src_path.exists():
+                    dst_path = illust_dir / img_filename
+                    if not dst_path.exists():  # Avoid overwriting
+                        shutil.copy2(src_path, dst_path)
+                        copied_illustrations.append(img_filename)
+                    break
+        
+        if copied_illustrations:
+            print(f"     Copied {len(copied_illustrations)} inline illustrations to assets")
+            # Add to image catalog for manifest
+            image_catalog["illustrations"].extend([
+                type('obj', (object,), {'filename': f})() for f in copied_illustrations
+            ])
 
         # Update illustration references in markdown files
         if filename_mapping:
@@ -445,7 +521,15 @@ class LibrarianAgent:
             spine_kuchie=spine_kuchie,  # Add spine-based kuchie metadata
             ruby_data=ruby_data,
             source_lang=source_lang,
-            target_lang=target_lang
+            target_lang=target_lang,
+            recovery_info={
+                "used_spine_fallback": use_spine_fallback,
+                "recovery_reasons": recovery_reasons,
+                "toc_entries": toc_entry_count,
+                "spine_content_files": len([i for i in spine.items if i.linear and not i.is_illustration]),
+                "toc_coverage": toc_coverage,
+                "missing_from_toc": sorted(list(missing_files)) if missing_files else []
+            }
         )
 
         # Sync manifest filenames with normalized names
@@ -1075,6 +1159,144 @@ class LibrarianAgent:
         except Exception:
             return False
 
+    def _apply_heading_split(
+        self,
+        chapters: List[ConvertedChapter],
+        output_dir: Path,
+        heading_patterns: List[str]
+    ) -> List[ConvertedChapter]:
+        """
+        Apply Kodansha-style heading-based chapter splitting.
+        
+        When Kodansha EPUBs merge all content into one/few files with ### N markers,
+        this method splits them into proper chapters.
+        
+        Args:
+            chapters: List of converted chapters (may have merged content)
+            output_dir: Directory containing markdown files
+            heading_patterns: Regex patterns for heading detection
+            
+        Returns:
+            New list of ConvertedChapter objects after splitting
+        """
+        import re
+        
+        # Create splitter with publisher-specific patterns
+        splitter = KodanshaSplitter(heading_patterns=heading_patterns)
+        
+        # First pass: identify which chapters need splitting and calculate offsets
+        split_info = []  # List of (chapter_index, num_split_chapters)
+        total_offset = 0
+        
+        for idx, chapter in enumerate(chapters):
+            chapter_path = output_dir / chapter.filename
+            
+            if not chapter_path.exists():
+                continue
+            
+            content = chapter_path.read_text(encoding='utf-8')
+            
+            if splitter.should_split(content, min_chapters=2):
+                num_chapters = splitter.detect_chapters(content)
+                split_info.append((idx, num_chapters))
+                # Offset is (new chapters - 1) because we're replacing 1 chapter with N
+                total_offset += num_chapters - 1
+        
+        if not split_info:
+            return chapters  # Nothing to split
+        
+        # Second pass: renumber subsequent chapters to make room
+        # We need to rename files from the end to avoid conflicts
+        for split_idx, num_new in reversed(split_info):
+            # Chapters after split_idx need to be renumbered
+            chapters_to_rename = []
+            for i in range(len(chapters) - 1, split_idx, -1):
+                old_path = output_dir / chapters[i].filename
+                if old_path.exists():
+                    # Calculate new chapter number
+                    old_num = i + 1  # 1-indexed
+                    # Add offset for all splits before this point
+                    offset = sum(n - 1 for idx, n in split_info if idx < i)
+                    new_num = old_num + offset + (num_new - 1)
+                    
+                    new_filename = f"CHAPTER_{new_num:02d}.md"
+                    new_path = output_dir / new_filename
+                    
+                    chapters_to_rename.append((old_path, new_path, chapters[i], new_filename))
+            
+            # Rename from highest to lowest to avoid conflicts
+            for old_path, new_path, chapter_obj, new_filename in chapters_to_rename:
+                if old_path != new_path:
+                    old_path.rename(new_path)
+                    chapter_obj.filename = new_filename
+        
+        # Third pass: perform the actual splits
+        new_chapters = []
+        current_chapter_num = 1
+        
+        for idx, chapter in enumerate(chapters):
+            chapter_path = output_dir / chapter.filename
+            
+            if not chapter_path.exists():
+                new_chapters.append(chapter)
+                current_chapter_num += 1
+                continue
+            
+            content = chapter_path.read_text(encoding='utf-8')
+            
+            # Check if this chapter needs splitting
+            if not splitter.should_split(content, min_chapters=2):
+                # Update filename to current number (may have shifted)
+                new_filename = f"CHAPTER_{current_chapter_num:02d}.md"
+                if chapter.filename != new_filename:
+                    old_path = output_dir / chapter.filename
+                    new_path = output_dir / new_filename
+                    if old_path.exists() and old_path != new_path:
+                        old_path.rename(new_path)
+                    chapter.filename = new_filename
+                new_chapters.append(chapter)
+                current_chapter_num += 1
+                continue
+            
+            # Split the chapter
+            print(f"     [KODANSHA SPLIT] {chapter.filename} has multiple chapter markers")
+            split_chapters = splitter.split_chapters(content, base_chapter_num=current_chapter_num)
+            
+            if not split_chapters:
+                new_chapters.append(chapter)
+                current_chapter_num += 1
+                continue
+            
+            # Backup original file BEFORE creating new files (to avoid overwrite)
+            backup_path = chapter_path.with_suffix('.md.backup')
+            chapter_path.rename(backup_path)
+            print(f"     [BACKUP] {chapter.filename} -> {backup_path.name}")
+            
+            # Create new chapter files
+            for split_ch in split_chapters:
+                new_filename = f"CHAPTER_{current_chapter_num:02d}.md"
+                new_path = output_dir / new_filename
+                
+                # Write content with proper header
+                with open(new_path, 'w', encoding='utf-8') as f:
+                    f.write(split_ch.content)
+                
+                # Create ConvertedChapter object
+                new_chapter = ConvertedChapter(
+                    filename=new_filename,
+                    title=split_ch.title,
+                    content=split_ch.content,
+                    illustrations=split_ch.illustrations,
+                    word_count=split_ch.word_count,
+                    paragraph_count=len([p for p in split_ch.content.split('\n\n') if p.strip()]),
+                    is_pre_toc_content=False
+                )
+                new_chapters.append(new_chapter)
+                print(f"       -> {new_filename}: '{split_ch.title}' ({split_ch.word_count} words)")
+                current_chapter_num += 1
+        
+        return new_chapters
+
     def _detect_pre_toc_content(
         self,
         spine_order: List[str],
@@ -1604,10 +1826,14 @@ class LibrarianAgent:
                             continue
                         
                         # Check actual image file size
+                        # Note: Some publishers (e.g., Gagaga Bunko) use small decorative images
+                        # as chapter headers/ornaments that should be included as kuchie
                         img_file_path = content_dir / img_src
                         if img_file_path.exists():
                             img_size = img_file_path.stat().st_size
-                            if img_size < 20000:  # < 20KB, likely not a color plate
+                            # Lowered threshold to 5KB to capture decorative chapter images
+                            # Very small images (< 5KB) are usually gaiji or icons
+                            if img_size < 5000:  # < 5KB, likely gaiji/icon
                                 continue
                         
                         # Generate sequential kuchie filename
@@ -1615,6 +1841,16 @@ class LibrarianAgent:
                         extension = Path(original_filename).suffix
                         normalized_filename = f"kuchie-{kuchie_number:03d}{extension}"
                         
+                        # KUCHIE SCHEMA (v3.5) - CANONICAL FIELDS
+                        # ========================================
+                        # "file": normalized destination filename (Builder uses this)
+                        # "original": source filename from EPUB
+                        # "image_path": full relative path to source image
+                        # "spine_index": position in OPF spine
+                        # "spine_href": XHTML file reference in spine
+                        # 
+                        # NOTE: Builder expects "file" field. Legacy manifests may have
+                        # only "image_path" - Builder has fallback for this.
                         kuchie_list.append({
                             "file": normalized_filename,
                             "original": original_filename,
@@ -1629,6 +1865,50 @@ class LibrarianAgent:
         
         return kuchie_list
 
+    def _validate_toc_completeness(self, toc: TableOfContents, spine: Spine) -> tuple[float, set]:
+        """
+        Validate if TOC covers all content files in spine.
+        
+        Args:
+            toc: Parsed table of contents
+            spine: Parsed spine with reading order
+            
+        Returns:
+            Tuple of (coverage_ratio, missing_files_set)
+            - coverage_ratio: 0.0 to 1.0 indicating percentage of spine files in TOC
+            - missing_files: Set of filenames in spine but not in TOC
+        """
+        # Get normalized filenames from TOC
+        toc_files = set()
+        for np in toc.get_flat_list():
+            # Normalize: xhtml/p-007.xhtml#toc-001 -> p-007.xhtml
+            filename = np.content_src.split('#')[0]
+            if '/' in filename:
+                filename = filename.split('/')[-1]
+            toc_files.add(filename)
+        
+        # Get content files from spine (exclude special files)
+        skip_patterns = ['cover', 'nav', 'toc', 'colophon', 'copyright', 'titlepage']
+        spine_content = set()
+        for item in spine.items:
+            if not item.linear or item.is_illustration:
+                continue
+            filename = item.href.split('/')[-1] if '/' in item.href else item.href
+            lower_name = filename.lower()
+            if any(skip in lower_name for skip in skip_patterns):
+                continue
+            spine_content.add(filename)
+        
+        # Calculate coverage
+        if not spine_content:
+            return 1.0, set()  # No content files to check
+        
+        covered_files = toc_files & spine_content
+        missing_files = spine_content - toc_files
+        coverage = len(covered_files) / len(spine_content)
+        
+        return coverage, missing_files
+
     def _build_manifest(
         self,
         volume_id: str,
@@ -1641,7 +1921,8 @@ class LibrarianAgent:
         spine_kuchie: List[Dict[str, Any]],  # Add spine-based kuchie metadata
         ruby_data: Dict[str, List],
         source_lang: str,
-        target_lang: str
+        target_lang: str,
+        recovery_info: Optional[Dict[str, Any]] = None
     ) -> Manifest:
         """Build complete manifest from extraction results."""
         now = datetime.now().isoformat()
@@ -1688,14 +1969,26 @@ class LibrarianAgent:
             "illustrations": [img.filename for img in image_catalog["illustrations"]],
         }
 
-        # Build pipeline state
+        # Build pipeline state with recovery information
+        librarian_state = PipelineState(
+            status="completed",
+            timestamp=now,
+            chapters_completed=len(chapters),
+            chapters_total=len(chapters),
+        ).to_dict()
+        
+        # Add recovery diagnostics if spine fallback was used
+        if recovery_info and recovery_info.get("used_spine_fallback"):
+            librarian_state["recovery_method"] = "spine_fallback"
+            librarian_state["recovery_reasons"] = recovery_info["recovery_reasons"]
+            librarian_state["toc_entries"] = recovery_info["toc_entries"]
+            librarian_state["spine_content_files"] = recovery_info["spine_content_files"]
+            librarian_state["toc_coverage"] = round(recovery_info["toc_coverage"], 2)
+            if recovery_info["missing_from_toc"]:
+                librarian_state["missing_from_toc"] = recovery_info["missing_from_toc"][:10]  # Limit to 10 for brevity
+        
         pipeline_state = {
-            "librarian": PipelineState(
-                status="completed",
-                timestamp=now,
-                chapters_completed=len(chapters),
-                chapters_total=len(chapters),
-            ).to_dict(),
+            "librarian": librarian_state,
             "translator": PipelineState(
                 status="pending",
                 chapters_total=len(chapters),

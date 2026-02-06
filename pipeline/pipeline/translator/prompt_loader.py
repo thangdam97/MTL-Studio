@@ -40,8 +40,12 @@ class PromptLoader:
         self.reference_index_path = None
         self.kanji_difficult_path = None
         self.cjk_prevention_path = None  # Initialize for all languages
-        
+        self.anti_ai_ism_path = None  # Anti-AI-ism pattern library (v3.5)
+        self.english_grammar_rag_path = None  # English Grammar RAG (Tier 1) - EN only
+        self.literacy_techniques_path = None  # Literary techniques (Tier 1) - language-agnostic
+
         # Setup Three-Tier RAG paths for VN
+        self.vietnamese_grammar_rag_path = None  # Vietnamese Grammar RAG (Tier 1) - VN only
         if self.target_language == 'vn':
             reference_dir_config = self.lang_config.get('reference_dir')
             if reference_dir_config:
@@ -54,17 +58,32 @@ class PromptLoader:
             self.kanji_difficult_path = vn_root / 'kanji_difficult.json'
             self.cjk_prevention_path = prompts_root / 'cjk_prevention_schema_vn.json'
             self.reference_index_path = vn_root / 'reference_index.json'
+            # Vietnamese Grammar RAG (Tier 1) - Anti-AI-ism + particle system for JP→VN
+            self.vietnamese_grammar_rag_path = vn_root / 'vietnamese_grammar_rag.json'
         
         # Setup CJK prevention for EN (English also needs CJK prevention)
         elif self.target_language == 'en':
             prompts_root = PIPELINE_ROOT / 'prompts' / 'modules' / 'rag'
             self.cjk_prevention_path = prompts_root / 'cjk_prevention_schema_en.json'
+            # Anti-AI-ism pattern library (v3.5) - EN only for now
+            config_dir = PIPELINE_ROOT / 'config'
+            self.anti_ai_ism_path = config_dir / 'anti_ai_ism_patterns.json'
+            # English Grammar RAG (Tier 1) - Natural idiom patterns for JP→EN
+            self.english_grammar_rag_path = config_dir / 'english_grammar_rag.json'
+
+        # Literacy Techniques (Tier 1 - language-agnostic, applies to both EN and VN)
+        config_dir = PIPELINE_ROOT / 'config'
+        self.literacy_techniques_path = config_dir / 'literacy_techniques.json'
 
         self._master_prompt_cache = None
         self._rag_modules_cache = {}
         self._reference_index = None  # Three-Tier RAG metadata
         self._kanji_difficult = None  # Tier 1 kanji data
         self._cjk_prevention = None  # CJK prevention schema with substitution patterns
+        self._anti_ai_ism = None  # Anti-AI-ism pattern library (v3.5)
+        self._english_grammar_rag = None  # English Grammar RAG (Tier 1) - natural idioms
+        self._vietnamese_grammar_rag = None  # Vietnamese Grammar RAG (Tier 1) - anti-AI-ism + particle system
+        self._literacy_techniques = None  # Literary techniques (Tier 1) - language-agnostic narrative techniques
         self._continuity_pack = None  # Continuity pack from previous volume
         self._character_names = None  # Character names from manifest
         self._glossary = None  # Glossary terms from manifest
@@ -362,6 +381,181 @@ class PromptLoader:
         except Exception as e:
             logger.warning(f"Failed to load CJK prevention schema: {e}")
             return None
+    
+    def load_anti_ai_ism_patterns(self) -> Optional[Dict[str, Any]]:
+        """Load anti-AI-ism pattern library (v3.5)."""
+        if self._anti_ai_ism:
+            return self._anti_ai_ism
+        
+        if not self.anti_ai_ism_path or not self.anti_ai_ism_path.exists():
+            logger.debug(f"Anti-AI-ism pattern library not found for language: {self.target_language}")
+            return None
+        
+        try:
+            with open(self.anti_ai_ism_path, 'r', encoding='utf-8') as f:
+                self._anti_ai_ism = json.load(f)
+            size_kb = self.anti_ai_ism_path.stat().st_size / 1024
+            
+            # Count patterns by severity (v2.0 structure)
+            critical_patterns = len(self._anti_ai_ism.get('CRITICAL', {}).get('patterns', []))
+            
+            # Count MAJOR patterns across categories
+            major_count = 0
+            major_categories = self._anti_ai_ism.get('MAJOR', {}).get('categories', {})
+            for category_data in major_categories.values():
+                major_count += len(category_data.get('patterns', []))
+            
+            # Count MINOR patterns across categories
+            minor_count = 0
+            minor_categories = self._anti_ai_ism.get('MINOR', {}).get('categories', {})
+            for category_data in minor_categories.values():
+                minor_count += len(category_data.get('patterns', []))
+            
+            total_patterns = critical_patterns + major_count + minor_count
+            
+            # Check if echo detection is enabled (from _meta)
+            meta = self._anti_ai_ism.get('_meta', {})
+            echo_enabled = meta.get('echo_detection', {}).get('enabled', False)
+            echo_status = "enabled" if echo_enabled else "disabled"
+            
+            logger.info(f"✓ Loaded anti_ai_ism_patterns.json: {total_patterns} patterns "
+                       f"(CRITICAL: {critical_patterns}, MAJOR: {major_count}, "
+                       f"MINOR: {minor_count}), echo detection {echo_status} ({size_kb:.1f}KB)")
+            return self._anti_ai_ism
+        except Exception as e:
+            logger.warning(f"Failed to load anti-AI-ism pattern library: {e}")
+            return None
+
+    def load_english_grammar_rag(self) -> Optional[Dict[str, Any]]:
+        """Load english_grammar_rag.json (Tier 1) - Natural idiom patterns for JP→EN translation."""
+        if self._english_grammar_rag:
+            return self._english_grammar_rag
+        
+        # Check for path attribute (only set for EN translations)
+        if not hasattr(self, 'english_grammar_rag_path') or not self.english_grammar_rag_path:
+            logger.debug("English Grammar RAG not configured for this language")
+            return None
+        
+        if not self.english_grammar_rag_path.exists():
+            logger.debug(f"English Grammar RAG not found: {self.english_grammar_rag_path}")
+            return None
+        
+        try:
+            with open(self.english_grammar_rag_path, 'r', encoding='utf-8') as f:
+                self._english_grammar_rag = json.load(f)
+            size_kb = self.english_grammar_rag_path.stat().st_size / 1024
+            
+            # Count patterns across categories
+            pattern_categories = self._english_grammar_rag.get('pattern_categories', {})
+            total_patterns = 0
+            category_names = []
+            
+            for cat_name, cat_data in pattern_categories.items():
+                patterns = cat_data.get('patterns', [])
+                total_patterns += len(patterns)
+                category_names.append(cat_name)
+            
+            # Count high-frequency transcreation patterns specifically
+            hf_patterns = pattern_categories.get('high_frequency_transcreations', {}).get('patterns', [])
+            transcreation_count = len(hf_patterns)
+            
+            logger.info(f"✓ Loaded english_grammar_rag.json: {total_patterns} patterns "
+                       f"({transcreation_count} high-frequency transcreations) across "
+                       f"{len(category_names)} categories ({size_kb:.1f}KB)")
+            return self._english_grammar_rag
+        except Exception as e:
+            logger.warning(f"Failed to load English Grammar RAG: {e}")
+            return None
+
+    def load_vietnamese_grammar_rag(self) -> Optional[Dict[str, Any]]:
+        """Load vietnamese_grammar_rag.json (Tier 1) - Anti-AI-ism + particle system for JP→VN translation."""
+        if self._vietnamese_grammar_rag:
+            return self._vietnamese_grammar_rag
+        
+        # Check for path attribute (only set for VN translations)
+        if not hasattr(self, 'vietnamese_grammar_rag_path') or not self.vietnamese_grammar_rag_path:
+            logger.debug("Vietnamese Grammar RAG not configured for this language")
+            return None
+        
+        if not self.vietnamese_grammar_rag_path.exists():
+            logger.debug(f"Vietnamese Grammar RAG not found: {self.vietnamese_grammar_rag_path}")
+            return None
+        
+        try:
+            with open(self.vietnamese_grammar_rag_path, 'r', encoding='utf-8') as f:
+                self._vietnamese_grammar_rag = json.load(f)
+            size_kb = self.vietnamese_grammar_rag_path.stat().st_size / 1024
+            
+            # Count patterns across all categories
+            total_patterns = 0
+            category_stats = []
+            
+            # Count AI-ism patterns
+            sentence_ai_isms = self._vietnamese_grammar_rag.get('sentence_structure_ai_isms', {}).get('patterns', [])
+            dialogue_ai_isms = self._vietnamese_grammar_rag.get('dialogue_ai_isms', {}).get('patterns', [])
+            total_patterns += len(sentence_ai_isms) + len(dialogue_ai_isms)
+            category_stats.append(f"{len(sentence_ai_isms) + len(dialogue_ai_isms)} AI-ism rules")
+            
+            # Count particles (question + statement + exclamation)
+            particle_system = self._vietnamese_grammar_rag.get('particle_system', {})
+            question_particles = particle_system.get('question_particles', [])
+            statement_particles = particle_system.get('statement_particles', [])
+            exclamation_particles = particle_system.get('exclamation_particles', [])
+            particle_combos = particle_system.get('combination_patterns', [])
+            particle_count = len(question_particles) + len(statement_particles) + len(exclamation_particles)
+            total_patterns += particle_count + len(particle_combos)
+            category_stats.append(f"{particle_count} particles + {len(particle_combos)} combos")
+            
+            # Count archetypes
+            archetypes = self._vietnamese_grammar_rag.get('archetype_register_matrix', {}).get('archetypes', {})
+            total_patterns += len(archetypes)
+            category_stats.append(f"{len(archetypes)} archetypes")
+            
+            # Count pronoun tiers
+            pronoun_tiers = self._vietnamese_grammar_rag.get('pronoun_tiers', {})
+            pronoun_count = 0
+            for tier_type in ['friendship', 'romance_scale']:
+                tier_data = pronoun_tiers.get(tier_type, {})
+                if isinstance(tier_data, dict):
+                    pronoun_count += len(tier_data)
+            total_patterns += pronoun_count
+            category_stats.append(f"{pronoun_count} pronoun tiers")
+            
+            logger.info(f"✓ Loaded vietnamese_grammar_rag.json: {total_patterns} patterns "
+                       f"({', '.join(category_stats)}) ({size_kb:.1f}KB)")
+            return self._vietnamese_grammar_rag
+        except Exception as e:
+            logger.warning(f"Failed to load Vietnamese Grammar RAG: {e}")
+            return None
+
+    def load_literacy_techniques(self) -> Optional[Dict[str, Any]]:
+        """Load literacy_techniques.json (Tier 1) - Language-agnostic narrative techniques."""
+        if self._literacy_techniques:
+            return self._literacy_techniques
+
+        if not self.literacy_techniques_path or not self.literacy_techniques_path.exists():
+            logger.debug(f"Literacy techniques not found: {self.literacy_techniques_path}")
+            return None
+
+        try:
+            with open(self.literacy_techniques_path, 'r', encoding='utf-8') as f:
+                self._literacy_techniques = json.load(f)
+            size_kb = self.literacy_techniques_path.stat().st_size / 1024
+
+            # Count techniques
+            first_person = self._literacy_techniques.get('narrative_techniques', {}).get('first_person', {}).get('subtechniques', {})
+            third_person = self._literacy_techniques.get('narrative_techniques', {}).get('third_person', {}).get('subtechniques', {})
+            psychic_distance_levels = len(self._literacy_techniques.get('psychic_distance_levels', {}).get('levels', {}))
+            genre_presets = len(self._literacy_techniques.get('genre_specific_presets', {}))
+
+            total_techniques = len(first_person) + len(third_person) + 1  # +1 for FID
+
+            logger.info(f"✓ Loaded literacy_techniques.json: {total_techniques} narrative techniques, "
+                       f"{psychic_distance_levels} psychic distance levels, {genre_presets} genre presets ({size_kb:.1f}KB)")
+            return self._literacy_techniques
+        except Exception as e:
+            logger.warning(f"Failed to load literacy techniques: {e}")
+            return None
 
     def load_reference_index(self) -> Optional[Dict[str, Any]]:
         """Load reference_index.json (Three-Tier RAG metadata)."""
@@ -491,20 +685,25 @@ class PromptLoader:
     def build_system_instruction(self, genre: str = None) -> str:
         """
         Construct the final system instruction with Three-Tier RAG injection.
-        
+
         Tier 1 (Always inject):
           - Core modules (MEGA_CORE, ANTI_TRANSLATIONESE, MEGA_CHARACTER_VOICE)
           - kanji_difficult.json
-        
+          - cjk_prevention_schema_*.json (language-specific)
+          - anti_ai_ism_patterns.json (EN only)
+          - english_grammar_rag.json (EN only)
+          - vietnamese_grammar_rag.json (VN only)
+          - literacy_techniques.json (language-agnostic)
+
         Tier 2 (Context-aware):
           - Reference modules based on genre/triggers
-          
+
         Tier 3 (On-demand):
           - Deferred to Week 3 (retrieval-based)
-        
+
         Args:
             genre: Novel genre for context-aware module selection
-            
+
         Returns:
             Complete system instruction with injected RAG modules
         """
@@ -529,6 +728,22 @@ class PromptLoader:
         logger.debug("[VERBOSE] Loading Tier 1: cjk_prevention_schema_vn.json...")
         cjk_prevention_data = self.load_cjk_prevention()
         
+        # Load Tier 1: anti_ai_ism_patterns.json (v3.5)
+        logger.debug("[VERBOSE] Loading Tier 1: anti_ai_ism_patterns.json...")
+        anti_ai_ism_data = self.load_anti_ai_ism_patterns()
+        
+        # Load Tier 1: english_grammar_rag.json (EN only - natural idiom patterns)
+        logger.debug("[VERBOSE] Loading Tier 1: english_grammar_rag.json...")
+        english_grammar_rag_data = self.load_english_grammar_rag()
+        
+        # Load Tier 1: vietnamese_grammar_rag.json (VN only - anti-AI-ism + particle system)
+        logger.debug("[VERBOSE] Loading Tier 1: vietnamese_grammar_rag.json...")
+        vietnamese_grammar_rag_data = self.load_vietnamese_grammar_rag()
+
+        # Load Tier 1: literacy_techniques.json (language-agnostic narrative techniques)
+        logger.debug("[VERBOSE] Loading Tier 1: literacy_techniques.json...")
+        literacy_techniques_data = self.load_literacy_techniques()
+
         # Load Tier 2: Reference modules (context-aware)
         logger.debug("[VERBOSE] Loading Tier 2 reference modules...")
         reference_modules = self.load_reference_modules(genre)
@@ -581,6 +796,114 @@ class PromptLoader:
             logger.info(f"Injecting cjk_prevention_schema_vn.json: CJK prevention rules ({cjk_size_kb:.1f}KB)")
             cjk_injection = f"\n<!-- START MODULE: cjk_prevention_schema_vn.json -->\n{cjk_formatted}\n<!-- END MODULE: cjk_prevention_schema_vn.json -->\n"
             final_prompt = final_prompt.replace("cjk_prevention_schema_vn.json", cjk_injection)
+            injected_count += 1
+        
+        # Inject anti_ai_ism_patterns.json (Tier 1 - v3.5)
+        if anti_ai_ism_data and "anti_ai_ism_patterns.json" in final_prompt:
+            anti_ai_ism_formatted = self._format_anti_ai_ism_for_injection(anti_ai_ism_data)
+            anti_ai_ism_size_kb = len(anti_ai_ism_formatted.encode('utf-8')) / 1024
+            
+            # Count patterns
+            critical_count = len(anti_ai_ism_data.get('CRITICAL', {}).get('patterns', []))
+            major_categories = anti_ai_ism_data.get('MAJOR', {}).get('categories', {})
+            major_count = sum(len(cat.get('patterns', [])) for cat in major_categories.values())
+            total_count = critical_count + major_count
+            
+            logger.info(f"Injecting anti_ai_ism_patterns.json: {total_count} patterns ({critical_count} CRITICAL, {major_count} MAJOR) + echo detection ({anti_ai_ism_size_kb:.1f}KB)")
+            anti_ai_ism_injection = f"\n<!-- START MODULE: anti_ai_ism_patterns.json -->\n{anti_ai_ism_formatted}\n<!-- END MODULE: anti_ai_ism_patterns.json -->\n"
+            final_prompt = final_prompt.replace("anti_ai_ism_patterns.json", anti_ai_ism_injection)
+            injected_count += 1
+            anti_ai_ism_injected.append('anti_ai_ism_patterns.json (v3.5)')
+
+        # Inject english_grammar_rag.json (Tier 1 - EN only, natural idioms)
+        if english_grammar_rag_data and "english_grammar_rag.json" in final_prompt:
+            english_grammar_formatted = self._format_english_grammar_rag_for_injection(english_grammar_rag_data)
+            grammar_size_kb = len(english_grammar_formatted.encode('utf-8')) / 1024
+            
+            # Count patterns
+            pattern_categories = english_grammar_rag_data.get('pattern_categories', {})
+            total_patterns = sum(len(cat.get('patterns', [])) for cat in pattern_categories.values())
+            hf_transcreations = len(pattern_categories.get('high_frequency_transcreations', {}).get('patterns', []))
+            
+            logger.info(f"Injecting english_grammar_rag.json: {total_patterns} patterns ({hf_transcreations} high-frequency transcreations) ({grammar_size_kb:.1f}KB)")
+            grammar_injection = f"\n<!-- START MODULE: english_grammar_rag.json -->\n{english_grammar_formatted}\n<!-- END MODULE: english_grammar_rag.json -->\n"
+            final_prompt = final_prompt.replace("english_grammar_rag.json", grammar_injection)
+            injected_count += 1
+            anti_ai_ism_injected.append('english_grammar_rag.json (Tier 1)')
+        elif english_grammar_rag_data:
+            # Auto-append if placeholder not found (fallback for prompts without placeholder)
+            english_grammar_formatted = self._format_english_grammar_rag_for_injection(english_grammar_rag_data)
+            grammar_size_kb = len(english_grammar_formatted.encode('utf-8')) / 1024
+            
+            pattern_categories = english_grammar_rag_data.get('pattern_categories', {})
+            total_patterns = sum(len(cat.get('patterns', [])) for cat in pattern_categories.values())
+            
+            logger.info(f"Appending english_grammar_rag.json (no placeholder found): {total_patterns} patterns ({grammar_size_kb:.1f}KB)")
+            final_prompt += f"\n\n<!-- START MODULE: english_grammar_rag.json (AUTO-APPENDED) -->\n{english_grammar_formatted}\n<!-- END MODULE: english_grammar_rag.json -->\n"
+            injected_count += 1
+            anti_ai_ism_injected.append('english_grammar_rag.json (Tier 1, auto-appended)')
+
+        # Inject vietnamese_grammar_rag.json (Tier 1 - VN only, anti-AI-ism + particle system)
+        if vietnamese_grammar_rag_data and "vietnamese_grammar_rag.json" in final_prompt:
+            vietnamese_grammar_formatted = self._format_vietnamese_grammar_rag_for_injection(vietnamese_grammar_rag_data)
+            grammar_size_kb = len(vietnamese_grammar_formatted.encode('utf-8')) / 1024
+            
+            # Count patterns
+            sentence_ai_isms = len(vietnamese_grammar_rag_data.get('sentence_structure_ai_isms', {}).get('patterns', []))
+            dialogue_ai_isms = len(vietnamese_grammar_rag_data.get('dialogue_ai_isms', {}).get('patterns', []))
+            # Count particles from correct keys
+            particle_system = vietnamese_grammar_rag_data.get('particle_system', {})
+            particles = len(particle_system.get('question_particles', [])) + len(particle_system.get('statement_particles', [])) + len(particle_system.get('exclamation_particles', []))
+            total_patterns = sentence_ai_isms + dialogue_ai_isms + particles
+            
+            logger.info(f"Injecting vietnamese_grammar_rag.json: {total_patterns} patterns ({sentence_ai_isms + dialogue_ai_isms} AI-isms, {particles} particles) ({grammar_size_kb:.1f}KB)")
+            grammar_injection = f"\n<!-- START MODULE: vietnamese_grammar_rag.json -->\n{vietnamese_grammar_formatted}\n<!-- END MODULE: vietnamese_grammar_rag.json -->\n"
+            final_prompt = final_prompt.replace("vietnamese_grammar_rag.json", grammar_injection)
+            injected_count += 1
+            anti_ai_ism_injected.append('vietnamese_grammar_rag.json (Tier 1)')
+        elif vietnamese_grammar_rag_data:
+            # Auto-append if placeholder not found (fallback for prompts without placeholder)
+            vietnamese_grammar_formatted = self._format_vietnamese_grammar_rag_for_injection(vietnamese_grammar_rag_data)
+            grammar_size_kb = len(vietnamese_grammar_formatted.encode('utf-8')) / 1024
+            
+            sentence_ai_isms = len(vietnamese_grammar_rag_data.get('sentence_structure_ai_isms', {}).get('patterns', []))
+            dialogue_ai_isms = len(vietnamese_grammar_rag_data.get('dialogue_ai_isms', {}).get('patterns', []))
+            # Count particles from correct keys
+            particle_system = vietnamese_grammar_rag_data.get('particle_system', {})
+            particles = len(particle_system.get('question_particles', [])) + len(particle_system.get('statement_particles', [])) + len(particle_system.get('exclamation_particles', []))
+            total_patterns = sentence_ai_isms + dialogue_ai_isms + particles
+            
+            logger.info(f"Appending vietnamese_grammar_rag.json (no placeholder found): {total_patterns} patterns ({grammar_size_kb:.1f}KB)")
+            final_prompt += f"\n\n<!-- START MODULE: vietnamese_grammar_rag.json (AUTO-APPENDED) -->\n{vietnamese_grammar_formatted}\n<!-- END MODULE: vietnamese_grammar_rag.json -->\n"
+            injected_count += 1
+            anti_ai_ism_injected.append('vietnamese_grammar_rag.json (Tier 1, auto-appended)')
+
+        # Inject literacy_techniques.json (Tier 1 - language-agnostic narrative techniques)
+        if literacy_techniques_data and "literacy_techniques.json" in final_prompt:
+            literacy_formatted = self._format_literacy_techniques_for_injection(literacy_techniques_data)
+            literacy_size_kb = len(literacy_formatted.encode('utf-8')) / 1024
+
+            # Count techniques
+            first_person = len(literacy_techniques_data.get('narrative_techniques', {}).get('first_person', {}).get('subtechniques', {}))
+            third_person = len(literacy_techniques_data.get('narrative_techniques', {}).get('third_person', {}).get('subtechniques', {}))
+            psychic_levels = len(literacy_techniques_data.get('psychic_distance_levels', {}).get('levels', {}))
+            genre_presets = len(literacy_techniques_data.get('genre_specific_presets', {}))
+
+            logger.info(f"Injecting literacy_techniques.json: {first_person + third_person + 1} narrative techniques, "
+                       f"{psychic_levels} psychic distance levels, {genre_presets} genre presets ({literacy_size_kb:.1f}KB)")
+            literacy_injection = f"\n<!-- START MODULE: literacy_techniques.json -->\n{literacy_formatted}\n<!-- END MODULE: literacy_techniques.json -->\n"
+            final_prompt = final_prompt.replace("literacy_techniques.json", literacy_injection)
+            injected_count += 1
+        elif literacy_techniques_data:
+            # Auto-append if placeholder not found (fallback for prompts without placeholder)
+            literacy_formatted = self._format_literacy_techniques_for_injection(literacy_techniques_data)
+            literacy_size_kb = len(literacy_formatted.encode('utf-8')) / 1024
+
+            first_person = len(literacy_techniques_data.get('narrative_techniques', {}).get('first_person', {}).get('subtechniques', {}))
+            third_person = len(literacy_techniques_data.get('narrative_techniques', {}).get('third_person', {}).get('subtechniques', {}))
+
+            logger.info(f"Appending literacy_techniques.json (no placeholder found): {first_person + third_person + 1} techniques ({literacy_size_kb:.1f}KB)")
+            final_prompt += f"\n\n<!-- START MODULE: literacy_techniques.json (AUTO-APPENDED) -->\n{literacy_formatted}\n<!-- END MODULE: literacy_techniques.json -->\n"
             injected_count += 1
 
         final_size_kb = len(final_prompt.encode('utf-8')) / 1024
@@ -1246,6 +1569,567 @@ class PromptLoader:
         lines.append(f"\n**Golden Rule:** If {lang_name} reader with ZERO Japanese knowledge can understand 100% → Success.")
         lines.append("**Failure Condition:** Even 1 CJK character = Translation incomplete = Unacceptable quality.\n")
         
+        return "\n".join(lines)
+    
+    def _format_anti_ai_ism_for_injection(self, anti_ai_ism_data: Dict[str, Any]) -> str:
+        """
+        Format anti-AI-ism pattern library for prompt injection (v3.5).
+        
+        Converts JSON pattern library into concise enforcement rules with proximity penalties.
+        
+        Args:
+            anti_ai_ism_data: Anti-AI-ism pattern library dictionary
+            
+        Returns:
+            Formatted anti-AI-ism enforcement instructions
+        """
+        lines = ["# ANTI-AI-ISM PATTERN LIBRARY (v3.5 LTS)\n"]
+        lines.append("## ⚠️ CRITICAL: Human-Level Natural Prose Standard\n")
+        
+        meta = anti_ai_ism_data.get('_meta', {})
+        target_density = meta.get('target_density_per_1k_words', 0.02)
+        lines.append(f"**TARGET:** <{target_density} AI-ism instances per 1,000 words (Yen Press/J-Novel Club benchmark)\n")
+        
+        # CRITICAL patterns (max impact)
+        critical_section = anti_ai_ism_data.get('CRITICAL', {})
+        critical_patterns = critical_section.get('patterns', [])
+        if critical_patterns:
+            lines.append("\n## 🔴 CRITICAL PATTERNS (Eliminate 100%)")
+            lines.append(critical_section.get('description', ''))
+            for pattern in critical_patterns[:8]:  # Top 8
+                display = pattern.get('display', '')
+                fix = pattern.get('fix', '')
+                lines.append(f"- **ELIMINATE:** \"{display}\" → {fix}")
+        
+        # MAJOR patterns (high priority)
+        major_section = anti_ai_ism_data.get('MAJOR', {})
+        major_categories = major_section.get('categories', {})
+        if major_categories:
+            lines.append("\n## 🟠 MAJOR PATTERNS (Minimize to <2 per chapter)")
+            lines.append(major_section.get('description', ''))
+            
+            for category_name, category_data in list(major_categories.items())[:4]:  # Top 4 categories
+                category_patterns = category_data.get('patterns', [])
+                if category_patterns:
+                    lines.append(f"\n### {category_name.replace('_', ' ').title()}")
+                    for pattern in category_patterns[:3]:  # 3 samples per category
+                        display = pattern.get('display', '')
+                        fix = pattern.get('fix', '')
+                        lines.append(f"- \"{display}\" → {fix}")
+        
+        # MINOR patterns (awareness level)
+        minor_section = anti_ai_ism_data.get('MINOR', {})
+        minor_categories = minor_section.get('categories', {})
+        if minor_categories:
+            lines.append("\n## 🟡 MINOR PATTERNS (Limit to 3-5 per chapter)")
+            
+            # Just show category names and 1-2 samples
+            for category_name, category_data in list(minor_categories.items())[:2]:  # Just 2 categories
+                category_patterns = category_data.get('patterns', [])
+                if category_patterns:
+                    lines.append(f"- {category_name.replace('_', ' ').title()}: Reduce hedge words, process verbs")
+        
+        # Echo detection rules (from _meta)
+        meta_echo = meta.get('echo_detection', {})
+        if meta_echo.get('enabled'):
+            lines.append("\n## 🔵 ECHO DETECTION (Proximity-Based)")
+            lines.append("**RULE:** Avoid repeating phrases within close proximity (triggers escalating penalties)\n")
+            lines.append(f"**Default Window:** {meta_echo.get('default_proximity_window', 100)} words")
+            
+            thresholds = meta_echo.get('proximity_thresholds', {})
+            if thresholds:
+                lines.append("\n### Proximity Thresholds")
+                for severity, distance in thresholds.items():
+                    lines.append(f"- {severity.upper()}: within {distance} words")
+            
+            lines.append("\n**Note:** Many patterns have proximity_penalty fields that trigger when reused too close together.")
+        
+        # Enforcement checklist
+        lines.append("\n## ✅ PRE-OUTPUT VALIDATION")
+        lines.append("Before submitting translation:")
+        lines.append("1. **Pattern Scan:** Check for CRITICAL/MAJOR AI-ism patterns")
+        lines.append("2. **Echo Check:** Scan last 5 sentences for repeated phrases")
+        lines.append("3. **Hedge Audit:** Count hedging words (somewhat, rather, quite) - limit to 3-5/chapter")
+        lines.append("4. **Process Verbs:** Replace \"started to/began to\" with direct action verbs")
+        lines.append("5. **Natural Flow:** Read aloud - does it sound like a human translator wrote it?")
+        
+        lines.append("\n**Success Metric:** Translation indistinguishable from human professional localizer.")
+        lines.append(f"**Failure Condition:** AI-ism density >{target_density}/1k words = Below professional standard.\n")
+        
+        return "\n".join(lines)
+    
+    def _format_english_grammar_rag_for_injection(self, grammar_rag_data: Dict[str, Any]) -> str:
+        """
+        Format English Grammar RAG for prompt injection (Tier 1).
+        
+        Converts JSON pattern database into natural English idiom guidance.
+        Focuses on high-frequency transcreation patterns for maximum impact.
+        
+        Args:
+            grammar_rag_data: English Grammar RAG dictionary with pattern_categories
+            
+        Returns:
+            Formatted natural idiom guidance for prompt injection
+        """
+        lines = ["# ENGLISH GRAMMAR RAG: NATURAL IDIOM PATTERNS (Tier 1)\n"]
+        lines.append("## 📖 JP→EN Transcreation for Natural English Prose\n")
+        lines.append("Apply these idiomatic patterns instead of literal translation.\n")
+        
+        pattern_categories = grammar_rag_data.get('pattern_categories', {})
+        
+        # HIGH PRIORITY: High-frequency transcreation patterns
+        hf_patterns = pattern_categories.get('high_frequency_transcreations', {}).get('patterns', [])
+        if hf_patterns:
+            lines.append("## 🔥 HIGH-FREQUENCY TRANSCREATIONS (Top Priority)\n")
+            lines.append("These patterns appear frequently in Japanese LN. Apply natural English equivalents:\n")
+            
+            # Sort by corpus_frequency if available
+            sorted_patterns = sorted(hf_patterns, key=lambda x: x.get('corpus_frequency', 0), reverse=True)
+            
+            for pattern in sorted_patterns[:15]:  # Top 15 most frequent
+                pattern_id = pattern.get('id', '')
+                jp_indicators = pattern.get('japanese_indicators', [])
+                en_pattern = pattern.get('english_pattern', '')
+                examples = pattern.get('examples', [])
+                usage_rules = pattern.get('usage_rules', [])
+                
+                # Format indicators
+                jp_display = ', '.join(jp_indicators[:3])
+                
+                lines.append(f"### {jp_display}")
+                lines.append(f"**Pattern:** {en_pattern}")
+                
+                # Add examples (first one)
+                if examples:
+                    ex = examples[0]
+                    if ex.get('literal'):
+                        lines.append(f"❌ Literal: \"{ex.get('literal', '')}\"")
+                    if ex.get('natural'):
+                        lines.append(f"✅ Natural: \"{ex.get('natural', '')}\"")
+                
+                # Add key usage rule
+                if usage_rules:
+                    lines.append(f"📌 {usage_rules[0]}")
+                
+                lines.append("")
+        
+        # EMOTIONAL INTENSIFIERS
+        emotional_patterns = pattern_categories.get('emotional_intensifiers', {}).get('patterns', [])
+        if emotional_patterns:
+            lines.append("## 💥 EMOTIONAL INTENSIFIERS\n")
+            for pattern in emotional_patterns[:5]:
+                jp_indicators = pattern.get('japanese_indicators', [])[:2]
+                en_pattern = pattern.get('english_pattern', '')
+                lines.append(f"- **{', '.join(jp_indicators)}** → {en_pattern}")
+            lines.append("")
+        
+        # CONTRASTIVE COMPARISON
+        contrastive_patterns = pattern_categories.get('contrastive_comparison', {}).get('patterns', [])
+        if contrastive_patterns:
+            lines.append("## ⚖️ CONTRASTIVE COMPARISON\n")
+            for pattern in contrastive_patterns[:3]:
+                jp_indicators = pattern.get('japanese_indicators', [])[:2]
+                en_pattern = pattern.get('english_pattern', '')
+                examples = pattern.get('examples', [])
+                lines.append(f"- **{', '.join(jp_indicators)}** → \"{en_pattern}\"")
+                if examples and examples[0].get('natural'):
+                    lines.append(f"  Example: {examples[0].get('natural', '')}")
+            lines.append("")
+        
+        # CONDITIONAL RESTRUCTURING (important for natural flow)
+        conditional_patterns = pattern_categories.get('conditional_restructuring', {}).get('patterns', [])
+        if conditional_patterns:
+            lines.append("## 🔀 CONDITIONAL RESTRUCTURING\n")
+            for pattern in conditional_patterns[:3]:
+                jp_indicators = pattern.get('japanese_indicators', [])[:2]
+                en_pattern = pattern.get('english_pattern', '')
+                lines.append(f"- **{', '.join(jp_indicators)}** → \"{en_pattern}\"")
+            lines.append("")
+        
+        # QUICK REFERENCE: Avoid Literal Translations
+        lines.append("## ⚠️ AVOID THESE LITERAL TRANSLATIONS\n")
+        lines.append("| Japanese Pattern | ❌ Don't Write | ✅ Write Instead |")
+        lines.append("|-----------------|----------------|------------------|")
+        lines.append("| やっぱり | \"As expected\" | \"Sure enough\", \"I knew it\" |")
+        lines.append("| さすが | \"As expected of X\" | \"That's X for you\", \"Classic X\" |")
+        lines.append("| しょうがない | \"It can't be helped\" | \"Oh well\", \"What can you do\" |")
+        lines.append("| まさか | \"Could it be...\" | \"Wait...\", \"No way\" |")
+        lines.append("| 絶対 | \"Absolutely\" | \"No way\", \"For sure\", \"I swear\" |")
+        lines.append("| まったく | \"Completely\" | \"Good grief\", \"Honestly\", \"Jeez\" |")
+        lines.append("")
+        
+        lines.append("**Golden Rule:** Natural English TRUMPS dictionary accuracy.")
+        lines.append("**Success Metric:** Native English reader experiences NO translation friction.\n")
+        
+        return "\n".join(lines)
+
+    def _format_vietnamese_grammar_rag_for_injection(self, grammar_rag_data: Dict[str, Any]) -> str:
+        """
+        Format Vietnamese Grammar RAG for prompt injection (Tier 1).
+        
+        Converts JSON pattern database into Vietnamese translation guidance.
+        Focuses on:
+        1. AI-ism elimination (sentence + dialogue patterns)
+        2. Particle system by archetype/RTAS
+        3. Pronoun tier system (friendship/romance)
+        4. Japanese structure carryover prevention
+        
+        Args:
+            grammar_rag_data: Vietnamese Grammar RAG dictionary
+            
+        Returns:
+            Formatted Vietnamese grammar guidance for prompt injection
+        """
+        lines = ["# VIETNAMESE GRAMMAR RAG: ANTI-AI-ISM + PARTICLE SYSTEM (Tier 1)\n"]
+        lines.append("## 🇻🇳 JP→VN Transcreation for Natural Vietnamese Prose\n")
+        lines.append("Sử dụng hệ thống particle và cấu trúc câu tự nhiên của tiếng Việt.\n")
+        
+        # CRITICAL: AI-ISM ELIMINATION
+        lines.append("## 🚫 CRITICAL: XÓA AI-ISM PATTERNS\n")
+        
+        # Sentence structure AI-isms  
+        sentence_ai_isms = grammar_rag_data.get('sentence_structure_ai_isms', {}).get('patterns', [])
+        if sentence_ai_isms:
+            lines.append("### Cấu Trúc Câu AI-ism (CẤM DÙNG)\n")
+            for pattern in sentence_ai_isms:
+                rule_id = pattern.get('id', '')
+                rule = pattern.get('rule', '')
+                severity = pattern.get('severity', 'high')
+                forbidden = pattern.get('forbidden', [])[:3]  # First 3 examples
+                corrections = pattern.get('corrections', {})
+                
+                lines.append(f"**{rule_id}** [{severity.upper()}]")
+                lines.append(f"Rule: {rule}")
+                if forbidden:
+                    lines.append(f"❌ Forbidden: {', '.join(forbidden)}")
+                if corrections:
+                    # Show first correction
+                    for wrong, correct in list(corrections.items())[:1]:
+                        lines.append(f"   ❌ \"{wrong}\"")
+                        lines.append(f"   ✅ \"{correct}\"")
+                lines.append("")
+        
+        # Dialogue AI-isms
+        dialogue_ai_isms = grammar_rag_data.get('dialogue_ai_isms', {}).get('patterns', [])
+        if dialogue_ai_isms:
+            lines.append("### Hội Thoại AI-ism (TRÁNH)\n")
+            for pattern in dialogue_ai_isms:
+                rule_id = pattern.get('id', '')
+                rule = pattern.get('rule', '')
+                
+                lines.append(f"**{rule_id}**")
+                lines.append(f"Rule: {rule}")
+                
+                # Handle different pattern structures
+                if pattern.get('mappings'):
+                    lines.append("Mappings:")
+                    for jp, vn_options in list(pattern.get('mappings', {}).items())[:3]:
+                        options = ', '.join(vn_options) if isinstance(vn_options, list) else vn_options
+                        lines.append(f"  {jp} → {options}")
+                elif pattern.get('correct_patterns'):
+                    for style, example in list(pattern.get('correct_patterns', {}).items())[:2]:
+                        lines.append(f"  {style}: {example}")
+                lines.append("")
+        
+        # PARTICLE SYSTEM (CORE)
+        lines.append("## 💬 PARTICLE SYSTEM: SẮC THÁI HỘI THOẠI\n")
+        
+        particle_system = grammar_rag_data.get('particle_system', {})
+        
+        # Question particles
+        question_particles = particle_system.get('question_particles', [])
+        if question_particles:
+            lines.append("### Question Particles\n")
+            lines.append("| Particle | Register | Gender | Archetype | Ví dụ |")
+            lines.append("|----------|----------|--------|-----------|-------|")
+            
+            for p in question_particles[:8]:
+                particle = p.get('particle', '')
+                register = p.get('register', 'neutral')
+                gender = p.get('gender', 'both')
+                archetypes = p.get('archetype_affinity', ['universal'])[:2]
+                examples = p.get('examples', [''])
+                example = examples[0] if examples else ''
+                arch_str = ', '.join(archetypes)
+                lines.append(f"| **{particle}** | {register} | {gender} | {arch_str} | {example} |")
+            lines.append("")
+        
+        # Statement particles
+        statement_particles = particle_system.get('statement_particles', [])
+        if statement_particles:
+            lines.append("### Statement Particles\n")
+            lines.append("| Particle | Register | Function | Ví dụ |")
+            lines.append("|----------|----------|----------|-------|")
+            
+            for p in statement_particles[:8]:
+                particle = p.get('particle', '')
+                register = p.get('register', 'neutral')
+                function = p.get('function', '')
+                examples = p.get('examples', [''])
+                example = examples[0] if examples else ''
+                lines.append(f"| **{particle}** | {register} | {function} | {example} |")
+            lines.append("")
+        
+        # Combination patterns
+        combo_patterns = particle_system.get('combination_patterns', [])
+        if combo_patterns:
+            lines.append("### Particle Combinations\n")
+            for combo in combo_patterns[:5]:
+                combination = combo.get('combination', '')
+                register = combo.get('register', '')
+                function = combo.get('function', '')
+                example = combo.get('example', '')
+                lines.append(f"- **{combination}** ({register}): {function}")
+                if example:
+                    lines.append(f"  Ví dụ: \"{example}\"")
+            lines.append("")
+        
+        # ARCHETYPE REGISTER MATRIX
+        lines.append("## 🎭 ARCHETYPE-PARTICLE MAPPING\n")
+        
+        archetypes = grammar_rag_data.get('archetype_register_matrix', {}).get('archetypes', {})
+        if archetypes:
+            lines.append("| Archetype | Register | Casual | Forbidden |")
+            lines.append("|-----------|----------|--------|-----------|")
+            
+            for arch_name, arch_data in list(archetypes.items())[:8]:
+                register = arch_data.get('preferred_register', 'standard')
+                casual = ', '.join(arch_data.get('casual_particles', [])[:3])
+                forbidden = ', '.join(arch_data.get('forbidden_particles', [])[:3])
+                lines.append(f"| **{arch_name}** | {register} | {casual} | {forbidden} |")
+            lines.append("")
+        
+        # PRONOUN TIERS
+        lines.append("## 👤 PRONOUN EVOLUTION BY RELATIONSHIP\n")
+        
+        pronoun_tiers = grammar_rag_data.get('pronoun_tiers', {})
+        
+        # Friendship tiers
+        friendship = pronoun_tiers.get('friendship', {})
+        if friendship:
+            lines.append("### Friendship Progression\n")
+            for tier_name, tier_data in friendship.items():
+                if isinstance(tier_data, dict):
+                    rtas_range = tier_data.get('rtas_range', '')
+                    pronouns = tier_data.get('pronouns', {})
+                    first_person = pronouns.get('first_person', [])[:2]
+                    second_person = pronouns.get('second_person', [])[:2]
+                    first_str = ', '.join(first_person) if first_person else '-'
+                    second_str = ', '.join(second_person) if second_person else '-'
+                    lines.append(f"**{tier_name}** (RTAS {rtas_range}): xưng {first_str} / gọi {second_str}")
+            lines.append("")
+        
+        # Romance scale
+        romance = pronoun_tiers.get('romance_scale', {})
+        if romance:
+            lines.append("### Romance Evolution\n")
+            for stage, stage_data in list(romance.items())[:4]:
+                if isinstance(stage_data, dict):
+                    rtas = stage_data.get('rtas', '')
+                    pronouns = stage_data.get('pronouns', {})
+                    first = pronouns.get('first_person', [''])[:1]
+                    second = pronouns.get('second_person', [''])[:1]
+                    lines.append(f"**{stage}** (RTAS {rtas}): {first[0] if first else ''} ↔ {second[0] if second else ''}")
+            lines.append("")
+        
+        # RTAS PARTICLE EVOLUTION
+        rtas_evolution = grammar_rag_data.get('rtas_particle_evolution', {})
+        if rtas_evolution:
+            lines.append("## 📈 RTAS PARTICLE EVOLUTION\n")
+            for rtas_tier, tier_data in list(rtas_evolution.items())[:4]:
+                if isinstance(tier_data, dict):
+                    register = tier_data.get('register', '')
+                    particles_list = tier_data.get('particles', [])[:4]
+                    lines.append(f"**{rtas_tier}** ({register}): {', '.join(particles_list)}")
+            lines.append("")
+        
+        # FREQUENCY THRESHOLDS (warnings)
+        frequency = grammar_rag_data.get('frequency_thresholds', {})
+        if frequency:
+            lines.append("## ⚠️ AI-ISM DENSITY WARNINGS\n")
+            max_markers = frequency.get('max_markers_per_1k_words', {})
+            if max_markers:
+                lines.append("| Marker | Max/1000 từ | Severity |")
+                lines.append("|--------|-------------|----------|")
+                for marker, limit in list(max_markers.items())[:6]:
+                    severity = "🔴" if limit <= 1 else "🟡" if limit <= 2 else "🟢"
+                    lines.append(f"| {marker} | {limit} | {severity} |")
+            lines.append("")
+        
+        # GOLDEN RULES
+        lines.append("## 📌 GOLDEN RULES\n")
+        lines.append("1. **Particle là Linh Hồn Hội Thoại** - Không có particle = đọc như robot")
+        lines.append("2. **Match Archetype với Register** - Tsundere ≠ Ojou-sama particle set")
+        lines.append("3. **RTAS Drives Pronoun Evolution** - Mức độ thân thiết → thay đổi xưng hô")
+        lines.append("4. **Zero AI-ism Tolerance** - \"Có lẽ X...\" patterns = FAIL\n")
+        lines.append("")
+        lines.append("**Success Metric:** Người đọc Việt Nam không nhận ra là bản dịch.")
+        lines.append("**Failure Condition:** AI-ism density >2/1k words = Chưa đạt chuẩn.\n")
+        
+        return "\n".join(lines)
+
+    def _format_literacy_techniques_for_injection(self, literacy_data: Dict[str, Any]) -> str:
+        """
+        Format Literary Techniques for prompt injection (Tier 1).
+
+        Converts JSON literary technique database into narrative transcreation guidance.
+        Focuses on:
+        1. Narrative POV techniques (1st person, 3rd person, Free Indirect Discourse)
+        2. Psychic distance levels
+        3. Show Don't Tell principles
+        4. Genre-specific presets
+
+        Args:
+            literacy_data: Literary techniques dictionary with narrative_techniques, psychic_distance_levels, etc.
+
+        Returns:
+            Formatted literary technique guidance for prompt injection
+        """
+        lines = ["# LITERARY TECHNIQUES: CREATIVE TRANSCREATION (Tier 1 - Language-Agnostic)\n"]
+        lines.append("## 🎭 What You Are Doing: NOT Translation, But Creative Transcreation\n")
+        lines.append("You are not a dictionary—you are a **method actor** performing a script.")
+        lines.append("Transform Japanese narrative quirks into natural prose using literary techniques.\n")
+
+        # NARRATIVE TECHNIQUES
+        narrative_techniques = literacy_data.get('narrative_techniques', {})
+
+        # Third Person (most common in LN)
+        third_person = narrative_techniques.get('third_person', {})
+        if third_person:
+            lines.append("## 📖 THIRD PERSON NARRATIVE TECHNIQUES\n")
+
+            third_person_subs = third_person.get('subtechniques', {})
+
+            # Third Person Limited (most important for Shoujo/Romance)
+            tp_limited = third_person_subs.get('third_person_limited', {})
+            if tp_limited:
+                lines.append("### 🎯 Third Person Limited (Ngôi thứ ba hạn tri)\n")
+                lines.append(f"**Definition:** {tp_limited.get('definition', '')}\n")
+                lines.append(f"**Psychic Distance:** {tp_limited.get('psychic_distance', 'close')}")
+
+                filter_removal = tp_limited.get('filter_removal', {})
+                if filter_removal and filter_removal.get('enabled'):
+                    banned_filters = filter_removal.get('banned_filters', [])
+                    lines.append("\n**CRITICAL: Eliminate Filter Words**")
+                    lines.append("❌ BANNED: " + ", ".join([f'"{f}"' for f in banned_filters[:5]]))
+                    lines.append(f"✅ FIX: {filter_removal.get('instruction', '')}\n")
+
+                vocab_infection = tp_limited.get('vocabulary_infection', {})
+                if vocab_infection and vocab_infection.get('enabled'):
+                    lines.append(f"**Vocabulary Infection:** {vocab_infection.get('instruction', '')}\n")
+
+            # Third Person Omniscient
+            tp_omniscient = third_person_subs.get('third_person_omniscient', {})
+            if tp_omniscient:
+                lines.append("### 🌍 Third Person Omniscient (Ngôi thứ ba toàn tri)\n")
+                lines.append(f"**Definition:** {tp_omniscient.get('definition', '')}")
+                lines.append(f"**Psychic Distance:** {tp_omniscient.get('psychic_distance', 'far')}\n")
+
+            # Third Person Objective
+            tp_objective = third_person_subs.get('third_person_objective', {})
+            if tp_objective:
+                lines.append("### 📹 Third Person Objective (Ngôi thứ ba khách quan)\n")
+                lines.append(f"**Definition:** {tp_objective.get('definition', '')}")
+                banned_content = tp_objective.get('banned_content', [])
+                if banned_content:
+                    lines.append("\n**BANNED:** " + ", ".join(banned_content[:4]))
+                lines.append("")
+
+        # FREE INDIRECT DISCOURSE (Critical for Shoujo)
+        fid = narrative_techniques.get('free_indirect_discourse', {})
+        if fid:
+            lines.append("## 🎨 FREE INDIRECT DISCOURSE (Gián tiếp tự do)\n")
+            lines.append(f"**Definition:** {fid.get('description', '')}\n")
+            lines.append(f"**Instruction:** {fid.get('instruction', '')}\n")
+
+            examples = fid.get('examples', {})
+            if examples:
+                lines.append("**Example Transformation:**")
+                lines.append(f"❌ Standard 3rd: {examples.get('standard_third', '')}")
+                lines.append(f"✅ Free Indirect: {examples.get('free_indirect', '')}")
+                lines.append(f"📌 {examples.get('explanation', '')}\n")
+
+            key_features = fid.get('key_features', [])
+            if key_features:
+                lines.append("**Key Features:**")
+                for feature in key_features[:5]:
+                    lines.append(f"- {feature}")
+                lines.append("")
+
+        # PSYCHIC DISTANCE LEVELS
+        psychic_distance = literacy_data.get('psychic_distance_levels', {})
+        if psychic_distance:
+            levels = psychic_distance.get('levels', {})
+            lines.append("## 📏 PSYCHIC DISTANCE SCALE (John Gardner)\n")
+            lines.append("Control how close the narration is to the character's consciousness:\n")
+
+            for level_key in ['level_4_very_close', 'level_3_close', 'level_2_distant']:
+                level = levels.get(level_key, {})
+                if level:
+                    description = level.get('description', '')
+                    example = level.get('example', '')
+                    lines.append(f"**{level_key.replace('_', ' ').title()}**")
+                    lines.append(f"- {description}")
+                    if example:
+                        lines.append(f"- Example: \"{example}\"")
+                    lines.append("")
+
+        # SHOW DON'T TELL
+        show_dont_tell = literacy_data.get('show_dont_tell', {})
+        if show_dont_tell and show_dont_tell.get('enabled'):
+            lines.append("## 🎬 SHOW DON'T TELL (Fundamental Rule)\n")
+            lines.append(f"**Principle:** {show_dont_tell.get('description', '')}\n")
+
+            banned_phrases = show_dont_tell.get('banned_tell_phrases', [])
+            if banned_phrases:
+                lines.append("**❌ BANNED TELL PHRASES:**")
+                for phrase in banned_phrases[:5]:
+                    lines.append(f"- {phrase}")
+                lines.append("")
+
+            show_alternatives = show_dont_tell.get('show_alternatives', {})
+            if show_alternatives:
+                lines.append("**✅ SHOW ALTERNATIVES:**")
+                for tell, show in list(show_alternatives.items())[:3]:
+                    lines.append(f"- **{tell}** → \"{show}\"")
+                lines.append("")
+
+        # GENRE-SPECIFIC PRESETS
+        genre_presets = literacy_data.get('genre_specific_presets', {})
+        if genre_presets:
+            lines.append("## 🎯 GENRE-SPECIFIC NARRATIVE PRESETS\n")
+
+            # Shoujo Romance (most relevant)
+            shoujo = genre_presets.get('shoujo_romance', {})
+            if shoujo:
+                lines.append("### 🌸 Shoujo Romance")
+                lines.append(f"- **Technique:** {shoujo.get('narrative_technique', '')}")
+                lines.append(f"- **Psychic Distance:** {shoujo.get('psychic_distance', '')}")
+                lines.append(f"- **Sensory Focus:** {shoujo.get('sensory_focus', '')}")
+                lines.append(f"- **Pacing:** {shoujo.get('sentence_pacing', '')}")
+                lines.append(f"- **Vocabulary:** {shoujo.get('emotional_vocabulary', '')}\n")
+
+            # Other genres (abbreviated)
+            for genre_key in ['noir_hardboiled', 'psychological_horror']:
+                genre = genre_presets.get(genre_key, {})
+                if genre:
+                    genre_name = genre_key.replace('_', ' ').title()
+                    lines.append(f"### {genre_name}")
+                    lines.append(f"- Technique: {genre.get('narrative_technique', '')}")
+                    lines.append(f"- Distance: {genre.get('psychic_distance', '')}")
+                    lines.append(f"- Pacing: {genre.get('sentence_pacing', '')}\n")
+
+        # GOLDEN RULES
+        lines.append("## 📌 INTEGRATION RULES\n")
+        lines.append("1. **Match Narrative Technique to Source** - If JP uses 3rd person limited, maintain it")
+        lines.append("2. **Remove Filter Words** - 'She saw', 'He felt' → Direct perception")
+        lines.append("3. **Apply Free Indirect Discourse** - Merge narrator voice with character vocabulary")
+        lines.append("4. **Show Emotions Through Actions** - Not 'sad', but 'throat tight, eyes stinging'")
+        lines.append("5. **Psychic Distance = Genre** - Shoujo = Very Close, Epic Fantasy = Distant\n")
+
+        lines.append("**Success Metric:** Translation reads as if originally written in target language.")
+        lines.append("**Failure:** Reads like a translated document with stiff, unnatural phrasing.\n")
+
         return "\n".join(lines)
 
     def build_translation_prompt(

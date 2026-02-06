@@ -1,0 +1,508 @@
+{
+  "version": "1.0",
+  "description": "Gap B: Ruby visual joke patterns",
+  "extracted_at": "2026-02-01T10:06:01.666144",
+  "total_patterns": 110,
+  "patterns": [
+    {
+      "kanji": "頷",
+      "ruby": "うなず",
+      "joke_type": "archaic",
+      "context": "　感想を聞いてみると、エマちゃんは元気よく頷いた。",
+      "character_reaction": "",
+      "reveal_timing": "first_mention",
+      "needs_note": true,
+      "source_epub": "(迷子になっていた幼女を助けたら、お隣に住む美少女留学生が家に遊びに来るようになった件について (2).epub"
+    },
+    {
+      "kanji": "直",
+      "ruby": "ちよく",
+      "joke_type": "archaic",
+      "context": "　率直に、かわいすぎると思ってしまう。",
+      "character_reaction": "",
+      "reveal_timing": "first_mention",
+      "needs_note": true,
+      "source_epub": "(迷子になっていた幼女を助けたら、お隣に住む美少女留学生が家に遊びに来るようになった件について (2).epub"
+    },
+    {
+      "kanji": "若",
+      "ruby": "じやつ",
+      "joke_type": "archaic",
+      "context": "　若干気まずい雰囲気になりそうだったので、俺は話題を咄嗟に考えて、エマちゃんのことを持ち出した。",
+      "character_reaction": "",
+      "reveal_timing": "first_mention",
+      "needs_note": true,
+      "source_epub": "(迷子になっていた幼女を助けたら、お隣に住む美少女留学生が家に遊びに来るようになった件について (2).epub"
+    },
+    {
+      "kanji": "彰",
+      "ruby": "あきら",
+      "joke_type": "archaic",
+      "context": "「それじゃあ、彰にそれとなく話しておくよ。もちろん、無理強いとかはしないように言っておくから」",
+      "character_reaction": "",
+      "reveal_timing": "first_mention",
+      "needs_note": true,
+      "source_epub": "(迷子になっていた幼女を助けたら、お隣に住む美少女留学生が家に遊びに来るようになった件について (2).epub"
+    },
+    {
+      "kanji": "予",
+      "ruby": "あらかじ",
+      "joke_type": "archaic",
+      "context": "　若干頰を赤く染めたシャーロットさんはそれだけ言うと、予め入れてあった食材を俺の冷蔵庫から取り出し、洗い場で両手を丁寧に洗い始めた。",
+      "character_reaction": "",
+      "reveal_timing": "first_mention",
+      "needs_note": true,
+      "source_epub": "(迷子になっていた幼女を助けたら、お隣に住む美少女留学生が家に遊びに来るようになった件について (2).epub"
+    },
+    {
+      "kanji": "疇",
+      "ruby": "ちゆう",
+      "joke_type": "archaic",
+      "context": "「いいよ、それくらい。暴れるっていっても、幼い子の範疇だし」",
+      "character_reaction": "",
+      "reveal_timing": "first_mention",
+      "needs_note": true,
+      "source_epub": "(迷子になっていた幼女を助けたら、お隣に住む美少女留学生が家に遊びに来るようになった件について (2).epub"
+    },
+    {
+      "kanji": "眼",
+      "ruby": "まなこ",
+      "joke_type": "archaic",
+      "context": "　半開きとなった眼は朧気で、寝ぼけていることがよくわかる。",
+      "character_reaction": "",
+      "reveal_timing": "first_mention",
+      "needs_note": true,
+      "source_epub": "(迷子になっていた幼女を助けたら、お隣に住む美少女留学生が家に遊びに来るようになった件について (2).epub"
+    },
+    {
+      "kanji": "朧",
+      "ruby": "おぼろ",
+      "joke_type": "archaic",
+      "context": "　半開きとなった眼は朧気で、寝ぼけていることがよくわかる。",
+      "character_reaction": "",
+      "reveal_timing": "first_mention",
+      "needs_note": true,
+      "source_epub": "(迷子になっていた幼女を助けたら、お隣に住む美少女留学生が家に遊びに来るようになった件について (2).epub"
+    },
+    {
+      "kanji": "呟",
+      "ruby": "つぶや",
+      "joke_type": "archaic",
+      "context": "　俺たちのやりとりを見届けていたシャーロットさんが、とても驚いたような表情をしてそう呟いた。",
+      "character_reaction": "",
+      "reveal_timing": "first_mention",
+      "needs_note": true,
+      "source_epub": "(迷子になっていた幼女を助けたら、お隣に住む美少女留学生が家に遊びに来るようになった件について (2).epub"
+    },
+    {
+      "kanji": "噂",
+      "ruby": "うわさ",
+      "joke_type": "archaic",
+      "context": "　何より、シャーロットさんと一緒にいるところを見られると、噂になって彼女に迷惑をかけてしまうのだ。",
+      "character_reaction": "",
+      "reveal_timing": "first_mention",
+      "needs_note": true,
+      "source_epub": "(迷子になっていた幼女を助けたら、お隣に住む美少女留学生が家に遊びに来るようになった件について (2).epub"
+    },
+    {
+      "kanji": "厨",
+      "ruby": "ちゆう",
+      "joke_type": "archaic",
+      "context": "　俺は笑顔で誤魔化し、さっさと食器を厨房へと返しに向かった。",
+      "character_reaction": "",
+      "reveal_timing": "first_mention",
+      "needs_note": true,
+      "source_epub": "(迷子になっていた幼女を助けたら、お隣に住む美少女留学生が家に遊びに来るようになった件について (2).epub"
+    },
+    {
+      "kanji": "雫",
+      "ruby": "しずく",
+      "joke_type": "archaic",
+      "context": "　目の端には……雫が、浮かんでいた。",
+      "character_reaction": "",
+      "reveal_timing": "first_mention",
+      "needs_note": true,
+      "source_epub": "(迷子になっていた幼女を助けたら、お隣に住む美少女留学生が家に遊びに来るようになった件について (2).epub"
+    },
+    {
+      "kanji": "俯",
+      "ruby": "うつむ",
+      "joke_type": "archaic",
+      "context": "　すると、そこには俯いて体をモジモジとさせる、シャーロットさんが立っていた。",
+      "character_reaction": "",
+      "reveal_timing": "first_mention",
+      "needs_note": true,
+      "source_epub": "(迷子になっていた幼女を助けたら、お隣に住む美少女留学生が家に遊びに来るようになった件について (2).epub"
+    },
+    {
+      "kanji": "窺",
+      "ruby": "うかが",
+      "joke_type": "archaic",
+      "context": "　そして先程と同じように、チラチラと俺の顔色を窺ってくる。",
+      "character_reaction": "",
+      "reveal_timing": "first_mention",
+      "needs_note": true,
+      "source_epub": "(迷子になっていた幼女を助けたら、お隣に住む美少女留学生が家に遊びに来るようになった件について (2).epub"
+    },
+    {
+      "kanji": "力",
+      "ruby": "りよく",
+      "joke_type": "archaic",
+      "context": "「まだ語彙力を持っていませんからね。そのかわいいという言葉に、いろいろな意味が含まれているんだと思いますよ」",
+      "character_reaction": "",
+      "reveal_timing": "first_mention",
+      "needs_note": true,
+      "source_epub": "(迷子になっていた幼女を助けたら、お隣に住む美少女留学生が家に遊びに来るようになった件について (2).epub"
+    },
+    {
+      "kanji": "驚",
+      "ruby": "きよう",
+      "joke_type": "archaic",
+      "context": "　シャーロットさんが急に顔を真っ赤に染め、まるで驚愕しているような表情で何か独り言を呟いているので、俺は不安になって声をかけた。",
+      "character_reaction": "",
+      "reveal_timing": "first_mention",
+      "needs_note": true,
+      "source_epub": "(迷子になっていた幼女を助けたら、お隣に住む美少女留学生が家に遊びに来るようになった件について (2).epub"
+    },
+    {
+      "kanji": "瞼",
+      "ruby": "まぶた",
+      "joke_type": "archaic",
+      "context": "　カーテンの隙間から差す日の光によって起きた俺は、重い瞼をなんとか開きながら学校に行く準備をしていた。",
+      "character_reaction": "",
+      "reveal_timing": "first_mention",
+      "needs_note": true,
+      "source_epub": "(迷子になっていた幼女を助けたら、お隣に住む美少女留学生が家に遊びに来るようになった件について (2).epub"
+    },
+    {
+      "kanji": "訝",
+      "ruby": "いぶか",
+      "joke_type": "archaic",
+      "context": "うやら、シャーロットさんの様子に違和感を抱いたのは俺だけではなかったようで、腕の中にいるエマちゃんが訝しげな表情でシャーロットさんを見ていた。",
+      "character_reaction": "",
+      "reveal_timing": "first_mention",
+      "needs_note": true,
+      "source_epub": "(迷子になっていた幼女を助けたら、お隣に住む美少女留学生が家に遊びに来るようになった件について (2).epub"
+    },
+    {
+      "kanji": "躊",
+      "ruby": "ちゆう",
+      "joke_type": "archaic",
+      "context": "　正直に申し上げますと、青柳君の前に行くのが恥ずかしくて躊躇してしまうようになりました。",
+      "character_reaction": "",
+      "reveal_timing": "first_mention",
+      "needs_note": true,
+      "source_epub": "(迷子になっていた幼女を助けたら、お隣に住む美少女留学生が家に遊びに来るようになった件について (2).epub"
+    },
+    {
+      "kanji": "醜",
+      "ruby": "みにく",
+      "joke_type": "archaic",
+      "context": "　ましてや、そんな嫉妬をする醜い女性、というふうに青柳君に思われたくないです。",
+      "character_reaction": "",
+      "reveal_timing": "first_mention",
+      "needs_note": true,
+      "source_epub": "(迷子になっていた幼女を助けたら、お隣に住む美少女留学生が家に遊びに来るようになった件について (2).epub"
+    },
+    {
+      "kanji": "蔑",
+      "ruby": "ないがし",
+      "joke_type": "archaic",
+      "context": "　だけどそれは、彼女の思いを蔑ろにしてまで、守るべきなのだろうか？",
+      "character_reaction": "",
+      "reveal_timing": "first_mention",
+      "needs_note": true,
+      "source_epub": "(迷子になっていた幼女を助けたら、お隣に住む美少女留学生が家に遊びに来るようになった件について (2).epub"
+    },
+    {
+      "kanji": "消",
+      "ruby": "しよう",
+      "joke_type": "archaic",
+      "context": "　そして無理矢理体勢を戻そうと頑張るため、体力の消耗が激しいのだ。",
+      "character_reaction": "",
+      "reveal_timing": "first_mention",
+      "needs_note": true,
+      "source_epub": "(迷子になっていた幼女を助けたら、お隣に住む美少女留学生が家に遊びに来るようになった件について (2).epub"
+    },
+    {
+      "kanji": "休",
+      "ruby": "きゆう",
+      "joke_type": "archaic",
+      "context": "　かなり辛そうなので、俺は休憩を提案してみる。",
+      "character_reaction": "",
+      "reveal_timing": "first_mention",
+      "needs_note": true,
+      "source_epub": "(迷子になっていた幼女を助けたら、お隣に住む美少女留学生が家に遊びに来るようになった件について (2).epub"
+    },
+    {
+      "kanji": "邪",
+      "ruby": "よこしま",
+      "joke_type": "archaic",
+      "context": "　本当は、シャーロットさんへの好意は溢れかえるほどにあるけれど、先程の発言にはそんな邪な気持ちはなかった。",
+      "character_reaction": "",
+      "reveal_timing": "first_mention",
+      "needs_note": true,
+      "source_epub": "(迷子になっていた幼女を助けたら、お隣に住む美少女留学生が家に遊びに来るようになった件について (2).epub"
+    },
+    {
+      "kanji": "張",
+      "ruby": "ちよう",
+      "joke_type": "archaic",
+      "context": "　忘れていた張本人がそれを言うのかよ、と思いつつも、俺は黙って彰の次の言葉を待つ。",
+      "character_reaction": "",
+      "reveal_timing": "first_mention",
+      "needs_note": true,
+      "source_epub": "(迷子になっていた幼女を助けたら、お隣に住む美少女留学生が家に遊びに来るようになった件について (2).epub"
+    },
+    {
+      "kanji": "鞄",
+      "ruby": "かばん",
+      "joke_type": "archaic",
+      "context": "　俺と彰は鞄を持つと、他に六人を連れて教室を出ようとする。",
+      "character_reaction": "",
+      "reveal_timing": "first_mention",
+      "needs_note": true,
+      "source_epub": "(迷子になっていた幼女を助けたら、お隣に住む美少女留学生が家に遊びに来るようになった件について (2).epub"
+    },
+    {
+      "kanji": "快",
+      "ruby": "こころよ",
+      "joke_type": "archaic",
+      "context": "　今回快く引き受けてくれたのも、俺たちがターゲット層に当てはまっていたからなのだ。",
+      "character_reaction": "",
+      "reveal_timing": "first_mention",
+      "needs_note": true,
+      "source_epub": "(迷子になっていた幼女を助けたら、お隣に住む美少女留学生が家に遊びに来るようになった件について (2).epub"
+    },
+    {
+      "kanji": "些",
+      "ruby": "いささ",
+      "joke_type": "archaic",
+      "context": "　お淑やかでおとなしい彼女に振るのは、些か酷だろう。",
+      "character_reaction": "",
+      "reveal_timing": "first_mention",
+      "needs_note": true,
+      "source_epub": "(迷子になっていた幼女を助けたら、お隣に住む美少女留学生が家に遊びに来るようになった件について (2).epub"
+    },
+    {
+      "kanji": "遮",
+      "ruby": "さえぎ",
+      "joke_type": "archaic",
+      "context": "　シャーロットさんが何かを言おうとした時、その言葉を遮るかのように感心するような声が聞こえてきた。",
+      "character_reaction": "",
+      "reveal_timing": "first_mention",
+      "needs_note": true,
+      "source_epub": "(迷子になっていた幼女を助けたら、お隣に住む美少女留学生が家に遊びに来るようになった件について (2).epub"
+    },
+    {
+      "kanji": "梓",
+      "ruby": "あずさ",
+      "joke_type": "archaic",
+      "context": "「梓！」",
+      "character_reaction": "",
+      "reveal_timing": "first_mention",
+      "needs_note": true,
+      "source_epub": "(迷子になっていた幼女を助けたら、お隣に住む美少女留学生が家に遊びに来るようになった件について (2).epub"
+    },
+    {
+      "kanji": "怯",
+      "ruby": "きよう",
+      "joke_type": "archaic",
+      "context": "　俺は卑怯だとわかりつつも、シャーロットさんの性格を利用して他人のことを持ちだす。",
+      "character_reaction": "",
+      "reveal_timing": "first_mention",
+      "needs_note": true,
+      "source_epub": "(迷子になっていた幼女を助けたら、お隣に住む美少女留学生が家に遊びに来るようになった件について (2).epub"
+    },
+    {
+      "kanji": "喋",
+      "ruby": "しやべ",
+      "joke_type": "archaic",
+      "context": "　今までまともに話したことがなかったけれど、この子は好きな話題になれば表情豊かになってよく喋れる子なのかもしれない。",
+      "character_reaction": "",
+      "reveal_timing": "first_mention",
+      "needs_note": true,
+      "source_epub": "(迷子になっていた幼女を助けたら、お隣に住む美少女留学生が家に遊びに来るようになった件について (2).epub"
+    },
+    {
+      "kanji": "却",
+      "ruby": "きやつ",
+      "joke_type": "archaic",
+      "context": "「却下で」",
+      "character_reaction": "",
+      "reveal_timing": "first_mention",
+      "needs_note": true,
+      "source_epub": "(迷子になっていた幼女を助けたら、お隣に住む美少女留学生が家に遊びに来るようになった件について (2).epub"
+    },
+    {
+      "kanji": "定",
+      "ruby": "じよう",
+      "joke_type": "archaic",
+      "context": "　案の定、東雲さんは俺の服の袖を引っ張ってきた。",
+      "character_reaction": "",
+      "reveal_timing": "first_mention",
+      "needs_note": true,
+      "source_epub": "(迷子になっていた幼女を助けたら、お隣に住む美少女留学生が家に遊びに来るようになった件について (2).epub"
+    },
+    {
+      "kanji": "辱",
+      "ruby": "はずかし",
+      "joke_type": "archaic",
+      "context": "　そんな中で、シャーロットさんを辱めるわけにはいかない。",
+      "character_reaction": "",
+      "reveal_timing": "first_mention",
+      "needs_note": true,
+      "source_epub": "(迷子になっていた幼女を助けたら、お隣に住む美少女留学生が家に遊びに来るようになった件について (2).epub"
+    },
+    {
+      "kanji": "囁",
+      "ruby": "ささや",
+      "joke_type": "archaic",
+      "context": "　俺は彼女の耳元に口を寄せ、優しく囁く。",
+      "character_reaction": "",
+      "reveal_timing": "first_mention",
+      "needs_note": true,
+      "source_epub": "(迷子になっていた幼女を助けたら、お隣に住む美少女留学生が家に遊びに来るようになった件について (2).epub"
+    },
+    {
+      "kanji": "繕",
+      "ruby": "つくろ",
+      "joke_type": "archaic",
+      "context": "　どう取り繕おうと、彼を裏切ってしまうことに変わりないでしょう。",
+      "character_reaction": "",
+      "reveal_timing": "first_mention",
+      "needs_note": true,
+      "source_epub": "(迷子になっていた幼女を助けたら、お隣に住む美少女留学生が家に遊びに来るようになった件について (2).epub"
+    },
+    {
+      "kanji": "陥",
+      "ruby": "おちい",
+      "joke_type": "archaic",
+      "context": "西園寺君から色々と聞き出してるから、青柳君の過去をほとんど知ってるんだ。それで、正直私なら人間不信に陥っているようなことが青柳君には起きているのに、彼は未だにまっすぐで誰かのために行動してる。だから、尊",
+      "character_reaction": "",
+      "reveal_timing": "first_mention",
+      "needs_note": true,
+      "source_epub": "(迷子になっていた幼女を助けたら、お隣に住む美少女留学生が家に遊びに来るようになった件について (2).epub"
+    },
+    {
+      "kanji": "醜",
+      "ruby": "しゆう",
+      "joke_type": "archaic",
+      "context": "だよ……！　俺の足の怪我は、お前のせいじゃない！　俺が無茶をしたせいだ！　俺たちが全国大会で大敗して醜態を晒したのも、お前がいなかったからじゃない！　俺たちがお前に頼りすぎていて、冷静さを失ったからだ！",
+      "character_reaction": "",
+      "reveal_timing": "first_mention",
+      "needs_note": true,
+      "source_epub": "(迷子になっていた幼女を助けたら、お隣に住む美少女留学生が家に遊びに来るようになった件について (2).epub"
+    },
+    {
+      "kanji": "償",
+      "ruby": "つぐな",
+      "joke_type": "archaic",
+      "context": "「どうして、俺が悪くないなんて思えるんだよ……？　全ての原因は、俺にある。だから、俺が償わなければならないんだ」",
+      "character_reaction": "",
+      "reveal_timing": "first_mention",
+      "needs_note": true,
+      "source_epub": "(迷子になっていた幼女を助けたら、お隣に住む美少女留学生が家に遊びに来るようになった件について (2).epub"
+    },
+    {
+      "kanji": "盾",
+      "ruby": "じゆん",
+      "joke_type": "archaic",
+      "context": "　それが、俺には矛盾にもとれて理解できない。",
+      "character_reaction": "",
+      "reveal_timing": "first_mention",
+      "needs_note": true,
+      "source_epub": "(迷子になっていた幼女を助けたら、お隣に住む美少女留学生が家に遊びに来るようになった件について (2).epub"
+    },
+    {
+      "kanji": "狂",
+      "ruby": "きよう",
+      "joke_type": "archaic",
+      "context": "　保育士さんが俺のことを彼氏だと言うと、シャーロットさんが顔を真っ赤にして素っ頓狂な声を上げてしまった。",
+      "character_reaction": "",
+      "reveal_timing": "first_mention",
+      "needs_note": true,
+      "source_epub": "(迷子になっていた幼女を助けたら、お隣に住む美少女留学生が家に遊びに来るようになった件について (2).epub"
+    },
+    {
+      "kanji": "陥",
+      "ruby": "おとしい",
+      "joke_type": "archaic",
+      "context": "「何か理由はあったんだろうが、他人を陥れるためじゃないだろうな。…………まぁ私は、清水が何を考えていたのか、なんとなくわかるが……」",
+      "character_reaction": "",
+      "reveal_timing": "first_mention",
+      "needs_note": true,
+      "source_epub": "(迷子になっていた幼女を助けたら、お隣に住む美少女留学生が家に遊びに来るようになった件について (2).epub"
+    },
+    {
+      "kanji": "賞",
+      "ruby": "しよう",
+      "joke_type": "archaic",
+      "context": "「お前がこの学校に入ってまで狙っているもの――特別推薦は、皆勤賞が必須というレベルだ。それなのに休むということは、特別推薦を取ることが絶望的になるぞ？」",
+      "character_reaction": "",
+      "reveal_timing": "first_mention",
+      "needs_note": true,
+      "source_epub": "(迷子になっていた幼女を助けたら、お隣に住む美少女留学生が家に遊びに来るようになった件について (2).epub"
+    },
+    {
+      "kanji": "承",
+      "ruby": "しよう",
+      "joke_type": "archaic",
+      "context": "「保育園にも私から連絡をして承諾を得ておく。あちらにはあちらの立場があるんだから、なるべく相手は立てなければならない。まぁその辺は",
+      "character_reaction": "",
+      "reveal_timing": "first_mention",
+      "needs_note": true,
+      "source_epub": "(迷子になっていた幼女を助けたら、お隣に住む美少女留学生が家に遊びに来るようになった件について (2).epub"
+    },
+    {
+      "kanji": "殆",
+      "ruby": "ほとん",
+      "joke_type": "archaic",
+      "context": "　その点、エマちゃんが投げた二つのお手玉は、頂点に達した時の高さが殆ど同じだった。",
+      "character_reaction": "",
+      "reveal_timing": "first_mention",
+      "needs_note": true,
+      "source_epub": "(迷子になっていた幼女を助けたら、お隣に住む美少女留学生が家に遊びに来るようになった件について (2).epub"
+    },
+    {
+      "kanji": "喪",
+      "ruby": "うしな",
+      "joke_type": "archaic",
+      "context": "「私、お父さんを喪っているんです。エマがまだお母さんのお腹の中にいた頃なので、四年以上前の話になりますが」",
+      "character_reaction": "",
+      "reveal_timing": "first_mention",
+      "needs_note": true,
+      "source_epub": "(迷子になっていた幼女を助けたら、お隣に住む美少女留学生が家に遊びに来るようになった件について (2).epub"
+    },
+    {
+      "kanji": "緑",
+      "ruby": "みどり",
+      "joke_type": "archaic",
+      "context": "　担当編集者さん、緑川先生をはじめとした、書籍化する際に携わって頂いた皆様、今作もご助力頂き本当にありがとうございます。",
+      "character_reaction": "",
+      "reveal_timing": "first_mention",
+      "needs_note": true,
+      "source_epub": "(迷子になっていた幼女を助けたら、お隣に住む美少女留学生が家に遊びに来るようになった件について (2).epub"
+    },
+    {
+      "kanji": "携",
+      "ruby": "たずさ",
+      "joke_type": "archaic",
+      "context": "　担当編集者さん、緑川先生をはじめとした、書籍化する際に携わって頂いた皆様、今作もご助力頂き本当にありがとうございます。",
+      "character_reaction": "",
+      "reveal_timing": "first_mention",
+      "needs_note": true,
+      "source_epub": "(迷子になっていた幼女を助けたら、お隣に住む美少女留学生が家に遊びに来るようになった件について (2).epub"
+    },
+    {
+      "kanji": "懐",
+      "ruby": "ふところ",
+      "joke_type": "archaic",
+      "context": "　相手の懐にうまく入っていく人で、お客さんからの人気も高い人だ。",
+      "character_reaction": "",
+      "reveal_timing": "first_mention",
+      "needs_note": true,
+      "source_epub": "(迷子になっていた幼女を助けたら、お隣に住む美少女留学生が家に遊びに来るようになった件について (6).epub"
+    }
+  ]
+}

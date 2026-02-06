@@ -1592,6 +1592,133 @@
                     "priority": "medium"
                 }
             ]
+        },
+        "tense_harmonization": {
+            "description": "Harmonizing tenses when transcreating JP→EN with past/present tense ambiguity - maintaining temporal consistency and monologue coherence",
+            "patterns": [
+                {
+                    "id": "explanatory_nodanodearunohazu_present",
+                    "japanese_structure": "のだ / のである / はず (non-past explanatory/expectation)",
+                    "japanese_indicators": [
+                        "のだ",
+                        "んだ",
+                        "のである",
+                        "はずだ",
+                        "はず",
+                        "に違いない"
+                    ],
+                    "english_pattern": "Present tense for ongoing states, current beliefs, general truths",
+                    "examples": [
+                        {
+                            "japanese": "いつの日か悠馬と付き合い、結婚する日が来るはずだ",
+                            "literal": "I was sure that one day, Yuma and I would date and eventually get married",
+                            "natural": "I'm sure that one day, Yuma and I will date and eventually get married",
+                            "explanation": "JP はずだ (non-past expectation) → EN present tense maintains monologue-present register"
+                        },
+                        {
+                            "japanese": "抵抗感は消滅するはず",
+                            "literal": "her resistance would vanish",
+                            "natural": "her resistance should vanish",
+                            "explanation": "JP はず (non-past certainty) → EN present/future modal"
+                        },
+                        {
+                            "japanese": "大好きな悠馬の彼女になったときに備えて、いまから恋人としての振る舞い方を学んでおいたほうがいい",
+                            "literal": "I figured I should start learning how to act like a girlfriend now to prepare for the day I finally became his",
+                            "natural": "I figure I should start learning how to act like a girlfriend now to prepare for the day I finally become his",
+                            "explanation": "JP いい (non-past advisory) → EN present maintains continuity with preceding のだ monologue"
+                        }
+                    ],
+                    "usage_rules": [
+                        "When JP uses non-past explanatory forms (のだ/のである/はず), render in English present tense",
+                        "This applies to: ongoing psychological states, current beliefs, general truths, expectations about the future",
+                        "Preserves monologue coherence - don't shift to past mid-reflection without narrative justification",
+                        "Critical for first-person introspection where character is expressing current mindset"
+                    ],
+                    "priority": "high"
+                },
+                {
+                    "id": "explanatory_nodatta_past",
+                    "japanese_structure": "のだった / のであった (past explanatory)",
+                    "japanese_indicators": [
+                        "のだった",
+                        "んだった",
+                        "のであった",
+                        "はずだった"
+                    ],
+                    "english_pattern": "Past tense for completed explanations, retrospective closure",
+                    "examples": [
+                        {
+                            "japanese": "そう思うと、なかなか踏ん切りがつかないのだった",
+                            "literal": "The thought of that keeps me from taking the plunge",
+                            "natural": "The thought of that kept me from taking the plunge",
+                            "explanation": "JP のだった (past explanatory) → EN past tense signals wrap-back to narrative past after monologue"
+                        },
+                        {
+                            "japanese": "俺は世界一美味い弁当を頰張りつつ、当時の記憶からヒントを探すのであった",
+                            "literal": "I start digging into the world's most delicious bento, searching my memories from that time for a clue",
+                            "natural": "I started digging into the world's most delicious bento, searching my memories from that time for a clue",
+                            "explanation": "JP のであった (past explanatory) → EN past tense closes the scene retrospectively"
+                        }
+                    ],
+                    "usage_rules": [
+                        "When JP explicitly uses past explanatory forms (のだった/のであった), render in English past tense",
+                        "Signals retrospective closure after internal monologue",
+                        "Acts as transition back to narrative past from present-tense introspection",
+                        "Often appears at paragraph/section endings as summary statement"
+                    ],
+                    "priority": "high"
+                },
+                {
+                    "id": "monologue_coherence",
+                    "japanese_structure": "Continuous non-past forms in introspection blocks",
+                    "japanese_indicators": [
+                        "Multiple consecutive のだ/る-form sentences",
+                        "No intervening た-form narrative breaks",
+                        "Psychological state descriptions"
+                    ],
+                    "english_pattern": "Maintain present tense throughout monologue block until explicit narrative transition",
+                    "examples": [
+                        {
+                            "japanese": "長いこと姉御肌で接してきた手前、急に甘えん坊になるのは恥ずかしく、ついツンツンした態度を取ってしまうのだ。それでも…いつの日か悠馬と付き合い、結婚する日が来るはずだ。",
+                            "awkward": "I've been acting like his tough older sister for so long that suddenly acting all sweet and clingy is just too embarrassing, so I end up acting all standoffish instead. Even so… I was sure that one day, Yuma and I would date and eventually get married.",
+                            "natural": "I've been acting like his tough older sister for so long that suddenly acting all sweet and clingy is just too embarrassing, so I end up acting all standoffish instead. Even so… I'm sure that one day, Yuma and I will date and eventually get married.",
+                            "explanation": "JP maintains non-past forms throughout (取ってしまうのだ → 来るはずだ), no narrative break. EN should stay in present tense for the entire reflection block. Shifting to 'was sure' creates unmotivated tense pocket."
+                        }
+                    ],
+                    "usage_rules": [
+                        "When character's internal reflection uses consistent JP non-past forms (のだ/る) across multiple sentences, maintain EN present tense throughout",
+                        "Only shift to past when JP provides explicit signal (た-form, のだった) or narrative returns to action/scene",
+                        "Prevents 'tense pockets' where unmotivated shifts break introspection flow",
+                        "Exception: Past events being recalled should stay in past (e.g., 'I thought about confessing myself a few times')"
+                    ],
+                    "priority": "high"
+                },
+                {
+                    "id": "parallel_pov_consistency",
+                    "japanese_structure": "Same JP grammar across different POV sections",
+                    "japanese_indicators": [
+                        "Multiple characters using same structure (e.g., はず, のだ)",
+                        "Parallel conviction/belief statements",
+                        "Symmetrical psychological descriptions"
+                    ],
+                    "english_pattern": "Render same JP structure with consistent EN tense across POVs",
+                    "examples": [
+                        {
+                            "context": "Momoka and Yuma both express certainty about future outcomes using はず",
+                            "inconsistent_example": "Momoka: 'I was sure' (past) vs Yuma: 'her resistance should vanish' (present)",
+                            "consistent_solution": "Both should be present ('I'm sure' / 'should vanish') OR both past ('I was sure' / 'would vanish')",
+                            "explanation": "Same JP grammar (はず non-past expectation) in structurally parallel moments should have matching EN tense for register symmetry"
+                        }
+                    ],
+                    "usage_rules": [
+                        "When multiple POV sections use identical JP grammar for parallel situations, harmonize EN tense",
+                        "Especially important for: beliefs/expectations (はず), explanations (のだ), ongoing states",
+                        "Prevents register inconsistency where one character sounds reflective and another sounds present",
+                        "Check cross-POV symmetry during editing phase"
+                    ],
+                    "priority": "medium"
+                }
+            ]
         }
     },
     "advanced_patterns": {
@@ -1844,6 +1971,113 @@
                         "Keep nominalization only for technical/legal writing"
                     ],
                     "priority": "medium"
+                }
+            ]
+        },
+        "redundancy_reduction": {
+            "description": "Avoiding repetitive terms in close proximity by using pronouns or demonstratives for natural flow",
+            "patterns": [
+                {
+                    "id": "near_term_substitution",
+                    "japanese_structure": "～について / ～を / ～が (repeated noun phrase)",
+                    "japanese_indicators": [
+                        "Noun phrase repeated within 1-2 sentences",
+                        "Same referent in adjacent sentences",
+                        "Topic established then immediately repeated"
+                    ],
+                    "english_pattern": "Use 'that', 'it', 'this', 'one' for second mention",
+                    "examples": [
+                        {
+                            "context": "Test of courage discussion",
+                            "literal": "As Kazehaya had just mentioned, it looked like they had decided to invite the entire class to participate in this test of courage.\n\nThey must have thought just doing a test of courage would be boring, so they decided to collect a participation fee and even prepare prizes.",
+                            "natural": "As Kazehaya had just mentioned, it looked like they had decided to invite the entire class to participate in this test of courage.\n\nThey must have thought just doing that would be boring, so they decided to collect a participation fee and even prepare prizes.",
+                            "fix": "test of courage → that (second mention)",
+                            "source": "Kimi ni Todoke Vol 1"
+                        },
+                        {
+                            "context": "Book discussion",
+                            "literal": "She finished reading the mystery novel last night.\n\nThe mystery novel had a surprising twist at the end.",
+                            "natural": "She finished reading the mystery novel last night.\n\nIt had a surprising twist at the end.",
+                            "fix": "The mystery novel → It (subject already established)"
+                        },
+                        {
+                            "context": "Event planning",
+                            "literal": "The school festival will be held next month.\n\nThe school festival requires a lot of preparation.",
+                            "natural": "The school festival will be held next month.\n\nIt requires a lot of preparation.",
+                            "fix": "The school festival → It (second sentence)"
+                        }
+                    ],
+                    "usage_rules": [
+                        "When noun phrase appears in sentence N, use pronoun/demonstrative in sentence N+1",
+                        "Applies when referent is clear from immediate context",
+                        "Use 'that' for abstract concepts just mentioned",
+                        "Use 'it' for concrete subjects",
+                        "Use 'one' when comparing similar items",
+                        "Distance threshold: 1-2 sentences maximum",
+                        "Exception: Keep repetition if ambiguity possible",
+                        "Exception: Keep repetition for emphasis/rhetorical effect"
+                    ],
+                    "priority": "high",
+                    "scope": "prose_quality"
+                },
+                {
+                    "id": "action_phrase_substitution",
+                    "japanese_structure": "～すること / ～するの (repeated action phrase)",
+                    "japanese_indicators": [
+                        "Verb phrase + こと repeated",
+                        "Action described then referenced again",
+                        "～するの appearing twice"
+                    ],
+                    "english_pattern": "Use 'doing that', 'doing so', 'that' for second mention",
+                    "examples": [
+                        {
+                            "context": "Activity hesitation",
+                            "literal": "I was nervous about going to the party.\n\nBut I decided going to the party was necessary.",
+                            "natural": "I was nervous about going to the party.\n\nBut I decided it was necessary.",
+                            "fix": "going to the party → it (action already stated)"
+                        },
+                        {
+                            "context": "Task completion",
+                            "literal": "He tried solving the puzzle for hours.\n\nSolving the puzzle proved more difficult than expected.",
+                            "natural": "He tried solving the puzzle for hours.\n\nIt proved more difficult than expected.",
+                            "fix": "Solving the puzzle → It"
+                        }
+                    ],
+                    "usage_rules": [
+                        "Replace repeated gerund phrases with pronouns",
+                        "Use 'doing that' when emphasizing the action aspect",
+                        "Use 'it' when treating action as a thing/state",
+                        "Distance: within 1-2 sentences",
+                        "Preserve if comparing two different actions"
+                    ],
+                    "priority": "medium",
+                    "scope": "prose_flow"
+                },
+                {
+                    "id": "character_name_substitution",
+                    "japanese_structure": "Name repetition in adjacent sentences",
+                    "japanese_indicators": [
+                        "Character name at start of consecutive sentences",
+                        "Same subject across sentence boundary",
+                        "No intervening speakers"
+                    ],
+                    "english_pattern": "Use pronoun after first mention in paragraph",
+                    "examples": [
+                        {
+                            "context": "Character action sequence",
+                            "literal": "Sawako entered the classroom nervously.\n\nSawako noticed everyone staring at her.",
+                            "natural": "Sawako entered the classroom nervously.\n\nShe noticed everyone staring at her.",
+                            "fix": "Sawako → She (same subject continuing)"
+                        }
+                    ],
+                    "usage_rules": [
+                        "Use pronouns for same subject in adjacent sentences",
+                        "Exception: Restate name after speaker change in dialogue",
+                        "Exception: Restate name at paragraph breaks",
+                        "Exception: Keep name if ambiguous (multiple same-gender characters active)"
+                    ],
+                    "priority": "medium",
+                    "scope": "prose_flow"
                 }
             ]
         },
@@ -2107,6 +2341,874 @@
                         "Works for playful banter and teasing"
                     ],
                     "priority": "medium"
+                }
+            ]
+        },
+        "sentence_endings": {
+            "description": "Japanese sentence-final particles that add nuance, confirmation-seeking, or emotional coloring - critical for natural dialogue flow",
+            "patterns": [
+                {
+                    "id": "confirmation_seeking_dayo_ne",
+                    "japanese_structure": "～だよね / ～よね",
+                    "japanese_indicators": [
+                        "だよね",
+                        "よね",
+                        "だろ？",
+                        "でしょ？"
+                    ],
+                    "english_pattern": "Right?, Don't you think?, Isn't it?",
+                    "examples": [
+                        {
+                            "jp": "これ、おかしいよね？",
+                            "literal": "This is weird, right?",
+                            "natural": "This is weird, right?"
+                        },
+                        {
+                            "jp": "そうだよね、彼女は優しいよね",
+                            "literal": "That's right, she is kind, isn't she?",
+                            "natural": "Right? She's really kind."
+                        },
+                        {
+                            "jp": "明日来るよね？",
+                            "literal": "You're coming tomorrow, right?",
+                            "natural": "You're coming tomorrow, right?"
+                        }
+                    ],
+                    "usage_rules": [
+                        "Add question tags naturally: right?, yeah?, don't you think?",
+                        "Can soften statements or seek agreement",
+                        "Common in casual conversation for rapport building",
+                        "Position varies: can be mid-sentence or final"
+                    ],
+                    "priority": "high"
+                },
+                {
+                    "id": "tag_question_janai",
+                    "japanese_structure": "～じゃない？ / ～じゃん",
+                    "japanese_indicators": [
+                        "じゃない",
+                        "じゃん",
+                        "やん"
+                    ],
+                    "english_pattern": "Isn't it?, Right?, You know",
+                    "examples": [
+                        {
+                            "jp": "それ、やばいじゃない？",
+                            "literal": "That's bad, isn't it?",
+                            "natural": "That's bad, isn't it?"
+                        },
+                        {
+                            "jp": "知ってるじゃん",
+                            "literal": "You know it, right?",
+                            "natural": "You know that."
+                        },
+                        {
+                            "jp": "可愛いじゃない",
+                            "literal": "She's cute, isn't she?",
+                            "natural": "She's cute, isn't she?"
+                        }
+                    ],
+                    "usage_rules": [
+                        "じゃん is more casual/assertive than じゃない",
+                        "Can express obviousness or shared knowledge",
+                        "Often drops question mark for statements",
+                        "Regional variation: やん in Kansai dialect"
+                    ],
+                    "priority": "high"
+                },
+                {
+                    "id": "wondering_kana",
+                    "japanese_structure": "～かな / ～かなあ",
+                    "japanese_indicators": [
+                        "かな",
+                        "かなあ",
+                        "だろうか"
+                    ],
+                    "english_pattern": "I wonder, Maybe, I guess",
+                    "examples": [
+                        {
+                            "jp": "明日雨かな",
+                            "literal": "I wonder if it will rain tomorrow",
+                            "natural": "Wonder if it'll rain tomorrow."
+                        },
+                        {
+                            "jp": "これでいいかなあ",
+                            "literal": "I wonder if this is okay",
+                            "natural": "Is this okay, I wonder?"
+                        },
+                        {
+                            "jp": "彼、来るかな？",
+                            "literal": "I wonder if he'll come",
+                            "natural": "Think he'll come?"
+                        }
+                    ],
+                    "usage_rules": [
+                        "Expresses uncertainty or tentative thinking",
+                        "Can drop 'I wonder' for brevity in casual speech",
+                        "Often used for self-directed questions",
+                        "かなあ (extended) shows more doubt/pondering"
+                    ],
+                    "priority": "medium"
+                },
+                {
+                    "id": "explanatory_nda",
+                    "japanese_structure": "～んだ / ～のだ",
+                    "japanese_indicators": [
+                        "んだ",
+                        "んです",
+                        "のだ",
+                        "のよ"
+                    ],
+                    "english_pattern": "You see, That's because, The thing is",
+                    "examples": [
+                        {
+                            "jp": "忙しかったんだ",
+                            "literal": "I was busy (explanatory)",
+                            "natural": "I was busy, you see."
+                        },
+                        {
+                            "jp": "彼が来ないんです",
+                            "literal": "He's not coming (explanatory)",
+                            "natural": "The thing is, he's not coming."
+                        },
+                        {
+                            "jp": "そういうことなのよ",
+                            "literal": "That's how it is (explanatory, feminine)",
+                            "natural": "That's just how it is."
+                        }
+                    ],
+                    "usage_rules": [
+                        "Adds explanatory/contextual nuance to statements",
+                        "Often implies 'let me explain' or 'here's why'",
+                        "Can be dropped in translation if context is clear",
+                        "のよ is feminine speech pattern"
+                    ],
+                    "priority": "medium"
+                },
+                {
+                    "id": "probability_darou",
+                    "japanese_structure": "～だろう / ～でしょう",
+                    "japanese_indicators": [
+                        "だろう",
+                        "でしょう",
+                        "だろ"
+                    ],
+                    "english_pattern": "Probably, I bet, Must be",
+                    "examples": [
+                        {
+                            "jp": "彼は来るだろう",
+                            "literal": "He will probably come",
+                            "natural": "He'll probably come."
+                        },
+                        {
+                            "jp": "知ってるでしょう？",
+                            "literal": "You know, don't you?",
+                            "natural": "You know that, don't you?"
+                        },
+                        {
+                            "jp": "寒いだろ",
+                            "literal": "It's cold, right?",
+                            "natural": "It's cold, right?"
+                        }
+                    ],
+                    "usage_rules": [
+                        "Expresses probability or assumption",
+                        "Can seek confirmation (with rising intonation)",
+                        "だろ is casual, でしょう is polite",
+                        "Often translated as 'probably', 'I bet', 'must be'"
+                    ],
+                    "priority": "medium"
+                },
+                {
+                    "id": "wondering_if_noka",
+                    "japanese_structure": "～のか / ～のかな",
+                    "japanese_indicators": [
+                        "のか",
+                        "のかな",
+                        "んだろう"
+                    ],
+                    "english_pattern": "I wonder if, Could it be",
+                    "examples": [
+                        {
+                            "jp": "本当なのか",
+                            "literal": "I wonder if it's true",
+                            "natural": "Is it really true?"
+                        },
+                        {
+                            "jp": "彼女は怒っているのかな",
+                            "literal": "I wonder if she's angry",
+                            "natural": "Is she mad, I wonder?"
+                        },
+                        {
+                            "jp": "どうすればいいんだろう",
+                            "literal": "I wonder what I should do",
+                            "natural": "What should I do?"
+                        }
+                    ],
+                    "usage_rules": [
+                        "Self-directed questioning or pondering",
+                        "Often internal monologue in narrative",
+                        "Can drop 'I wonder' in English for directness",
+                        "のかな adds more uncertainty than のか"
+                    ],
+                    "priority": "medium"
+                },
+                {
+                    "id": "recall_question_kke",
+                    "japanese_structure": "～っけ / ～んだっけ",
+                    "japanese_indicators": [
+                        "っけ",
+                        "んだっけ",
+                        "だっけ"
+                    ],
+                    "english_pattern": "Was it...?, Let me think, If I recall",
+                    "examples": [
+                        {
+                            "jp": "明日だっけ？",
+                            "literal": "Was it tomorrow?",
+                            "natural": "Was it tomorrow?"
+                        },
+                        {
+                            "jp": "何て言ったんだっけ",
+                            "literal": "What did they say again?",
+                            "natural": "What'd they say again?"
+                        },
+                        {
+                            "jp": "彼の名前、何だっけ",
+                            "literal": "His name, what was it again?",
+                            "natural": "What was his name again?"
+                        }
+                    ],
+                    "usage_rules": [
+                        "Indicates trying to recall information",
+                        "Often translates with 'again' or 'was it'",
+                        "Common in casual conversation",
+                        "Can show genuine uncertainty or rhetorical confirmation"
+                    ],
+                    "priority": "medium"
+                },
+                {
+                    "id": "causal_wake",
+                    "japanese_structure": "～わけだ / ～わけですね",
+                    "japanese_indicators": [
+                        "わけだ",
+                        "わけですね",
+                        "というわけ"
+                    ],
+                    "english_pattern": "That's why, No wonder, Naturally",
+                    "examples": [
+                        {
+                            "jp": "だから遅れたわけだ",
+                            "literal": "That's why you were late",
+                            "natural": "So that's why you were late."
+                        },
+                        {
+                            "jp": "彼が怒るわけですね",
+                            "literal": "So that's why he's angry",
+                            "natural": "No wonder he's angry."
+                        },
+                        {
+                            "jp": "そういうわけで",
+                            "literal": "For that reason",
+                            "natural": "That's why / So anyway"
+                        }
+                    ],
+                    "usage_rules": [
+                        "Expresses logical conclusion or realization",
+                        "Often shows understanding of cause-effect",
+                        "Can be triumphant ('I knew it!') or neutral",
+                        "というわけで is transition phrase: 'so anyway'"
+                    ],
+                    "priority": "medium"
+                }
+            ]
+        },
+        "emotional_nuance": {
+            "description": "Japanese modal particles and adverbs that add speaker attitude, uncertainty, or emotional coloring - essential for authentic character voice",
+            "patterns": [
+                {
+                    "id": "vague_nanka",
+                    "japanese_structure": "なんか",
+                    "japanese_indicators": [
+                        "なんか",
+                        "何か"
+                    ],
+                    "english_pattern": "Kind of, Somehow, Like, Sort of",
+                    "examples": [
+                        {
+                            "jp": "なんか変な感じがする",
+                            "literal": "I have a somehow strange feeling",
+                            "natural": "Something feels off."
+                        },
+                        {
+                            "jp": "なんか違うんだよね",
+                            "literal": "It's somehow different",
+                            "natural": "It's just... not quite right."
+                        },
+                        {
+                            "jp": "今日、なんか疲れた",
+                            "literal": "Today, I'm somehow tired",
+                            "natural": "I'm kinda tired today."
+                        }
+                    ],
+                    "usage_rules": [
+                        "Expresses vague uncertainty or hesitation",
+                        "Often untranslatable hedge - can drop entirely",
+                        "Overuse creates Valley Girl speech - use sparingly",
+                        "Can add 'sort of', 'kinda', 'somehow' depending on context"
+                    ],
+                    "priority": "high"
+                },
+                {
+                    "id": "softener_chotto",
+                    "japanese_structure": "ちょっと",
+                    "japanese_indicators": [
+                        "ちょっと",
+                        "ちょい"
+                    ],
+                    "english_pattern": "A bit, Kinda, A little, (or drop entirely)",
+                    "examples": [
+                        {
+                            "jp": "ちょっと難しいかも",
+                            "literal": "It might be a bit difficult",
+                            "natural": "Might be kinda hard."
+                        },
+                        {
+                            "jp": "ちょっと待って",
+                            "literal": "Wait a bit",
+                            "natural": "Wait a sec / Hold on"
+                        },
+                        {
+                            "jp": "ちょっと違う",
+                            "literal": "It's a bit different",
+                            "natural": "Not quite. / That's not it."
+                        }
+                    ],
+                    "usage_rules": [
+                        "Softens statements to sound less direct",
+                        "Common in requests: 'ちょっと待って' = 'wait a sec'",
+                        "Can often be dropped in English without losing meaning",
+                        "Overuse makes speech sound wishy-washy"
+                    ],
+                    "priority": "high"
+                },
+                {
+                    "id": "as_expected_yappari",
+                    "japanese_structure": "やっぱり / やはり",
+                    "japanese_indicators": [
+                        "やっぱり",
+                        "やはり",
+                        "やっぱ"
+                    ],
+                    "english_pattern": "As expected, I knew it, Just as I thought, Sure enough",
+                    "examples": [
+                        {
+                            "jp": "やっぱりそうだった",
+                            "literal": "It was as expected",
+                            "natural": "I knew it."
+                        },
+                        {
+                            "jp": "やっぱり無理だね",
+                            "literal": "As expected, it's impossible",
+                            "natural": "Yeah, no way that's happening."
+                        },
+                        {
+                            "jp": "やはり彼が正しかった",
+                            "literal": "As expected, he was right",
+                            "natural": "He was right after all."
+                        }
+                    ],
+                    "usage_rules": [
+                        "Confirms prior expectation or suspicion",
+                        "やっぱり is casual, やはり is formal",
+                        "Can express resignation, vindication, or confirmation",
+                        "Natural alternatives: 'figures', 'knew it', 'of course'"
+                    ],
+                    "priority": "high"
+                },
+                {
+                    "id": "even_so_sasuga_ni",
+                    "japanese_structure": "さすがに",
+                    "japanese_indicators": [
+                        "さすがに",
+                        "流石に"
+                    ],
+                    "english_pattern": "Even so, Even I, That's too much, As expected",
+                    "examples": [
+                        {
+                            "jp": "さすがにそれは無理だ",
+                            "literal": "Even so, that's impossible",
+                            "natural": "Even I can't do that. / That's too much."
+                        },
+                        {
+                            "jp": "さすがに疲れた",
+                            "literal": "I'm tired even so",
+                            "natural": "I'm beat. / That was exhausting."
+                        },
+                        {
+                            "jp": "さすがプロだね",
+                            "literal": "As expected of a pro",
+                            "natural": "That's a pro for you."
+                        }
+                    ],
+                    "usage_rules": [
+                        "Expresses reaching a limit or exceeding expectations",
+                        "Two meanings: (1) 'even I/you' (limit), (2) 'as expected' (praise)",
+                        "Context determines which meaning applies",
+                        "Often shows exasperation or admiration"
+                    ],
+                    "priority": "medium"
+                },
+                {
+                    "id": "no_way_masaka",
+                    "japanese_structure": "まさか",
+                    "japanese_indicators": [
+                        "まさか",
+                        "まさかね"
+                    ],
+                    "english_pattern": "No way, Surely not, Don't tell me, Could it be",
+                    "examples": [
+                        {
+                            "jp": "まさか、そんなことないよね？",
+                            "literal": "Surely not, that's not the case, right?",
+                            "natural": "No way. That can't be true, right?"
+                        },
+                        {
+                            "jp": "まさか彼が裏切るとは",
+                            "literal": "I never thought he would betray us",
+                            "natural": "I can't believe he betrayed us."
+                        },
+                        {
+                            "jp": "まさかね",
+                            "literal": "Surely not (dismissive)",
+                            "natural": "Nah. / No way."
+                        }
+                    ],
+                    "usage_rules": [
+                        "Expresses disbelief or strong doubt",
+                        "Often rhetorical: speaker knows it's true but shocked",
+                        "まさかね is dismissive: 'nah, can't be'",
+                        "Can introduce shocking realization"
+                    ],
+                    "priority": "medium"
+                },
+                {
+                    "id": "could_it_be_moshikashite",
+                    "japanese_structure": "もしかして",
+                    "japanese_indicators": [
+                        "もしかして",
+                        "もしかすると",
+                        "もしかしたら"
+                    ],
+                    "english_pattern": "Could it be, By any chance, Maybe, Perhaps",
+                    "examples": [
+                        {
+                            "jp": "もしかして怒ってる？",
+                            "literal": "By any chance, are you angry?",
+                            "natural": "Are you mad?"
+                        },
+                        {
+                            "jp": "もしかしたら間違ってるかも",
+                            "literal": "Perhaps I might be wrong",
+                            "natural": "Maybe I'm wrong."
+                        },
+                        {
+                            "jp": "もしかして、彼が犯人？",
+                            "literal": "Could it be, he's the culprit?",
+                            "natural": "Wait... is he the one?"
+                        }
+                    ],
+                    "usage_rules": [
+                        "Expresses tentative hypothesis or realization",
+                        "Often marks sudden understanding or suspicion",
+                        "Can be excited discovery or worried question",
+                        "Natural alternatives: 'wait', 'hold on', 'don't tell me'"
+                    ],
+                    "priority": "medium"
+                },
+                {
+                    "id": "anyway_douse",
+                    "japanese_structure": "どうせ",
+                    "japanese_indicators": [
+                        "どうせ",
+                        "所詮"
+                    ],
+                    "english_pattern": "Anyway, Might as well, It's not like, In the end",
+                    "examples": [
+                        {
+                            "jp": "どうせ無理だし",
+                            "literal": "Anyway it's impossible",
+                            "natural": "It's hopeless anyway."
+                        },
+                        {
+                            "jp": "どうせ誰も来ないよ",
+                            "literal": "Anyway, no one will come",
+                            "natural": "No one's coming anyway."
+                        },
+                        {
+                            "jp": "どうせ暇だから",
+                            "literal": "Anyway I'm free",
+                            "natural": "I'm free anyway. / Might as well."
+                        }
+                    ],
+                    "usage_rules": [
+                        "Expresses resignation or fatalism",
+                        "Often dismissive or pessimistic tone",
+                        "Can justify action: 'might as well since...'",
+                        "所詮 is more literary/philosophical"
+                    ],
+                    "priority": "medium"
+                },
+                {
+                    "id": "just_in_case_ichiou",
+                    "japanese_structure": "一応",
+                    "japanese_indicators": [
+                        "一応",
+                        "いちおう"
+                    ],
+                    "english_pattern": "Just in case, For now, Technically, I guess",
+                    "examples": [
+                        {
+                            "jp": "一応確認しておくね",
+                            "literal": "I'll confirm just in case",
+                            "natural": "I'll double-check just in case."
+                        },
+                        {
+                            "jp": "一応学生です",
+                            "literal": "I'm technically a student",
+                            "natural": "I'm a student... technically."
+                        },
+                        {
+                            "jp": "一応やってみる",
+                            "literal": "I'll try it for now",
+                            "natural": "I'll give it a shot, I guess."
+                        }
+                    ],
+                    "usage_rules": [
+                        "Hedges commitment or certainty",
+                        "Multiple meanings: 'just in case', 'technically', 'for now'",
+                        "Shows doing something without full confidence",
+                        "Often implies minimal effort or reluctance"
+                    ],
+                    "priority": "medium"
+                },
+                {
+                    "id": "for_now_toriaezu",
+                    "japanese_structure": "とりあえず",
+                    "japanese_indicators": [
+                        "とりあえず",
+                        "取り敢えず"
+                    ],
+                    "english_pattern": "For now, First, Anyway, Let's start with",
+                    "examples": [
+                        {
+                            "jp": "とりあえずビール",
+                            "literal": "For now, beer",
+                            "natural": "Beer to start. / I'll have a beer."
+                        },
+                        {
+                            "jp": "とりあえず帰ろう",
+                            "literal": "For now, let's go home",
+                            "natural": "Let's just go home."
+                        },
+                        {
+                            "jp": "とりあえずやってみる",
+                            "literal": "For now, I'll try it",
+                            "natural": "I'll just try it. / Let me give it a shot."
+                        }
+                    ],
+                    "usage_rules": [
+                        "Taking first step without full plan",
+                        "Common in restaurants: 'とりあえずビール' = 'beer to start'",
+                        "Shows pragmatic approach: deal with immediate need first",
+                        "Natural alternatives: 'first', 'for starters', 'just'"
+                    ],
+                    "priority": "medium"
+                }
+            ]
+        },
+        "action_emphasis": {
+            "description": "Japanese auxiliary verbs that modify action nuance - completion, trial, motion, benefit - critical for capturing character intent and emotional undertones",
+            "patterns": [
+                {
+                    "id": "regrettable_completion_te_shimau",
+                    "japanese_structure": "～てしまう / ～ちゃう / ～じゃう",
+                    "japanese_indicators": [
+                        "てしまう",
+                        "てしまった",
+                        "ちゃう",
+                        "ちゃった",
+                        "じゃう"
+                    ],
+                    "english_pattern": "Ended up, Accidentally, Completely, (or just past tense with regret)",
+                    "examples": [
+                        {
+                            "jp": "忘れてしまった",
+                            "literal": "I completely forgot",
+                            "natural": "I forgot. / Dammit, I forgot."
+                        },
+                        {
+                            "jp": "食べちゃった",
+                            "literal": "I ended up eating it",
+                            "natural": "I ate it all. / Oops, ate it."
+                        },
+                        {
+                            "jp": "壊しちゃった",
+                            "literal": "I accidentally broke it",
+                            "natural": "I broke it. / Crap, I broke it."
+                        },
+                        {
+                            "jp": "好きになっちゃった",
+                            "literal": "I ended up falling in love",
+                            "natural": "I fell for you. / I'm in love."
+                        }
+                    ],
+                    "usage_rules": [
+                        "Expresses regret, completion, or irreversibility",
+                        "ちゃう/じゃう are casual contractions of てしまう",
+                        "Often implies accident or unintended consequence",
+                        "Can show resignation: 'it's done, can't undo it'",
+                        "In romance: expresses helpless emotion ('I fell for you')"
+                    ],
+                    "priority": "high"
+                },
+                {
+                    "id": "try_doing_te_miru",
+                    "japanese_structure": "～てみる",
+                    "japanese_indicators": [
+                        "てみる",
+                        "てみた",
+                        "てみて"
+                    ],
+                    "english_pattern": "Try (doing), Give it a try, See what happens",
+                    "examples": [
+                        {
+                            "jp": "やってみる",
+                            "literal": "I'll try doing it",
+                            "natural": "I'll give it a shot. / Let me try."
+                        },
+                        {
+                            "jp": "食べてみて",
+                            "literal": "Try eating it",
+                            "natural": "Try it. / Give it a taste."
+                        },
+                        {
+                            "jp": "考えてみた",
+                            "literal": "I tried thinking about it",
+                            "natural": "I thought about it."
+                        }
+                    ],
+                    "usage_rules": [
+                        "Indicates attempting action to see result",
+                        "Shows experimental or tentative attitude",
+                        "Often translates as 'give it a try', 'see if'",
+                        "Can be dropped entirely if 'try' is implicit"
+                    ],
+                    "priority": "high"
+                },
+                {
+                    "id": "motion_toward_te_kuru",
+                    "japanese_structure": "～てくる",
+                    "japanese_indicators": [
+                        "てくる",
+                        "てきた",
+                        "てくるよ"
+                    ],
+                    "english_pattern": "(1) Come/go and do, (2) Gradually, (3) Be back (after doing)",
+                    "examples": [
+                        {
+                            "jp": "買ってくる",
+                            "literal": "I'll go buy and come back",
+                            "natural": "I'll go grab it. / Be right back."
+                        },
+                        {
+                            "jp": "雨が降ってきた",
+                            "literal": "Rain has started falling (toward now)",
+                            "natural": "It's starting to rain."
+                        },
+                        {
+                            "jp": "分かってきた",
+                            "literal": "I've come to understand",
+                            "natural": "I'm starting to get it."
+                        }
+                    ],
+                    "usage_rules": [
+                        "Three meanings: (1) go-and-return action, (2) gradual change toward present, (3) approach",
+                        "Directional: action moves toward speaker",
+                        "With change verbs: 'starting to', 'gradually'",
+                        "With going verbs: 'I'll go (do X) and be back'"
+                    ],
+                    "priority": "medium"
+                },
+                {
+                    "id": "motion_away_te_iku",
+                    "japanese_structure": "～ていく",
+                    "japanese_indicators": [
+                        "ていく",
+                        "ていった",
+                        "てく"
+                    ],
+                    "english_pattern": "(1) Go and do, (2) Gradually, (3) Keep doing, (4) Will (future continuous)",
+                    "examples": [
+                        {
+                            "jp": "持っていく",
+                            "literal": "I'll take it (and go)",
+                            "natural": "I'll take it with me."
+                        },
+                        {
+                            "jp": "変わっていく",
+                            "literal": "It's changing (going forward)",
+                            "natural": "It's changing. / Things are changing."
+                        },
+                        {
+                            "jp": "頑張っていく",
+                            "literal": "I'll keep doing my best",
+                            "natural": "I'll keep at it. / I'll do my best."
+                        }
+                    ],
+                    "usage_rules": [
+                        "Directional: action moves away from speaker",
+                        "With change verbs: ongoing change into future",
+                        "Shows continuation or progression",
+                        "てく is casual contraction"
+                    ],
+                    "priority": "medium"
+                },
+                {
+                    "id": "gratitude_te_kureru",
+                    "japanese_structure": "～てくれる / ～てくれた",
+                    "japanese_indicators": [
+                        "てくれる",
+                        "てくれた",
+                        "てくれて"
+                    ],
+                    "english_pattern": "(do) for me, (emphasize gratitude or benefit received)",
+                    "examples": [
+                        {
+                            "jp": "助けてくれた",
+                            "literal": "He helped me (I'm grateful)",
+                            "natural": "He helped me. / Thanks for helping."
+                        },
+                        {
+                            "jp": "教えてくれる？",
+                            "literal": "Will you teach me (for my benefit)?",
+                            "natural": "Can you teach me? / Will you show me?"
+                        },
+                        {
+                            "jp": "来てくれてありがとう",
+                            "literal": "Thank you for coming (for me)",
+                            "natural": "Thanks for coming."
+                        }
+                    ],
+                    "usage_rules": [
+                        "Shows speaker receives benefit from action",
+                        "Implies gratitude or appreciation",
+                        "Contrasts with てあげる (giving benefit to others)",
+                        "Often omitted in English unless emphasizing gratitude"
+                    ],
+                    "priority": "medium"
+                },
+                {
+                    "id": "giving_benefit_te_ageru",
+                    "japanese_structure": "～てあげる",
+                    "japanese_indicators": [
+                        "てあげる",
+                        "てあげた",
+                        "てやる"
+                    ],
+                    "english_pattern": "(do) for (someone), Let me (do), I'll (do) for you",
+                    "examples": [
+                        {
+                            "jp": "手伝ってあげる",
+                            "literal": "I'll help you (for your benefit)",
+                            "natural": "I'll help you. / Let me help."
+                        },
+                        {
+                            "jp": "教えてあげた",
+                            "literal": "I taught him (as a favor)",
+                            "natural": "I showed him. / I helped him out."
+                        },
+                        {
+                            "jp": "貸してやるよ",
+                            "literal": "I'll lend it to you (casual/masculine)",
+                            "natural": "I'll lend it to you."
+                        }
+                    ],
+                    "usage_rules": [
+                        "Shows speaker gives benefit to someone else",
+                        "Can sound condescending if translated literally ('I'll do X for you')",
+                        "てやる is masculine/rough variant",
+                        "Often drop entirely in English to avoid sounding patronizing"
+                    ],
+                    "priority": "low"
+                },
+                {
+                    "id": "preparatory_te_oku",
+                    "japanese_structure": "～ておく",
+                    "japanese_indicators": [
+                        "ておく",
+                        "ておいた",
+                        "とく"
+                    ],
+                    "english_pattern": "Do (in advance), Leave (in a state), Prepare, Set up",
+                    "examples": [
+                        {
+                            "jp": "買っておく",
+                            "literal": "I'll buy it in advance",
+                            "natural": "I'll buy it ahead of time. / I'll grab it now."
+                        },
+                        {
+                            "jp": "開けておいて",
+                            "literal": "Leave it open (in advance)",
+                            "natural": "Leave it open. / Keep it open."
+                        },
+                        {
+                            "jp": "準備しとく",
+                            "literal": "I'll prepare in advance (casual)",
+                            "natural": "I'll get it ready. / I'll prep it."
+                        }
+                    ],
+                    "usage_rules": [
+                        "Indicates preparatory action for future benefit",
+                        "Can mean 'leave in a state' or 'do in advance'",
+                        "とく is casual contraction",
+                        "Shows foresight or planning"
+                    ],
+                    "priority": "medium"
+                },
+                {
+                    "id": "regrettable_past_te_shimatta",
+                    "japanese_structure": "～てしまった (past form emphasis)",
+                    "japanese_indicators": [
+                        "てしまった",
+                        "ちゃった",
+                        "じゃった"
+                    ],
+                    "english_pattern": "Ended up (doing), It's too late, Already (regret emphasis)",
+                    "examples": [
+                        {
+                            "jp": "言ってしまった",
+                            "literal": "I ended up saying it",
+                            "natural": "I said it. / Crap, I said it."
+                        },
+                        {
+                            "jp": "もう終わっちゃった",
+                            "literal": "It already ended (regrettably)",
+                            "natural": "It's already over. / Aw, it's done."
+                        },
+                        {
+                            "jp": "全部食べちゃった",
+                            "literal": "I ate it all (unintentionally)",
+                            "natural": "I ate it all. / Oops, finished it."
+                        }
+                    ],
+                    "usage_rules": [
+                        "Past tense of てしまう - emphasizes completion",
+                        "Often expresses regret or 'too late now'",
+                        "Can show surprise at own actions",
+                        "Casual forms ちゃった/じゃった are very common"
+                    ],
+                    "priority": "high"
                 }
             ]
         }

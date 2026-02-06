@@ -1,0 +1,357 @@
+{
+    "version": "1.0",
+    "description": "Context-aware Sino-Vietnamese usage rules. Three-tier strategy for register matching.",
+    "last_updated": "2026-02-04",
+    "enforcement": {
+        "mode": "hard_substitution",
+        "priority": "CRITICAL",
+        "inject_timing": "pre_translation",
+        "validation": "post_translation_audit"
+    },
+    "tier_1_technical_formal": {
+        "description": "Academic, news, formal speeches, legal, medical contexts",
+        "preference": "sino_vietnamese",
+        "confidence": 0.95,
+        "applies_to": [
+            "academic",
+            "news",
+            "legal",
+            "medical",
+            "political",
+            "scientific"
+        ],
+        "examples": [
+            {
+                "kanji": "政治",
+                "romaji": "seiji",
+                "sino_vietnamese": "chính trị",
+                "natural_vietnamese": null,
+                "use": "sino_vietnamese",
+                "rationale": "Technical political terminology - Sino-Vietnamese is standard"
+            },
+            {
+                "kanji": "経済",
+                "romaji": "keizai",
+                "sino_vietnamese": "kinh tế",
+                "natural_vietnamese": null,
+                "use": "sino_vietnamese",
+                "rationale": "Economic terminology - Sino-Vietnamese is standard"
+            },
+            {
+                "kanji": "科学",
+                "romaji": "kagaku",
+                "sino_vietnamese": "khoa học",
+                "natural_vietnamese": null,
+                "use": "sino_vietnamese",
+                "rationale": "Scientific terminology - Sino-Vietnamese is standard"
+            },
+            {
+                "kanji": "教育",
+                "romaji": "kyouiku",
+                "sino_vietnamese": "giáo dục",
+                "natural_vietnamese": null,
+                "use": "sino_vietnamese",
+                "rationale": "Educational terminology - Sino-Vietnamese is standard"
+            },
+            {
+                "kanji": "法律",
+                "romaji": "houritsu",
+                "sino_vietnamese": "pháp luật",
+                "natural_vietnamese": null,
+                "use": "sino_vietnamese",
+                "rationale": "Legal terminology - Sino-Vietnamese is standard"
+            },
+            {
+                "kanji": "診断",
+                "romaji": "shindan",
+                "sino_vietnamese": "chẩn đoán",
+                "natural_vietnamese": null,
+                "use": "sino_vietnamese",
+                "rationale": "Medical diagnosis - Sino-Vietnamese is standard terminology"
+            }
+        ]
+    },
+    "tier_2_historical_formal": {
+        "description": "Period dramas, historical novels, fantasy with classical setting, formal narration",
+        "preference": "sino_vietnamese_acceptable",
+        "confidence": 0.8,
+        "applies_to": [
+            "historical",
+            "period_drama",
+            "fantasy_classical",
+            "wuxia",
+            "formal_literary"
+        ],
+        "examples": [
+            {
+                "kanji": "玄関",
+                "romaji": "genkan",
+                "sino_vietnamese": "huyền quan",
+                "natural_vietnamese": "cửa chính",
+                "use": "sino_vietnamese",
+                "rationale": "In historical/palace settings, 'huyền quan' maintains period atmosphere"
+            },
+            {
+                "kanji": "宮殿",
+                "romaji": "kyuuden",
+                "sino_vietnamese": "cung điện",
+                "natural_vietnamese": "lâu đài",
+                "use": "sino_vietnamese",
+                "rationale": "Royal palace - Sino-Vietnamese maintains formality for period setting"
+            },
+            {
+                "kanji": "侍",
+                "romaji": "samurai",
+                "sino_vietnamese": "võ sĩ",
+                "natural_vietnamese": "samurai",
+                "use": "either",
+                "rationale": "Keep 'samurai' for recognition or 'võ sĩ' for Vietnamese adaptation"
+            },
+            {
+                "kanji": "少女",
+                "romaji": "shoujo",
+                "sino_vietnamese": "thiếu nữ",
+                "natural_vietnamese": "cô gái",
+                "use": "sino_vietnamese",
+                "rationale": "In formal/literary narration, 'thiếu nữ' maintains elevated register"
+            },
+            {
+                "kanji": "青年",
+                "romaji": "seinen",
+                "sino_vietnamese": "thanh niên",
+                "natural_vietnamese": "chàng trai",
+                "use": "sino_vietnamese",
+                "rationale": "In formal contexts, 'thanh niên' is appropriate"
+            }
+        ]
+    },
+    "tier_3_modern_casual": {
+        "description": "Contemporary romcom, school life, slice-of-life, modern urban, teen POV",
+        "preference": "natural_vietnamese",
+        "confidence": 0.9,
+        "applies_to": [
+            "romcom",
+            "school_life",
+            "slice_of_life",
+            "contemporary",
+            "modern_urban",
+            "teen_protagonist"
+        ],
+        "mandatory_substitutions": [
+            {
+                "kanji": "玄関",
+                "romaji": "genkan",
+                "sino_vietnamese": "huyền quan",
+                "natural_vietnamese": "cửa chính",
+                "use": "natural_vietnamese",
+                "rationale": "Modern apartment entrance - 'huyền quan' is literary/archaic, 'cửa chính' is contemporary"
+            },
+            {
+                "kanji": "少女",
+                "romaji": "shoujo",
+                "sino_vietnamese": "thiếu nữ",
+                "natural_vietnamese": "cô gái",
+                "use": "natural_vietnamese",
+                "rationale": "Modern teen context - 'thiếu nữ' sounds like historical novel, 'cô gái' is natural"
+            },
+            {
+                "kanji": "美少女",
+                "romaji": "bishoujo",
+                "sino_vietnamese": "mỹ thiếu nữ",
+                "natural_vietnamese": "cô gái xinh đẹp",
+                "use": "natural_vietnamese",
+                "rationale": "Modern casual - 'mỹ thiếu nữ' is literary, 'cô gái xinh đẹp' is contemporary teen speech"
+            },
+            {
+                "kanji": "食事",
+                "romaji": "shokuji",
+                "sino_vietnamese": "thực sự",
+                "natural_vietnamese": "bữa ăn",
+                "use": "natural_vietnamese",
+                "rationale": "Daily meal - 'thực sự' is formal/written, 'bữa ăn' is spoken"
+            },
+            {
+                "kanji": "学校",
+                "romaji": "gakkou",
+                "sino_vietnamese": "học hiệu",
+                "natural_vietnamese": "trường học",
+                "use": "natural_vietnamese",
+                "rationale": "Modern school - 'học hiệu' is archaic, 'trường học' is standard"
+            },
+            {
+                "kanji": "台所",
+                "romaji": "daidokoro",
+                "sino_vietnamese": "đài sở",
+                "natural_vietnamese": "bếp",
+                "use": "natural_vietnamese",
+                "rationale": "Kitchen - 'đài sở' is archaic literary, 'bếp' is natural"
+            },
+            {
+                "kanji": "部屋",
+                "romaji": "heya",
+                "sino_vietnamese": "bộ ốc",
+                "natural_vietnamese": "phòng",
+                "use": "natural_vietnamese",
+                "rationale": "Room - 'bộ ốc' is literary, 'phòng' is contemporary"
+            },
+            {
+                "kanji": "友人",
+                "romaji": "yuujin",
+                "sino_vietnamese": "hữu nhân",
+                "natural_vietnamese": "bạn",
+                "use": "natural_vietnamese",
+                "rationale": "Friend - 'hữu nhân' is classical, 'bạn' is casual contemporary"
+            },
+            {
+                "kanji": "母親",
+                "romaji": "hahaoya",
+                "sino_vietnamese": "mẫu thân",
+                "natural_vietnamese": "mẹ",
+                "use": "natural_vietnamese",
+                "rationale": "Mother - 'mẫu thân' is formal/filial, 'mẹ' is natural family address"
+            },
+            {
+                "kanji": "父親",
+                "romaji": "chichioya",
+                "sino_vietnamese": "phụ thân",
+                "natural_vietnamese": "bố/ba",
+                "use": "natural_vietnamese",
+                "rationale": "Father - 'phụ thân' is formal/filial, 'bố/ba' is natural family address"
+            },
+            {
+                "kanji": "兄",
+                "romaji": "ani",
+                "sino_vietnamese": "huynh",
+                "natural_vietnamese": "anh",
+                "use": "natural_vietnamese",
+                "rationale": "Older brother - 'huynh' is classical, 'anh' is contemporary"
+            },
+            {
+                "kanji": "姉",
+                "romaji": "ane",
+                "sino_vietnamese": "tỷ",
+                "natural_vietnamese": "chị",
+                "use": "natural_vietnamese",
+                "rationale": "Older sister - 'tỷ' is classical, 'chị' is contemporary"
+            },
+            {
+                "kanji": "弟",
+                "romaji": "otouto",
+                "sino_vietnamese": "đệ",
+                "natural_vietnamese": "em trai",
+                "use": "natural_vietnamese",
+                "rationale": "Younger brother - 'đệ' is classical, 'em trai' is contemporary"
+            },
+            {
+                "kanji": "妹",
+                "romaji": "imouto",
+                "sino_vietnamese": "muội",
+                "natural_vietnamese": "em gái",
+                "use": "natural_vietnamese",
+                "rationale": "Younger sister - 'muội' is classical, 'em gái' is contemporary"
+            },
+            {
+                "kanji": "彼女",
+                "romaji": "kanojo",
+                "sino_vietnamese": "bỉ nữ",
+                "natural_vietnamese": "cô ấy/bạn gái",
+                "use": "natural_vietnamese",
+                "rationale": "Girlfriend/she - 'bỉ nữ' is archaic, 'cô ấy' (she) or 'bạn gái' (girlfriend) is natural"
+            },
+            {
+                "kanji": "彼氏",
+                "romaji": "kareshi",
+                "sino_vietnamese": "bỉ thị",
+                "natural_vietnamese": "anh ấy/bạn trai",
+                "use": "natural_vietnamese",
+                "rationale": "Boyfriend/he - 'anh ấy' (he) or 'bạn trai' (boyfriend) is natural"
+            }
+        ]
+    },
+    "genre_mapping": {
+        "romcom": "tier_3_modern_casual",
+        "school_life": "tier_3_modern_casual",
+        "slice_of_life": "tier_3_modern_casual",
+        "contemporary": "tier_3_modern_casual",
+        "modern_urban": "tier_3_modern_casual",
+        "yandere": "tier_3_modern_casual",
+        "psychological": "tier_3_modern_casual",
+        "historical": "tier_2_historical_formal",
+        "period_drama": "tier_2_historical_formal",
+        "fantasy_classical": "tier_2_historical_formal",
+        "wuxia": "tier_2_historical_formal",
+        "isekai_medieval": "tier_2_historical_formal",
+        "academic": "tier_1_technical_formal",
+        "legal_thriller": "tier_1_technical_formal",
+        "medical_drama": "tier_1_technical_formal",
+        "political": "tier_1_technical_formal"
+    },
+    "validation_rules": [
+        {
+            "pattern": "huyền quan",
+            "expected_genres": [
+                "historical",
+                "period_drama",
+                "fantasy_classical"
+            ],
+            "flag_if_genre": [
+                "romcom",
+                "school_life",
+                "slice_of_life",
+                "contemporary"
+            ],
+            "severity": "ERROR",
+            "fix": "Replace with 'cửa chính'"
+        },
+        {
+            "pattern": "mỹ thiếu nữ",
+            "expected_genres": [
+                "historical",
+                "period_drama",
+                "fantasy_classical",
+                "formal_literary"
+            ],
+            "flag_if_genre": [
+                "romcom",
+                "school_life",
+                "slice_of_life",
+                "contemporary"
+            ],
+            "severity": "ERROR",
+            "fix": "Replace with 'cô gái xinh đẹp'"
+        },
+        {
+            "pattern": "thiếu nữ(?! xinh)",
+            "expected_genres": [
+                "historical",
+                "period_drama",
+                "fantasy_classical"
+            ],
+            "flag_if_genre": [
+                "romcom",
+                "school_life",
+                "slice_of_life",
+                "contemporary"
+            ],
+            "severity": "WARNING",
+            "fix": "Consider replacing with 'cô gái'"
+        },
+        {
+            "pattern": "mẫu thân|phụ thân",
+            "expected_genres": [
+                "historical",
+                "period_drama",
+                "fantasy_classical",
+                "formal_literary"
+            ],
+            "flag_if_genre": [
+                "romcom",
+                "school_life",
+                "slice_of_life",
+                "contemporary"
+            ],
+            "severity": "ERROR",
+            "fix": "Replace with 'mẹ'/'bố' or 'ba'"
+        }
+    ]
+}

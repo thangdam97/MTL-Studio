@@ -25,10 +25,23 @@ class EnglishGrammarRAG:
     def _flatten_patterns(self) -> List[Dict]:
         """Flatten nested pattern structure for easier searching."""
         flat_patterns = []
-        for category_name, category_data in self.config["pattern_categories"].items():
-            for pattern in category_data["patterns"]:
+
+        # Load from pattern_categories
+        pattern_categories = self.config.get("pattern_categories", {})
+        for category_name, category_data in pattern_categories.items():
+            for pattern in category_data.get("patterns", []):
                 pattern["category"] = category_name
                 flat_patterns.append(pattern)
+
+        # Also load from advanced_patterns section
+        advanced_patterns = self.config.get("advanced_patterns", {})
+        for category_name, category_data in advanced_patterns.items():
+            # Skip non-category keys like 'description'
+            if isinstance(category_data, dict) and "patterns" in category_data:
+                for pattern in category_data["patterns"]:
+                    pattern["category"] = category_name
+                    flat_patterns.append(pattern)
+
         return flat_patterns
     
     def detect_patterns(self, japanese_text: str) -> List[Dict]:

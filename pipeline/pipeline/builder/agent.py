@@ -304,11 +304,37 @@ class BuilderAgent:
             # Get language-specific metadata using actual target language
             metadata_key = f'metadata_{actual_target_lang}'
             metadata_translated = manifest.get(metadata_key) or manifest.get('metadata_en', {})
+            
+            # Support both v3.0 and v3.5 manifest schemas
             chapters = manifest.get('chapters', [])
+            if not chapters and 'structure' in manifest:
+                # v3.5 schema: chapters are in structure.chapters
+                chapters = manifest.get('structure', {}).get('chapters', [])
 
             # Get title in actual target language
+            # Support v3.0, v3.5, v3.6, and v3.7 schemas
             title_key = f'title_{actual_target_lang}'
-            book_title = metadata_translated.get(title_key) or metadata_translated.get('title_en') or metadata_jp.get('title', 'Unknown')
+            series_data = metadata_jp.get('series', {})
+            # v3.7 format: check for title_english/title_japanese directly first
+            if isinstance(series_data, dict) and 'title_english' in series_data:
+                if actual_target_lang == 'en':
+                    book_title = series_data.get('title_english') or series_data.get('title_romaji') or 'Unknown'
+                else:
+                    book_title = series_data.get(f'title_{actual_target_lang}') or series_data.get('title_english') or 'Unknown'
+            elif isinstance(series_data, dict) and 'title' in series_data:
+                series_title = series_data.get('title', {})
+                if isinstance(series_title, dict):
+                    # v3.5 schema: title is nested dict (title.english, title.romaji)
+                    if actual_target_lang == 'en':
+                        book_title = series_title.get('english') or series_title.get('romaji') or 'Unknown'
+                    else:
+                        book_title = series_title.get(actual_target_lang) or series_title.get('english') or series_title.get('romaji') or 'Unknown'
+                else:
+                    # v3.6 schema: title is string
+                    book_title = series_data.get('title') or 'Unknown'
+            else:
+                # v3.0 schema or fallback
+                book_title = metadata_translated.get(title_key) or metadata_translated.get('title_en') or metadata_jp.get('title', 'Unknown')
             print(f"     Title: {book_title}")
             print(f"     Target Language: {actual_language_name}")
             print(f"     Chapters: {len(chapters)}")
@@ -418,7 +444,10 @@ class BuilderAgent:
             )
 
         except Exception as e:
+            import traceback
             print(f"\n[ERROR] Build failed: {e}")
+            print("\n[DEBUG] Full traceback:")
+            traceback.print_exc()
             return BuildResult(
                 success=False,
                 output_path=None,
@@ -460,7 +489,11 @@ class BuilderAgent:
         target_language: str
     ) -> tuple:
         """Convert all translated markdown chapters to XHTML."""
+        # Support both v3.0 and v3.5 manifest schemas
         chapters = manifest.get('chapters', [])
+        if not chapters and 'structure' in manifest:
+            # v3.5 schema: chapters are in structure.chapters
+            chapters = manifest.get('structure', {}).get('chapters', [])
         metadata_jp = manifest.get('metadata', {})
         # Get language-specific metadata
         metadata_key = f'metadata_{target_language}'
@@ -486,7 +519,12 @@ class BuilderAgent:
             source_file = chapter.get('source_file', '')
             # Prioritize language-specific chapter title
             chapter_title_key = f'title_{target_language}'
-            title = chapter.get(chapter_title_key) or chapter.get('title_en') or chapter.get('title', f'Chapter {i+1}')
+            # v3.7 uses title_english, older versions use title_en
+            title = chapter.get(chapter_title_key) or chapter.get('title_english') or chapter.get('title_en') or chapter.get('title', f'Chapter {i+1}')
+
+            # Skip chapters without source files (e.g., cover, kuchie)
+            if not source_file:
+                continue
 
             # Look for translated file in language-specific dir first, then fallback
             # Use the target_language parameter (from manifest), not self.target_language (from config)
@@ -549,13 +587,14 @@ class BuilderAgent:
                 media_type="application/xhtml+xml"
             ))
 
-            # Track for navigation
-            chapter_info.append({
-                'id': chapter_id,
-                'title': title,
-                'xhtml_filename': xhtml_filename,
-                'href': f"Text/{xhtml_filename}"
-            })
+            # Track for navigation (skip pre-TOC content like cover pages)
+            if not chapter.get('is_pre_toc_content', False):
+                chapter_info.append({
+                    'id': chapter_id,
+                    'title': title,
+                    'xhtml_filename': xhtml_filename,
+                    'href': f"Text/{xhtml_filename}"
+                })
 
             print(f"     [OK] {source_file} -> {xhtml_filename}")
 
@@ -647,32 +686,54 @@ class BuilderAgent:
         
         return filename
 
-    def _detect_kuchie_images(self, assets: Dict, manifest: Dict = None) -> List[str]:
+    def _detect_kuchie_images(self, assets: Dict, manifest: Dict = None, structure: Dict = None) -> List[str]:
         """
         Auto-detect kuchi-e images from manifest assets.
-        
+
         First checks for explicit kuchie list in assets, then falls back
-        to pattern matching on illustration filenames.
+        to pattern matching on illustration filenames, and finally checks
+        the chapters array for kuchie entries (schema v3.6+).
         
+        For v3.7 schema, reads from structure.illustrations array.
+
         For RTL→LTR conversions, automatically reverses the kuchie order
         to maintain correct visual reading flow based on the original EPUB's
         page-progression-direction detected by the Librarian.
-        
+
         Args:
-            assets: Assets dictionary from manifest
-            manifest: Full manifest dictionary (optional, for RTL detection)
-            
+            assets: Assets dictionary from manifest (v3.0-3.5)
+            manifest: Full manifest dictionary (optional, for RTL detection and chapter lookup)
+            structure: Structure dictionary from manifest (v3.7+)
+
         Returns:
             List of kuchi-e image filenames (reversed for RTL→LTR conversions)
         """
         kuchie_list = assets.get('kuchie', [])
         
+        # v3.7 schema: check structure.illustrations for frontmatter kuchie (exclude cover)
+        if not kuchie_list and structure:
+            kuchie_list = [
+                ill.get('file', '') 
+                for ill in structure.get('illustrations', [])
+                if ill.get('location') == 'frontmatter' 
+                and ill.get('file')
+                and ill.get('id', '').lower() != 'cover'  # Exclude cover image
+            ]
+
         # Handle new format: list of dicts with metadata
+        # Schema v3.5 has: {"file": "kuchie-001.jpg", "original": "...", "image_path": "..."}
+        # Legacy manifests might have only "image_path" - use that as fallback
         if kuchie_list and isinstance(kuchie_list[0], dict):
-            # Extract 'file' field from each metadata dict
+            # Extract 'file' field from each metadata dict (preferred)
+            # Fallback to 'image_path' basename for legacy manifests
             # Already in correct spine order (1→N)
-            kuchie_list = [k['file'] for k in kuchie_list]
-        
+            kuchie_list = [
+                k.get('file') or Path(k.get('image_path', '')).name
+                for k in kuchie_list
+            ]
+            # Filter out empty strings
+            kuchie_list = [k for k in kuchie_list if k]
+
         if not kuchie_list:
             # Fallback: detect from illustrations with naming patterns
             kuchie_patterns = [r'kuchie.*\.jpg', r'frontis.*\.jpg', r'color.*\.jpg']
@@ -683,6 +744,13 @@ class BuilderAgent:
                         kuchie_images.append(illust)
                         break
             kuchie_list = sorted(kuchie_images)
+
+        # Second fallback: Check chapters array for kuchie entry (schema v3.6+)
+        if not kuchie_list and manifest:
+            for chapter in manifest.get('chapters', []):
+                if chapter.get('id') == 'kuchie':
+                    kuchie_list = chapter.get('illustrations', [])
+                    break
         
         # DON'T auto-reverse kuchie order - the librarian extraction already
         # provides them in correct visual/narrative order via sequential numbering.
@@ -707,7 +775,10 @@ class BuilderAgent:
         Returns:
             Tuple of (manifest_items, kuchie_metadata)
         """
+        # Support both v3.0-3.5 (assets key) and v3.7 (structure.illustrations) schemas
         assets = manifest.get('assets', {})
+        structure = manifest.get('structure', {})
+        
         manifest_items = []
 
         assets_dir = work_dir / "assets"
@@ -747,8 +818,8 @@ class BuilderAgent:
             print(f"     [WARNING] No cover specified in manifest")
 
         # Kuchie - copy and analyze dimensions
-        # Use helper to handle both list and dict formats
-        kuchie_list = self._detect_kuchie_images(assets, manifest)
+        # Use helper to handle both list and dict formats, passing structure for v3.7
+        kuchie_list = self._detect_kuchie_images(assets, manifest, structure)
         for i, kuchie in enumerate(kuchie_list):
             # Try subdirectory first (old format), then root assets directory (new format)
             kuchie_path = assets_dir / "kuchie" / kuchie
@@ -767,18 +838,108 @@ class BuilderAgent:
         # Analyze kuchi-e dimensions for orientation detection
         kuchie_metadata = analyze_kuchie_images(assets_dir, kuchie_list)
 
-        # Illustrations
+        # Illustrations - support both v3.0-3.5 (assets.illustrations) and v3.7 (structure.illustrations)
         illust_list = assets.get('illustrations', [])
-        for i, illust in enumerate(illust_list):
-            illust_path = assets_dir / "illustrations" / illust
+        
+        # v3.7 schema: illustrations are in structure.illustrations array
+        if not illust_list and structure.get('illustrations'):
+            illust_list = [ill.get('file', '') for ill in structure.get('illustrations', []) if ill.get('file')]
+
+        # Handle new format: list of dicts with metadata (similar to kuchie handling)
+        if illust_list and isinstance(illust_list[0], dict):
+            # Extract 'file' field from each metadata dict
+            illust_list = [
+                ill.get('file') or Path(ill.get('image_path', '')).name
+                for ill in illust_list
+            ]
+            # Filter out empty strings
+            illust_list = [ill for ill in illust_list if ill]
+
+        # Fallback: Collect illustrations from chapters array (schema v3.6+)
+        if not illust_list:
+            illust_set = set()  # Use set to avoid duplicates
+            for chapter in manifest.get('chapters', []):
+                chapter_illusts = chapter.get('illustrations', [])
+                illust_set.update(chapter_illusts)
+            illust_list = sorted(illust_set)  # Sort for consistent ordering
+
+        # Track copied illustrations to avoid duplicates
+        copied_illustrations = set()
+        illust_counter = 0
+        
+        for illust in illust_list:
+            # v3.7: images are in root assets directory
+            # v3.0-3.5: images are in assets/illustrations subdirectory
+            illust_path = assets_dir / illust
+            if not illust_path.exists():
+                illust_path = assets_dir / "illustrations" / illust
+            
             if illust_path.exists():
                 dest = paths.images_dir / illust
                 shutil.copy2(illust_path, dest)
+                illust_counter += 1
                 manifest_items.append(ManifestItem(
-                    id=f"illust-{i+1:03d}",
+                    id=f"illust-{illust_counter:03d}",
                     href=f"Images/{illust}",
                     media_type=self._get_image_media_type(illust)
                 ))
+                copied_illustrations.add(illust)
+        
+        # Also copy any original-named illustrations from assets/illustrations directory
+        # This supports original EPUB filenames from various Japanese publishers
+        illustrations_dir = assets_dir / "illustrations"
+        if illustrations_dir.exists():
+            # Patterns for common original EPUB illustration filenames (from publisher_profiles/)
+            # Each pattern group covers specific publisher naming conventions:
+            original_patterns = [
+                # Page number formats (most common - KADOKAWA, Overlap, Brave Bunko, Kodansha)
+                r'^p\d+\.(?:jpg|jpeg|png|gif|webp)$',           # p015.jpg, p267.jpg (lowercase)
+                r'^P\d+[a-z]?\.(?:jpg|jpeg|png|gif|webp)$',     # P013.jpg, P020a.jpg (SB Creative uppercase with optional suffix)
+                
+                # Kindle/AZW conversion format
+                r'^image_rsrc\w+\.(?:jpg|jpeg|png|gif|webp)$',  # image_rsrc147.jpg, image_rsrc3ND.jpg
+                
+                # Manga page format
+                r'^m\d+\.(?:jpg|jpeg|png|gif|webp)$',           # m003.jpg, m047.jpg
+                
+                # Illustration prefix formats (KADOKAWA, Brave Bunko)
+                r'^i[-_]\d+\.(?:jpg|jpeg|png|gif|webp)$',       # i-001.jpg, i_023.jpg
+                
+                # Shueisha embed format
+                r'^embed\d+(?:_HD)?\.(?:jpg|jpeg|png|gif|webp)$',  # embed0006.jpg, embed0007_HD.jpg
+                
+                # Media Factory o_ prefix format
+                r'^o_p\d+\.(?:jpg|jpeg|png|gif|webp)$',         # o_p025.jpg, o_p039.jpg
+                
+                # Special formats
+                r'^photo\.(?:jpg|jpeg|png|gif|webp)$',          # photo.jpg (author photos, etc.)
+                r'^t\d+\.(?:jpg|jpeg|png|gif|webp)$',           # t002.jpg, t003.jpg (title pages)
+            ]
+            import re as regex_module
+            combined_pattern = '|'.join(f'({p})' for p in original_patterns)
+            
+            for img_path in sorted(illustrations_dir.iterdir()):
+                if not img_path.is_file():
+                    continue
+                filename = img_path.name
+                # Skip if already copied
+                if filename in copied_illustrations:
+                    continue
+                # Skip standard renamed format (illust-###.jpg) - already handled above
+                if filename.startswith('illust-'):
+                    continue
+                # Check if matches original filename patterns
+                if regex_module.match(combined_pattern, filename, regex_module.IGNORECASE):
+                    dest = paths.images_dir / filename
+                    shutil.copy2(img_path, dest)
+                    illust_counter += 1
+                    manifest_items.append(ManifestItem(
+                        id=f"illust-{illust_counter:03d}",
+                        href=f"Images/{filename}",
+                        media_type=self._get_image_media_type(filename)
+                    ))
+                    copied_illustrations.add(filename)
+                    print(f"     [OK] Copied original illustration: {filename}")
 
         # Additional images (titlepage, manga headers, etc.)
         additional_list = assets.get('additional', [])
@@ -1060,14 +1221,79 @@ class BuilderAgent:
         publisher_key = f'publisher_{target_language}'
         series_key = f'series_{target_language}'
         
+        # Support v3.5/v3.7 nested schema for author/publisher/title
+        series_data = metadata_jp.get('series', {})
+        if isinstance(series_data, dict) and ('author' in series_data or 'title' in series_data or 'title_english' in series_data):
+            # v3.5/v3.7 schema with nested series dict
+            
+            # Extract author (handle both string and dict formats for v3.7)
+            author_data = series_data.get('author', '')
+            if isinstance(author_data, dict):
+                # v3.7 format: author is a dict with name_english, name_japanese, etc.
+                jp_author = author_data.get('name_english') or author_data.get('name_romaji') or author_data.get('name_japanese') or ''
+            else:
+                # v3.5 format: author is a string
+                jp_author = author_data
+            
+            # Extract publisher (handle both string and dict formats for v3.7)
+            publisher_data = series_data.get('publisher', '')
+            if isinstance(publisher_data, dict):
+                # v3.7 format: publisher is a dict with name_english, etc.
+                jp_publisher = publisher_data.get('name_english') or publisher_data.get('name_japanese') or ''
+            else:
+                # v3.5 format: publisher is a string
+                jp_publisher = publisher_data
+            
+            # Extract title - check v3.7 format first (title_english directly in series)
+            if 'title_english' in series_data:
+                # v3.7 format: title fields directly in series
+                if target_language == 'en':
+                    jp_title = series_data.get('title_english') or series_data.get('title_romaji') or 'Unknown'
+                else:
+                    jp_title = series_data.get(f'title_{target_language}') or series_data.get('title_english') or 'Unknown'
+                jp_series = series_data.get('title_japanese', '')
+            else:
+                # v3.5 nested format or v3.6 string format
+                series_title = series_data.get('title', {})
+                if isinstance(series_title, dict) and series_title:  # Non-empty dict
+                    if target_language == 'en':
+                        jp_title = series_title.get('english') or series_title.get('romaji') or 'Unknown'
+                    else:
+                        jp_title = series_title.get(target_language) or series_title.get('english') or series_title.get('romaji') or 'Unknown'
+                    jp_series = series_title.get('japanese', '')
+                else:
+                    # series_title is a string
+                    jp_title = metadata_jp.get('title', '')
+                    jp_series = series_data if isinstance(series_data, str) else ''
+        else:
+            # v3.0 schema or series is a string
+            jp_author = metadata_jp.get('author', '')
+            jp_publisher = metadata_jp.get('publisher', '')
+            jp_title = metadata_jp.get('title', '')
+            jp_series = series_data if isinstance(series_data, str) else metadata_jp.get('series', '')
+        
         # Build BookMetadata using target language fields
+        # Handle series_index from either v3.0 or v3.5 schema
+        series_index = metadata_jp.get('series_index')
+        if not series_index and isinstance(series_data, dict):
+            series_index = series_data.get('volume_number')
+        
+        # Extract series string from metadata, handling both string and dict formats
+        series_value = metadata_translated.get(series_key) or metadata_translated.get('series_en') or jp_series
+        # If series is still a dict (from metadata or metadata_en), extract the appropriate language
+        if isinstance(series_value, dict):
+            if target_language == 'en':
+                series_value = series_value.get('title_english') or series_value.get('english') or series_value.get('title_romaji') or series_value.get('romaji') or ''
+            else:
+                series_value = series_value.get(f'title_{target_language}') or series_value.get(target_language) or series_value.get('title_english') or series_value.get('english') or ''
+        
         book_metadata = BookMetadata(
-            title=metadata_translated.get(title_key) or metadata_translated.get('title_en') or metadata_jp.get('title', ''),
-            author=metadata_translated.get(author_key) or metadata_translated.get('author_en') or metadata_jp.get('author', ''),
+            title=metadata_translated.get(title_key) or metadata_translated.get('title_en') or jp_title,
+            author=metadata_translated.get(author_key) or metadata_translated.get('author_en') or jp_author,
             language=language_code,
-            publisher=metadata_translated.get(publisher_key) or metadata_translated.get('publisher_en') or metadata_jp.get('publisher', ''),
-            series=metadata_translated.get(series_key) or metadata_translated.get('series_en') or metadata_jp.get('series', ''),
-            series_index=metadata_jp.get('series_index'),
+            publisher=metadata_translated.get(publisher_key) or metadata_translated.get('publisher_en') or jp_publisher,
+            series=series_value,
+            series_index=series_index,
             identifier=manifest.get('volume_id', '')
         )
 
@@ -1078,7 +1304,11 @@ class BuilderAgent:
         spine_items.append(SpineItem(idref="cover", linear="no"))
 
         # Kuchi-e pages (frontmatter position)
-        kuchie_list = self._detect_kuchie_images(manifest.get('assets', {}), manifest)
+        kuchie_list = self._detect_kuchie_images(
+            manifest.get('assets', {}), 
+            manifest, 
+            manifest.get('structure', {})
+        )
         for i in range(len(kuchie_list)):
             spine_items.append(SpineItem(idref=f"kuchie-{i+1:03d}"))
 

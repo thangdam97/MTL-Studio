@@ -105,8 +105,11 @@ XHTML_EXTENSION = '.xhtml'
 # Scene break marker (universal)
 SCENE_BREAK_MARKER = "* * *"
 
-# Illustration placeholder pattern
+# Illustration placeholder patterns
+# Legacy format: [ILLUSTRATION: filename]
 ILLUSTRATION_PLACEHOLDER_PATTERN = r'\[ILLUSTRATION:?\s*"?([^"\]]+)"?\]'
+# Standard markdown format: ![alt](filename) where alt can be 'illustration', 'gaiji', or empty
+MARKDOWN_IMAGE_PATTERN = r'!\[(illustration|gaiji|)\]\(([^)]+)\)'
 
 # Ruby tag removal (for CJK languages)
 REMOVE_RUBY_TAGS = True

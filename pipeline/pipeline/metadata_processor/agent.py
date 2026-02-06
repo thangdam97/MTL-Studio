@@ -40,10 +40,49 @@ logging.basicConfig(
 logger = logging.getLogger("MetadataProcessor")
 
 
+def sanitize_json_strings(obj: Any) -> Any:
+    """
+    Recursively sanitize JSON objects to escape unescaped quotes in string values.
+
+    Fixes Gemini LLM output that may contain unescaped quotes like:
+    "key": "value with "quotes" inside"
+
+    Args:
+        obj: JSON object (dict, list, str, etc.)
+
+    Returns:
+        Sanitized object with properly escaped quotes
+    """
+    if isinstance(obj, dict):
+        return {k: sanitize_json_strings(v) for k, v in obj.items()}
+    elif isinstance(obj, list):
+        return [sanitize_json_strings(item) for item in obj]
+    elif isinstance(obj, str):
+        # Check if string contains unescaped quotes (not at boundaries)
+        # This is a heuristic - if we find " in the middle, escape it
+        # But skip if it's already escaped (\")
+        if '"' in obj and not obj.startswith('"') and not obj.endswith('"'):
+            # Replace unescaped quotes with escaped quotes
+            # But preserve already escaped quotes
+            obj = obj.replace('\\"', '\x00')  # Temporarily mark escaped quotes
+            obj = obj.replace('"', '\\"')      # Escape unescaped quotes
+            obj = obj.replace('\x00', '\\"')  # Restore escaped quotes
+        return obj
+    else:
+        return obj
+
+
 # Japanese to Arabic number mapping
 JAPANESE_NUMBERS = {
     '一': '1', '二': '2', '三': '3', '四': '4', '五': '5',
-    '六': '6', '七': '7', '八': '8', '九': '9', '十': '10'
+    '六': '6', '七': '7', '八': '8', '九': '9', '十': '10',
+    '十一': '11', '十二': '12', '十三': '13', '十四': '14', '十五': '15'
+}
+
+# Full-width to half-width number mapping
+FULLWIDTH_TO_HALFWIDTH = {
+    '０': '0', '１': '1', '２': '2', '３': '3', '４': '4',
+    '５': '5', '６': '6', '７': '7', '８': '8', '９': '9'
 }
 
 # Vietnamese number word mapping
@@ -51,6 +90,100 @@ VIETNAMESE_NUMBERS = {
     'Một': '1', 'Hai': '2', 'Ba': '3', 'Bốn': '4', 'Năm': '5',
     'Sáu': '6', 'Bảy': '7', 'Tám': '8', 'Chín': '9', 'Mười': '10'
 }
+
+
+def extract_volume_number(title: str) -> Optional[int]:
+    """
+    Extract volume number from Japanese book title using prioritized pattern matching.
+
+    Strategy:
+    1. Check for numbers in parentheses: (3), （3）, (三), （三）
+    2. Check for trailing space + number: "Title 3", "Title ３", "Title 三"
+    3. Check for volume markers: "Vol.3", "Volume 3", "巻3"
+    4. Fall back to first number found (lowest priority)
+
+    Handles formats:
+    - Arabic numerals: 0-9
+    - Full-width numerals: ０-９
+    - Kanji numerals: 一, 二, 三, etc.
+
+    Examples:
+        "この中に1人、妹がいる! 3" → 3 (not 1)
+        "タイトル (5)" → 5
+        "タイトル　Vol.4" → 4
+        "タイトル　第三巻" → 3
+
+    Args:
+        title: Japanese book title from .opf metadata
+
+    Returns:
+        Volume number as integer, or None if not found
+    """
+    import re
+
+    if not title:
+        return None
+
+    # Helper function to convert any number format to int
+    def normalize_number(num_str: str) -> int:
+        # Try full-width conversion
+        if num_str in FULLWIDTH_TO_HALFWIDTH:
+            num_str = FULLWIDTH_TO_HALFWIDTH[num_str]
+
+        # Try multi-character full-width
+        normalized = ''.join(FULLWIDTH_TO_HALFWIDTH.get(c, c) for c in num_str)
+
+        # Try kanji conversion
+        if normalized in JAPANESE_NUMBERS:
+            normalized = JAPANESE_NUMBERS[normalized]
+
+        # Convert to int
+        try:
+            return int(normalized)
+        except ValueError:
+            return None
+
+    # Priority 1: Numbers in parentheses (half-width)
+    # Matches: (3), (12), etc.
+    match = re.search(r'\(([0-9０-９一二三四五六七八九十]+)\)', title)
+    if match:
+        vol_num = normalize_number(match.group(1))
+        if vol_num:
+            return vol_num
+
+    # Priority 2: Numbers in full-width parentheses
+    # Matches: （3）, （12）, etc.
+    match = re.search(r'（([0-9０-９一二三四五六七八九十]+)）', title)
+    if match:
+        vol_num = normalize_number(match.group(1))
+        if vol_num:
+            return vol_num
+
+    # Priority 3: Volume markers (Vol., Volume, 巻, etc.)
+    # Matches: "Vol.3", "Volume 3", "第3巻", etc.
+    match = re.search(r'(?:Vol\.?|Volume|巻|第)\s*([0-9０-９一二三四五六七八九十]+)', title, re.IGNORECASE)
+    if match:
+        vol_num = normalize_number(match.group(1))
+        if vol_num:
+            return vol_num
+
+    # Priority 4: Trailing space + number at end of title
+    # Matches: "Title 3", "Title　３", "Title 三"
+    match = re.search(r'[\s　]+([0-9０-９一二三四五六七八九十]+)$', title)
+    if match:
+        vol_num = normalize_number(match.group(1))
+        if vol_num:
+            return vol_num
+
+    # Priority 5: First number found (lowest priority)
+    # This catches edge cases but may be wrong for titles like "この中に1人、妹がいる!"
+    match = re.search(r'([0-9０-９]+|[一二三四五六七八九十]+)', title)
+    if match:
+        vol_num = normalize_number(match.group(1))
+        if vol_num:
+            return vol_num
+
+    return None
 
 
 def standardize_chapter_title(title: str, target_language: str = 'vn') -> str:
@@ -347,97 +480,173 @@ class MetadataProcessor:
         - glossary terms
         - chapters (for deduplication)
         - source_volume (for tracking)
+
+        Validation:
+        - Ensures metadata_en.json exists and is complete
+        - Checks for required fields (title_en, author_en, character_names)
+        - Validates that predecessor completed Phase 1.5 successfully
+
+        Selection Strategy:
+        - Collects ALL matching volumes in the series
+        - Selects the most recent (highest volume number) as prequel
+        - Ensures subsequential inheritance (V5 inherits from V4, not V1)
         """
         current_title = self.manifest.get("metadata", {}).get("title", "")
         if not current_title:
             return None
-        
+
+        import re
+
+        # Extract current volume number using smart pattern matching
+        current_vol_num = extract_volume_number(current_title)
+        if current_vol_num:
+            logger.debug(f"Current volume number detected: {current_vol_num} from title: {current_title}")
+
+        # Collect ALL potential prequels
+        candidates = []
+
         # Search for predecessor volumes
         for vol_dir in self.work_dir.parent.iterdir():
             if not vol_dir.is_dir() or vol_dir.name == self.work_dir.name:
                 continue
-                
+
             manifest_path = vol_dir / "manifest.json"
             metadata_en_path = vol_dir / "metadata_en.json"
-            
-            if manifest_path.exists() and metadata_en_path.exists():
-                try:
-                    with open(manifest_path, 'r') as f:
-                        m_data = json.load(f)
-                    other_title = m_data.get("metadata", {}).get("title", "")
-                    
-                    # Heuristic: Shared first 10 chars indicates same series
-                    if current_title[:10] == other_title[:10]:
-                        # Load metadata_en
-                        with open(metadata_en_path, 'r') as f:
-                            metadata_en = json.load(f)
-                        
-                        # Load character roster from name_registry.json
-                        name_registry_path = vol_dir / ".context" / "name_registry.json"
-                        character_roster = {}
-                        if name_registry_path.exists():
-                            try:
-                                with open(name_registry_path, 'r') as f:
-                                    # name_registry.json is a flat dict: {jp_name: en_name}
-                                    character_roster = json.load(f)
-                            except Exception as e:
-                                logger.warning(f"Could not load name registry: {e}")
-                        
-                        # Load glossary from metadata_en.json (translated glossary, not JP)
-                        glossary = metadata_en.get("glossary", {})
-                        if not glossary:
-                            # Fallback to manifest glossary (JP) if metadata_en has none
-                            glossary = m_data.get("glossary", {})
-                        
-                        # Load chapter info for deduplication
-                        chapters = []
-                        if 'chapters' in metadata_en:
-                            chapters_data = metadata_en['chapters']
-                            
-                            # Handle both formats: list or dict
-                            if isinstance(chapters_data, list):
-                                # List format: [{'id': '01', 'title_en': 'Title'}, ...]
-                                for ch in chapters_data:
-                                    # Find original JP title from manifest
-                                    manifest_chapters = m_data.get('chapters', [])
-                                    jp_title = next(
-                                        (c['title'] for c in manifest_chapters if c['id'] == ch['id']),
-                                        ''
-                                    )
-                                    if jp_title:
-                                        chapters.append({
-                                            'id': ch['id'],
-                                            'title_jp': jp_title,
-                                            'title_en': ch.get('title_en', ch.get('title', ''))
-                                        })
-                            elif isinstance(chapters_data, dict):
-                                # Dict format: {'01': 'Chapter Title', ...}
-                                manifest_chapters = m_data.get('chapters', [])
-                                for ch_id, title_en in chapters_data.items():
-                                    jp_title = next(
-                                        (c['title'] for c in manifest_chapters if c['id'] == ch_id),
-                                        ''
-                                    )
-                                    if jp_title:
-                                        chapters.append({
-                                            'id': ch_id,
-                                            'title_jp': jp_title,
-                                            'title_en': title_en
-                                        })
-                        
-                        # Combine everything
-                        inheritance_data = {
-                            **metadata_en,
-                            "character_roster": character_roster,
-                            "glossary": glossary,
-                            "chapters": chapters,
-                            "source_volume": vol_dir.name
-                        }
-                        
-                        return inheritance_data
-                except Exception:
+
+            # Validation: Both files must exist
+            if not (manifest_path.exists() and metadata_en_path.exists()):
+                continue
+
+            # Validation: metadata_en.json must be readable and complete
+            try:
+                with open(metadata_en_path, 'r') as f:
+                    metadata_en = json.load(f)
+
+                # Check for required fields
+                required_fields = ['title_en', 'author_en', 'target_language']
+                if not all(field in metadata_en for field in required_fields):
+                    logger.debug(f"⚠️  Skipping {vol_dir.name}: incomplete metadata_en.json")
                     continue
-        return None
+
+                # Check that it's not a template (has actual translations)
+                if metadata_en.get('title_en', '').startswith('[TO BE FILLED]'):
+                    logger.debug(f"⚠️  Skipping {vol_dir.name}: metadata not yet processed")
+                    continue
+
+            except (json.JSONDecodeError, Exception) as e:
+                logger.debug(f"⚠️  Skipping {vol_dir.name}: invalid metadata_en.json ({e})")
+                continue
+
+            # Files exist and metadata_en is valid, now check if it's same series
+            try:
+                with open(manifest_path, 'r') as f:
+                    m_data = json.load(f)
+                other_title = m_data.get("metadata", {}).get("title", "")
+
+                # Heuristic: Shared first 10 chars indicates same series
+                if current_title[:10] == other_title[:10]:
+                    # Extract volume number from candidate using smart pattern matching
+                    other_vol_num = extract_volume_number(other_title)
+
+                    if other_vol_num is None:
+                        # No volume number in title = assume Volume 1
+                        other_vol_num = 1
+                        logger.debug(f"✓ Found series match: {vol_dir.name} (assumed vol 1, no number in title)")
+                    else:
+                        logger.debug(f"✓ Found series match: {vol_dir.name} (vol {other_vol_num})")
+
+                    # Load character roster from name_registry.json
+                    name_registry_path = vol_dir / ".context" / "name_registry.json"
+                    character_roster = {}
+                    if name_registry_path.exists():
+                        try:
+                            with open(name_registry_path, 'r') as f:
+                                character_roster = json.load(f)
+                        except Exception as e:
+                            logger.warning(f"Could not load name registry: {e}")
+
+                    # Load glossary from metadata_en.json
+                    glossary = metadata_en.get("glossary", {})
+                    if not glossary:
+                        glossary = m_data.get("glossary", {})
+
+                    # Load chapter info for deduplication
+                    chapters = []
+                    if 'chapters' in metadata_en:
+                        chapters_data = metadata_en['chapters']
+
+                        # Handle both formats: list or dict
+                        if isinstance(chapters_data, list):
+                            for ch in chapters_data:
+                                manifest_chapters = m_data.get('chapters', [])
+                                jp_title = next(
+                                    (c['title'] for c in manifest_chapters if c['id'] == ch['id']),
+                                    ''
+                                )
+                                if jp_title:
+                                    chapters.append({
+                                        'id': ch['id'],
+                                        'title_jp': jp_title,
+                                        'title_en': ch.get('title_en', ch.get('title', ''))
+                                    })
+                        elif isinstance(chapters_data, dict):
+                            manifest_chapters = m_data.get('chapters', [])
+                            for ch_id, title_en in chapters_data.items():
+                                jp_title = next(
+                                    (c['title'] for c in manifest_chapters if c['id'] == ch_id),
+                                    ''
+                                )
+                                if jp_title:
+                                    chapters.append({
+                                        'id': ch_id,
+                                        'title_jp': jp_title,
+                                        'title_en': title_en
+                                    })
+
+                    # Store candidate with volume number for sorting
+                    candidates.append({
+                        'vol_num': other_vol_num,
+                        'vol_dir': vol_dir,
+                        'metadata_en': metadata_en,
+                        'character_roster': character_roster,
+                        'glossary': glossary,
+                        'chapters': chapters
+                    })
+
+            except Exception:
+                continue
+
+        # No candidates found
+        if not candidates:
+            return None
+
+        # Select the most recent prequel (highest volume number less than current)
+        if current_vol_num is not None:
+            # Current has volume number - select immediate predecessor (n-1)
+            valid_prequels = [c for c in candidates if c['vol_num'] < current_vol_num]
+            if valid_prequels:
+                # Sort by volume number (descending) and take the highest
+                best_match = sorted(valid_prequels, key=lambda x: x['vol_num'], reverse=True)[0]
+                logger.info(f"✓ Selected prequel: {best_match['vol_dir'].name} (vol {best_match['vol_num']} → vol {current_vol_num})")
+            else:
+                # No valid predecessors (current might be V1)
+                return None
+        else:
+            # Current has no volume number - select highest numbered prequel
+            best_match = sorted(candidates, key=lambda x: x['vol_num'], reverse=True)[0]
+            logger.info(f"✓ Selected prequel: {best_match['vol_dir'].name} (vol {best_match['vol_num']})")
+
+        # Build inheritance data from best match
+        inheritance_data = {
+            **best_match['metadata_en'],
+            "character_roster": best_match['character_roster'],
+            "glossary": best_match['glossary'],
+            "chapters": best_match['chapters'],
+            "source_volume": best_match['vol_dir'].name,
+            "prequel_volume_number": best_match['vol_num']
+        }
+
+        return inheritance_data
     
     def _batch_translate_ruby(
         self,
@@ -549,11 +758,177 @@ class MetadataProcessor:
             # Fallback: return inherited only
             return inherited_names.copy()
 
-    def _process_sequel_metadata_optimized(
-        self, 
-        parent_data: Dict, 
+    def _process_sequel_metadata_direct_copy(
+        self,
+        parent_data: Dict,
         original_metadata: Dict,
-        chapter_titles: List[Dict], 
+        chapter_titles: List[Dict]
+    ) -> None:
+        """
+        FULL sequel mode: Direct copy metadata_en.json from prequel.
+        Skips ALL name extraction, only translates NEW chapter titles.
+
+        This is the most cost-effective approach for sequential volumes where:
+        - Character roster is 100% inherited
+        - No new characters introduced
+        - Title/author remain consistent
+        - Only chapter content is new
+
+        Args:
+            parent_data: Predecessor volume data (from detect_sequel_parent)
+            original_metadata: Current volume's original metadata
+            chapter_titles: Current volume's chapter titles
+        """
+        logger.info("="*70)
+        logger.info("🔄 FULL SEQUEL MODE: Direct Metadata Copy")
+        logger.info("="*70)
+
+        predecessor_volume = parent_data.get('source_volume', 'Unknown')
+        logger.info(f"📦 Source: {predecessor_volume}")
+
+        # === STEP 1: Direct copy entire metadata_en.json structure ===
+        metadata_translated = {
+            'title_en': parent_data.get('title_en', ''),
+            'author_en': parent_data.get('author_en', ''),
+            'character_names': parent_data.get('character_roster', {}).copy(),
+            'glossary': parent_data.get('glossary', {}).copy(),
+            'character_profiles': parent_data.get('character_profiles', {}).copy(),
+            'localization_notes': parent_data.get('localization_notes', {}).copy(),
+            'inherited_from': predecessor_volume,
+            'sequel_mode': 'direct_copy'
+        }
+
+        # Fix volume number in title using smart extraction
+        import re
+        current_jp_title = original_metadata.get('title', '')
+        base_title = metadata_translated['title_en']
+
+        # Extract volume number from current Japanese title using prioritized pattern matching
+        current_vol_num = extract_volume_number(current_jp_title)
+
+        if current_vol_num:
+            # Update English title with current volume number
+            vol_pattern = r'(\s+\d+|\s+[IVX]+|\s+Vol\.?\s+\d+|\s+Volume\s+\d+)$'
+            if re.search(vol_pattern, base_title):
+                metadata_translated['title_en'] = re.sub(vol_pattern, f' {current_vol_num}', base_title)
+            else:
+                metadata_translated['title_en'] = f"{base_title} {current_vol_num}"
+
+            logger.info(f"  📝 Updated title: '{base_title}' → '{metadata_translated['title_en']}'")
+        else:
+            logger.info(f"  ℹ️  No volume number found in Japanese title, keeping: '{base_title}'")
+
+        logger.info(f"  ✓ Title: {metadata_translated['title_en']}")
+        logger.info(f"  ✓ Author: {metadata_translated['author_en']}")
+        logger.info(f"  ✓ Character names: {len(metadata_translated['character_names'])} inherited")
+        logger.info(f"  ✓ Glossary: {len(metadata_translated['glossary'])} terms inherited")
+
+        # === STEP 2: Handle chapter titles (NEW only) ===
+        predecessor_chapters = parent_data.get('chapters', [])
+        predecessor_titles_jp = {ch['title_jp'] for ch in predecessor_chapters}
+
+        new_chapter_titles = [
+            ch for ch in chapter_titles
+            if ch['title_jp'] not in predecessor_titles_jp
+        ]
+
+        # Copy matching chapter titles directly
+        chapter_translations = {}
+        for ch in chapter_titles:
+            matching_pred = next(
+                (p for p in predecessor_chapters if p['title_jp'] == ch['title_jp']),
+                None
+            )
+            if matching_pred:
+                chapter_translations[ch['id']] = matching_pred['title_en']
+                logger.info(f"  ♻️  Chapter '{ch['id']}': Copied from predecessor")
+
+        # Translate only NEW chapter titles
+        if new_chapter_titles:
+            logger.info(f"\n📝 Translating {len(new_chapter_titles)} NEW chapter titles...")
+
+            with open(self.prompt_path, 'r', encoding='utf-8') as f:
+                system_prompt = f.read()
+
+            # Simplified prompt: only chapter titles
+            prompt = (
+                f"Translate these chapter titles to {self.language_name}:\n\n"
+                f"{json.dumps(new_chapter_titles, indent=2, ensure_ascii=False)}\n\n"
+                f"Return JSON format: {{'chapters': [{{'id': 'XX', 'title_en': '...'}}]}}"
+            )
+
+            response = self.client.generate(
+                prompt=prompt,
+                system_instruction=system_prompt,
+                temperature=0.3
+            )
+
+            try:
+                content = response.content.strip()
+                if content.startswith("```json"):
+                    content = content[7:-3].strip()
+                elif content.startswith("```"):
+                    content = content[3:-3].strip()
+
+                result = json.loads(content)
+
+                for ch in result.get('chapters', []):
+                    chapter_translations[ch['id']] = ch['title_en']
+                    logger.info(f"  ✨ Chapter '{ch['id']}': {ch['title_en']}")
+
+                logger.info(f"  ✓ Translated {len(new_chapter_titles)} new chapters")
+
+            except Exception as e:
+                logger.error(f"  ✗ Chapter translation failed: {e}")
+                # Fallback: use raw titles
+                for ch in new_chapter_titles:
+                    chapter_translations[ch['id']] = ch['title_jp']
+        else:
+            logger.info("  ✓ All chapter titles found in predecessor (0 new chapters)")
+
+        metadata_translated['chapters'] = chapter_translations
+
+        # === STEP 3: Save results ===
+        metadata_translated['target_language'] = self.target_language
+        metadata_translated['language_code'] = self.language_code
+
+        output_filename = f"metadata_{self.target_language}.json"
+        output_path = self.work_dir / output_filename
+
+        # Sanitize JSON to fix any unescaped quotes from LLM output
+        metadata_translated = sanitize_json_strings(metadata_translated)
+
+        with open(output_path, 'w', encoding='utf-8') as f:
+            json.dump(metadata_translated, f, indent=2, ensure_ascii=False)
+
+        logger.info(f"\n💾 Saved to {output_path}")
+
+        # Update manifest - PRESERVE v3 enhanced schema
+        self._update_manifest_preserve_schema(
+            title_en=metadata_translated["title_en"],
+            author_en=metadata_translated["author_en"],
+            chapters=metadata_translated["chapters"],
+            character_names=metadata_translated["character_names"],
+            glossary=metadata_translated.get("glossary", {}),
+            extra_fields={"inherited_from": predecessor_volume, "sequel_mode": "direct_copy"}
+        )
+
+        with open(self.manifest_path, 'w', encoding='utf-8') as f:
+            json.dump(self.manifest, f, indent=2, ensure_ascii=False)
+
+        logger.info("="*70)
+        logger.info("✅ FULL SEQUEL MODE COMPLETE - Maximum API savings achieved!")
+        logger.info(f"   • Inherited: {len(metadata_translated['character_names'])} names, "
+                    f"{len(metadata_translated['glossary'])} terms")
+        logger.info(f"   • New translations: {len(new_chapter_titles)} chapters only")
+        logger.info(f"   • Name extraction: SKIPPED (100% inherited)")
+        logger.info("="*70)
+
+    def _process_sequel_metadata_optimized(
+        self,
+        parent_data: Dict,
+        original_metadata: Dict,
+        chapter_titles: List[Dict],
         ruby_names: List
     ) -> None:
         """
@@ -578,24 +953,18 @@ class MetadataProcessor:
         base_title = parent_data.get('title_en', '')
         current_jp_title = original_metadata.get('title', '')
         
-        # Try to update volume number if present
+        # Try to update volume number if present using smart extraction
         import re
         # Match patterns like "Vol 2", "Volume 2", "2", "II", etc. at end of title
         vol_pattern = r'(\s+\d+|\s+[IVX]+|\s+Vol\.?\s+\d+|\s+Volume\s+\d+)$'
-        
-        # Extract volume number from current Japanese title if present
-        jp_vol_match = re.search(r'[０-９0-9]+|[一二三四五六七八九十]+', current_jp_title)
-        if jp_vol_match:
-            # Found volume number in JP title
-            jp_vol_str = jp_vol_match.group()
-            # Convert to Arabic numeral if needed
-            vol_map = {'１':'1', '２':'2', '３':'3', '４':'4', '５':'5', '６':'6', '７':'7', '８':'8', '９':'9', '０':'0',
-                      '一':'1', '二':'2', '三':'3', '四':'4', '五':'5', '六':'6', '七':'7', '八':'8', '九':'9', '十':'10'}
-            current_vol_num = vol_map.get(jp_vol_str, jp_vol_str)
-            
+
+        # Extract volume number from current Japanese title using prioritized pattern matching
+        current_vol_num = extract_volume_number(current_jp_title)
+
+        if current_vol_num:
             # Check if prequel has a volume number in its title
             prequel_has_vol_num = bool(re.search(vol_pattern, base_title))
-            
+
             # Update English title with current volume number
             if prequel_has_vol_num:
                 # Replace existing number (e.g., "Title 1" → "Title 2")
@@ -604,7 +973,7 @@ class MetadataProcessor:
                 # Prequel has no volume number - assume it's v1, append current volume number
                 # e.g., "Title" (v1) → "Title 2" (for v2)
                 updated_title = f"{base_title} {current_vol_num}"
-            
+
             logger.info(f"  📝 Updated title: '{base_title}' → '{updated_title}'")
         else:
             updated_title = base_title
@@ -717,10 +1086,13 @@ class MetadataProcessor:
         
         output_filename = f"metadata_{self.target_language}.json"
         output_path = self.work_dir / output_filename
-        
+
+        # Sanitize JSON to fix any unescaped quotes from LLM output
+        metadata_translated = sanitize_json_strings(metadata_translated)
+
         with open(output_path, 'w', encoding='utf-8') as f:
             json.dump(metadata_translated, f, indent=2, ensure_ascii=False)
-        
+
         logger.info(f"\n💾 Saved to {output_path}")
         
         # Save name registry to .context
@@ -752,48 +1124,65 @@ class MetadataProcessor:
                     f"{len(new_ruby_names)} names")
         logger.info("="*70)
 
-    def process_metadata(self, ignore_sequel: bool = False):
-        """Translate metadata and save to metadata_en.json."""
+    def process_metadata(self, ignore_sequel: bool = False, sequel_mode: bool = False):
+        """Translate metadata and save to metadata_en.json.
+
+        Args:
+            ignore_sequel: If True, ignore sequel detection and process as independent volume
+            sequel_mode: If True, enable full sequel mode (direct metadata copy, skip name extraction)
+        """
         logger.info(f"Processing metadata for {self.work_dir.name}")
-        
+
         # Prepare context for LLM
         original_metadata = self.manifest.get("metadata", {})
-        
+
         # Pre-process chapter titles: standardize format BEFORE translation
         raw_chapters = self.manifest.get("chapters", [])
         chapter_titles = []
-        
+
         for c in raw_chapters:
             original_title = c["title"]
             standardized_title = standardize_chapter_title(original_title, self.target_language)
-            
+
             # Log standardization if changed
             if standardized_title != original_title:
                 logger.info(f"📝 Standardized: '{original_title}' → '{standardized_title}'")
-            
+
             chapter_titles.append({
                 "id": c["id"],
                 "title_jp": standardized_title  # Use standardized version for translation
             })
-        
-        # Get ruby-extracted character names
-        ruby_names = self.manifest.get("ruby_names", [])
-        logger.info(f"Ruby entries: {len(ruby_names)} character names")
-        
+
+        # Get ruby-extracted character names (skip in sequel_mode)
+        ruby_names = []
+        if not sequel_mode:
+            ruby_names = self.manifest.get("ruby_names", [])
+            logger.info(f"Ruby entries: {len(ruby_names)} character names")
+        else:
+            logger.info("🔄 SEQUEL MODE: Skipping ruby name extraction (will inherit from prequel)")
+
         # Check for sequel inheritance
         parent_data = None
         if not ignore_sequel:
             parent_data = self.detect_sequel_parent()
-        
+
         # === NEW OPTIMIZATION: Direct inheritance for sequels ===
         if parent_data:
-            logger.info("🚀 SEQUEL OPTIMIZATION ACTIVE - Skipping API for inherited data")
-            return self._process_sequel_metadata_optimized(
-                parent_data, 
-                original_metadata, 
-                chapter_titles, 
-                ruby_names
-            )
+            if sequel_mode:
+                logger.info("🚀 FULL SEQUEL MODE ACTIVE - Direct metadata copy from prequel")
+                return self._process_sequel_metadata_direct_copy(
+                    parent_data,
+                    original_metadata,
+                    chapter_titles
+                )
+            else:
+                logger.info("🚀 SEQUEL OPTIMIZATION ACTIVE - Skipping API for inherited data")
+                return self._process_sequel_metadata_optimized(
+                    parent_data,
+                    original_metadata,
+                    chapter_titles,
+                    ruby_names
+                )
             
         inheritance_context = ""
         if parent_data:
@@ -884,6 +1273,10 @@ class MetadataProcessor:
             # Save to language-specific metadata file (e.g., metadata_en.json, metadata_vn.json)
             output_filename = f"metadata_{self.target_language}.json"
             output_path = self.work_dir / output_filename
+
+            # Sanitize JSON to fix any unescaped quotes from LLM output
+            metadata_translated = sanitize_json_strings(metadata_translated)
+
             with open(output_path, 'w', encoding='utf-8') as f:
                 json.dump(metadata_translated, f, indent=2, ensure_ascii=False)
 
@@ -932,18 +1325,20 @@ def main():
     parser = argparse.ArgumentParser(description="Run Metadata Processor Agent")
     parser.add_argument("--volume", type=str, required=True, help="Volume ID (directory name in WORK)")
     parser.add_argument("--ignore-sequel", action="store_true", help="Ignore sequel detection")
-    
+    parser.add_argument("--sequel-mode", action="store_true",
+                        help="Enable full sequel mode: copy metadata_en.json directly, skip name extraction")
+
     args = parser.parse_args()
-    
+
     from pipeline.config import WORK_DIR
     volume_dir = WORK_DIR / args.volume
-    
+
     if not volume_dir.exists():
         logger.error(f"Volume directory not found: {volume_dir}")
         sys.exit(1)
-        
+
     processor = MetadataProcessor(volume_dir)
-    processor.process_metadata(ignore_sequel=args.ignore_sequel)
+    processor.process_metadata(ignore_sequel=args.ignore_sequel, sequel_mode=args.sequel_mode)
 
 if __name__ == "__main__":
     main()

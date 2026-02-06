@@ -5,8 +5,9 @@ Multi-language Japanese EPUB translation pipeline (EN/VN supported)
 
 Phases:
   1. Librarian      - Extract Japanese EPUB to markdown
-  1.5 Metadata      - Translate titles and author names
-  2. Translator     - Gemini-powered translation with RAG
+  1.5 Metadata      - Translate titles and author names  
+  1.6 Multimodal    - Pre-bake illustration analysis (Gemini 3 Pro Vision)
+  2. Translator     - Gemini-powered translation with RAG + visual context
   3. Critics        - Manual/Agentic quality review (Gemini CLI + IDE Agent)
   4. Builder        - Package final translated EPUB
 
@@ -14,12 +15,21 @@ Usage:
   mtl.py run <epub_path>                 # Full pipeline (auto-generates volume ID)
   mtl.py run <epub_path> --id <id>       # Full pipeline with custom ID
   mtl.py run <epub_path> --verbose       # Full pipeline with interactive prompts
+  mtl.py run <epub_path> --skip-multimodal  # Skip Phase 1.6 (faster, no visual context)
   mtl.py phase1 <epub_path>              # Run Phase 1 only
+  mtl.py phase1.5 [volume_id]            # Run Phase 1.5 (metadata processing)
+  mtl.py phase1.6 [volume_id]            # Run Phase 1.6 (multimodal pre-bake)
   mtl.py phase2 [volume_id]              # Run Phase 2 (interactive if no ID)
+  mtl.py phase2 [volume_id] --enable-multimodal  # Phase 2 with visual context
+  mtl.py multimodal [volume_id]          # Run Phase 1.6 + Phase 2 with multimodal (visual translation)
   mtl.py phase4 [volume_id]              # Run Phase 4 (interactive if no ID)
   mtl.py status <volume_id>              # Check pipeline status
   mtl.py list                            # List all volumes
   mtl.py metadata <volume_id>            # Inspect metadata and schema
+  mtl.py cache-inspect [volume_id]       # Inspect visual analysis cache
+  mtl.py visual-thinking [volume_id]     # Convert visual thought logs to markdown
+  mtl.py visual-thinking [volume_id] --split        # One file per illustration
+  mtl.py visual-thinking [volume_id] --with-cache   # Include Art Director's Notes
 
 Interactive Mode:
   - Phase 2, 4: Can be run without volume_id to see selection menu
@@ -56,6 +66,16 @@ Phase 1.5 (Metadata Processor):
   - PRESERVES: v3 enhanced schema (character_profiles, localization_notes, keigo_switch)
   - Safe to re-run on volumes with existing schema configurations
 
+Phase 1.6 (Multimodal Processor):
+  - Analyzes illustrations using Gemini 3 Pro Vision
+  - Generates Art Director's Notes for translation context
+  - Canon Event Fidelity: Visual guidance enhances vocabulary, not content
+  - Runs automatically in full pipeline (use --skip-multimodal to bypass)
+  
+  Manual inspection:
+    mtl.py cache-inspect <volume_id>              # View cached visual analysis
+    mtl.py cache-inspect <volume_id> --detail     # Full analysis details
+
 Modes:
   Default (Minimal):  Clean output, auto-proceed through phases, no interactive prompts
   --verbose:          Full details, interactive menus, metadata review options
@@ -71,7 +91,7 @@ import logging
 import readline  # Enable delete key, arrow keys, and command history in CLI
 from pathlib import Path
 from datetime import datetime
-from typing import Optional, Dict, Any
+from typing import Optional, Dict, Any, List
 import subprocess
 import re
 import os
@@ -228,6 +248,10 @@ class PipelineController:
             indicators = []
             if status.get('librarian', {}).get('status') == 'completed':
                 indicators.append("📚")
+            # Check for visual cache (Phase 0)
+            visual_cache = self.work_dir / vol['id'] / "visual_cache.json"
+            if visual_cache.exists():
+                indicators.append("🎨")
             if status.get('translator', {}).get('status') == 'completed':
                 indicators.append("✍️")
             if status.get('builder', {}).get('status') == 'completed':
@@ -436,37 +460,160 @@ class PipelineController:
             
             if parent_candidate:
                 if self.verbose:
-                    # Interactive mode - ask user
-                    print(f"\n✨ Potential Prequel Detected: '{parent_candidate}'")
-                    print("   Do you want to INHERIT metadata (Series Title, Author) from this volume?")
-                    print("   [Y] Yes - Maintain consistency (Recommended)")
-                    print("   [N] No  - Generate fresh metadata")
+                    # Interactive mode - ask user about sequel workflow
+                    print(f"\n{'='*70}")
+                    print(f"🔗 SEQUEL VOLUME DETECTED")
+                    print(f"{'='*70}")
+                    print(f"   Prequel: '{parent_candidate}'")
+                    print(f"   Current: '{current_title}'")
+                    print()
+                    print("   SEQUEL MODE enables maximum continuity and API cost savings:")
+                    print("   ✓ Copy metadata_en.json directly from prequel")
+                    print("   ✓ Skip character name extraction (inherit from prequel)")
+                    print("   ✓ Inherit title/author (only update volume number)")
+                    print("   ✓ Only translate NEW chapter titles")
+                    print("   ✓ Preserve character profiles and localization settings")
+                    print()
+                    print("   [Y] Yes - Enable SEQUEL MODE (Recommended)")
+                    print("   [N] No  - Generate fresh metadata (Independent volume)")
+                    print()
                     choice = input("   Select [Y/n]: ").strip().lower()
+
                     if choice == 'n':
                         ignore_sequel = True
-                        logger.info("User selected FRESH metadata generation.")
+                        logger.info("User selected FRESH metadata generation (independent volume).")
                     else:
-                        logger.info("User selected INHERITANCE.")
+                        logger.info("User selected SEQUEL MODE (metadata inheritance).")
+                        print()
+                        print("   ⚠️  IMPORTANT: Update your character database before Phase 2")
+                        print(f"   • Review character_names in: {volume_id}/metadata_en.json")
+                        print(f"   • Add any new characters to your reference database")
+                        print(f"   • Update character relationships/profiles if needed")
+                        print()
+                        input("   Press Enter to continue to metadata processing...")
                 else:
                     # Minimal mode - auto-inherit (recommended default)
-                    logger.info(f"✨ Sequel detected, inheriting from: {parent_candidate}")
+                    logger.info(f"✨ Sequel detected, enabling SEQUEL MODE")
+                    logger.info(f"   Inheriting from: {parent_candidate}")
+                    logger.warning("⚠️  Remember to update character database before Phase 2")
                     ignore_sequel = False
 
         cmd = [
             sys.executable, "-m", "pipeline.metadata_processor.agent",
             "--volume", volume_id
         ]
-        
+
         if ignore_sequel:
             cmd.append("--ignore-sequel")
+        else:
+            # Enable sequel mode (direct metadata copy, skip name extraction)
+            if parent_candidate and not ignore_sequel:
+                cmd.append("--sequel-mode")
         
         if self._run_command(cmd, "Phase 1.5 (Metadata)"):
             logger.info("✓ Phase 1.5 completed successfully")
             return True
         return False
     
-    def run_phase2(self, volume_id: str, chapters: Optional[list] = None, force: bool = False, 
-                   enable_continuity: bool = False) -> bool:
+    def run_phase1_6(self, volume_id: str, standalone: bool = False) -> bool:
+        """
+        Run Phase 1.6: Multimodal Processor (Visual Asset Pre-bake).
+        
+        Analyzes illustrations using Gemini 3 Pro Vision and caches
+        Art Director's Notes for use during Phase 2 translation.
+        
+        Args:
+            volume_id: Volume identifier
+            standalone: If True, show next-step instructions (for CLI use)
+        
+        Returns:
+            True if successful, False otherwise
+        """
+        logger.info("="*60)
+        logger.info("PHASE 1.6: MULTIMODAL PROCESSOR")
+        logger.info("  Analyzing illustrations with Gemini 3 Pro Vision")
+        logger.info("="*60)
+
+        # Verify manifest exists
+        manifest = self.load_manifest(volume_id)
+        if not manifest:
+            logger.error(f"No manifest.json found for volume: {volume_id}")
+            logger.error("  Please run Phase 1 first to extract the EPUB")
+            return False
+
+        logger.info(f"Volume: {manifest.get('metadata', {}).get('title', volume_id)}")
+
+        try:
+            # Import and run asset processor
+            sys.path.insert(0, str(PROJECT_ROOT))
+
+            # Pre-flight: Illustration integrity check
+            from modules.multimodal.integrity_checker import check_illustration_integrity
+
+            volume_path = self.work_dir / volume_id
+            integrity = check_illustration_integrity(volume_path)
+
+            if integrity.warnings:
+                for w in integrity.warnings:
+                    logger.warning(f"  ⚠ {w}")
+
+            if not integrity.passed:
+                logger.error("")
+                logger.error("ILLUSTRATION INTEGRITY CHECK FAILED")
+                logger.error("The following issues must be resolved before Phase 1.6 can run:")
+                for err in integrity.errors:
+                    logger.error(f"  ✗ {err}")
+                logger.error("")
+                logger.error("Fix the JP source tags, asset files, or manifest epub_id_to_cache_id mapping,")
+                logger.error("then re-run: mtl.py phase1.6 " + volume_id)
+                return False
+
+            logger.info(f"  {integrity.summary()}")
+
+            from modules.multimodal.asset_processor import VisualAssetProcessor
+
+            processor = VisualAssetProcessor(volume_path)
+            stats = processor.process_volume()
+
+            if stats.get("error"):
+                logger.error(f"Phase 1.6 failed: {stats['error']}")
+                return False
+
+            logger.info("")
+            logger.info("="*60)
+            logger.info("PHASE 1.6 COMPLETE")
+            logger.info(f"  Total illustrations: {stats.get('total', 0)}")
+            logger.info(f"  Already cached:      {stats.get('cached', 0)}")
+            logger.info(f"  Newly analyzed:      {stats.get('generated', 0)}")
+            logger.info(f"  Safety blocked:      {stats.get('blocked', 0)}")
+            logger.info("="*60)
+            
+            if standalone:
+                logger.info("")
+                logger.info("Next: Run Phase 2 to translate with visual context")
+                logger.info(f"  mtl.py phase2 {volume_id} --enable-multimodal")
+            
+            return True
+
+        except ImportError as e:
+            logger.error(f"Failed to import multimodal module: {e}")
+            logger.error("Ensure modules/multimodal/ package is installed")
+            return False
+        except Exception as e:
+            logger.error(f"Phase 1.6 failed: {e}")
+            import traceback
+            traceback.print_exc()
+            return False
+    
+    # Alias for backward compatibility
+    def run_phase0(self, volume_id: str) -> bool:
+        """Deprecated: Use run_phase1_6 instead. Kept for backward compatibility."""
+        logger.warning("⚠️  'phase0' is deprecated. Use 'phase1.6' instead.")
+        return self.run_phase1_6(volume_id, standalone=True)
+
+    def run_phase2(self, volume_id: str, chapters: Optional[list] = None, force: bool = False,
+                   enable_continuity: bool = False, enable_gap_analysis: bool = False,
+                   enable_multimodal: bool = False) -> bool:
         """Run Phase 2: Translator (Gemini MT)."""
         logger.info("="*60)
         logger.info("PHASE 2: TRANSLATOR - Gemini-Powered Translation")
@@ -495,6 +642,12 @@ class PipelineController:
         if enable_continuity:
             cmd.append("--enable-continuity")
         
+        if enable_gap_analysis:
+            cmd.append("--enable-gap-analysis")
+
+        if enable_multimodal:
+            cmd.append("--enable-multimodal")
+
         if self._run_command(cmd, "Phase 2 (Translator)"):
             logger.info("✓ Phase 2 completed successfully")
             
@@ -602,8 +755,19 @@ class PipelineController:
             return True
         return False
     
-    def run_full_pipeline(self, epub_path: Path, volume_id: Optional[str] = None) -> bool:
-        """Run the complete pipeline (Phases 1, 1.5, 2, then pause for 3)."""
+    def run_full_pipeline(self, epub_path: Path, volume_id: Optional[str] = None,
+                          skip_multimodal: bool = False) -> bool:
+        """
+        Run the complete pipeline (Phases 1, 1.5, 1.6, 2, then pause for 3).
+        
+        Args:
+            epub_path: Path to source EPUB file
+            volume_id: Optional volume identifier (auto-generated if not provided)
+            skip_multimodal: Skip Phase 1.6 (visual analysis) for faster processing
+        
+        Returns:
+            True if successful, False otherwise
+        """
         from pipeline.config import (
             get_target_language, get_language_config, validate_language_setup
         )
@@ -695,13 +859,29 @@ class PipelineController:
                     print("Invalid selection. Try again.")
                     continue
         else:
-            # Minimal mode - auto-proceed to Phase 2
-            logger.info("✓ Metadata extraction complete, proceeding to translation...")
+            # Minimal mode - auto-proceed
+            logger.info("✓ Metadata extraction complete")
         
         logger.info("")
         
-        # Phase 2: Translator
-        if not self.run_phase2(volume_id):
+        # Phase 1.6: Multimodal Processor (Visual Analysis)
+        multimodal_success = False
+        if not skip_multimodal:
+            multimodal_success = self.run_phase1_6(volume_id, standalone=False)
+            if not multimodal_success:
+                logger.warning("⚠️  Phase 1.6 (Multimodal) failed or skipped")
+                logger.warning("   Continuing without visual context...")
+            logger.info("")
+        else:
+            logger.info("ℹ️  Skipping Phase 1.6 (Multimodal) - --skip-multimodal flag set")
+            logger.info("")
+        
+        # Phase 2: Translator (with multimodal if Phase 1.6 succeeded)
+        enable_multimodal = multimodal_success and not skip_multimodal
+        if enable_multimodal:
+            logger.info("✓ Visual context enabled for translation")
+        
+        if not self.run_phase2(volume_id, enable_multimodal=enable_multimodal):
             return False
         
         logger.info("")
@@ -931,6 +1111,22 @@ class PipelineController:
         logger.info("PHASE STATUS:")
         logger.info(f"  Phase 1 (Librarian):    {pipeline_state.get('librarian', {}).get('status', 'not started')}")
         logger.info(f"  Phase 1.5 (Metadata):   {pipeline_state.get('metadata_processor', {}).get('status', 'not started')}")
+
+        # Phase 0 (Multimodal) - check for visual_cache.json
+        volume_path = self.work_dir / volume_id
+        visual_cache_path = volume_path / "visual_cache.json"
+        if visual_cache_path.exists():
+            try:
+                import json as _json
+                with open(visual_cache_path, 'r', encoding='utf-8') as _f:
+                    cache_data = _json.load(_f)
+                cache_count = len(cache_data)
+                logger.info(f"  Phase 0 (Visual):       ✓ cached ({cache_count} illustration(s))")
+            except Exception:
+                logger.info(f"  Phase 0 (Visual):       ⚠ cache exists but unreadable")
+        else:
+            logger.info(f"  Phase 0 (Visual):       not run (optional, experimental)")
+
         logger.info(f"  Phase 2 (Translator):   {pipeline_state.get('translator', {}).get('status', 'not started')}")
         logger.info(f"  Phase 3 (Critics):      {pipeline_state.get('critics', {}).get('status', 'manual review')}")
         logger.info(f"  Phase 4 (Builder):      {pipeline_state.get('builder', {}).get('status', 'not started')}")
@@ -992,6 +1188,398 @@ class PipelineController:
             logger.error(f"Cleanup failed: {e}")
             return False
     
+    def run_cjk_clean(self, volume_id: str, dry_run: bool = False) -> bool:
+        """
+        Run Vietnamese CJK hard substitution cleaner on translated chapters.
+        
+        This post-processor catches CJK leaks that slipped through Gemini's
+        translation despite advisory guidance. It performs hard regex substitution
+        for known patterns (少女, スタミナ, etc.) with Vietnamese equivalents.
+        
+        Args:
+            volume_id: Volume identifier
+            dry_run: Preview changes without modifying files
+        
+        Returns:
+            True if successful, False otherwise
+        """
+        logger.info("="*60)
+        logger.info("VIETNAMESE CJK LEAK CLEANER (Hard Substitution)")
+        logger.info("="*60)
+        
+        try:
+            from pipeline.post_processor.vn_cjk_cleaner import VietnameseCJKCleaner, format_cleaner_report
+            
+            # Find volume directory
+            volume_dirs = list(self.work_dir.glob(f"*{volume_id}*"))
+            if not volume_dirs:
+                logger.error(f"Volume not found: {volume_id}")
+                return False
+            
+            work_dir = volume_dirs[0]
+            vn_dir = work_dir / "VN"
+            
+            if not vn_dir.exists():
+                logger.error(f"VN directory not found: {vn_dir}")
+                return False
+            
+            # Initialize cleaner
+            cleaner = VietnameseCJKCleaner(strict_mode=not dry_run, log_substitutions=True)
+            
+            # Run cleaner
+            results = cleaner.clean_volume(vn_dir)
+            
+            # Print report
+            print(format_cleaner_report(results))
+            
+            if results['total_substitutions'] > 0:
+                if dry_run:
+                    logger.info(f"[DRY RUN] Would apply {results['total_substitutions']} substitutions")
+                else:
+                    logger.info(f"✓ Applied {results['total_substitutions']} hard substitutions")
+            
+            if results['total_remaining_leaks'] > 0:
+                logger.warning(f"⚠ {results['total_remaining_leaks']} unknown CJK leaks remain - manual review needed")
+            
+            return True
+            
+        except ImportError as e:
+            logger.error(f"Failed to import CJK cleaner: {e}")
+            return False
+        except Exception as e:
+            logger.error(f"CJK cleaning failed: {e}")
+            return False
+    
+    def run_vn_audit(self, volume_id: str, reference_id: Optional[str] = None) -> bool:
+        """
+        Run Vietnamese Critics Audit on translated chapters.
+        
+        This 3-subagent audit system checks:
+        1. Content Fidelity - Line counts, structure completeness
+        2. Content Integrity - Names, formatting, illustrations
+        3. Prose Quality - Vietnamese AI-ism detection
+        
+        Args:
+            volume_id: Volume to audit
+            reference_id: Optional reference volume for comparison
+            
+        Returns:
+            True if successful, False otherwise
+        """
+        logger.info("="*60)
+        logger.info("VN CRITICS AUDIT (3-Subagent System)")
+        logger.info("="*60)
+        
+        try:
+            from modules.vn_critics_auditor import run_vn_critics_audit
+            run_vn_critics_audit(volume_id, reference_id)
+            return True
+        except ImportError as e:
+            logger.error(f"Failed to import VN auditor: {e}")
+            return False
+        except Exception as e:
+            logger.error(f"VN audit failed: {e}")
+            return False
+    
+    def run_vn_refine(self, volume_id: str, dry_run: bool = False) -> bool:
+        """
+        Run Vietnamese Prose Refiner to eliminate AI-isms.
+        
+        This post-processor fixes common AI-ism patterns:
+        - "một cách [adj]" → direct adverb
+        - "một cảm giác [emotion]" → direct emotion
+        - "sự [noun] của X" → verb form
+        
+        Args:
+            volume_id: Volume to refine
+            dry_run: Preview changes without modifying files
+            
+        Returns:
+            True if successful, False otherwise
+        """
+        logger.info("="*60)
+        logger.info(f"VN PROSE REFINER {'(DRY RUN)' if dry_run else ''}")
+        logger.info("="*60)
+        
+        try:
+            from modules.vn_prose_refiner import run_vn_prose_refiner
+            run_vn_prose_refiner(volume_id, dry_run)
+            return True
+        except ImportError as e:
+            logger.error(f"Failed to import VN refiner: {e}")
+            return False
+        except Exception as e:
+            logger.error(f"VN refinement failed: {e}")
+            return False
+    
+    def inspect_visual_cache(self, volume_id: str, detail: bool = False) -> bool:
+        """
+        Inspect the visual analysis cache for a volume.
+
+        Shows cache statistics, per-illustration status, and optionally
+        full cached analysis content for debugging.
+
+        Args:
+            volume_id: Volume identifier
+            detail: If True, show full cached analysis per illustration
+
+        Returns:
+            True if cache exists, False otherwise
+        """
+        volume_path = self.work_dir / volume_id
+        cache_path = volume_path / "visual_cache.json"
+
+        logger.info("="*60)
+        logger.info(f"VISUAL CACHE INSPECTOR: {volume_id}")
+        logger.info("="*60)
+
+        if not cache_path.exists():
+            logger.info("")
+            logger.info("  ✗ No visual_cache.json found")
+            logger.info("")
+            logger.info("  To generate, run:")
+            logger.info(f"    mtl.py phase0 {volume_id}")
+            logger.info("="*60)
+            return False
+
+        try:
+            with open(cache_path, 'r', encoding='utf-8') as f:
+                cache = json.load(f)
+        except (json.JSONDecodeError, IOError) as e:
+            logger.error(f"  ✗ Failed to read cache: {e}")
+            return False
+
+        total = len(cache)
+        statuses = {}
+        for illust_id, data in cache.items():
+            status = data.get('status', 'unknown')
+            statuses[status] = statuses.get(status, 0) + 1
+
+        logger.info(f"\n  Total entries:     {total}")
+        for status, count in sorted(statuses.items()):
+            icon = "✓" if status == "analyzed" else "⚠" if status == "safety_blocked" else "?"
+            logger.info(f"  {icon} {status}: {count:>3}")
+
+        # Check for manual overrides
+        manual = sum(1 for d in cache.values() if d.get('manual_override'))
+        if manual > 0:
+            logger.info(f"  🔒 Manual overrides: {manual}")
+
+        logger.info("")
+
+        # Per-illustration summary
+        logger.info("ILLUSTRATIONS:")
+        logger.info("-" * 50)
+        for illust_id, data in sorted(cache.items()):
+            status = data.get('status', 'unknown')
+            icon = "✓" if status == "analyzed" else "⛔" if status == "safety_blocked" else "?"
+            override = " 🔒" if data.get('manual_override') else ""
+            model = data.get('model', 'N/A')
+
+            # Show composition snippet
+            vgt = data.get('visual_ground_truth', {})
+            composition = vgt.get('composition', '')
+            snippet = composition[:60] + "..." if len(composition) > 60 else composition
+
+            logger.info(f"  {icon} {illust_id}{override}")
+            if snippet:
+                logger.info(f"      {snippet}")
+
+            if detail:
+                emotional = vgt.get('emotional_delta', 'N/A')
+                directives = vgt.get('narrative_directives', [])
+                spoiler = data.get('spoiler_prevention', {})
+                logger.info(f"      Model: {model}")
+                logger.info(f"      Emotion: {emotional}")
+                if directives:
+                    logger.info(f"      Directives ({len(directives)}):")
+                    for d in directives[:3]:
+                        logger.info(f"        - {d}")
+                if spoiler.get('do_not_reveal_before_text'):
+                    logger.info(f"      ⚠ Spoiler guards: {spoiler['do_not_reveal_before_text']}")
+                logger.info("")
+
+        logger.info("="*60)
+        logger.info(f"Next: mtl.py phase2 {volume_id} --enable-multimodal")
+        logger.info("="*60)
+        return True
+
+    def run_gap_analysis(self, volume_id: str, chapters: List[int] = None) -> bool:
+        """
+        Run Gap Analysis on a volume to flag passages requiring special attention.
+        
+        Gap Types:
+        - Gap A: Emotion + Action sentence surgery (temp=0.4, conservative)
+        - Gap B: Ruby visual joke preservation
+        - Gap C: Sarcasm/Subtext layer preservation (temp=1.0, creative)
+        
+        Args:
+            volume_id: Volume to analyze
+            chapters: Specific chapters to analyze (None = all)
+            
+        Returns:
+            True if successful, False otherwise
+        """
+        logger.info("="*60)
+        logger.info("GAP ANALYSIS (Week 2-3 Implementation)")
+        logger.info("="*60)
+        
+        try:
+            from modules.gap_integration import run_gap_analysis
+            return run_gap_analysis(volume_id, chapters)
+        except ImportError as e:
+            logger.error(f"Failed to import gap analysis module: {e}")
+            return False
+        except Exception as e:
+            logger.error(f"Gap analysis failed: {e}")
+            import traceback
+            traceback.print_exc()
+            return False
+    
+    def run_visual_thinking(
+        self,
+        volume_id: str,
+        split: bool = False,
+        with_cache: bool = False,
+        filter_type: Optional[str] = None,
+        output_dir: Optional[str] = None,
+    ) -> bool:
+        """
+        Convert Gemini 3 Pro visual thought logs (JSON) to markdown.
+
+        Imports the standalone converter from scripts/convert_visual_thoughts.py
+        and runs it against the specified volume, producing either a consolidated
+        VISUAL_THINKING.md or per-illustration split files.
+
+        Args:
+            volume_id: Volume identifier
+            split: If True, generate one file per illustration
+            with_cache: If True, include Art Director's Notes from visual_cache.json
+            filter_type: Optional filter ('illust', 'kuchie', or 'cover')
+            output_dir: Custom output directory (default: THINKING/ in volume)
+
+        Returns:
+            True if successful, False otherwise
+        """
+        volume_path = self.work_dir / volume_id
+        thoughts_dir = volume_path / "cache" / "thoughts"
+
+        logger.info("=" * 60)
+        logger.info("VISUAL THINKING LOG CONVERTER (JSON → Markdown)")
+        logger.info("=" * 60)
+
+        if not thoughts_dir.exists():
+            logger.error(f"No thought logs found at: {thoughts_dir}")
+            logger.error("Run Phase 1.6 first: mtl.py phase1.6 <volume_id>")
+            return False
+
+        try:
+            from scripts.convert_visual_thoughts import (
+                load_thought_json,
+                load_visual_cache_entry,
+                render_thought_entry,
+                render_consolidated_markdown,
+            )
+        except ImportError as e:
+            logger.error(f"Failed to import convert_visual_thoughts: {e}")
+            return False
+
+        # Load thought logs
+        json_files = sorted(thoughts_dir.glob("*.json"))
+        if not json_files:
+            logger.error("No .json files found in cache/thoughts/")
+            return False
+
+        entries = []
+        for jf in json_files:
+            data = load_thought_json(jf)
+            if data:
+                entries.append(data)
+
+        logger.info(f"Loaded {len(entries)} thought log(s)")
+
+        # Apply filter
+        if filter_type:
+            if filter_type == "cover":
+                entries = [e for e in entries if e["illustration_id"] == "cover"]
+            else:
+                entries = [e for e in entries if e["illustration_id"].startswith(filter_type)]
+            logger.info(f"Filtered to {len(entries)} entries (type={filter_type})")
+
+        if not entries:
+            logger.warning("No entries after filtering. Nothing to convert.")
+            return True
+
+        # Load visual cache if requested
+        visual_cache = None
+        if with_cache:
+            cache_path = volume_path / "visual_cache.json"
+            if cache_path.exists():
+                with open(cache_path, 'r', encoding='utf-8') as f:
+                    visual_cache = json.load(f)
+                logger.info(f"Loaded visual_cache.json ({len(visual_cache)} entries)")
+            else:
+                logger.warning("visual_cache.json not found, --with-cache ignored")
+
+        # Determine output directory
+        if output_dir:
+            out_dir = Path(output_dir)
+        else:
+            out_dir = volume_path / "THINKING"
+        out_dir.mkdir(parents=True, exist_ok=True)
+
+        # Extract volume name from directory
+        vol_name = volume_path.name.rsplit("_", 2)[0]
+
+        from datetime import datetime as dt
+
+        if split:
+            written = 0
+            for entry in entries:
+                illust_id = entry["illustration_id"]
+                cache_entry = None
+                if visual_cache:
+                    cache_entry = load_visual_cache_entry(visual_cache, illust_id)
+
+                md_lines = []
+                md_lines.append("# Visual Analysis Reasoning Process")
+                md_lines.append("")
+                md_lines.append(f"**Volume**: {vol_name}")
+                md_lines.append(f"**Generated**: {dt.now().strftime('%Y-%m-%d %H:%M:%S')}")
+                md_lines.append(f"**Model**: {entry.get('model', 'gemini-3-pro-preview')}")
+                md_lines.append(f"**Phase**: 1.6 (Multimodal Processor)")
+                md_lines.append("")
+                md_lines.append("---")
+                md_lines.append("")
+                md_lines.append(render_thought_entry(entry, cache_entry, with_cache))
+                md_lines.append("---")
+                md_lines.append("")
+                md_lines.append(
+                    "*This visual thinking process is automatically generated by "
+                    "Gemini 3 Pro during Phase 1.6 (Multimodal Processor) and "
+                    "provides insight into the visual analysis decision-making process.*"
+                )
+
+                out_file = out_dir / f"visual_{illust_id}_THINKING.md"
+                out_file.write_text("\n".join(md_lines), encoding="utf-8")
+                written += 1
+                logger.info(f"  ✓ {out_file.name}")
+
+            logger.info(f"\n✅ Generated {written} visual thinking file(s) in {out_dir}")
+        else:
+            markdown = render_consolidated_markdown(
+                entries, vol_name, visual_cache, with_cache
+            )
+            out_file = out_dir / "VISUAL_THINKING.md"
+            out_file.write_text(markdown, encoding="utf-8")
+
+            total_time = sum(e.get("processing_time_seconds", 0) for e in entries)
+            logger.info(f"\n✅ Generated: {out_file}")
+            logger.info(f"   {len(entries)} illustrations, {total_time:.1f}s total")
+
+        logger.info("=" * 60)
+        return True
+
     def list_volumes(self) -> None:
         """List all volumes in WORK directory."""
         volumes = [d for d in self.work_dir.iterdir() if d.is_dir()]
@@ -1183,7 +1771,8 @@ class PipelineController:
     def handle_config(self, toggle_pre_toc: bool = False, show: bool = False,
                      model: Optional[str] = None, temperature: Optional[float] = None,
                      top_p: Optional[float] = None, top_k: Optional[int] = None,
-                     language: Optional[str] = None, show_language: bool = False) -> None:
+                     language: Optional[str] = None, show_language: bool = False,
+                     toggle_multimodal: bool = False) -> None:
         """Handle configuration commands."""
         import yaml
         import sys
@@ -1317,7 +1906,7 @@ class PipelineController:
             changes_made.append(f"top_k: {old_top_k} → {top_k}")
         
         # Show current settings
-        if show or (not toggle_pre_toc and not model and temperature is None and top_p is None and top_k is None and not language):
+        if show or (not toggle_pre_toc and not toggle_multimodal and not model and temperature is None and top_p is None and top_k is None and not language):
             logger.info("="*60)
             logger.info("PIPELINE CONFIGURATION")
             logger.info("="*60)
@@ -1369,6 +1958,68 @@ class PipelineController:
             logger.info(f"\nLogging:")
             logger.info(f"  Level: {config.get('logging', {}).get('level', 'INFO')}")
 
+            # Sino-Vietnamese RAG + Vector Search Status
+            logger.info(f"\nSino-Vietnamese RAG + Vector Search:")
+            try:
+                rag_path = PROJECT_ROOT / "config" / "sino_vietnamese_rag.json"
+                chroma_path = PROJECT_ROOT / "chroma_sino_vn"
+                
+                if rag_path.exists():
+                    import json
+                    with open(rag_path, 'r', encoding='utf-8') as f:
+                        rag_data = json.load(f)
+                    
+                    # Count patterns
+                    total_patterns = 0
+                    categories = []
+                    for cat_name, cat_data in rag_data.get('pattern_categories', {}).items():
+                        count = len(cat_data.get('patterns', []))
+                        total_patterns += count
+                        categories.append(f"{cat_name}({count})")
+                    
+                    logger.info(f"  RAG Database: ✓ ONLINE ({total_patterns} patterns)")
+                    logger.info(f"  Categories: {', '.join(categories)}")
+                    
+                    # Check ChromaDB
+                    if chroma_path.exists():
+                        # Try to get vector count
+                        try:
+                            from modules.sino_vietnamese_store import SinoVietnameseStore
+                            store = SinoVietnameseStore(
+                                persist_directory=str(chroma_path),
+                                rag_file_path=str(rag_path)
+                            )
+                            vector_count = store.vector_store.collection.count()
+                            logger.info(f"  Vector Index: ✓ ONLINE ({vector_count} vectors)")
+                            logger.info(f"  Hybrid Mode: ✓ Direct Lookup + Semantic Search")
+                        except Exception as e:
+                            logger.info(f"  Vector Index: ⚠️ Error loading ({e})")
+                    else:
+                        logger.info(f"  Vector Index: ✗ OFFLINE (run rebuild_index.py)")
+                else:
+                    logger.info(f"  RAG Database: ✗ OFFLINE (sino_vietnamese_rag.json not found)")
+            except Exception as e:
+                logger.info(f"  Status: ⚠️ Error checking ({e})")
+
+            # Multimodal Configuration
+            multimodal = config.get('multimodal', {})
+            mm_enabled = multimodal.get('enabled', False)
+            mm_status = "✓ ENABLED" if mm_enabled else "✗ DISABLED"
+            logger.info(f"\nMultimodal Visual Context (Experimental): {mm_status}")
+            if mm_enabled:
+                mm_models = multimodal.get('models', {})
+                logger.info(f"  Vision Model: {mm_models.get('vision', 'N/A')}")
+                logger.info(f"  Prose Model: {mm_models.get('prose', 'N/A')}")
+                mm_thinking = multimodal.get('thinking', {})
+                logger.info(f"  Thinking Level: {mm_thinking.get('default_level', 'N/A')}")
+                mm_cache = multimodal.get('visual_cache', {})
+                logger.info(f"  Cache Enabled: {mm_cache.get('enabled', False)}")
+                mm_lookahead = multimodal.get('lookahead', {})
+                logger.info(f"  Lookahead Buffer: {mm_lookahead.get('buffer_size', 'N/A')} segments")
+            else:
+                logger.info("  Enable with: mtl.py config --toggle-multimodal")
+                logger.info("  Workflow: phase0 → phase2 --enable-multimodal")
+
             logger.info("\n" + "="*60)
             logger.info("Quick Commands:")
             logger.info("  --language en|vn             Switch target language")
@@ -1378,18 +2029,32 @@ class PipelineController:
             logger.info("  --top-p 0.95                 Adjust nucleus sampling")
             logger.info("  --top-k 40                   Adjust top-k sampling")
             logger.info("  --toggle-pre-toc             Toggle pre-TOC detection")
+            logger.info("  --toggle-multimodal          Toggle multimodal visual context")
             logger.info("="*60)
         
         # Toggle pre-TOC detection
         if toggle_pre_toc:
             if 'pre_toc_detection' not in config:
                 config['pre_toc_detection'] = {}
-            
+
             current = config['pre_toc_detection'].get('enabled', True)
             new_value = not current
             config['pre_toc_detection']['enabled'] = new_value
             status = "ENABLED" if new_value else "DISABLED"
             changes_made.append(f"Pre-TOC Detection: {status}")
+
+        # Toggle multimodal visual context
+        if toggle_multimodal:
+            if 'multimodal' not in config:
+                config['multimodal'] = {'enabled': False}
+
+            current = config['multimodal'].get('enabled', False)
+            new_value = not current
+            config['multimodal']['enabled'] = new_value
+            status = "ENABLED" if new_value else "DISABLED"
+            changes_made.append(f"Multimodal Visual Context: {status}")
+            if new_value:
+                changes_made.append("  Workflow: phase0 <vol> → phase2 <vol> --enable-multimodal")
         
         # Save changes if any were made
         if changes_made:
@@ -1423,10 +2088,17 @@ Examples:
   mtl.py phase2 novel_v1
   mtl.py phase4 novel_v1
   
+  # Multimodal workflow (experimental)
+  mtl.py phase0 novel_v1                           # Pre-bake illustration analysis
+  mtl.py phase2 novel_v1 --enable-multimodal       # Translate with visual context
+  mtl.py cache-inspect novel_v1                    # Inspect cached analysis
+  mtl.py cache-inspect novel_v1 --detail           # Full analysis per illustration
+  mtl.py config --toggle-multimodal                # Toggle multimodal in config
+
   # Check status
   mtl.py status novel_v1
   mtl.py list
-  
+
   # Metadata schema inspection
   mtl.py metadata novel_v1              # Quick schema detection
   mtl.py metadata novel_v1 --validate   # Full validation report
@@ -1446,10 +2118,17 @@ Supported Metadata Schemas:
     subparsers = parser.add_subparsers(dest='command', help='Command to run')
     
     # Run command (full pipeline)
-    run_parser = subparsers.add_parser('run', parents=[parent_parser], help='Run full pipeline (Phases 1, 1.5, 2, then pause for 3)')
+    run_parser = subparsers.add_parser('run', parents=[parent_parser], help='Run full pipeline (Phases 1, 1.5, 1.6, 2, then pause for 3)')
     run_parser.add_argument('epub_path', type=str, help='Path to Japanese EPUB file')
     run_parser.add_argument('--id', dest='volume_id', type=str, help='Custom volume ID (auto-generated if not provided)')
+    run_parser.add_argument('--skip-multimodal', action='store_true', 
+                            help='Skip Phase 1.6 (visual analysis) for faster processing')
     
+    # Phase 0 (Deprecated - kept for backward compatibility)
+    phase0_parser = subparsers.add_parser('phase0', parents=[parent_parser],
+        help='[DEPRECATED] Use phase1.6 instead. Pre-compute visual analysis for illustrations')
+    phase0_parser.add_argument('volume_id', type=str, nargs='?', help='Volume ID (optional - will prompt if not provided)')
+
     # Phase 1
     phase1_parser = subparsers.add_parser('phase1', parents=[parent_parser], help='Run Phase 1: Librarian (EPUB Extraction)')
     phase1_parser.add_argument('epub_path', type=str, help='Path to Japanese EPUB file')
@@ -1460,6 +2139,18 @@ Supported Metadata Schemas:
         help='Run Phase 1.5: Metadata Processor (translates title/author/chapters, preserves v3 schema)')
     phase1_5_parser.add_argument('volume_id', type=str, nargs='?', help='Volume ID (optional - will prompt if not provided)')
     
+    # Phase 1.6 (Multimodal Processor)
+    phase1_6_parser = subparsers.add_parser('phase1.6', parents=[parent_parser],
+        help='Run Phase 1.6: Multimodal Processor (visual analysis for illustrations)')
+    phase1_6_parser.add_argument('volume_id', type=str, nargs='?', help='Volume ID (optional - will prompt if not provided)')
+    
+    # Multimodal Translator (Phase 1.6 + Phase 2)
+    multimodal_parser = subparsers.add_parser('multimodal', parents=[parent_parser],
+        help='Run Multimodal Translator: Phase 1.6 (visual analysis) + Phase 2 (translation with visual context)')
+    multimodal_parser.add_argument('volume_id', type=str, nargs='?', help='Volume ID (optional - will prompt if not provided)')
+    multimodal_parser.add_argument('--chapters', nargs='+', help='Specific chapters to translate')
+    multimodal_parser.add_argument('--force', action='store_true', help='Re-translate completed chapters')
+    
     # Phase 2
     phase2_parser = subparsers.add_parser('phase2', parents=[parent_parser], help='Run Phase 2: Translator')
     phase2_parser.add_argument('volume_id', type=str, nargs='?', help='Volume ID (optional - will prompt if not provided)')
@@ -1467,6 +2158,10 @@ Supported Metadata Schemas:
     phase2_parser.add_argument('--force', action='store_true', help='Re-translate completed chapters')
     phase2_parser.add_argument('--enable-continuity', action='store_true', 
                                help='[ALPHA] Enable schema extraction and continuity (experimental, unstable)')
+    phase2_parser.add_argument('--enable-gap-analysis', action='store_true',
+                               help='Enable semantic gap analysis (Week 2-3 integration) for improved translation quality')
+    phase2_parser.add_argument('--enable-multimodal', action='store_true',
+                               help='[EXPERIMENTAL] Enable multimodal visual context injection (requires Phase 0)')
     
     # Phase 3
     phase3_parser = subparsers.add_parser('phase3', parents=[parent_parser], help='Show Phase 3 instructions (Manual/Agentic Workflow)')
@@ -1482,6 +2177,49 @@ Supported Metadata Schemas:
     cleanup_parser.add_argument('volume_id', type=str, help='Volume ID')
     cleanup_parser.add_argument('--dry-run', action='store_true', help='Preview changes without modifying files')
     
+    # CJK Clean (Vietnamese post-processor)
+    cjk_clean_parser = subparsers.add_parser('cjk-clean', parents=[parent_parser], 
+        help='Run Vietnamese CJK hard substitution cleaner (少女→thiếu nữ, スタミナ→sức bền, etc.)')
+    cjk_clean_parser.add_argument('volume_id', type=str, help='Volume ID')
+    cjk_clean_parser.add_argument('--dry-run', action='store_true', help='Preview substitutions without modifying files')
+    
+    # VN Audit (Vietnamese Critics Auditor)
+    vn_audit_parser = subparsers.add_parser('vn-audit', parents=[parent_parser],
+        help='Run Vietnamese Critics Audit (Fidelity, Integrity, Prose Quality)')
+    vn_audit_parser.add_argument('volume_id', type=str, help='Volume ID to audit')
+    vn_audit_parser.add_argument('--reference', '-r', type=str, help='Reference volume ID for comparison')
+    
+    # VN Refine (Vietnamese Prose Refiner)
+    vn_refine_parser = subparsers.add_parser('vn-refine', parents=[parent_parser],
+        help='Run Vietnamese Prose Refiner (eliminate AI-isms: một cách → direct adverb)')
+    vn_refine_parser.add_argument('volume_id', type=str, help='Volume ID to refine')
+    vn_refine_parser.add_argument('--dry-run', action='store_true', help='Preview refinements without modifying files')
+    
+    # Gap Analysis (Week 2-3 Implementation)
+    gap_parser = subparsers.add_parser('gap-analysis', parents=[parent_parser],
+        help='Run Gap Analysis (emotion+action surgery, ruby jokes, sarcasm/subtext detection)')
+    gap_parser.add_argument('volume_id', type=str, nargs='?', help='Volume ID (optional - will prompt if not provided)')
+    gap_parser.add_argument('--chapters', nargs='+', type=int, help='Specific chapters to analyze')
+    
+    # Cache Inspect (Multimodal)
+    cache_parser = subparsers.add_parser('cache-inspect', parents=[parent_parser],
+        help='Inspect visual analysis cache for a volume (multimodal)')
+    cache_parser.add_argument('volume_id', type=str, nargs='?', help='Volume ID (optional - will prompt if not provided)')
+    cache_parser.add_argument('--detail', action='store_true', help='Show full analysis per illustration')
+
+    # Visual Thinking (JSON → Markdown converter)
+    vt_parser = subparsers.add_parser('visual-thinking', parents=[parent_parser],
+        help='Convert Gemini 3 Pro visual thought logs (JSON) to markdown')
+    vt_parser.add_argument('volume_id', type=str, nargs='?', help='Volume ID (optional - will prompt if not provided)')
+    vt_parser.add_argument('--split', action='store_true',
+        help='Generate one markdown file per illustration instead of consolidated')
+    vt_parser.add_argument('--with-cache', action='store_true',
+        help="Include Art Director's Notes output from visual_cache.json")
+    vt_parser.add_argument('--filter', choices=['illust', 'kuchie', 'cover'],
+        help='Only convert a specific illustration type')
+    vt_parser.add_argument('--output-dir', type=str,
+        help='Custom output directory (default: THINKING/ inside volume)')
+
     # Status
     status_parser = subparsers.add_parser('status', parents=[parent_parser], help='Show pipeline status for a volume')
     status_parser.add_argument('volume_id', type=str, help='Volume ID')
@@ -1493,6 +2231,7 @@ Supported Metadata Schemas:
     config_parser = subparsers.add_parser('config', parents=[parent_parser], help='View or modify pipeline configuration')
     config_parser.add_argument('--show', action='store_true', help='Show current configuration')
     config_parser.add_argument('--toggle-pre-toc', action='store_true', help='Toggle pre-TOC content detection (rare opening hooks before prologue)')
+    config_parser.add_argument('--toggle-multimodal', action='store_true', help='Toggle multimodal visual context (experimental)')
     # Language switching
     config_parser.add_argument('--language', type=str, choices=['en', 'vn'], help='Switch target language (en=English, vn=Vietnamese)')
     config_parser.add_argument('--show-language', action='store_true', help='Show current target language details')
@@ -1538,14 +2277,20 @@ Supported Metadata Schemas:
     controller = PipelineController(verbose=args.verbose)
     
     # Centralized Volume ID Resolution with Interactive Mode
-    # Phases 1.5, 2, 3, 4 support interactive selection
+    # Phases 1.5, 1.6, 2, 3, 4 support interactive selection
     phase_names = {
+        'phase0': 'Phase 0 - Visual Asset Processor (Deprecated)',
         'phase1.5': 'Phase 1.5 - Metadata Translation (Schema-Safe)',
+        'phase1.6': 'Phase 1.6 - Multimodal Processor (Visual Analysis)',
+        'multimodal': 'Multimodal Translator (Phase 1.6 + Phase 2 with Visual Context)',
         'phase2': 'Phase 2 - Translator',
         'phase3': 'Phase 3 - Critics',
         'phase4': 'Phase 4 - Builder',
+        'cache-inspect': 'Visual Cache Inspector (Multimodal)',
         'metadata': 'Metadata Schema Inspection',
-        'schema': 'Schema Manipulator'
+        'schema': 'Schema Manipulator',
+        'gap-analysis': 'Gap Analysis (Emotion+Action, Ruby, Sarcasm)',
+        'visual-thinking': 'Visual Thinking Log Converter (JSON → Markdown)'
     }
     
     if hasattr(args, 'volume_id'):
@@ -1576,9 +2321,62 @@ Supported Metadata Schemas:
     # Execute command
     if args.command == 'run':
         epub_path = Path(args.epub_path)
-        success = controller.run_full_pipeline(epub_path, args.volume_id)
+        skip_multimodal = getattr(args, 'skip_multimodal', False)
+        success = controller.run_full_pipeline(epub_path, args.volume_id, skip_multimodal=skip_multimodal)
+        sys.exit(0 if success else 1)
+
+    elif args.command == 'phase0':
+        # Deprecated: redirects to phase1.6
+        success = controller.run_phase0(args.volume_id)
         sys.exit(0 if success else 1)
     
+    elif args.command == 'phase1.6':
+        success = controller.run_phase1_6(args.volume_id, standalone=True)
+        sys.exit(0 if success else 1)
+    
+    elif args.command == 'multimodal':
+        # Run Phase 1.6 first, then Phase 2 with multimodal enabled
+        logger.info("="*70)
+        logger.info("MULTIMODAL TRANSLATOR: Phase 1.6 + Phase 2 (Visual Context)")
+        logger.info("="*70)
+        logger.info("")
+        logger.info("Step 1: Running Phase 1.6 (Visual Analysis)...")
+        success_p16 = controller.run_phase1_6(args.volume_id, standalone=False)
+        
+        if not success_p16:
+            logger.error("Phase 1.6 failed. Aborting multimodal translation.")
+            sys.exit(1)
+        
+        logger.info("")
+        logger.info("Step 2: Running Phase 2 (Translation with Visual Context)...")
+        chapters = getattr(args, 'chapters', None)
+        force = getattr(args, 'force', False)
+        
+        # Enable verbose mode for Phase 2 to show translation progress
+        if not args.verbose:
+            logger.info("ℹ️  Running Phase 2 in verbose mode for detailed progress")
+            controller = PipelineController(verbose=True)
+        
+        success_p2 = controller.run_phase2(
+            args.volume_id, chapters, force,
+            enable_continuity=False,
+            enable_gap_analysis=False,
+            enable_multimodal=True  # Always enable multimodal for this command
+        )
+        
+        if success_p2:
+            logger.info("")
+            logger.info("="*70)
+            logger.info("✓ MULTIMODAL TRANSLATION COMPLETE")
+            logger.info("="*70)
+        
+        sys.exit(0 if success_p2 else 1)
+
+    elif args.command == 'cache-inspect':
+        detail = getattr(args, 'detail', False)
+        success = controller.inspect_visual_cache(args.volume_id, detail=detail)
+        sys.exit(0 if success else 1)
+
     elif args.command == 'phase1':
         epub_path = Path(args.epub_path)
         success = controller.run_phase1(epub_path, args.volume_id)
@@ -1594,7 +2392,10 @@ Supported Metadata Schemas:
             logger.info("ℹ️  Running Phase 2 in verbose mode (use mtl.py run for minimal output)")
             controller = PipelineController(verbose=True)
         enable_continuity = getattr(args, 'enable_continuity', False)
-        success = controller.run_phase2(args.volume_id, args.chapters, args.force, enable_continuity)
+        enable_gap_analysis = getattr(args, 'enable_gap_analysis', False)
+        enable_multimodal = getattr(args, 'enable_multimodal', False)
+        success = controller.run_phase2(args.volume_id, args.chapters, args.force,
+                                        enable_continuity, enable_gap_analysis, enable_multimodal)
         sys.exit(0 if success else 1)
     
     elif args.command == 'phase3':
@@ -1607,6 +2408,35 @@ Supported Metadata Schemas:
     
     elif args.command == 'cleanup':
         success = controller.run_cleanup(args.volume_id, args.dry_run)
+        sys.exit(0 if success else 1)
+    
+    elif args.command == 'cjk-clean':
+        success = controller.run_cjk_clean(args.volume_id, args.dry_run)
+        sys.exit(0 if success else 1)
+    
+    elif args.command == 'vn-audit':
+        reference_id = args.reference if hasattr(args, 'reference') else None
+        success = controller.run_vn_audit(args.volume_id, reference_id)
+        sys.exit(0 if success else 1)
+    
+    elif args.command == 'vn-refine':
+        success = controller.run_vn_refine(args.volume_id, args.dry_run)
+        sys.exit(0 if success else 1)
+    
+    elif args.command == 'gap-analysis':
+        chapters = getattr(args, 'chapters', None)
+        success = controller.run_gap_analysis(args.volume_id, chapters)
+        sys.exit(0 if success else 1)
+    
+    elif args.command == 'visual-thinking':
+        split = getattr(args, 'split', False)
+        with_cache = getattr(args, 'with_cache', False)
+        filter_type = getattr(args, 'filter', None)
+        output_dir = getattr(args, 'output_dir', None)
+        success = controller.run_visual_thinking(
+            args.volume_id, split=split, with_cache=with_cache,
+            filter_type=filter_type, output_dir=output_dir
+        )
         sys.exit(0 if success else 1)
     
     elif args.command == 'status':
@@ -1626,7 +2456,8 @@ Supported Metadata Schemas:
             top_p=args.top_p if hasattr(args, 'top_p') else None,
             top_k=args.top_k if hasattr(args, 'top_k') else None,
             language=args.language if hasattr(args, 'language') else None,
-            show_language=args.show_language if hasattr(args, 'show_language') else False
+            show_language=args.show_language if hasattr(args, 'show_language') else False,
+            toggle_multimodal=args.toggle_multimodal if hasattr(args, 'toggle_multimodal') else False
         )
         sys.exit(0)
     

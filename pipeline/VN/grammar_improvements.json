@@ -1,0 +1,470 @@
+{
+  "version": "2.0",
+  "description": "Corpus-derived improvements for Vietnamese Grammar RAG",
+  "source": "Analyzed from 107 light novels",
+  "new_interjection_mappings": {
+    "casual_yes": {
+      "frequency": 5652,
+      "vietnamese_options": [
+        "Ừ",
+        "Ờ",
+        "Um"
+      ],
+      "confidence": "high"
+    },
+    "formal_yes": {
+      "frequency": 5225,
+      "vietnamese_options": [
+        "Vâng",
+        "Dạ",
+        "Vâng ạ"
+      ],
+      "confidence": "high"
+    },
+    "realization": {
+      "frequency": 3906,
+      "vietnamese_options": [
+        "À",
+        "Ồ",
+        "A"
+      ],
+      "confidence": "high"
+    },
+    "hey_wait": {
+      "frequency": 3758,
+      "vietnamese_options": [
+        "Khoan",
+        "Này",
+        "Ê"
+      ],
+      "confidence": "high"
+    },
+    "attention_getter": {
+      "frequency": 3525,
+      "vietnamese_options": [
+        "Này",
+        "Ơ này",
+        "À"
+      ],
+      "confidence": "high"
+    },
+    "surprise_mild": {
+      "frequency": 2496,
+      "vietnamese_options": [
+        "Ơ",
+        "Hả",
+        "Ủa"
+      ],
+      "confidence": "high"
+    },
+    "look_here": {
+      "frequency": 1596,
+      "vietnamese_options": [
+        "Này",
+        "Xem này",
+        "Kìa"
+      ],
+      "confidence": "high"
+    },
+    "interest": {
+      "frequency": 1550,
+      "vietnamese_options": [
+        "Ồ",
+        "Hoh",
+        "Thú vị"
+      ],
+      "confidence": "high"
+    },
+    "attention_male": {
+      "frequency": 1528,
+      "vietnamese_options": [
+        "Này",
+        "Ê",
+        "Ơi"
+      ],
+      "confidence": "high"
+    },
+    "hey_rough": {
+      "frequency": 1469,
+      "vietnamese_options": [
+        "Ê",
+        "Này",
+        "Ơi"
+      ],
+      "confidence": "high"
+    },
+    "shock": {
+      "frequency": 1232,
+      "vietnamese_options": [
+        "Ối",
+        "Trời",
+        "Chà"
+      ],
+      "confidence": "high"
+    },
+    "polite_yes": {
+      "frequency": 1175,
+      "vietnamese_options": [
+        "Vâng",
+        "Dạ vâng",
+        "Ừm"
+      ],
+      "confidence": "high"
+    },
+    "attention_casual": {
+      "frequency": 1174,
+      "vietnamese_options": [
+        "Này",
+        "Ê",
+        "Nè"
+      ],
+      "confidence": "high"
+    },
+    "hesitation": {
+      "frequency": 1130,
+      "vietnamese_options": [
+        "Ừm",
+        "À",
+        "Ờ"
+      ],
+      "confidence": "high"
+    },
+    "well_soft": {
+      "frequency": 1096,
+      "vietnamese_options": [
+        "Ùi",
+        "Ôi",
+        "À"
+      ],
+      "confidence": "high"
+    },
+    "fright_female": {
+      "frequency": 924,
+      "vietnamese_options": [
+        "Kyaa",
+        "Ái chà",
+        "Ôi"
+      ],
+      "confidence": "high"
+    },
+    "seriously": {
+      "frequency": 655,
+      "vietnamese_options": [
+        "Thật à",
+        "Nghiêm túc",
+        "Thiệt hả"
+      ],
+      "confidence": "high"
+    },
+    "alright": {
+      "frequency": 598,
+      "vietnamese_options": [
+        "Ok",
+        "Được rồi",
+        "Tốt"
+      ],
+      "confidence": "high"
+    },
+    "sigh": {
+      "frequency": 546,
+      "vietnamese_options": [
+        "Hà",
+        "Phù",
+        "Thở"
+      ],
+      "confidence": "high"
+    },
+    "frustration": {
+      "frequency": 542,
+      "vietnamese_options": [
+        "Khh",
+        "Tức",
+        "Ức"
+      ],
+      "confidence": "high"
+    },
+    "yay": {
+      "frequency": 394,
+      "vietnamese_options": [
+        "Yeah",
+        "Hura",
+        "Tuyệt"
+      ],
+      "confidence": "high"
+    },
+    "oops": {
+      "frequency": 385,
+      "vietnamese_options": [
+        "Chết",
+        "Thôi chết",
+        "Hỏng rồi"
+      ],
+      "confidence": "high"
+    },
+    "amazing": {
+      "frequency": 330,
+      "vietnamese_options": [
+        "Tuyệt",
+        "Đẹp",
+        "Hay"
+      ],
+      "confidence": "high"
+    },
+    "casual_no": {
+      "frequency": 305,
+      "vietnamese_options": [
+        "Không",
+        "Ừm không",
+        "Đâu có"
+      ],
+      "confidence": "high"
+    },
+    "thinking": {
+      "frequency": 244,
+      "vietnamese_options": [
+        "Ừm",
+        "Để xem",
+        "Hmm"
+      ],
+      "confidence": "high"
+    },
+    "pondering": {
+      "frequency": 241,
+      "vietnamese_options": [
+        "Hmm",
+        "Ừm...",
+        "Để nghĩ xem"
+      ],
+      "confidence": "high"
+    },
+    "well_now": {
+      "frequency": 221,
+      "vietnamese_options": [
+        "Nào",
+        "Thôi nào",
+        "Đi"
+      ],
+      "confidence": "high"
+    },
+    "impressed": {
+      "frequency": 216,
+      "vietnamese_options": [
+        "Ồ",
+        "Chà",
+        "Hay"
+      ],
+      "confidence": "high"
+    },
+    "tch_annoyance": {
+      "frequency": 215,
+      "vietnamese_options": [
+        "Tch",
+        "Xì",
+        "Hừ"
+      ],
+      "confidence": "high"
+    },
+    "dismissive": {
+      "frequency": 210,
+      "vietnamese_options": [
+        "Hừ",
+        "Hứ",
+        "Xì"
+      ],
+      "confidence": "high"
+    },
+    "damn": {
+      "frequency": 181,
+      "vietnamese_options": [
+        "Chết tiệt",
+        "Khốn",
+        "Đồ khốn"
+      ],
+      "confidence": "medium"
+    },
+    "relief_sigh": {
+      "frequency": 164,
+      "vietnamese_options": [
+        "Phù",
+        "Hú hồn",
+        "May quá"
+      ],
+      "confidence": "medium"
+    },
+    "surprise_strong": {
+      "frequency": 134,
+      "vietnamese_options": [
+        "Ơ!",
+        "Cái gì!",
+        "Sao!"
+      ],
+      "confidence": "medium"
+    },
+    "displeasure": {
+      "frequency": 130,
+      "vietnamese_options": [
+        "Hừ",
+        "Hmph",
+        "Xì"
+      ],
+      "confidence": "medium"
+    },
+    "fright": {
+      "frequency": 96,
+      "vietnamese_options": [
+        "Hự",
+        "Ái",
+        "Hự!"
+      ],
+      "confidence": "medium"
+    },
+    "yabai": {
+      "frequency": 64,
+      "vietnamese_options": [
+        "Chết",
+        "Xong rồi",
+        "Toang"
+      ],
+      "confidence": "medium"
+    },
+    "hesitation_long": {
+      "frequency": 61,
+      "vietnamese_options": [
+        "Ừm...",
+        "À...",
+        "Ờ..."
+      ],
+      "confidence": "medium"
+    }
+  },
+  "new_onomatopoeia_mappings": {
+    "chuckling": {
+      "frequency": 1795,
+      "vietnamese_options": [
+        "khúc khích",
+        "hì hì",
+        "cười nhẹ"
+      ]
+    },
+    "laughing": {
+      "frequency": 764,
+      "vietnamese_options": [
+        "ha ha",
+        "cười lớn",
+        "cười"
+      ]
+    },
+    "embarrassed_laugh": {
+      "frequency": 677,
+      "vietnamese_options": [
+        "cười ngượng",
+        "hì hì",
+        "he he"
+      ]
+    },
+    "heartbeat_nervous": {
+      "frequency": 448,
+      "vietnamese_options": [
+        "tim đập thình thịch",
+        "hồi hộp",
+        "đập thình thình"
+      ]
+    },
+    "grinning": {
+      "frequency": 277,
+      "vietnamese_options": [
+        "cười toe toét",
+        "cười nham hiểm",
+        "nhếch mép"
+      ]
+    },
+    "smiling": {
+      "frequency": 182,
+      "vietnamese_options": [
+        "tươi cười",
+        "nở nụ cười",
+        "cười"
+      ]
+    },
+    "blank_look": {
+      "frequency": 144,
+      "vietnamese_options": [
+        "ngơ ngác",
+        "trống rỗng",
+        "không hiểu"
+      ]
+    },
+    "dazed": {
+      "frequency": 132,
+      "vietnamese_options": [
+        "ngẩn ngơ",
+        "thờ thẫn",
+        "lơ đễnh"
+      ]
+    },
+    "staring": {
+      "frequency": 83,
+      "vietnamese_options": [
+        "nhìn chằm chằm",
+        "chăm chú",
+        "đăm đăm"
+      ]
+    },
+    "irritated": {
+      "frequency": 69,
+      "vietnamese_options": [
+        "bực bội",
+        "khó chịu",
+        "cáu"
+      ]
+    },
+    "glancing": {
+      "frequency": 64,
+      "vietnamese_options": [
+        "liếc",
+        "đưa mắt",
+        "nhìn lén"
+      ]
+    },
+    "giggling": {
+      "frequency": 56,
+      "vietnamese_options": [
+        "cười khúc khích",
+        "cười hí hí",
+        "cười"
+      ]
+    },
+    "excited": {
+      "frequency": 52,
+      "vietnamese_options": [
+        "háo hức",
+        "nôn nao",
+        "phấn khích"
+      ]
+    },
+    "exhausted": {
+      "frequency": 48,
+      "vietnamese_options": [
+        "kiệt sức",
+        "mệt lả",
+        "rã rời"
+      ]
+    },
+    "gulping": {
+      "frequency": 48,
+      "vietnamese_options": [
+        "nuốt nước bọt",
+        "ực",
+        "nuốt khan"
+      ]
+    }
+  },
+  "register_frequency_data": {
+    "polite_vs_casual_ratio": 0.19168683349732735,
+    "note": "Light novels typically have 60-70% casual speech"
+  },
+  "dialogue_density_baseline": {
+    "avg_dialogues_per_chapter": 159,
+    "expected_particle_rate": "80%+ of dialogue lines should have particles"
+  }
+}

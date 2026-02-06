@@ -334,7 +334,11 @@ class BuilderAgent:
                     book_title = series_data.get('title') or 'Unknown'
             else:
                 # v3.0 schema or fallback
-                book_title = metadata_translated.get(title_key) or metadata_translated.get('title_en') or metadata_jp.get('title', 'Unknown')
+                # Check metadata_translated first, then top-level title_en, then fall back to Japanese
+                book_title = (metadata_translated.get(title_key) or 
+                             metadata_translated.get('title_en') or 
+                             manifest.get('title_en') or 
+                             metadata_jp.get('title', 'Unknown'))
             print(f"     Title: {book_title}")
             print(f"     Target Language: {actual_language_name}")
             print(f"     Chapters: {len(chapters)}")
@@ -499,7 +503,10 @@ class BuilderAgent:
         metadata_key = f'metadata_{target_language}'
         metadata_translated = manifest.get(metadata_key) or manifest.get('metadata_en', {})
         title_key = f'title_{target_language}'
-        book_title = metadata_translated.get(title_key) or metadata_translated.get('title_en') or metadata_jp.get('title', '')
+        book_title = (metadata_translated.get(title_key) or 
+                     metadata_translated.get('title_en') or 
+                     manifest.get('title_en') or 
+                     metadata_jp.get('title', ''))
         lang_config = get_language_config(target_language)
         lang_code = lang_config.get('language_code', target_language)
 
@@ -1000,7 +1007,10 @@ class BuilderAgent:
         
         # Get title in target language
         title_key = f'title_{target_language}'
-        title = metadata_translated.get(title_key) or metadata_translated.get('title_en') or metadata_jp.get('title', '')
+        title = (metadata_translated.get(title_key) or 
+                metadata_translated.get('title_en') or 
+                manifest.get('title_en') or 
+                metadata_jp.get('title', ''))
         
         # Get UI strings from language config
         ui_strings = lang_config.get('ui_strings', {})
@@ -1108,7 +1118,10 @@ class BuilderAgent:
         
         # Get title in target language
         title_key = f'title_{target_language}'
-        title = metadata_translated.get(title_key) or metadata_translated.get('title_en') or metadata_jp.get('title', '')
+        title = (metadata_translated.get(title_key) or 
+                metadata_translated.get('title_en') or 
+                manifest.get('title_en') or 
+                metadata_jp.get('title', ''))
         identifier = manifest.get('volume_id', '')
         
         # Get UI strings from language config
@@ -1288,7 +1301,10 @@ class BuilderAgent:
                 series_value = series_value.get(f'title_{target_language}') or series_value.get(target_language) or series_value.get('title_english') or series_value.get('english') or ''
         
         book_metadata = BookMetadata(
-            title=metadata_translated.get(title_key) or metadata_translated.get('title_en') or jp_title,
+            title=(metadata_translated.get(title_key) or 
+                  metadata_translated.get('title_en') or 
+                  manifest.get('title_en') or 
+                  jp_title),
             author=metadata_translated.get(author_key) or metadata_translated.get('author_en') or jp_author,
             language=language_code,
             publisher=metadata_translated.get(publisher_key) or metadata_translated.get('publisher_en') or jp_publisher,

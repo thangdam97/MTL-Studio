@@ -1,0 +1,506 @@
+{
+    "rhythm_rules": {
+        "description": "Archetype-driven Vietnamese prose rhythm rules - Character archetypes define speech rhythm patterns. Vietnamese thrives on short, punchy sentences with natural syllable flow. Long sequential Japanese sentences need 'amputation' to match Vietnamese rhythm.",
+        "amputation_philosophy": "Japanese builds complexity through sequential clauses (て-form chains, relative clauses). Vietnamese prefers: Cut → Breathe → Cut. Each sentence = one breath. Long Japanese sequences must be amputated into Vietnamese staccato rhythm. Character archetype determines HOW to cut - warriors cut sharp, intellectuals cut measured, children cut erratic.",
+        "archetype_system": {
+            "enabled": true,
+            "source": "manifest.json characters[].personality_traits",
+            "override_priority": "archetype > narrator > default",
+            "description": "Speech rhythm adapts to character archetype. Warrior = terse staccato. Scholar = measured cadence. Child = erratic bursts. Noble = balanced periods."
+        },
+        "max_sentence_length": 25,
+        "ideal_sentence_range": [
+            8,
+            20
+        ],
+        "character_archetypes": {
+            "warrior_soldier": {
+                "description": "Combat-focused characters - terse, direct, action-oriented",
+                "personality_traits_match": [
+                    "disciplined",
+                    "combat_skilled",
+                    "tactical",
+                    "aggressive",
+                    "protective",
+                    "stoic"
+                ],
+                "rhythm_profile": {
+                    "sentence_length_bias": "short",
+                    "ideal_range": [
+                        3,
+                        10
+                    ],
+                    "max_length": 15,
+                    "pattern": "staccato_bursts",
+                    "amputation_style": "hard_cuts",
+                    "variation": "minimal"
+                },
+                "speech_patterns": {
+                    "conjunctions": "minimal - use periods instead of 'và'",
+                    "particles": "rare - action over commentary",
+                    "descriptors": "sparse - verbs dominate",
+                    "rhythm": "punch-pause-punch"
+                },
+                "examples": {
+                    "jp": "彼は剣を抜いて、敵を睨んで、前に踏み出した。",
+                    "vn_default": "Anh rút kiếm ra và nhìn kẻ địch và bước về phía trước.",
+                    "vn_archetype": "Rút kiếm. Nhìn. Tiến.",
+                    "analysis": "Warrior rhythm: 2-word bursts. No elaboration. Pure action."
+                }
+            },
+            "scholar_intellectual": {
+                "description": "Analytical characters - measured, deliberate, complex thoughts",
+                "personality_traits_match": [
+                    "intelligent",
+                    "analytical",
+                    "bookish",
+                    "methodical",
+                    "strategic",
+                    "contemplative"
+                ],
+                "rhythm_profile": {
+                    "sentence_length_bias": "medium_to_long",
+                    "ideal_range": [
+                        12,
+                        22
+                    ],
+                    "max_length": 28,
+                    "pattern": "measured_cadence",
+                    "amputation_style": "logical_breaks",
+                    "variation": "moderate"
+                },
+                "speech_patterns": {
+                    "conjunctions": "deliberate - use 'mà', 'nhưng', 'vì' for logical flow",
+                    "particles": "strategic - 'đấy', 'chứ' for emphasis",
+                    "descriptors": "precise - qualifiers and nuance",
+                    "rhythm": "thesis-elaboration-conclusion"
+                },
+                "examples": {
+                    "jp": "この問題には三つの解決策があるが、どれも一長一短だ。",
+                    "vn_default": "Có ba giải pháp cho vấn đề này nhưng mỗi cái đều có ưu nhược điểm.",
+                    "vn_archetype": "Vấn đề này có ba giải pháp. Mỗi cái đều có điểm mạnh và yếu. Cần cân nhắc kỹ.",
+                    "analysis": "Scholar rhythm: Measured unpacking. Each sentence = one logical step."
+                }
+            },
+            "child_energetic": {
+                "description": "Young energetic characters - erratic, enthusiastic, simple structures",
+                "personality_traits_match": [
+                    "cheerful",
+                    "energetic",
+                    "naive",
+                    "excitable",
+                    "childish",
+                    "optimistic"
+                ],
+                "rhythm_profile": {
+                    "sentence_length_bias": "very_short",
+                    "ideal_range": [
+                        2,
+                        8
+                    ],
+                    "max_length": 12,
+                    "pattern": "erratic_bursts",
+                    "amputation_style": "excitement_breaks",
+                    "variation": "high_irregular"
+                },
+                "speech_patterns": {
+                    "conjunctions": "childish chains - 'rồi', 'nè', 'mà'",
+                    "particles": "abundant - 'à', 'nhỉ', 'nè', 'ư'",
+                    "descriptors": "simple - basic adjectives, repetition",
+                    "rhythm": "burst-giggle-burst"
+                },
+                "examples": {
+                    "jp": "見て見て！すごいでしょ？私が作ったんだよ！",
+                    "vn_default": "Nhìn này nhìn này! Tuyệt phải không? Em làm đấy!",
+                    "vn_archetype": "Nhìn này! Nhìn nè! Tuyệt không? Em làm đó! Em làm!",
+                    "analysis": "Child rhythm: Excited repetition. Particles everywhere. Uneven bursts."
+                }
+            },
+            "noble_formal": {
+                "description": "Aristocratic/formal characters - balanced, elegant, controlled",
+                "personality_traits_match": [
+                    "refined",
+                    "elegant",
+                    "aristocratic",
+                    "formal",
+                    "composed",
+                    "traditional"
+                ],
+                "rhythm_profile": {
+                    "sentence_length_bias": "balanced",
+                    "ideal_range": [
+                        10,
+                        18
+                    ],
+                    "max_length": 22,
+                    "pattern": "elegant_periods",
+                    "amputation_style": "graceful_pauses",
+                    "variation": "controlled_symmetry"
+                },
+                "speech_patterns": {
+                    "conjunctions": "formal - 'còn', 'song', 'tuy nhiên' (but natural)",
+                    "particles": "refined - 'ấy chứ', 'sao', 'đâu'",
+                    "descriptors": "elegant - classical vocabulary, balanced clauses",
+                    "rhythm": "rise-sustain-fall"
+                },
+                "examples": {
+                    "jp": "お話は承りました。しかしながら、この件については熟考が必要です。",
+                    "vn_default": "Tôi đã nghe yêu cầu của ngài rồi. Tuy nhiên, vấn đề này cần xem xét kỹ lưỡng.",
+                    "vn_archetype": "Lời ngài nói, thiếp đã ghi nhận. Song vấn đề này, cần thời gian suy nghĩ.",
+                    "analysis": "Noble rhythm: Balanced clauses. Classical inversion. Elegant pauses."
+                }
+            },
+            "tsundere_guarded": {
+                "description": "Emotionally guarded characters - clipped, defensive, occasional softness",
+                "personality_traits_match": [
+                    "tsundere",
+                    "emotionally_guarded",
+                    "defensive",
+                    "prideful",
+                    "secretly_caring"
+                ],
+                "rhythm_profile": {
+                    "sentence_length_bias": "short_defensive",
+                    "ideal_range": [
+                        4,
+                        12
+                    ],
+                    "max_length": 16,
+                    "pattern": "clipped_with_softening",
+                    "amputation_style": "defensive_cuts",
+                    "variation": "spiky_then_smooth"
+                },
+                "speech_patterns": {
+                    "conjunctions": "defensive denials - 'đâu có', 'không phải'",
+                    "particles": "mixed - harsh 'mà', 'chứ' → soft 'đấy', 'thôi'",
+                    "descriptors": "dismissive then caring - contrast is key",
+                    "rhythm": "spike-spike-soften"
+                },
+                "examples": {
+                    "jp": "別にあんたのためじゃないんだからね。ただ...作りすぎただけだし。",
+                    "vn_default": "Không phải vì cậu đâu nhé. Chỉ là... em làm nhiều quá thôi.",
+                    "vn_archetype": "Không phải vì cậu. Đừng hiểu lầm. Chỉ là... Làm nhiều. Thế thôi.",
+                    "analysis": "Tsundere rhythm: Sharp denial → hesitation → soft admission. Rhythm mirrors emotion."
+                }
+            },
+            "kuudere_stoic": {
+                "description": "Emotionally flat characters - monotone, minimal, occasional depth",
+                "personality_traits_match": [
+                    "stoic",
+                    "emotionless",
+                    "detached",
+                    "observant",
+                    "secretly_emotional"
+                ],
+                "rhythm_profile": {
+                    "sentence_length_bias": "ultra_short",
+                    "ideal_range": [
+                        2,
+                        6
+                    ],
+                    "max_length": 10,
+                    "pattern": "monotone_minimal",
+                    "amputation_style": "extreme_cuts",
+                    "variation": "almost_none"
+                },
+                "speech_patterns": {
+                    "conjunctions": "almost none - pure minimalism",
+                    "particles": "rare - only factual 'à', 'ư'",
+                    "descriptors": "sparse - observations only",
+                    "rhythm": "flat-flat-flat"
+                },
+                "examples": {
+                    "jp": "そう。分かった。行く。",
+                    "vn_default": "Ừ. Hiểu rồi. Đi.",
+                    "vn_archetype": "Ừ. Hiểu. Đi.",
+                    "analysis": "Kuudere rhythm: Absolute minimum. No elaboration. Emotionally flat."
+                }
+            },
+            "genki_optimist": {
+                "description": "High-energy positive characters - bouncy, enthusiastic, repetitive",
+                "personality_traits_match": [
+                    "cheerful",
+                    "optimistic",
+                    "energetic",
+                    "friendly",
+                    "outgoing"
+                ],
+                "rhythm_profile": {
+                    "sentence_length_bias": "short_bouncy",
+                    "ideal_range": [
+                        4,
+                        10
+                    ],
+                    "max_length": 14,
+                    "pattern": "bouncy_repetitive",
+                    "amputation_style": "enthusiasm_breaks",
+                    "variation": "high_energy"
+                },
+                "speech_patterns": {
+                    "conjunctions": "excited - 'rồi', 'nè', 'mà', 'và' (OK here)",
+                    "particles": "excessive - all the particles!",
+                    "descriptors": "enthusiastic - superlatives, repetition",
+                    "rhythm": "bounce-bounce-bounce"
+                },
+                "examples": {
+                    "jp": "ねえねえ！今日めっちゃ楽しかったよね！また行こうね！",
+                    "vn_default": "Này này! Hôm nay vui lắm phải không! Đi lại nhé!",
+                    "vn_archetype": "Này nè! Hôm nay vui lắm! Vui lắm luôn! Đi lại nha! Phải đi nha!",
+                    "analysis": "Genki rhythm: Repetition for emphasis. High energy maintained. Particles drive bounce."
+                }
+            },
+            "brooding_loner": {
+                "description": "Dark introspective characters - heavy, deliberate, internal monologue",
+                "personality_traits_match": [
+                    "brooding",
+                    "introspective",
+                    "loner",
+                    "philosophical",
+                    "melancholic"
+                ],
+                "rhythm_profile": {
+                    "sentence_length_bias": "medium_heavy",
+                    "ideal_range": [
+                        8,
+                        16
+                    ],
+                    "max_length": 20,
+                    "pattern": "weighted_contemplation",
+                    "amputation_style": "thoughtful_pauses",
+                    "variation": "deliberate_slow"
+                },
+                "speech_patterns": {
+                    "conjunctions": "internal - 'nhưng', 'song', 'còn'",
+                    "particles": "reflective - 'sao', 'nhỉ', 'chăng'",
+                    "descriptors": "heavy - atmospheric, emotional weight",
+                    "rhythm": "weight-pause-weight"
+                },
+                "examples": {
+                    "jp": "この世界に意味はあるのか。誰も答えを知らない。",
+                    "vn_default": "Thế giới này có ý nghĩa không. Không ai biết câu trả lời.",
+                    "vn_archetype": "Thế giới này... có ý nghĩa gì không nhỉ. Câu trả lời. Không ai biết.",
+                    "analysis": "Brooding rhythm: Ellipses for weight. Fragmented thoughts. Heavy pauses."
+                }
+            },
+            "narrator_default": {
+                "description": "Neutral narrator voice - balanced, clear, varied",
+                "personality_traits_match": [],
+                "rhythm_profile": {
+                    "sentence_length_bias": "balanced_varied",
+                    "ideal_range": [
+                        8,
+                        20
+                    ],
+                    "max_length": 25,
+                    "pattern": "natural_variation",
+                    "amputation_style": "contextual",
+                    "variation": "high_natural"
+                },
+                "speech_patterns": {
+                    "conjunctions": "natural - mix all types appropriately",
+                    "particles": "moderate - contextual usage",
+                    "descriptors": "balanced - show don't tell",
+                    "rhythm": "varied-natural-flow"
+                },
+                "examples": {
+                    "jp": "朝日が部屋に差し込んだ。彼は目を覚まして、窓の外を見た。",
+                    "vn_default": "Ánh sáng buổi sáng chiếu vào phòng. Anh thức dậy và nhìn ra ngoài cửa sổ.",
+                    "vn_archetype": "Ánh sáng rọi vào phòng. Anh thức dậy. Nhìn ra ngoài cửa sổ.",
+                    "analysis": "Narrator rhythm: Balanced variation. Mix short/medium. Natural flow."
+                }
+            }
+        },
+        "archetype_detection": {
+            "method": "personality_traits_matching",
+            "fallback": "narrator_default",
+            "minimum_trait_overlap": 2,
+            "priority_traits": {
+                "warrior_soldier": [
+                    "combat_skilled",
+                    "disciplined",
+                    "tactical"
+                ],
+                "scholar_intellectual": [
+                    "intelligent",
+                    "analytical",
+                    "bookish"
+                ],
+                "child_energetic": [
+                    "childish",
+                    "energetic",
+                    "naive"
+                ],
+                "noble_formal": [
+                    "refined",
+                    "aristocratic",
+                    "formal"
+                ],
+                "tsundere_guarded": [
+                    "tsundere",
+                    "emotionally_guarded",
+                    "prideful"
+                ],
+                "kuudere_stoic": [
+                    "stoic",
+                    "emotionless",
+                    "detached"
+                ],
+                "genki_optimist": [
+                    "cheerful",
+                    "optimistic",
+                    "energetic"
+                ],
+                "brooding_loner": [
+                    "brooding",
+                    "introspective",
+                    "melancholic"
+                ]
+            },
+            "trait_mapping_examples": {
+                "hardworking + skilled_gamer + responsible": "default (no strong archetype)",
+                "cheerful + clingy + energetic + naive": "child_energetic or genki_optimist",
+                "quiet + observant + mysterious + emotionless": "kuudere_stoic",
+                "intelligent + strategic + analytical": "scholar_intellectual",
+                "prideful + competitive + secretly_caring": "tsundere_guarded"
+            }
+        },
+        "core_principles": [
+            {
+                "id": "monosyllabic_rhythm",
+                "rule": "Vietnamese is monosyllabic - each syllable = one beat",
+                "explanation": "Long compound words break rhythm. Prefer short syllables with natural pauses.",
+                "example": "❌ 'sự kiện bất ngờ xuất hiện' → ✅ 'Chuyện bất ngờ. Xuất hiện thình lình.'",
+                "priority": "high"
+            },
+            {
+                "id": "amputation_over_conjunction",
+                "rule": "Cut Japanese sequential clauses - don't chain with 'và', 'rồi'",
+                "explanation": "Japanese て-form chains become multiple Vietnamese sentences. Each clause = independent sentence.",
+                "example": "❌ '彼は部屋に入って、椅子に座って、本を開いた' becomes NOT 'Anh ấy bước vào phòng và ngồi xuống ghế và mở sách' BUT ✅ 'Anh bước vào phòng. Ngồi xuống. Mở sách.'",
+                "priority": "critical"
+            },
+            {
+                "id": "particle_breathing_points",
+                "rule": "Use particles as natural breathing points",
+                "explanation": "Vietnamese particles (à, nhỉ, ư, đấy) create natural rhythm breaks. Place strategically for breath control.",
+                "example": "✅ 'Trời đẹp nhỉ. Đi chơi không?' (Natural pause at 'nhỉ')",
+                "priority": "medium"
+            },
+            {
+                "id": "vary_sentence_length",
+                "rule": "Alternate short/long for rhythm variation",
+                "explanation": "Monotonous sentence length = robotic. Mix: 1 short (3-8 words) → 1 medium (10-18) → 1 short creates natural Vietnamese flow.",
+                "example": "✅ 'Trời sáng. Anh thức dậy trong căn phòng tối. Lạnh.'",
+                "priority": "medium"
+            },
+            {
+                "id": "avoid_nested_clauses",
+                "rule": "Vietnamese doesn't nest clauses like Japanese relative clauses",
+                "explanation": "Japanese embeds clauses (彼が昨日買った本). Vietnamese unfolds sequentially. Flatten nested structures.",
+                "example": "❌ 'Cuốn sách mà anh ấy mua hôm qua mà tôi đã đọc' → ✅ 'Anh ấy mua cuốn sách hôm qua. Tôi đã đọc nó.'",
+                "priority": "high"
+            }
+        ],
+        "amputation_patterns": [
+            {
+                "id": "te_form_chain",
+                "marker": "て",
+                "explanation": "Japanese て-form chains must be amputated into separate Vietnamese sentences",
+                "before": "彼は立ち上がって、ドアを開けて、外に出た。",
+                "after": "Anh đứng dậy. Mở cửa. Bước ra ngoài.",
+                "rule": "Each て becomes a period (.) in Vietnamese"
+            },
+            {
+                "id": "relative_clause_unfold",
+                "marker": "の/が (relative)",
+                "explanation": "Japanese relative clauses embed information. Vietnamese unfolds them sequentially.",
+                "before": "昨日買った本を読んだ。",
+                "after": "Tôi mua cuốn sách hôm qua. Rồi đọc nó.",
+                "rule": "Convert embedded clause into separate sentence or sequential structure"
+            },
+            {
+                "id": "compound_verb_split",
+                "marker": "Compound verbs",
+                "explanation": "Japanese compound verbs (V1てV2) become two actions in Vietnamese",
+                "before": "走り出した。",
+                "after": "Chạy. Chạy đi.",
+                "rule": "Split compound verbs into action + manner/direction"
+            },
+            {
+                "id": "ba_structure_flatten",
+                "marker": "は...が... structure",
+                "explanation": "Japanese topic-comment with が creates nested structure. Flatten to Vietnamese SVO.",
+                "before": "彼は頭が良い。",
+                "after": "Anh ấy thông minh. / Đầu óc anh ấy tốt.",
+                "rule": "Either: Convert to direct SVO OR Split into two observations"
+            }
+        ],
+        "natural_break_particles": [
+            "à",
+            "nhỉ",
+            "nhé",
+            "đấy",
+            "đó",
+            "ấy",
+            "này",
+            "kia",
+            "thôi",
+            "rồi",
+            "mà",
+            "chứ",
+            "sao",
+            "ư",
+            "hả"
+        ],
+        "patterns": [
+            {
+                "id": "sequential_va_overuse",
+                "rule": "Avoid chaining 3+ clauses with 'và'",
+                "detection_regex": "và .{10,50} và .{10,50} và",
+                "fix": "Cut into separate sentences at each 'và'",
+                "severity": "medium",
+                "example": "❌ 'Anh ấy đứng lên và mở cửa và bước ra ngoài và nhìn vào bầu trời' → ✅ 'Anh đứng lên. Mở cửa. Bước ra ngoài. Nhìn trời.'"
+            },
+            {
+                "id": "nested_relative_clause",
+                "rule": "Unfold nested 'mà...mà...' structures",
+                "detection_regex": "mà .{20,} mà",
+                "fix": "Convert to sequential sentences",
+                "severity": "high",
+                "example": "❌ 'Người mà tôi gặp hôm qua mà anh biết' → ✅ 'Tôi gặp người đó hôm qua. Anh biết người ấy.'"
+            },
+            {
+                "id": "ai_ism_formal_connectors",
+                "rule": "Avoid AI-ism formal connectors that break rhythm",
+                "detection_regex": "(Tuy nhiên|Ngoài ra|Hơn nữa|Theo đó|Bên cạnh đó), .{30,}",
+                "fix": "Use natural Vietnamese rhythm breaks instead",
+                "severity": "medium",
+                "example": "❌ 'Tuy nhiên, anh ấy vẫn quyết định...' → ✅ 'Nhưng anh vẫn quyết định... / Thế mà anh vẫn...'"
+            }
+        ],
+        "rhythm_examples": {
+            "good_rhythm": [
+                {
+                    "text": "Trời sáng. Anh thức dậy. Căn phòng lạnh. Anh run lên.",
+                    "analysis": "Short staccato sentences (2-4 words each). Monosyllabic Vietnamese rhythm. Each sentence = one breath."
+                },
+                {
+                    "text": "Cô ấy cười. Một nụ cười đẹp, rạng rỡ như ánh mặt trời buổi sáng. Rồi cô quay đi.",
+                    "analysis": "Varies length: short (3) → long (13) → short (4). Natural rhythm variation."
+                }
+            ],
+            "bad_rhythm": [
+                {
+                    "text": "Anh ấy bước vào phòng và nhìn xung quanh và thấy rằng không ai ở đó và quyết định ngồi xuống ghế và chờ đợi.",
+                    "issue": "Chained 'và' connectors. Japanese sequential thinking imposed on Vietnamese. Needs amputation.",
+                    "fix": "Anh bước vào phòng. Nhìn quanh. Không ai cả. Anh ngồi xuống. Chờ."
+                },
+                {
+                    "text": "Cuốn sách mà anh ấy đã mua hôm qua từ cửa hàng gần nhà mà tôi đã từng nói với cậu là rất hay.",
+                    "issue": "Nested relative clauses (mà...mà...). Japanese embedding style. Vietnamese requires unfolding.",
+                    "fix": "Anh ấy mua cuốn sách hôm qua. Ở cửa hàng gần nhà. Tôi đã nói với cậu rồi. Nó rất hay."
+                }
+            ]
+        }
+    }
+}

@@ -408,6 +408,55 @@ This document contains the internal reasoning process that Gemini used while tra
                     logger.warning("[GRAMMAR] Continuing without grammar pattern guidance")
                     en_pattern_guidance = None
 
+            # === Vietnamese Grammar Pattern Detection (Vector Search) ===
+            # Detect Japanese grammar patterns and query vector store for natural Vietnamese equivalents
+            vn_pattern_guidance = None
+            if self.target_language == 'vn':  # Vietnamese translations only
+                try:
+                    from modules.grammar_pattern_detector import detect_grammar_patterns
+                    from modules.vietnamese_pattern_store import VietnamesePatternStore
+
+                    logger.debug(f"[VN-GRAMMAR] Detecting Japanese patterns for natural Vietnamese phrasing...")
+
+                    # Detect grammar patterns (same JP detector, VN-specific store)
+                    detected_patterns = detect_grammar_patterns(
+                        source_content_only,
+                        top_n=15,
+                        include_line_numbers=True
+                    )
+
+                    if detected_patterns:
+                        logger.debug(f"[VN-GRAMMAR] Found {len(detected_patterns)} patterns")
+
+                        # Query VN vector store for natural Vietnamese equivalents
+                        vn_store = VietnamesePatternStore()
+
+                        # Extract first 5 sentences as context hint
+                        sentences = re.split(r'[。！？\n]', source_content_only)
+                        context_sentences = [s.strip() for s in sentences[:5] if s.strip()]
+                        context_hint = '。'.join(context_sentences[:3])
+
+                        vn_pattern_guidance = vn_store.get_bulk_guidance(
+                            patterns=detected_patterns,
+                            context=context_hint,
+                            max_per_pattern=2,
+                            min_confidence=0.70
+                        )
+
+                        high_conf = len(vn_pattern_guidance.get("high_confidence", []))
+                        medium_conf = len(vn_pattern_guidance.get("medium_confidence", []))
+                        lookup_stats = vn_pattern_guidance.get("lookup_stats", {})
+
+                        logger.info(f"[VN-GRAMMAR] Vietnamese pattern guidance: {high_conf} high, {medium_conf} medium")
+                        logger.debug(f"[VN-GRAMMAR] Lookup stats: patterns_queried={lookup_stats.get('patterns_queried', 0)}, neg_penalties={lookup_stats.get('neg_penalties_applied', 0)}")
+                    else:
+                        logger.debug(f"[VN-GRAMMAR] No grammar patterns detected in chapter")
+
+                except Exception as e:
+                    logger.warning(f"[VN-GRAMMAR] Pattern detection failed: {e}")
+                    logger.warning("[VN-GRAMMAR] Continuing without Vietnamese grammar pattern guidance")
+                    vn_pattern_guidance = None
+
             # === MULTIMODAL VISUAL CONTEXT ===
             visual_guidance = None
             illustration_ids = []  # Track for thought logging
@@ -462,6 +511,7 @@ This document contains the internal reasoning process that Gemini used while tra
                 gap_flags=gap_flags,
                 dialect_guidance=dialect_guidance,  # v1.0 - Dialect detection
                 en_pattern_guidance=en_pattern_guidance,  # English grammar patterns
+                vn_pattern_guidance=vn_pattern_guidance,  # Vietnamese grammar patterns
                 visual_guidance=visual_guidance
             )
             logger.debug(f"[VERBOSE] User prompt length: {len(user_prompt)} characters")
@@ -590,6 +640,7 @@ This document contains the internal reasoning process that Gemini used while tra
         gap_flags: Optional[Dict] = None,
         dialect_guidance: Optional[str] = None,  # v1.0 - Dialect detection
         en_pattern_guidance: Optional[Dict] = None,  # English grammar patterns
+        vn_pattern_guidance: Optional[Dict] = None,  # Vietnamese grammar patterns
         visual_guidance: Optional[str] = None  # Multimodal visual context
     ) -> str:
         """Construct the user message part of the prompt."""
@@ -622,6 +673,12 @@ This document contains the internal reasoning process that Gemini used while tra
             pattern_section = self._format_english_pattern_guidance(en_pattern_guidance)
             # Insert guidance before the source text
             base_prompt = f"{base_prompt}\n\n{pattern_section}"
+
+        # Inject Vietnamese grammar pattern guidance if available (Vietnamese translations only)
+        if vn_pattern_guidance and vn_pattern_guidance.get("high_confidence"):
+            vn_pattern_section = self._format_vietnamese_pattern_guidance(vn_pattern_guidance)
+            # Insert guidance before the source text
+            base_prompt = f"{base_prompt}\n\n{vn_pattern_section}"
 
         # Inject multimodal visual context if available
         if visual_guidance:
@@ -778,6 +835,56 @@ This document contains the internal reasoning process that Gemini used while tra
 
         lines.append("---")
         lines.append("**Note:** Use these patterns to achieve natural, conversational English instead of literal translations.")
+        lines.append("")
+
+        return "\n".join(lines)
+
+    def _format_vietnamese_pattern_guidance(self, guidance: Dict[str, Any]) -> str:
+        """
+        Format Vietnamese grammar pattern guidance for prompt injection.
+
+        Provides translator with natural Vietnamese phrasing suggestions for
+        detected Japanese grammar patterns. Includes anti-AI-ism warnings.
+        """
+        lines = ["## Hướng Dẫn Diễn Đạt Tiếng Việt Tự Nhiên", ""]
+        lines.append("Các mẫu ngữ pháp tiếng Nhật sau đã được phát hiện trong chương này.")
+        lines.append("Sử dụng cách diễn đạt tiếng Việt tự nhiên sau thay vì dịch trực tiếp:")
+        lines.append("")
+
+        # High confidence matches
+        high_confidence = guidance.get("high_confidence", [])
+        if not high_confidence:
+            return ""  # No high-confidence patterns to inject
+
+        for item in high_confidence[:8]:  # Limit to top 8
+            jp_structure = item.get("japanese_structure", "")
+            vn_pattern = item.get("vietnamese_pattern", "")
+            natural_ex = item.get("natural_example", "")
+            jp_ex = item.get("jp_example", "")
+            similarity = item.get("similarity", 0.0)
+            usage_rules = item.get("usage_rules", [])
+
+            # Format pattern entry
+            entry = f"- **{jp_structure}** → **{vn_pattern}**"
+            lines.append(entry)
+
+            # Add natural example if available
+            if natural_ex:
+                lines.append(f"  *Ví dụ:* \"{natural_ex}\"")
+
+            # Add first usage rule as hint
+            if usage_rules and usage_rules[0]:
+                lines.append(f"  _Lưu ý: {usage_rules[0]}_")
+
+            # Add confidence indicator for very high matches
+            if similarity >= 0.90:
+                lines.append(f"  _(Độ tin cậy cao: {similarity:.2f})_")
+
+            lines.append("")
+
+        lines.append("---")
+        lines.append("**QUAN TRỌNG:** Tránh các lỗi AI-ism: 'một cách [adj]', 'một cảm giác', 'Sự [verb]', 'Việc [verb]'.")
+        lines.append("Dùng tiếng Việt tự nhiên như người bản xứ đọc light novel.")
         lines.append("")
 
         return "\n".join(lines)

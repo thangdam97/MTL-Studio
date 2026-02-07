@@ -1,0 +1,2821 @@
+{
+    "version": "2.0",
+    "description": "RAG Database for Vietnamese Grammar Restructuring — Natural JP→VN Translation Patterns (Extended via 148-EPUB corpus + 98 VN chapter analysis)",
+    "last_updated": "2026-02-07",
+    "metadata": {
+        "corpus_stats": {
+            "jp_epubs_scanned": 148,
+            "jp_total_lines": 523111,
+            "jp_total_chars": 16254148,
+            "jp_pattern_hits": 1022331,
+            "vn_chapters_analyzed": 98,
+            "vn_total_words": 607445,
+            "vn_particle_density_per_1000w": 100.5,
+            "paired_examples_extracted": 692
+        },
+        "embedding_model": "Gemini Embedding 001 (3072D)",
+        "vector_store": "ChromaDB (cosine)",
+        "collection_name": "vietnamese_grammar_patterns"
+    },
+    "pattern_categories": {
+        "contrastive_comparison": {
+            "description": "Contrasting two subjects or situations — Vietnamese uses 'nhưng/mà/còn' structures, not 'tuy nhiên' every time",
+            "patterns": [
+                {
+                    "id": "vn_kedo_but_casual",
+                    "japanese_structure": "AはBけど/だけど、CはD",
+                    "japanese_indicators": [
+                        "けど",
+                        "けれど",
+                        "だけど"
+                    ],
+                    "vietnamese_pattern": "A thì B, nhưng/mà C lại D — use 'mà' for casual, 'nhưng' for neutral",
+                    "examples": [
+                        {
+                            "jp": "結構大切にしているつもりですが？",
+                            "literal": "Em vẫn nghĩ là mình đang quý trọng lắm nhưng?",
+                            "natural": "Em vẫn nghĩ là mình đang quý trọng bản thân lắm mà?",
+                            "source": "0d29_VN_corpus"
+                        },
+                        {
+                            "jp": "先生は厳しいけど、面白い",
+                            "literal": "Thầy nghiêm khắc nhưng vui",
+                            "natural": "Thầy thì nghiêm, nhưng mà vui."
+                        },
+                        {
+                            "jp": "美優先生は美人なのに短気で男勝りなところが欠点だ",
+                            "literal": "Cô Miyuu xinh đẹp tuy nhiên nóng tính là khuyết điểm",
+                            "natural": "Cô Miyuu xinh đẹp nhưng lại có khuyết điểm là nóng tính và mạnh mẽ như con trai.",
+                            "source": "0b24_VN_corpus"
+                        }
+                    ],
+                    "usage_rules": [
+                        "Use 'mà' for casual surprise contrast: 'Xinh mà lười'",
+                        "Use 'nhưng' for neutral/balanced contrast",
+                        "Use 'nhưng mà' for emphatic contrast in dialogue",
+                        "Add 'lại' to emphasize unexpected contrast: 'lại còn...'"
+                    ],
+                    "priority": "high",
+                    "corpus_frequency": 35600
+                },
+                {
+                    "id": "vn_ga_but_formal",
+                    "japanese_structure": "AはBだが、CはD",
+                    "japanese_indicators": [
+                        "が、",
+                        "だが"
+                    ],
+                    "vietnamese_pattern": "A thì B, tuy nhiên C lại D — narration register",
+                    "examples": [
+                        {
+                            "jp": "しかし、彰は気に入った女の子相手にはアクセルを踏み過ぎて引かれてしまうという欠点があり",
+                            "literal": "Tuy nhiên, Akira có khuyết điểm là quá nhiệt tình với con gái mình thích",
+                            "natural": "Thế nhưng, Akira có một khuyết điểm là hay nhấn ga hết cỡ khi gặp con gái mình thích, khiến đối phương sợ hãi.",
+                            "source": "0b24_VN_corpus"
+                        },
+                        {
+                            "jp": "頭は良いが、運動はできない",
+                            "literal": "Học giỏi nhưng thể thao kém",
+                            "natural": "Học thì giỏi, nhưng thể thao thì không."
+                        }
+                    ],
+                    "usage_rules": [
+                        "Use 'thế nhưng' or 'tuy nhiên' in narration only",
+                        "In dialogue, simplify to 'nhưng mà' or 'cơ mà'",
+                        "Add 'thì...thì' for topic-focus: 'Học thì giỏi, thể thao thì không'"
+                    ],
+                    "priority": "medium",
+                    "corpus_frequency": 27211
+                },
+                {
+                    "id": "vn_noni_despite",
+                    "japanese_structure": "AのにB — despite A, B happened",
+                    "japanese_indicators": [
+                        "のに"
+                    ],
+                    "vietnamese_pattern": "A mà B / A rồi mà B — frustration or surprise that despite A, B",
+                    "examples": [
+                        {
+                            "jp": "なんで俺だけなんですか！ 明人も喋ってたのに！",
+                            "literal": "Tại sao chỉ mình em! Akihito cũng nói chuyện tuy nhiên!",
+                            "natural": "Tại sao lại chỉ có mình em! Akihito cũng nói chuyện mà!",
+                            "source": "0b24_VN_corpus"
+                        },
+                        {
+                            "jp": "約束したのに来なかった",
+                            "literal": "Đã hứa tuy nhiên không đến",
+                            "natural": "Hứa rồi mà không đến."
+                        },
+                        {
+                            "jp": "あんなに練習したのにダメだった",
+                            "literal": "Luyện tập nhiều thế tuy nhiên không được",
+                            "natural": "Tập nhiều thế mà vẫn không được."
+                        }
+                    ],
+                    "usage_rules": [
+                        "'mà' expresses frustration: 'Nói rồi mà!'",
+                        "'rồi mà' for broken promise/expectation",
+                        "'thế mà' for surprising outcome",
+                        "NEVER use 'tuy nhiên' for のに — too formal, wrong register"
+                    ],
+                    "priority": "high",
+                    "corpus_frequency": 10889
+                }
+            ],
+            "negative_vectors": {
+                "description": "Suppress match when text is simple additive comparison without contrast",
+                "texts": [
+                    "Both A and B are good, A as well as B, listing similar qualities without contrast or tension",
+                    "Simple enumeration: first this happened, then that happened, sequential narration",
+                    "Cause and effect without emotional tension: because A therefore B, logical consequence"
+                ]
+            }
+        },
+        "intensifiers": {
+            "description": "Degree modifiers — Vietnamese has rich casual intensifiers: khá, cực kỳ, siêu, quá trời",
+            "patterns": [
+                {
+                    "id": "vn_kekkou_pretty",
+                    "japanese_structure": "結構/けっこう + adj",
+                    "japanese_indicators": [
+                        "結構",
+                        "けっこう"
+                    ],
+                    "vietnamese_pattern": "khá / cũng + adj — understated but noticeable",
+                    "examples": [
+                        {
+                            "jp": "汗を気にして恥ずかしがっていたくらいだし、結構シャイな子なのかもしれない",
+                            "literal": "Ngay cả việc để ý mồ hôi cũng ngại, khá rụt rè",
+                            "natural": "Ngay cả việc để ý đến mồ hôi cũng đã thấy ngại rồi, có lẽ cô ấy là một người khá nhút nhát.",
+                            "source": "0b24_VN_corpus"
+                        },
+                        {
+                            "jp": "結構好きなんだよね",
+                            "literal": "Khá thích đấy",
+                            "natural": "Thích lắm đấy / Thích phết đấy."
+                        }
+                    ],
+                    "usage_rules": [
+                        "'khá' for understated: 'khá đẹp' (pretty beautiful)",
+                        "'cũng' + adj for balanced: 'cũng đẹp' (also beautiful/fairly)",
+                        "'phết' for casual emphasis: 'giỏi phết' (quite good)",
+                        "In dialogue, can intensify: 'cũng...lắm đấy'"
+                    ],
+                    "priority": "high",
+                    "corpus_frequency": 5530
+                },
+                {
+                    "id": "vn_mecha_super",
+                    "japanese_structure": "めちゃ/超/すごく + adj",
+                    "japanese_indicators": [
+                        "めちゃ",
+                        "めっちゃ",
+                        "超",
+                        "ちょう",
+                        "すごく"
+                    ],
+                    "vietnamese_pattern": "cực kỳ / siêu / quá trời — strong casual emphasis",
+                    "examples": [
+                        {
+                            "jp": "めっちゃかわいい",
+                            "literal": "Cực kỳ dễ thương",
+                            "natural": "Dễ thương quá trời / Siêu dễ thương luôn."
+                        },
+                        {
+                            "jp": "超楽しかった",
+                            "literal": "Siêu vui",
+                            "natural": "Vui cực kỳ / Vui quá trời quá đất."
+                        },
+                        {
+                            "jp": "凄くドキドキする",
+                            "literal": "Cực kỳ hồi hộp",
+                            "natural": "Hồi hộp quá / Tim đập loạn cả lên.",
+                            "source": "0b24_VN_corpus"
+                        }
+                    ],
+                    "usage_rules": [
+                        "'cực kỳ' — very strong, safe for all registers",
+                        "'siêu' — casual teen speech, very strong",
+                        "'quá trời' — exclamatory, emotional peak",
+                        "'vô cùng' — narration, slightly literary",
+                        "Position: adj + 'quá' OR 'cực kỳ' + adj"
+                    ],
+                    "priority": "high",
+                    "corpus_frequency": 3397
+                },
+                {
+                    "id": "vn_kanari_considerably",
+                    "japanese_structure": "かなり + adj/verb",
+                    "japanese_indicators": [
+                        "かなり"
+                    ],
+                    "vietnamese_pattern": "khá / tương đối / cũng...lắm",
+                    "examples": [
+                        {
+                            "jp": "かなり疲れた",
+                            "literal": "Tương đối mệt",
+                            "natural": "Mệt lắm rồi / Mệt phải biết."
+                        },
+                        {
+                            "jp": "かなり難しい問題だ",
+                            "literal": "Bài khá khó",
+                            "natural": "Bài này khó phết / Khó lắm đấy."
+                        }
+                    ],
+                    "usage_rules": [
+                        "'khá' for objective assessment",
+                        "'lắm' post-adj for emphasis: 'khó lắm'",
+                        "'phết' for surprised assessment: 'khó phết'",
+                        "'phải biết' for extreme: 'mệt phải biết'"
+                    ],
+                    "priority": "medium",
+                    "corpus_frequency": 2100
+                }
+            ],
+            "negative_vectors": {
+                "description": "Suppress match when text expresses exact quantities or neutral statements without degree emphasis",
+                "texts": [
+                    "Precisely three items, exactly five kilograms, specific numerical measurement without emotional emphasis",
+                    "Objective factual narration without speaker attitude: the room was large, the door was open",
+                    "Barely noticeable, hardly any, almost none — understated minimizers not intensifiers"
+                ]
+            }
+        },
+        "hedging": {
+            "description": "Uncertainty markers — Vietnamese has rich gradation: có lẽ < chắc < hẳn là < chắc chắn",
+            "patterns": [
+                {
+                    "id": "vn_darou_probability",
+                    "japanese_structure": "だろう / でしょう",
+                    "japanese_indicators": [
+                        "だろう",
+                        "でしょう"
+                    ],
+                    "vietnamese_pattern": "chắc / chắc là / có lẽ — probability assessment",
+                    "examples": [
+                        {
+                            "jp": "おそらく、男女問わず誰もが彼女を見れば心を奪われてしまうだろう",
+                            "literal": "Có lẽ, bất kể nam nữ, ai cũng bị hớp hồn đấy",
+                            "natural": "Có lẽ, bất kể là nam hay nữ, bất cứ ai nhìn thấy cô ấy cũng đều sẽ bị hớp hồn.",
+                            "source": "0b24_VN_corpus"
+                        },
+                        {
+                            "jp": "きっと俺には無理だろう",
+                            "literal": "Chắc chắn tôi không làm được",
+                            "natural": "Và, chắc chắn là tôi không thể làm được.",
+                            "source": "0b24_VN_corpus"
+                        },
+                        {
+                            "jp": "まぁ普通に考えればいるだろうな",
+                            "literal": "Nghĩ thường thì chắc là có",
+                            "natural": "Chà, nghĩ theo lẽ thường thì chắc là có rồi.",
+                            "source": "0b24_VN_corpus"
+                        }
+                    ],
+                    "usage_rules": [
+                        "'có lẽ' — low-medium certainty (40-60%)",
+                        "'chắc' — medium certainty (60-70%)",
+                        "'chắc là' — medium-high certainty (70-80%)",
+                        "'chắc chắn' — high certainty (85%+)",
+                        "'hẳn là' — deductive certainty ('must be')"
+                    ],
+                    "priority": "high",
+                    "corpus_frequency": 20738
+                },
+                {
+                    "id": "vn_to_omou_think",
+                    "japanese_structure": "と思う / と思った",
+                    "japanese_indicators": [
+                        "と思う",
+                        "と思った"
+                    ],
+                    "vietnamese_pattern": "tôi nghĩ / tôi thấy — can often be dropped",
+                    "examples": [
+                        {
+                            "jp": "言ってやれば気が付いて踏みとどまるので、正直もったいない男だと思う",
+                            "literal": "Nếu nói thì cậu ta sẽ nhận ra, thật sự tôi nghĩ tiếc cho cậu ta",
+                            "natural": "Chỉ cần nhắc nhở thì cậu ta sẽ nhận ra mà dừng lại, nói thật là tiếc cho cậu ta."
+                        },
+                        {
+                            "jp": "シャーロットさんの話題を振れば喰いついてくると思ったが",
+                            "literal": "Tôi nghĩ nhắc đến Charlotte-san sẽ cắn câu",
+                            "natural": "Tôi cứ ngỡ cậu ta sẽ đớp thính ngay khi tôi nhắc đến Charlotte-san.",
+                            "source": "0b24_VN_corpus"
+                        }
+                    ],
+                    "usage_rules": [
+                        "Can often drop 'tôi nghĩ' — Vietnamese shows opinion through tone",
+                        "'cứ ngỡ' for wrong expectation (thought X but was wrong)",
+                        "'thấy' more natural than 'nghĩ' for opinions: 'Tôi thấy hay'",
+                        "'theo tôi' for explicit opinion: 'Theo tôi thì...'"
+                    ],
+                    "priority": "high",
+                    "corpus_frequency": 9118
+                },
+                {
+                    "id": "vn_kamoshirenai_maybe",
+                    "japanese_structure": "かもしれない / かも",
+                    "japanese_indicators": [
+                        "かもしれない",
+                        "かも"
+                    ],
+                    "vietnamese_pattern": "có lẽ / có thể / biết đâu",
+                    "examples": [
+                        {
+                            "jp": "一年生の夏休み明け、これほどの美少女が留学してきたのは確かに幸運かもしれない",
+                            "literal": "Có thể đây là may mắn khi cô gái xinh đẹp đến du học",
+                            "natural": "Sau kỳ nghỉ hè năm nhất, việc một cô gái xinh đẹp như vậy chuyển đến du học quả thật có thể là một điều may mắn.",
+                            "source": "0b24_VN_corpus"
+                        },
+                        {
+                            "jp": "結構シャイな子なのかもしれない",
+                            "literal": "Có thể là cô ấy nhút nhát",
+                            "natural": "Có lẽ cô ấy là một người khá nhút nhát.",
+                            "source": "0b24_VN_corpus"
+                        }
+                    ],
+                    "usage_rules": [
+                        "'có lẽ' — soft possibility, most natural",
+                        "'có thể' — neutral possibility",
+                        "'biết đâu' — casual 'who knows': 'Biết đâu lại hay'",
+                        "'không chừng' — unexpectedly possible",
+                        "'e là' — worried possibility: 'E là hỏng rồi'"
+                    ],
+                    "priority": "high",
+                    "corpus_frequency": 9472
+                },
+                {
+                    "id": "vn_mitai_seems",
+                    "japanese_structure": "みたい / ようだ / らしい",
+                    "japanese_indicators": [
+                        "みたい",
+                        "ようだ",
+                        "ような",
+                        "らしい"
+                    ],
+                    "vietnamese_pattern": "hình như / có vẻ / trông có vẻ",
+                    "examples": [
+                        {
+                            "jp": "しかし、彼女には高い評価をしてもらえているらしい",
+                            "literal": "Tuy nhiên, hình như cô ấy đánh giá cao",
+                            "natural": "Tuy nhiên, có vẻ như cô ấy đánh giá tôi rất cao.",
+                            "source": "0b24_VN_corpus"
+                        },
+                        {
+                            "jp": "忙しいみたいだ",
+                            "literal": "Có vẻ bận",
+                            "natural": "Trông có vẻ bận / Hình như bận."
+                        }
+                    ],
+                    "usage_rules": [
+                        "'hình như' — observation-based guess",
+                        "'có vẻ' / 'có vẻ như' — apparent/seems",
+                        "'trông có vẻ' — visual observation",
+                        "'nghe nói' for hearsay-based: replaces らしい",
+                        "AVOID: 'dường như' in casual speech (too literary)"
+                    ],
+                    "priority": "high",
+                    "corpus_frequency": 22463
+                },
+                {
+                    "id": "vn_ki_ga_suru_feeling",
+                    "japanese_structure": "気がする",
+                    "japanese_indicators": [
+                        "気がする"
+                    ],
+                    "vietnamese_pattern": "thấy / cảm thấy — gut feeling",
+                    "examples": [
+                        {
+                            "jp": "何か嫌な気がする",
+                            "literal": "Một cảm giác không tốt",
+                            "natural": "Thấy không ổn rồi / Linh cảm không hay."
+                        },
+                        {
+                            "jp": "前にも会ったことがある気がする",
+                            "literal": "Cảm giác đã gặp trước đây",
+                            "natural": "Hình như mình gặp rồi thì phải."
+                        }
+                    ],
+                    "usage_rules": [
+                        "'thấy' for intuitive feeling (most natural)",
+                        "'linh cảm' for premonition",
+                        "'hình như' when unsure about memory",
+                        "NEVER: 'một cảm giác' (AI-ism — eliminate on sight)"
+                    ],
+                    "priority": "medium",
+                    "corpus_frequency": 2213
+                },
+                {
+                    "id": "vn_moshikashite_tentative",
+                    "japanese_structure": "もしかして / ひょっとして",
+                    "japanese_indicators": [
+                        "もしかして",
+                        "ひょっとして",
+                        "もしかすると"
+                    ],
+                    "vietnamese_pattern": "chẳng lẽ / không lẽ / hay là — tentative realization",
+                    "examples": [
+                        {
+                            "jp": "もしかして、怒ってる？",
+                            "literal": "Có thể cậu đang giận?",
+                            "natural": "Chẳng lẽ giận? / Giận à?"
+                        },
+                        {
+                            "jp": "ひょっとして忘れた？",
+                            "literal": "Có phải quên?",
+                            "natural": "Không lẽ quên? / Hay là quên rồi?"
+                        },
+                        {
+                            "jp": "もしかして好きなの？",
+                            "literal": "Có thể thích?",
+                            "natural": "Hay là... thích? / Thích à?"
+                        }
+                    ],
+                    "usage_rules": [
+                        "'chẳng lẽ' / 'không lẽ' — dawning realization",
+                        "'hay là' — tentative guess: 'Hay là quên rồi?'",
+                        "Can add pause with ellipsis: 'Hay là...'",
+                        "Less certain than まさか — genuine question vs disbelief"
+                    ],
+                    "priority": "high",
+                    "corpus_frequency": 760
+                }
+            ],
+            "negative_vectors": {
+                "description": "Suppress match when text expresses absolute certainty, commands, or definitive declarations",
+                "texts": [
+                    "I am absolutely certain, without any doubt, I know for a fact, definitely true, undeniable",
+                    "Do it now, imperative command, must do, order given, strong directive without uncertainty",
+                    "The truth is, the fact remains, it is certain that, definitive declaration, objective truth"
+                ]
+            }
+        },
+        "response_particles": {
+            "description": "Conversational response markers — Vietnamese uses 'ừ/à/ồ/thế à' not literal translations",
+            "patterns": [
+                {
+                    "id": "vn_sou_desu_ne",
+                    "japanese_structure": "そうだね / そうですね",
+                    "japanese_indicators": [
+                        "そうだね",
+                        "そうですね"
+                    ],
+                    "vietnamese_pattern": "Ừ nhỉ / Đúng thật / Cũng phải",
+                    "examples": [
+                        {
+                            "jp": "あぁ、そうだな",
+                            "literal": "À, đúng vậy nhỉ",
+                            "natural": "Ừ, đúng vậy.",
+                            "source": "0b24_VN_corpus"
+                        },
+                        {
+                            "jp": "そうですね、行きましょう",
+                            "literal": "Vâng, đi thôi ạ",
+                            "natural": "Ừm, đi thôi ạ."
+                        }
+                    ],
+                    "usage_rules": [
+                        "'Ừ nhỉ' — casual agreement with musing tone",
+                        "'Đúng thật' — enthusiastic agreement",
+                        "'Cũng phải' — reluctant concession",
+                        "Can simply use 'Ừ' or 'Vâng' for polite"
+                    ],
+                    "priority": "high",
+                    "corpus_frequency": 46317
+                },
+                {
+                    "id": "vn_un_yeah",
+                    "japanese_structure": "うん / ああ / ええ",
+                    "japanese_indicators": [
+                        "うん",
+                        "ああ",
+                        "あぁ",
+                        "ええ"
+                    ],
+                    "vietnamese_pattern": "Ừ / À / Ờ — match register to character",
+                    "examples": [
+                        {
+                            "jp": "うん、わかった",
+                            "literal": "Ừ, hiểu rồi",
+                            "natural": "Ừ, biết rồi."
+                        },
+                        {
+                            "jp": "ああ、そういうことか",
+                            "literal": "À, thì ra là vậy",
+                            "natural": "À, ra là vậy."
+                        },
+                        {
+                            "jp": "ええ、もちろん",
+                            "literal": "Vâng, dĩ nhiên rồi",
+                            "natural": "Vâng, tất nhiên rồi ạ."
+                        }
+                    ],
+                    "usage_rules": [
+                        "'Ừ' — casual male/neutral",
+                        "'Ừm' — casual with slight hesitation",
+                        "'Vâng/Dạ' — polite, to elders",
+                        "'À' — realization, light acknowledgment",
+                        "'Ờ' — reluctant/sleepy acknowledgment"
+                    ],
+                    "priority": "high",
+                    "corpus_frequency": 13074
+                },
+                {
+                    "id": "vn_hora_look",
+                    "japanese_structure": "ほら",
+                    "japanese_indicators": [
+                        "ほら"
+                    ],
+                    "vietnamese_pattern": "Này / Đấy / Kìa — attention-directing",
+                    "examples": [
+                        {
+                            "jp": "ほら、子供は我が儘を言うのが仕事なところがあるしさ",
+                            "literal": "Kìa, trẻ con thì việc đòi hỏi cũng là một phần",
+                            "natural": "Này, trẻ con thì việc đòi hỏi cũng là một phần công việc mà.",
+                            "source": "0b24_VN_corpus"
+                        },
+                        {
+                            "jp": "ほら、早く行こう",
+                            "literal": "Đó, đi nhanh lên",
+                            "natural": "Nào, đi nhanh lên."
+                        }
+                    ],
+                    "usage_rules": [
+                        "'Này' — getting attention, pointing out",
+                        "'Đấy' — 'see? I told you' (vindication)",
+                        "'Kìa' — 'look there!' (visual directing)",
+                        "'Nào' — encouraging 'come on' usage"
+                    ],
+                    "priority": "medium",
+                    "corpus_frequency": 1612
+                },
+                {
+                    "id": "vn_hee_surprise",
+                    "japanese_structure": "へえ / ふーん",
+                    "japanese_indicators": [
+                        "へえ",
+                        "へぇ",
+                        "ふーん"
+                    ],
+                    "vietnamese_pattern": "Ồ / Ủa / Hả / Thế à",
+                    "examples": [
+                        {
+                            "jp": "へえ、すごいね",
+                            "literal": "Ồ, hay nhỉ",
+                            "natural": "Ồ, giỏi nhỉ / Hay thật đấy."
+                        },
+                        {
+                            "jp": "ふーん、そうなんだ",
+                            "literal": "Ừm, thế à",
+                            "natural": "Hừm, thế à. / Vậy hả."
+                        }
+                    ],
+                    "usage_rules": [
+                        "'Ồ' — genuine surprise/interest",
+                        "'Ủa' — mild confusion/surprise",
+                        "'Hừm' — thinking/skeptical",
+                        "'Thế à' — neutral acknowledgment",
+                        "'Vậy hả' — casual, can be dismissive"
+                    ],
+                    "priority": "medium",
+                    "corpus_frequency": 396
+                }
+            ],
+            "negative_vectors": {
+                "description": "Suppress match when text is narration without dialogue, or formal prose",
+                "texts": [
+                    "Third-person narration describing scenery, no dialogue, pure description of environment or action",
+                    "Formal written document, report, letter, academic prose without conversational markers",
+                    "Silent internal analysis without emotional reaction, logical deduction, analytical thought"
+                ]
+            }
+        },
+        "natural_transitions": {
+            "description": "Discourse connectors — Vietnamese prefers casual 'mà/rồi/thế nên' over formal 'tuy nhiên/do đó'",
+            "patterns": [
+                {
+                    "id": "vn_dakara_so",
+                    "japanese_structure": "だから / なので",
+                    "japanese_indicators": [
+                        "だから",
+                        "なので"
+                    ],
+                    "vietnamese_pattern": "nên / thế nên / cho nên",
+                    "examples": [
+                        {
+                            "jp": "遅くなったから急ごう",
+                            "literal": "Trễ rồi nên đi nhanh thôi",
+                            "natural": "Trễ rồi, đi nhanh thôi."
+                        },
+                        {
+                            "jp": "だから言ったでしょ",
+                            "literal": "Vì vậy đã nói rồi mà",
+                            "natural": "Nói rồi mà! / Thấy chưa!"
+                        }
+                    ],
+                    "usage_rules": [
+                        "'nên' — neutral cause-effect",
+                        "'thế nên' — emphasizing conclusion",
+                        "'cho nên' — longer form, narration",
+                        "'đó nên' — 'that's why' casual",
+                        "Often can be dropped: 'Trễ rồi, đi nhanh thôi' (implied nên)"
+                    ],
+                    "priority": "medium",
+                    "corpus_frequency": 17597
+                },
+                {
+                    "id": "vn_demo_but",
+                    "japanese_structure": "でも / しかし",
+                    "japanese_indicators": [
+                        "でも",
+                        "しかし"
+                    ],
+                    "vietnamese_pattern": "Nhưng / Nhưng mà / Cơ mà",
+                    "examples": [
+                        {
+                            "jp": "でも、明人だって英語を同じくらいペラペラと話せるだろ？",
+                            "literal": "Nhưng mà, Akihito cũng nói tiếng Anh giỏi mà?",
+                            "natural": "Nhưng mà, Akihito cũng nói tiếng Anh vanh vách như thế còn gì?",
+                            "source": "0b24_VN_corpus"
+                        },
+                        {
+                            "jp": "しかし、みんなから誘いを受けるシャーロットさんは帰らないといけない",
+                            "literal": "Tuy nhiên, Charlotte-san phải về",
+                            "natural": "Thế nhưng, Charlotte-san nhận được lời mời từ mọi người lại phải về sớm.",
+                            "source": "0b24_VN_corpus"
+                        }
+                    ],
+                    "usage_rules": [
+                        "'nhưng mà' — casual dialogue contrast",
+                        "'cơ mà' — emphatic disagreement: 'Em nói rồi cơ mà!'",
+                        "'thế nhưng' — narration, slightly formal",
+                        "AVOID: 'tuy nhiên' in dialogue (too stiff)",
+                        "しかし → 'thế nhưng' (narration) or 'nhưng' (dialogue)"
+                    ],
+                    "priority": "high",
+                    "corpus_frequency": 29268
+                },
+                {
+                    "id": "vn_tonikaku_anyway",
+                    "japanese_structure": "とにかく / ところで / さて",
+                    "japanese_indicators": [
+                        "とにかく",
+                        "ところで",
+                        "さて"
+                    ],
+                    "vietnamese_pattern": "Mà thôi / Nói đúng hơn / À mà",
+                    "examples": [
+                        {
+                            "jp": "とにかく早く行こう",
+                            "literal": "Dù sao đi sớm thôi",
+                            "natural": "Thôi đi nhanh thôi / Kệ, đi thôi."
+                        },
+                        {
+                            "jp": "ところで、明日の予定は？",
+                            "literal": "Nhân tiện, ngày mai có kế hoạch gì?",
+                            "natural": "À mà, mai có lịch gì không?"
+                        },
+                        {
+                            "jp": "さて、どうしようか",
+                            "literal": "Vậy, làm sao đây",
+                            "natural": "Nào, giờ tính sao đây."
+                        }
+                    ],
+                    "usage_rules": [
+                        "'mà thôi' / 'thôi' for topic dismissal",
+                        "'à mà' for topic change: 'À mà, nói đúng hơn thì...'",
+                        "'nào' for transitioning to action",
+                        "'nhân tiện' for 'by the way'",
+                        "Keep transitions short — Vietnamese reader expects quick shifts"
+                    ],
+                    "priority": "medium",
+                    "corpus_frequency": 4175
+                },
+                {
+                    "id": "vn_datte_because_excuse",
+                    "japanese_structure": "だって",
+                    "japanese_indicators": [
+                        "だって"
+                    ],
+                    "vietnamese_pattern": "Tại / Tại vì / Vì / Thì",
+                    "examples": [
+                        {
+                            "jp": "だって仕方ないじゃん",
+                            "literal": "Vì không có cách nào khác",
+                            "natural": "Tại biết sao giờ / Thì biết làm sao."
+                        },
+                        {
+                            "jp": "だってかわいいんだもん",
+                            "literal": "Vì dễ thương mà",
+                            "natural": "Tại dễ thương mà / Dễ thương mà."
+                        }
+                    ],
+                    "usage_rules": [
+                        "'tại' — casual excuse: 'Tại anh/chị...'",
+                        "'tại vì' — slightly more formal excuse",
+                        "'thì' — defensive: 'Thì biết sao giờ!'",
+                        "Can drop entirely: 'Dễ thương mà!' (implied だって)"
+                    ],
+                    "priority": "medium",
+                    "corpus_frequency": 2176
+                }
+            ],
+            "negative_vectors": {
+                "description": "Suppress match when text has formal logical connectors in academic/technical prose",
+                "texts": [
+                    "Therefore the result shows, consequently the data indicates, thus we can conclude, formal academic reasoning",
+                    "First step then second step then third step, sequential procedure instructions, ordered process",
+                    "If condition A then result B, pure logical conditional without conversational flow"
+                ]
+            }
+        },
+        "sentence_endings": {
+            "description": "Vietnamese sentence-final particles — nhỉ/đấy/mà/nhé/kìa map to Japanese よ/ね/な/ぞ",
+            "patterns": [
+                {
+                    "id": "vn_ending_na_particle",
+                    "japanese_structure": "～な / ～なぁ",
+                    "japanese_indicators": [
+                        "な",
+                        "なぁ",
+                        "なあ"
+                    ],
+                    "vietnamese_pattern": "...nhỉ / ...thật / ...ha (musing, self-directed)",
+                    "examples": [
+                        {
+                            "jp": "まぁ普通に考えればいるだろうな。あれだけかわいいんだからさ",
+                            "literal": "Nghĩ bình thường thì chắc có rồi nhỉ. Xinh thế mà",
+                            "natural": "Chà, nghĩ theo lẽ thường thì chắc là có rồi. Xinh gái thế cơ mà.",
+                            "source": "0b24_VN_corpus"
+                        },
+                        {
+                            "jp": "いいなぁ",
+                            "literal": "Hay nhỉ",
+                            "natural": "Hay nhỉ / Thích ghê."
+                        },
+                        {
+                            "jp": "人間、仲間を作りたい生き物だからな",
+                            "literal": "Con người là sinh vật muốn có đồng minh mà",
+                            "natural": "Con người là sinh vật luôn muốn tìm kiếm đồng minh mà.",
+                            "source": "0b24_VN_corpus"
+                        }
+                    ],
+                    "usage_rules": [
+                        "'nhỉ' — wondering/musing, shared observation",
+                        "'thật' — confirming observation",
+                        "'mà' — assertive, sometimes explanatory",
+                        "'ha' — mild surprise or admiration",
+                        "Match particle to character voice profile"
+                    ],
+                    "priority": "high",
+                    "corpus_frequency": 22243
+                },
+                {
+                    "id": "vn_ending_yo_assertion",
+                    "japanese_structure": "～よ / ～ぞ / ～ぜ",
+                    "japanese_indicators": [
+                        "よ",
+                        "ぞ",
+                        "ぜ"
+                    ],
+                    "vietnamese_pattern": "...đấy / ...đó / ...mà / ...nào",
+                    "examples": [
+                        {
+                            "jp": "知ってるよ",
+                            "literal": "Biết rồi đấy",
+                            "natural": "Biết rồi mà."
+                        },
+                        {
+                            "jp": "行くぞ",
+                            "literal": "Đi đây",
+                            "natural": "Đi thôi nào / Đi nào."
+                        },
+                        {
+                            "jp": "いいぞ",
+                            "literal": "Tốt đấy",
+                            "natural": "Được đấy! / Hay lắm!"
+                        }
+                    ],
+                    "usage_rules": [
+                        "'đấy' — emphasis, calling attention (よ)",
+                        "'mà' — insistence, contradiction (よ with pushback)",
+                        "'nào' — rallying, let's go (ぞ)",
+                        "'đi' — urging action (ぞ/ぜ)",
+                        "'kìa' — pointing out obvious"
+                    ],
+                    "priority": "high",
+                    "corpus_frequency": 6467
+                },
+                {
+                    "id": "vn_ending_kana_wonder",
+                    "japanese_structure": "～かな / ～かしら",
+                    "japanese_indicators": [
+                        "かな",
+                        "かしら"
+                    ],
+                    "vietnamese_pattern": "...nhỉ / ...ta / ...không nhỉ (wondering)",
+                    "examples": [
+                        {
+                            "jp": "どうかしたの？ 誰かとはぐれてしまったのかな？",
+                            "literal": "Sao vậy? Bị lạc ai hả?",
+                            "natural": "Cháu sao vậy? Cháu bị lạc ai à?",
+                            "source": "0b24_VN_corpus"
+                        },
+                        {
+                            "jp": "大丈夫かな",
+                            "literal": "Không biết ổn không",
+                            "natural": "Ổn không nhỉ / Không biết ổn không ta."
+                        }
+                    ],
+                    "usage_rules": [
+                        "'nhỉ' — casual wondering",
+                        "'ta' — slightly literary wondering",
+                        "'không nhỉ' — explicit wondering question",
+                        "'à' — softer wondering in dialogue"
+                    ],
+                    "priority": "high",
+                    "corpus_frequency": 3040
+                },
+                {
+                    "id": "vn_ending_noda_explanation",
+                    "japanese_structure": "のだ / んだ / んです",
+                    "japanese_indicators": [
+                        "のだ",
+                        "んだ",
+                        "んです"
+                    ],
+                    "vietnamese_pattern": "...mà / ...đấy / ...cơ (explanatory emphasis)",
+                    "examples": [
+                        {
+                            "jp": "違うんだ！",
+                            "literal": "Không phải vậy đâu!",
+                            "natural": "Không phải đâu! / Không phải vậy mà!"
+                        },
+                        {
+                            "jp": "お前に用事があって来たんだよ",
+                            "literal": "Có việc với em mà đến đấy",
+                            "natural": "Cô đến đây vì có việc với em đấy.",
+                            "source": "0b24_VN_corpus"
+                        }
+                    ],
+                    "usage_rules": [
+                        "のだ provides explanation — use 'mà' or 'đấy' in VN",
+                        "'mà' when explaining/justifying",
+                        "'đấy' when informing/emphasizing",
+                        "'cơ' when pointing out hidden info",
+                        "Often can be natural without adding particle"
+                    ],
+                    "priority": "high",
+                    "corpus_frequency": 69792
+                },
+                {
+                    "id": "vn_confirmation_seeking",
+                    "japanese_structure": "～だよね / ～よね / ～だろ / ～でしょ",
+                    "japanese_indicators": [
+                        "だよね",
+                        "よね",
+                        "だろ",
+                        "でしょ"
+                    ],
+                    "vietnamese_pattern": "đúng không / phải không / nhỉ — seeking agreement",
+                    "examples": [
+                        {
+                            "jp": "これ、おかしいよね？",
+                            "literal": "Cái này lạ phải không?",
+                            "natural": "Cái này lạ đúng không? / Lạ nhỉ?"
+                        },
+                        {
+                            "jp": "明日来るよね？",
+                            "literal": "Mai đến phải không?",
+                            "natural": "Mai đến nhé? / Mai đến đúng không?"
+                        }
+                    ],
+                    "usage_rules": [
+                        "'đúng không' — neutral confirmation",
+                        "'phải không' — slightly more formal",
+                        "'nhỉ' — softer wondering confirmation",
+                        "'nhé' — gentle assertion seeking agreement"
+                    ],
+                    "priority": "high",
+                    "corpus_frequency": 2400
+                },
+                {
+                    "id": "vn_gentle_ending",
+                    "japanese_structure": "～ね / 頑張ろうね / ～ましょうね",
+                    "japanese_indicators": [
+                        "ね",
+                        "ましょうね"
+                    ],
+                    "vietnamese_pattern": "...nhé / ...nào — gentle directive or shared observation",
+                    "examples": [
+                        {
+                            "jp": "頑張ろうね",
+                            "literal": "Cố gắng nhé",
+                            "natural": "Cố lên nhé / Cố gắng nào."
+                        },
+                        {
+                            "jp": "気をつけてね",
+                            "literal": "Cẩn thận nhé",
+                            "natural": "Cẩn thận nhé / Giữ gìn nha."
+                        }
+                    ],
+                    "usage_rules": [
+                        "'nhé' — gentle, friendly directive",
+                        "'nha' — softer than nhé, Southern VN",
+                        "'nào' — encouraging suggestion: 'Đi nào'",
+                        "Softens commands: 'Đi ngủ nhé' vs 'Đi ngủ đi!'"
+                    ],
+                    "priority": "medium",
+                    "corpus_frequency": 2600
+                },
+                {
+                    "id": "vn_tag_question_obvious",
+                    "japanese_structure": "～じゃない / ～じゃん / ～やん",
+                    "japanese_indicators": [
+                        "じゃない",
+                        "じゃん",
+                        "やん"
+                    ],
+                    "vietnamese_pattern": "...mà / ...kìa / ...đó — pointing out obvious",
+                    "examples": [
+                        {
+                            "jp": "やばいじゃん",
+                            "literal": "Nguy hiểm mà",
+                            "natural": "Nguy rồi đó / Tệ rồi kìa."
+                        },
+                        {
+                            "jp": "できるじゃない",
+                            "literal": "Làm được mà",
+                            "natural": "Làm được mà / Được mà."
+                        }
+                    ],
+                    "usage_rules": [
+                        "'mà' — assertion of known fact",
+                        "'kìa' — pointing out what should be obvious",
+                        "'đó' — demonstrative: 'Đấy, thấy chưa?'",
+                        "Used to point out what speaker thinks is obvious"
+                    ],
+                    "priority": "medium",
+                    "corpus_frequency": 1400
+                }
+            ],
+            "negative_vectors": {
+                "description": "Suppress match when text has mid-sentence particles or grammatical markers not at sentence end",
+                "texts": [
+                    "Mid-sentence grammatical particle connecting clauses, case marker between nouns, not sentence-final",
+                    "Written formal prose without conversational sentence-ending markers, academic or report style",
+                    "Pure narration describing physical action without dialogue or internal monologue"
+                ]
+            }
+        },
+        "emotional_nuance": {
+            "description": "High-frequency Japanese expressions requiring context-aware Vietnamese transcreation",
+            "patterns": [
+                {
+                    "id": "vn_yappari_confirmed",
+                    "japanese_structure": "やっぱり / やはり / やっぱ",
+                    "japanese_indicators": [
+                        "やっぱり",
+                        "やはり",
+                        "やっぱ"
+                    ],
+                    "vietnamese_pattern": "Context-dependent: đúng thật / thôi / quả nhiên",
+                    "examples": [
+                        {
+                            "jp": "あ～やっぱりあの子かわいいなぁ…",
+                            "literal": "A~ Như mong đợi cô bạn đó dễ thương…",
+                            "natural": "A~ Cô bạn đó dễ thương thật đấy…",
+                            "source": "0b24_VN_corpus"
+                        },
+                        {
+                            "jp": "やっぱり…。",
+                            "literal": "Như dự đoán…",
+                            "natural": "Đúng như dự đoán…",
+                            "source": "0b24_VN_corpus"
+                        },
+                        {
+                            "jp": "やっぱりやめる",
+                            "literal": "Như dự đoán, dừng lại",
+                            "natural": "Thôi không làm nữa / Nghĩ lại thôi."
+                        }
+                    ],
+                    "usage_rules": [
+                        "Confirmed expectation: 'đúng thật', 'quả nhiên'",
+                        "Reversion/mind change: 'thôi', 'nghĩ lại'",
+                        "Opinion reinforcement: 'thiệt', 'thật đấy'",
+                        "AVOID: 'như mong đợi', 'như dự kiến' (too formal)"
+                    ],
+                    "priority": "critical",
+                    "corpus_frequency": 6340
+                },
+                {
+                    "id": "vn_maa_hedging_emotional",
+                    "japanese_structure": "まあ / まぁ",
+                    "japanese_indicators": [
+                        "まあ",
+                        "まぁ",
+                        "まあね"
+                    ],
+                    "vietnamese_pattern": "Chà / Thôi / Ừ thì — hedging or acceptance",
+                    "examples": [
+                        {
+                            "jp": "――まぁそれにしても、ラッキー…か",
+                            "literal": "Mà thôi, dù sao thì may mắn… ư",
+                            "natural": "—Mà thôi, dù sao đi nữa, may mắn… ư.",
+                            "source": "0b24_VN_corpus"
+                        },
+                        {
+                            "jp": "まぁ普通に考えればいるだろうな",
+                            "literal": "Chà, nghĩ bình thường thì chắc có",
+                            "natural": "Chà, nghĩ theo lẽ thường thì chắc là có rồi.",
+                            "source": "0b24_VN_corpus"
+                        }
+                    ],
+                    "usage_rules": [
+                        "'chà' — conversation opener, slightly surprised",
+                        "'mà thôi' — dismissing topic",
+                        "'ừ thì' — reluctant agreement",
+                        "'kệ đi' — resigned acceptance",
+                        "Can often be dropped entirely in Vietnamese"
+                    ],
+                    "priority": "critical",
+                    "corpus_frequency": 3400
+                },
+                {
+                    "id": "vn_sasuga_impressed",
+                    "japanese_structure": "さすが / 流石",
+                    "japanese_indicators": [
+                        "さすが",
+                        "流石",
+                        "さすがに"
+                    ],
+                    "vietnamese_pattern": "Đúng là [name] / [name] mà / Quá đấy",
+                    "examples": [
+                        {
+                            "jp": "さすがあのシャーロットさんの妹だ",
+                            "literal": "Xứng đáng là em gái Charlotte-san",
+                            "natural": "Đúng là em gái của Charlotte-san có khác.",
+                            "source": "0b24_VN_corpus"
+                        },
+                        {
+                            "jp": "さすがにそれは無理",
+                            "literal": "Dù sao cũng không thể",
+                            "natural": "Cái đó thì không / Quá đấy."
+                        }
+                    ],
+                    "usage_rules": [
+                        "Praise: 'đúng là [name]', '[name] mà', 'có khác'",
+                        "Limit: 'quá đấy', 'đừng có mà'",
+                        "Admiration: 'đẳng cấp', '[X] là khác'",
+                        "AVOID: 'xứng đáng là' (too literal)"
+                    ],
+                    "priority": "critical",
+                    "corpus_frequency": 1850
+                },
+                {
+                    "id": "vn_masaka_disbelief",
+                    "japanese_structure": "まさか",
+                    "japanese_indicators": [
+                        "まさか",
+                        "まさかの"
+                    ],
+                    "vietnamese_pattern": "Không lẽ / Chẳng lẽ / Không đời nào",
+                    "examples": [
+                        {
+                            "jp": "まさか、あの人にそっくりな人がいるなんてな",
+                            "literal": "Không thể nào, có người giống hệt",
+                            "natural": "Không ngờ lại có người giống hệt người đó đến vậy.",
+                            "source": "0b24_VN_corpus"
+                        },
+                        {
+                            "jp": "これはもしかして――",
+                            "literal": "Chẳng lẽ đây là—",
+                            "natural": "Chẳng lẽ đây là—.",
+                            "source": "0b24_VN_corpus"
+                        }
+                    ],
+                    "usage_rules": [
+                        "'không lẽ' — surprised disbelief (question)",
+                        "'chẳng lẽ' — dawning realization",
+                        "'không đời nào' — emphatic denial",
+                        "'không ngờ' — narration: 'unexpectedly'"
+                    ],
+                    "priority": "critical",
+                    "corpus_frequency": 840
+                },
+                {
+                    "id": "vn_betsu_ni_dismissal",
+                    "japanese_structure": "別に",
+                    "japanese_indicators": [
+                        "別に",
+                        "べつに"
+                    ],
+                    "vietnamese_pattern": "Có gì đâu / Kệ / Ai quan tâm",
+                    "examples": [
+                        {
+                            "jp": "いいんですよ、あれで。別に俺は気にしてませんし",
+                            "literal": "Không sao đâu. Em cũng không để tâm",
+                            "natural": "Không sao đâu cô ạ, thế là được rồi. Em cũng không để tâm đâu.",
+                            "source": "0b24_VN_corpus"
+                        },
+                        {
+                            "jp": "別に好きじゃないし",
+                            "literal": "Không phải là thích",
+                            "natural": "Có thích đâu / Ai thích cơ chứ."
+                        }
+                    ],
+                    "usage_rules": [
+                        "Dismissal: 'có gì đâu', 'kệ', 'tùy'",
+                        "Tsundere denial: 'có [verb] đâu', 'ai [verb] cơ chứ'",
+                        "Hiding feelings: 'không có gì', 'có gì đâu mà'",
+                        "Tone must sound defensive, not neutral"
+                    ],
+                    "priority": "critical",
+                    "corpus_frequency": 1680
+                },
+                {
+                    "id": "vn_nandaka_vague",
+                    "japanese_structure": "なんだか / 何だか / なんか",
+                    "japanese_indicators": [
+                        "なんだか",
+                        "何だか",
+                        "なんか"
+                    ],
+                    "vietnamese_pattern": "Sao... / Hình như / (drop entirely)",
+                    "examples": [
+                        {
+                            "jp": "なんだか嬉しい",
+                            "literal": "Không hiểu sao vui",
+                            "natural": "Vui quá / Sao vui thế."
+                        },
+                        {
+                            "jp": "なんだか変だ",
+                            "literal": "Không biết sao lạ",
+                            "natural": "Sao lạ thế / Hình như lạ lạ."
+                        }
+                    ],
+                    "usage_rules": [
+                        "Often best to OMIT — Vietnamese more direct",
+                        "'sao [adj] thế' for unexplained feeling",
+                        "'hình như' for vague suspicion",
+                        "AVOID: 'một cách nào đó' (AI-ism)"
+                    ],
+                    "priority": "high",
+                    "corpus_frequency": 1200
+                },
+                {
+                    "id": "vn_tashika_ni_concession",
+                    "japanese_structure": "確かに / たしかに",
+                    "japanese_indicators": [
+                        "確かに",
+                        "たしかに"
+                    ],
+                    "vietnamese_pattern": "Đúng là / Cũng phải / Phải nói là",
+                    "examples": [
+                        {
+                            "jp": "なるほど、確かに凄いよな。でも、明人だって英語を同じくらいペラペラと話せるだろ？",
+                            "literal": "Ra thế, quả là đáng nể. Nhưng mà, Akihito cũng nói tiếng Anh giỏi mà?",
+                            "natural": "Ra thế, quả là đáng nể thật. Nhưng mà, Akihito cũng nói tiếng Anh vanh vách như thế còn gì?",
+                            "source": "0b24_VN_corpus"
+                        },
+                        {
+                            "jp": "確かにそうだね",
+                            "literal": "Đúng thật",
+                            "natural": "Đúng đấy / Cũng phải."
+                        }
+                    ],
+                    "usage_rules": [
+                        "'đúng đấy' — agreement",
+                        "'cũng phải' — reluctant concession",
+                        "'phải nói là' — conceding a point",
+                        "'quả là' — emphatic acknowledgment"
+                    ],
+                    "priority": "high",
+                    "corpus_frequency": 920
+                },
+                {
+                    "id": "vn_chotto_little",
+                    "japanese_structure": "ちょっと",
+                    "japanese_indicators": [
+                        "ちょっと"
+                    ],
+                    "vietnamese_pattern": "Hơi / Tí / Một chút — context-dependent",
+                    "examples": [
+                        {
+                            "jp": "ちょっと今から私と一緒にこい",
+                            "literal": "Bây giờ đi với cô một chút",
+                            "natural": "Bây giờ đi với cô một lát.",
+                            "source": "0b24_VN_corpus"
+                        },
+                        {
+                            "jp": "ちょっと待って",
+                            "literal": "Đợi một chút",
+                            "natural": "Đợi tí / Khoan."
+                        }
+                    ],
+                    "usage_rules": [
+                        "'hơi' + adj for slight degree: 'hơi buồn'",
+                        "'tí/tý' for brief time: 'đợi tí'",
+                        "'khoan' for interjection: 'Khoan, khoan đã!'",
+                        "'một chút' for small amount",
+                        "Can often be dropped: 'Đợi!' is fine"
+                    ],
+                    "priority": "high",
+                    "corpus_frequency": 8299
+                },
+                {
+                    "id": "vn_doushite_why_emotional",
+                    "japanese_structure": "どうして / なぜ / なんで",
+                    "japanese_indicators": [
+                        "どうして",
+                        "なぜ",
+                        "なんで"
+                    ],
+                    "vietnamese_pattern": "sao (casual) → sao lại (emphatic) → tại sao (formal/dramatic)",
+                    "examples": [
+                        {
+                            "jp": "どうして言わなかったの？",
+                            "literal": "Tại sao không nói?",
+                            "natural": "Sao không nói? / Sao lại không nói?"
+                        },
+                        {
+                            "jp": "なぜだ",
+                            "literal": "Tại sao",
+                            "natural": "Tại sao? / Vì sao?"
+                        },
+                        {
+                            "jp": "なんでそんなこと",
+                            "literal": "Tại sao lại làm thế",
+                            "natural": "Sao lại... / Tại sao vậy..."
+                        }
+                    ],
+                    "usage_rules": [
+                        "'sao' — casual emotional why",
+                        "'sao lại' — emphatic, hurt confusion",
+                        "'tại sao' — formal, dramatic questioning",
+                        "Trail off for effect: 'Sao lại...'",
+                        "Repetition shows desperation: 'Sao? Sao vậy?'"
+                    ],
+                    "priority": "high",
+                    "corpus_frequency": 1540
+                }
+            ],
+            "negative_vectors": {
+                "description": "Suppress match when text has exact quantities or objective narration without speaker attitude",
+                "texts": [
+                    "Exactly three, precisely measured, specific numerical data, quantitative description without emotional color",
+                    "Completely certain, absolutely sure, totally without doubt, definitive assertion without hedging",
+                    "Objective third-person narration without speaker emotional involvement, clinical description"
+                ]
+            }
+        },
+        "action_emphasis": {
+            "description": "Japanese auxiliary verb patterns → Vietnamese aspect markers: đã...rồi, đang...đây, lại...mất",
+            "patterns": [
+                {
+                    "id": "vn_te_shimatta_regret",
+                    "japanese_structure": "～てしまった / ～ちゃった",
+                    "japanese_indicators": [
+                        "てしまった",
+                        "ちゃった",
+                        "てしまう"
+                    ],
+                    "vietnamese_pattern": "...mất rồi / lại... (regret/unintended completion)",
+                    "examples": [
+                        {
+                            "jp": "シャーロットさんは更に恥ずかしそうに顔を隠してしまった",
+                            "literal": "Charlotte-san lại che mặt",
+                            "natural": "Charlotte-san lại càng ngại ngùng che mặt đi.",
+                            "source": "0b24_VN_corpus"
+                        },
+                        {
+                            "jp": "俺は思わず苦笑いを浮かべてしまう",
+                            "literal": "Tôi bất giác cười khổ",
+                            "natural": "Tôi bất giác cười khổ.",
+                            "source": "0b24_VN_corpus"
+                        },
+                        {
+                            "jp": "壊しちゃった",
+                            "literal": "Đã làm vỡ rồi",
+                            "natural": "Làm vỡ mất rồi."
+                        }
+                    ],
+                    "usage_rules": [
+                        "'...mất rồi' — irreversible regret: 'Nói mất rồi'",
+                        "'lại...' — unintended/repeated: 'Lại quên nữa'",
+                        "'bất giác' — unintentional action (思わず～てしまう)",
+                        "Neutral completion: drop しまう aspect, use 'rồi'",
+                        "Match nuance: regret=mất, habit=lại, neutral=rồi"
+                    ],
+                    "priority": "high",
+                    "corpus_frequency": 8584
+                },
+                {
+                    "id": "vn_te_iru_progressive",
+                    "japanese_structure": "～ている / ～てる",
+                    "japanese_indicators": [
+                        "ている",
+                        "てる"
+                    ],
+                    "vietnamese_pattern": "đang... / vẫn...đó / [stative: drop đang]",
+                    "examples": [
+                        {
+                            "jp": "彰なんてニヤニヤとだらしない笑みを浮かべているしな",
+                            "literal": "Akira đang cười toe toét ngô nghê",
+                            "natural": "Akira ngồi sau lưng tôi còn đang cười toe toét ngô nghê nữa kìa.",
+                            "source": "0b24_VN_corpus"
+                        },
+                        {
+                            "jp": "知っている",
+                            "literal": "Đang biết",
+                            "natural": "Biết rồi."
+                        }
+                    ],
+                    "usage_rules": [
+                        "True progressive: 'đang...' (eating, running)",
+                        "State: DROP đang — 'biết', 'ngồi', 'mặc'",
+                        "Continuing: 'vẫn...đó' for emphasis",
+                        "'còn' for 'still doing': 'Còn ăn nữa à?'",
+                        "NEVER: 'đang biết', 'đang yêu' (stative verbs)"
+                    ],
+                    "priority": "high",
+                    "corpus_frequency": 62659
+                },
+                {
+                    "id": "vn_te_miru_try",
+                    "japanese_structure": "～てみる / ～てみた",
+                    "japanese_indicators": [
+                        "てみる",
+                        "てみた",
+                        "てみよう"
+                    ],
+                    "vietnamese_pattern": "thử...xem / ...thử",
+                    "examples": [
+                        {
+                            "jp": "食べてみる",
+                            "literal": "Thử ăn",
+                            "natural": "Thử ăn xem / Ăn thử."
+                        },
+                        {
+                            "jp": "考えてみる",
+                            "literal": "Thử nghĩ xem",
+                            "natural": "Nghĩ xem / Suy nghĩ xem."
+                        }
+                    ],
+                    "usage_rules": [
+                        "'thử...xem' — exploratory attempt",
+                        "'...thử' — experimental",
+                        "'thử...xem sao' — try and see",
+                        "Both orders OK: 'thử ăn' = 'ăn thử'"
+                    ],
+                    "priority": "medium",
+                    "corpus_frequency": 3200
+                },
+                {
+                    "id": "vn_te_oku_preparation",
+                    "japanese_structure": "～ておく / ～とく",
+                    "japanese_indicators": [
+                        "ておく",
+                        "とく"
+                    ],
+                    "vietnamese_pattern": "...trước / ...sẵn — advance preparation",
+                    "examples": [
+                        {
+                            "jp": "買っておく",
+                            "literal": "Mua trước",
+                            "natural": "Mua sẵn / Mua trước đi."
+                        },
+                        {
+                            "jp": "言っておくけど",
+                            "literal": "Nói trước nhé",
+                            "natural": "Nói trước nhé / Nói cho biết nhé."
+                        }
+                    ],
+                    "usage_rules": [
+                        "'...trước' — do in advance",
+                        "'...sẵn' — prepare ahead",
+                        "'...đi' for suggestion: 'Chuẩn bị trước đi'",
+                        "'nói trước nhé' for disclaimer"
+                    ],
+                    "priority": "medium",
+                    "corpus_frequency": 4200
+                }
+            ],
+            "negative_vectors": {
+                "description": "Suppress match when text is simple past tense or habitual action without aspectual nuance",
+                "texts": [
+                    "Simple past tense: he walked, she ate, they left, completed action without ongoing or regretful nuance",
+                    "Habitual repeated action: every day, usually, always does, routine without progressive aspect",
+                    "Stative description: the room is large, the weather is cold, permanent state not progressive action"
+                ]
+            }
+        },
+        "comedic_timing": {
+            "description": "Vietnamese comedy delivery — split-beat timing, tsukkomi retorts, deadpan responses",
+            "patterns": [
+                {
+                    "id": "vn_short_comedic_blunt",
+                    "japanese_structure": "～より～が嫌い / ～というより～",
+                    "japanese_indicators": [
+                        "というより",
+                        "より",
+                        "が嫌い"
+                    ],
+                    "vietnamese_pattern": "Split into question + negation + punchline: '[X] à? Không. [Y].'",
+                    "examples": [
+                        {
+                            "jp": "こいつ、本が苦手というより頭を使うことが嫌いなんだよな",
+                            "literal": "Cô ấy không phải ghét sách. Cô ấy ghét dùng não.",
+                            "natural": "Ghét sách à? Không. Ghét suy nghĩ."
+                        },
+                        {
+                            "jp": "真面目というより、単に融通が利かない",
+                            "literal": "Không phải nghiêm túc. Cứng nhắc thôi.",
+                            "natural": "Nghiêm túc? Không. Cứng nhắc thôi."
+                        },
+                        {
+                            "jp": "料理が下手というより、やる気がない",
+                            "literal": "Không phải nấu dở.",
+                            "natural": "Nấu dở? Sai rồi. Lười thôi."
+                        }
+                    ],
+                    "usage_rules": [
+                        "Setup with rhetorical question: '[X] à? / [X] hả?'",
+                        "Negate: 'Không / Sai rồi'",
+                        "Punchline: max 5-8 words, shorter than setup",
+                        "'thôi' for dismissive finality"
+                    ],
+                    "priority": "high",
+                    "corpus_frequency": 850
+                },
+                {
+                    "id": "vn_deadpan_timing",
+                    "japanese_structure": "どこの世界に～するヤツがいるんだ / 普通そんなこと言わないだろ",
+                    "japanese_indicators": [
+                        "どこの世界に",
+                        "誰が",
+                        "普通"
+                    ],
+                    "vietnamese_pattern": "Fragment action into 2-3 word bursts with periods",
+                    "examples": [
+                        {
+                            "jp": "どこの世界に人の部屋にやってきて、いきなり布団を敷き始めるヤツがいるんだ",
+                            "literal": "Ai vào phòng người ta trải nệm?",
+                            "natural": "Vào phòng người ta. Trải nệm. Bình thường?"
+                        },
+                        {
+                            "jp": "普通そんなこと言わないだろ",
+                            "literal": "Bình thường ai nói thế?",
+                            "natural": "Ai. Nói. Thế?"
+                        }
+                    ],
+                    "usage_rules": [
+                        "Break into fragments: 2-3 words each",
+                        "End with deadpan question: 'Bình thường?', 'Nghiêm túc?'",
+                        "Period after each fragment for pause",
+                        "Single word can be entire final beat"
+                    ],
+                    "priority": "high",
+                    "corpus_frequency": 620
+                },
+                {
+                    "id": "vn_one_word_devastation",
+                    "japanese_structure": "そう / ふーん / へえ (deadpan after long speech)",
+                    "japanese_indicators": [
+                        "そう",
+                        "ふーん",
+                        "へえ",
+                        "ああ"
+                    ],
+                    "vietnamese_pattern": "Single-syllable response: 'Ừ.' / 'Thế à.' / 'Ồ.'",
+                    "examples": [
+                        {
+                            "jp": "【長い告白】...ふーん",
+                            "literal": "[Long heartfelt speech] ... Ừ.",
+                            "natural": "[Long heartfelt speech]\n\n\"Ừ.\""
+                        },
+                        {
+                            "jp": "【必死の説明】...そう",
+                            "literal": "[Frantic reasoning] ... Thế.",
+                            "natural": "[Frantic reasoning]\n\n\"Thế à.\""
+                        }
+                    ],
+                    "usage_rules": [
+                        "Options: Ừ / Ồ / Thế / À / Hử",
+                        "Add period for maximum deadpan: 'Ừ.'",
+                        "Put on separate line with paragraph break",
+                        "NEVER add explanation — brevity IS the joke"
+                    ],
+                    "priority": "high",
+                    "corpus_frequency": 920
+                },
+                {
+                    "id": "vn_callback_humor",
+                    "japanese_structure": "さっきの〜 / あの〜 / 例の〜",
+                    "japanese_indicators": [
+                        "さっきの",
+                        "あの",
+                        "例の"
+                    ],
+                    "vietnamese_pattern": "Reference earlier absurdity with 'cái chuyện...', 'vụ...' + brief reminder",
+                    "examples": [
+                        {
+                            "jp": "さっきのやつ、まだ続けてるのか",
+                            "literal": "Chuyện nãy còn đang làm à?",
+                            "natural": "Vụ nãy. Còn chưa xong à?"
+                        },
+                        {
+                            "jp": "例の件、本当にやったのか",
+                            "literal": "Chuyện đó thật sự làm rồi à?",
+                            "natural": "Cái vụ đó. Làm thật à?"
+                        }
+                    ],
+                    "usage_rules": [
+                        "Use 'vụ' for casual events, 'chuyện' for situations",
+                        "Add time marker: nãy, hôm bữa, hồi trước",
+                        "Follow with brief surprise: 'Còn chưa xong?', 'Làm thật?'"
+                    ],
+                    "priority": "medium",
+                    "corpus_frequency": 340
+                },
+                {
+                    "id": "vn_absurdist_escalation",
+                    "japanese_structure": "それどころか / むしろ / かえって",
+                    "japanese_indicators": [
+                        "それどころか",
+                        "むしろ",
+                        "かえって"
+                    ],
+                    "vietnamese_pattern": "Escalate absurdity: '[Expected] à? Chưa. Còn [worse] nữa.'",
+                    "examples": [
+                        {
+                            "jp": "謝るどころか、笑い始めた",
+                            "literal": "Chưa xin lỗi, còn cười.",
+                            "natural": "Xin lỗi à? Chưa. Còn cười nữa."
+                        },
+                        {
+                            "jp": "反省するどころか、むしろ誇らしげだ",
+                            "literal": "Ăn năn? Chưa. Còn tự hào.",
+                            "natural": "Hối hận? Đùa à. Tự hào kìa."
+                        }
+                    ],
+                    "usage_rules": [
+                        "Setup: [Expected action] à/hả?",
+                        "Negate: Không/Chưa/Đùa à",
+                        "Escalate: Còn [worse action] nữa/kìa",
+                        "Each beat separated by period"
+                    ],
+                    "priority": "high",
+                    "corpus_frequency": 480
+                },
+                {
+                    "id": "vn_self_aware_meta",
+                    "japanese_structure": "なんか変だな / おかしいな / 変なこと言ってる",
+                    "japanese_indicators": [
+                        "なんか変",
+                        "おかしい",
+                        "変なこと言ってる"
+                    ],
+                    "vietnamese_pattern": "Character acknowledges own absurdity: casual + nhỉ/nhể ending",
+                    "examples": [
+                        {
+                            "jp": "変なこと言ってるよな、俺",
+                            "literal": "Tôi nói chuyện lạ nhỉ.",
+                            "natural": "Nghe điên nhỉ."
+                        },
+                        {
+                            "jp": "なんでこんなこと考えてるんだろう",
+                            "literal": "Sao lại nghĩ thế nhỉ.",
+                            "natural": "Nghĩ gì vậy trời."
+                        }
+                    ],
+                    "usage_rules": [
+                        "End with wondering particles: nhỉ, nhể, ta",
+                        "Can invoke higher power: 'trời', 'ơi'",
+                        "Keep short (3-5 words max)",
+                        "Creates relatable self-awareness without breaking wall"
+                    ],
+                    "priority": "medium",
+                    "corpus_frequency": 580
+                }
+            ],
+            "negative_vectors": {
+                "description": "Suppress match when text is dramatic/emotional without comedic intent",
+                "texts": [
+                    "Serious emotional confession, heartfelt revelation, dramatic turning point without humor",
+                    "Tragic scene, death, injury, grief, mourning — somber emotional context",
+                    "Formal announcement, official declaration, ceremony speech"
+                ]
+            }
+        },
+        "modal_nuances": {
+            "description": "Vietnamese modal verb gradations matching Japanese modal subtlety: nên→phải→bắt buộc",
+            "patterns": [
+                {
+                    "id": "vn_should_obligation",
+                    "japanese_structure": "～た方がいい / ～べき / ～なければならない",
+                    "japanese_indicators": [
+                        "た方がいい",
+                        "べき",
+                        "なければならない",
+                        "ほうがいい"
+                    ],
+                    "vietnamese_pattern": "nên...đi → phải → bắt buộc phải (escalating obligation)",
+                    "examples": [
+                        {
+                            "jp": "休んだ方がいい",
+                            "literal": "Nên nghỉ",
+                            "natural": "Nghỉ đi / Nên nghỉ đi."
+                        },
+                        {
+                            "jp": "ちゃんと勉強すべきだ",
+                            "literal": "Nên là học tử tế",
+                            "natural": "Nên là học hành cho đàng hoàng / Phải học mới được."
+                        },
+                        {
+                            "jp": "絶対に行かなければならない",
+                            "literal": "Phải đi",
+                            "natural": "Bắt buộc phải đi / Nhất định phải đi."
+                        }
+                    ],
+                    "usage_rules": [
+                        "'nên + đi' — gentle suggestion",
+                        "'nên là' — stronger advice with consequence",
+                        "'phải' — obligation, external requirement",
+                        "'bắt buộc phải' — no choice",
+                        "'nhất định phải' — absolute necessity"
+                    ],
+                    "priority": "high",
+                    "corpus_frequency": 2200
+                },
+                {
+                    "id": "vn_can_ability_permission",
+                    "japanese_structure": "できる / ～てもいい",
+                    "japanese_indicators": [
+                        "できる",
+                        "てもいい",
+                        "てもかまわない"
+                    ],
+                    "vietnamese_pattern": "biết (skill) / được (permission) / có thể (general)",
+                    "examples": [
+                        {
+                            "jp": "泳げる",
+                            "literal": "Có thể bơi",
+                            "natural": "Biết bơi / Bơi được."
+                        },
+                        {
+                            "jp": "入ってもいい？",
+                            "literal": "Có thể vào không?",
+                            "natural": "Vào được không? / Cho vào không?"
+                        }
+                    ],
+                    "usage_rules": [
+                        "'biết' — learned skill: swim, cook, speak",
+                        "'có thể' — general ability/possibility",
+                        "'được' — permission or capability",
+                        "'cứ [verb]' — permission with encouragement",
+                        "NEVER use 'có thể' for everything"
+                    ],
+                    "priority": "high",
+                    "corpus_frequency": 3100
+                },
+                {
+                    "id": "vn_possibility_gradation",
+                    "japanese_structure": "かもしれない / だろう / でしょう",
+                    "japanese_indicators": [
+                        "かもしれない",
+                        "だろう",
+                        "でしょう"
+                    ],
+                    "vietnamese_pattern": "có lẽ (30%) → chắc (60%) → chắc là (80%) → hẳn là (90%+)",
+                    "examples": [
+                        {
+                            "jp": "雨が降るかもしれない",
+                            "literal": "Có lẽ mưa",
+                            "natural": "Có lẽ mưa / Hình như sắp mưa."
+                        },
+                        {
+                            "jp": "明日は晴れるでしょう",
+                            "literal": "Chắc là ngày mai nắng",
+                            "natural": "Chắc là ngày mai nắng."
+                        }
+                    ],
+                    "usage_rules": [
+                        "'có lẽ' / 'hình như' — 30-50% certainty",
+                        "'có thể' — 50-70%",
+                        "'chắc' — 60-80%",
+                        "'chắc là' — 80-90%",
+                        "'hẳn là' / 'chắc hẳn' — 90%+ (deductive)"
+                    ],
+                    "priority": "medium",
+                    "corpus_frequency": 1900
+                }
+            ],
+            "negative_vectors": {
+                "description": "Suppress match when text states completed facts or gives imperative commands",
+                "texts": [
+                    "Completed past fact: he did, she went, it happened, no modality or possibility involved",
+                    "Direct imperative command without politeness hedging: do it, go there, stop now",
+                    "Statement of physical capability without modal context: the car runs, the machine works"
+                ]
+            }
+        },
+        "time_expressions": {
+            "description": "Vietnamese time markers — vừa nãy/hồi nãy/mới for recency, tí/lát/một lúc for duration",
+            "patterns": [
+                {
+                    "id": "vn_just_now_immediacy",
+                    "japanese_structure": "さっき / 今 / たった今",
+                    "japanese_indicators": [
+                        "さっき",
+                        "たった今",
+                        "ついさっき"
+                    ],
+                    "vietnamese_pattern": "vừa nãy (recent) → mới (just now) → vừa...xong (just finished)",
+                    "examples": [
+                        {
+                            "jp": "さっき見た",
+                            "literal": "Vừa nãy thấy",
+                            "natural": "Vừa nãy thấy / Hồi nãy thấy."
+                        },
+                        {
+                            "jp": "たった今聞いた",
+                            "literal": "Vừa mới nghe",
+                            "natural": "Vừa nghe xong / Mới nghe."
+                        }
+                    ],
+                    "usage_rules": [
+                        "'vừa nãy' — 5-15 minutes ago",
+                        "'hồi nãy' — 10-30 minutes ago",
+                        "'mới' / 'vừa mới' — just now (< 5 min)",
+                        "'vừa [verb] xong' — just finished"
+                    ],
+                    "priority": "high",
+                    "corpus_frequency": 1800
+                },
+                {
+                    "id": "vn_already_completion",
+                    "japanese_structure": "もう / すでに / とっくに",
+                    "japanese_indicators": [
+                        "もう",
+                        "すでに",
+                        "既に",
+                        "とっくに"
+                    ],
+                    "vietnamese_pattern": "rồi / đã...rồi / từ lâu rồi",
+                    "examples": [
+                        {
+                            "jp": "もう終わった",
+                            "literal": "Đã xong rồi",
+                            "natural": "Xong rồi / Đã xong."
+                        },
+                        {
+                            "jp": "とっくに出た",
+                            "literal": "Ra từ lâu rồi",
+                            "natural": "Ra từ hồi nào rồi / Ra lâu rồi."
+                        },
+                        {
+                            "jp": "もういい",
+                            "literal": "Đủ rồi",
+                            "natural": "Thôi đủ rồi / Được rồi."
+                        }
+                    ],
+                    "usage_rules": [
+                        "'đã...rồi' — completed past action",
+                        "'rồi' alone for casual finality: 'Xong rồi'",
+                        "'từ lâu rồi' — emphasis on long-past",
+                        "Can drop 'đã' in casual: 'Xong rồi' not 'Đã xong rồi'"
+                    ],
+                    "priority": "high",
+                    "corpus_frequency": 2800
+                },
+                {
+                    "id": "vn_duration_awhile",
+                    "japanese_structure": "しばらく / ちょっとの間 / 少し",
+                    "japanese_indicators": [
+                        "しばらく",
+                        "ちょっとの間",
+                        "少しの間"
+                    ],
+                    "vietnamese_pattern": "tí/tý (seconds) → chút (1-3 min) → một lúc (5-15 min) → một hồi (15+ min)",
+                    "examples": [
+                        {
+                            "jp": "しばらく考えた",
+                            "literal": "Suy nghĩ một lúc",
+                            "natural": "Nghĩ một lúc / Nghĩ tý."
+                        },
+                        {
+                            "jp": "しばらくしてから",
+                            "literal": "Sau một lúc",
+                            "natural": "Chốc lát sau / Một lúc sau."
+                        }
+                    ],
+                    "usage_rules": [
+                        "'tí/tý' — seconds-level, ultra casual",
+                        "'chút/một chút' — 1-3 minutes, casual",
+                        "'một lúc' — 5-15 minutes, neutral",
+                        "'chốc lát' — literary flavor for short moment",
+                        "'một hồi' — 15+ minutes"
+                    ],
+                    "priority": "high",
+                    "corpus_frequency": 2100
+                },
+                {
+                    "id": "vn_urgency_immediacy",
+                    "japanese_structure": "すぐ / 今すぐ / 直ちに",
+                    "japanese_indicators": [
+                        "すぐ",
+                        "今すぐ",
+                        "直ちに",
+                        "即座に"
+                    ],
+                    "vietnamese_pattern": "ngay (medium) → ngay lập tức (high) → tức thì (formal extreme)",
+                    "examples": [
+                        {
+                            "jp": "すぐ行く",
+                            "literal": "Đi ngay",
+                            "natural": "Đi ngay / Đi liền."
+                        },
+                        {
+                            "jp": "今すぐやって",
+                            "literal": "Làm ngay bây giờ",
+                            "natural": "Làm ngay đi / Làm liền đi."
+                        },
+                        {
+                            "jp": "直ちに報告しろ",
+                            "literal": "Báo cáo tức thì",
+                            "natural": "Báo cáo ngay lập tức / Báo cáo tức khắc."
+                        }
+                    ],
+                    "usage_rules": [
+                        "'ngay' — immediate, neutral urgency",
+                        "'liền' — immediately following, no delay",
+                        "'ngay lập tức' — high urgency",
+                        "'tức thì/tức khắc' — formal, very high urgency",
+                        "Add 'đi' for imperative: 'Làm ngay đi!'"
+                    ],
+                    "priority": "medium",
+                    "corpus_frequency": 1600
+                }
+            ],
+            "negative_vectors": {
+                "description": "Suppress match when text discusses future plans or hypothetical timing",
+                "texts": [
+                    "Tomorrow, next week, in the future, planning to do later, future tense scheduling",
+                    "If this happens then, hypothetical future scenario, conditional timing",
+                    "Historical date reference, specific calendar date, formal time specification"
+                ]
+            }
+        }
+    },
+    "advanced_patterns": {
+        "description": "Extended pattern categories for specialized JP→VN contexts",
+        "onomatopoeia": {
+            "description": "Japanese mimetics (ドキドキ/ニヤリ/チラッ) → Vietnamese natural equivalents",
+            "patterns": [
+                {
+                    "id": "vn_dokidoki_heart",
+                    "japanese_structure": "ドキドキ / どきどき",
+                    "japanese_indicators": [
+                        "ドキドキ",
+                        "どきどき"
+                    ],
+                    "vietnamese_pattern": "hồi hộp / tim đập thình thịch / thình thịch",
+                    "examples": [
+                        {
+                            "jp": "シャーロットさんのかわいい顔が近くに来て凄くドキドキする",
+                            "literal": "Khuôn mặt Charlotte-san đến gần khiến tôi rất hồi hộp",
+                            "natural": "Khuôn mặt dễ thương của Charlotte-san đến gần khiến tôi vô cùng hồi hộp.",
+                            "source": "0b24_VN_corpus"
+                        },
+                        {
+                            "jp": "心臓がドキドキした",
+                            "literal": "Tim đập nhanh",
+                            "natural": "Tim đập thình thịch."
+                        }
+                    ],
+                    "usage_rules": [
+                        "'hồi hộp' — general nervous excitement",
+                        "'thình thịch' — onomatopoeia for heartbeat",
+                        "'tim đập loạn' — extreme pounding",
+                        "Use 'hồi hộp' in narration, 'thình thịch' in vivid description"
+                    ],
+                    "priority": "high",
+                    "corpus_frequency": 789
+                },
+                {
+                    "id": "vn_niyari_grin",
+                    "japanese_structure": "ニヤリ / ニヤニヤ / にやり",
+                    "japanese_indicators": [
+                        "ニヤリ",
+                        "ニヤニヤ",
+                        "にやり",
+                        "ニヤッ"
+                    ],
+                    "vietnamese_pattern": "cười toe toét / nhếch mép / cười bí hiểm",
+                    "examples": [
+                        {
+                            "jp": "彰なんてニヤニヤとだらしない笑みを浮かべている",
+                            "literal": "Akira đang cười nhếch mép ngô nghê",
+                            "natural": "Akira còn đang cười toe toét ngô nghê nữa kìa.",
+                            "source": "0b24_VN_corpus"
+                        },
+                        {
+                            "jp": "なぜか美優先生はニヤッと笑みを浮かべる",
+                            "literal": "Không hiểu sao cô Miyuu nhếch mép cười",
+                            "natural": "Không hiểu sao cô Miyuu lại nhếch mép cười.",
+                            "source": "0b24_VN_corpus"
+                        }
+                    ],
+                    "usage_rules": [
+                        "'nhếch mép' — sly/knowing smile",
+                        "'toe toét' — goofy/silly grin",
+                        "'bí hiểm' — mysterious smile",
+                        "Match to character: villain=nhếch mép, friend=toe toét"
+                    ],
+                    "priority": "high",
+                    "corpus_frequency": 758
+                },
+                {
+                    "id": "vn_sowasowa_restless",
+                    "japanese_structure": "ソワソワ / モジモジ / ワクワク",
+                    "japanese_indicators": [
+                        "ソワソワ",
+                        "そわそわ",
+                        "モジモジ",
+                        "もじもじ",
+                        "ワクワク",
+                        "わくわく"
+                    ],
+                    "vietnamese_pattern": "bồn chồn / e dè / háo hức",
+                    "examples": [
+                        {
+                            "jp": "彼女はソワソワしている",
+                            "literal": "Cô ấy đang bồn chồn",
+                            "natural": "Cô ấy ngồi không yên."
+                        },
+                        {
+                            "jp": "恥ずかしそうにモジモジとし始め",
+                            "literal": "Bắt đầu e dè ngại ngùng",
+                            "natural": "Bắt đầu rụt rè bẽn lẽn.",
+                            "source": "0b24_VN_corpus"
+                        },
+                        {
+                            "jp": "ワクワクしている",
+                            "literal": "Đang háo hức",
+                            "natural": "Đang phấn khích / Háo hức lắm."
+                        }
+                    ],
+                    "usage_rules": [
+                        "ソワソワ → 'bồn chồn', 'ngồi không yên'",
+                        "モジモジ → 'rụt rè', 'bẽn lẽn', 'e dè'",
+                        "ワクワク → 'háo hức', 'phấn khích'",
+                        "Describe the body language, don't just name the emotion"
+                    ],
+                    "priority": "medium",
+                    "corpus_frequency": 365
+                },
+                {
+                    "id": "vn_gakkari_disappointed",
+                    "japanese_structure": "ガッカリ / イライラ / ビックリ",
+                    "japanese_indicators": [
+                        "ガッカリ",
+                        "がっかり",
+                        "イライラ",
+                        "いらいら",
+                        "ビックリ",
+                        "びっくり"
+                    ],
+                    "vietnamese_pattern": "thất vọng / bực mình / giật mình",
+                    "examples": [
+                        {
+                            "jp": "ガッカリした",
+                            "literal": "Thất vọng",
+                            "natural": "Xụi lơ / Thất vọng quá."
+                        },
+                        {
+                            "jp": "イライラする",
+                            "literal": "Bực mình",
+                            "natural": "Bực quá / Khó chịu thế."
+                        },
+                        {
+                            "jp": "ビックリした",
+                            "literal": "Giật mình",
+                            "natural": "Giật cả mình / Hú vía."
+                        }
+                    ],
+                    "usage_rules": [
+                        "ガッカリ → 'xụi lơ' (casual), 'thất vọng' (neutral)",
+                        "イライラ → 'bực mình', 'khó chịu'",
+                        "ビックリ → 'giật mình', 'hú vía'",
+                        "Use Vietnamese emotion words over onomatopoeia"
+                    ],
+                    "priority": "medium",
+                    "corpus_frequency": 804
+                }
+            ],
+            "negative_vectors": {
+                "description": "Suppress match when text describes mechanical sounds or katakana loanwords",
+                "texts": [
+                    "Machine engine sound, literal mechanical noise, equipment operating sound effect",
+                    "Foreign loanword written in katakana, brand name, technology term",
+                    "Character name in katakana, place name, proper noun transliteration"
+                ]
+            }
+        },
+        "giving_receiving": {
+            "description": "くれる/もらう/あげる social dynamics → Vietnamese benefactive expressions",
+            "patterns": [
+                {
+                    "id": "vn_kureru_favor",
+                    "japanese_structure": "～てくれる / ～てくれた",
+                    "japanese_indicators": [
+                        "くれる",
+                        "くれた",
+                        "くれない"
+                    ],
+                    "vietnamese_pattern": "Express gratitude through word choice, not literal 'cho tôi'",
+                    "examples": [
+                        {
+                            "jp": "シャーロットさんは日本への想いを教えてくれた",
+                            "literal": "Charlotte-san đã dạy cho tôi về tình cảm với Nhật Bản",
+                            "natural": "Charlotte-san nở một nụ cười vô cùng đáng yêu để chia sẻ tình yêu của cô với Nhật Bản.",
+                            "source": "0b24_VN_corpus"
+                        },
+                        {
+                            "jp": "同意してくれる奴が欲しかったんだろう",
+                            "literal": "Chắc muốn có người đồng ý cho",
+                            "natural": "Chắc cậu ta muốn có người đồng tình với mình.",
+                            "source": "0b24_VN_corpus"
+                        }
+                    ],
+                    "usage_rules": [
+                        "くれる implies gratitude — show it through warm word choice",
+                        "DON'T always translate as 'cho tôi' — often drop the benefactive",
+                        "Show appreciation through verb selection instead",
+                        "'chia sẻ' (share) > 'dạy cho' (teach for) in emotional contexts"
+                    ],
+                    "priority": "high",
+                    "corpus_frequency": 11019
+                },
+                {
+                    "id": "vn_morau_receive",
+                    "japanese_structure": "～てもらう / ～ていただく",
+                    "japanese_indicators": [
+                        "もらう",
+                        "もらった",
+                        "もらえ",
+                        "いただく"
+                    ],
+                    "vietnamese_pattern": "được... / nhờ... — receiving benefit, often passive",
+                    "examples": [
+                        {
+                            "jp": "彼女には高い評価をしてもらえているらしい",
+                            "literal": "Được cô ấy đánh giá cao",
+                            "natural": "Có vẻ như cô ấy đánh giá tôi rất cao.",
+                            "source": "0b24_VN_corpus"
+                        },
+                        {
+                            "jp": "大目に見てもらえるだろう",
+                            "literal": "Chắc sẽ được bỏ qua",
+                            "natural": "Chắc sẽ được bỏ qua cho.",
+                            "source": "0b24_VN_corpus"
+                        }
+                    ],
+                    "usage_rules": [
+                        "'được' — neutral receiving: 'được khen'",
+                        "'nhờ' — asking for help: 'nhờ giúp'",
+                        "Formal: いただく → 'được ạ', 'xin phép'",
+                        "Often restructure: 'cô ấy đánh giá tôi cao' instead of 'tôi được đánh giá cao'"
+                    ],
+                    "priority": "high",
+                    "corpus_frequency": 5696
+                }
+            ],
+            "negative_vectors": {
+                "description": "Suppress match when text describes self-initiated actions or commercial transactions",
+                "texts": [
+                    "Self-initiated action without social benefit: I did it myself, acting alone, independent action",
+                    "Commercial transaction: buying, selling, paying, exchange of goods for money",
+                    "Mechanical cause and effect: the button opens the door, the key unlocks the box"
+                ]
+            }
+        },
+        "inner_monologue": {
+            "description": "Japanese inner thought markers → Vietnamese narrator voice",
+            "patterns": [
+                {
+                    "id": "vn_omowazu_involuntary",
+                    "japanese_structure": "思わず / つい",
+                    "japanese_indicators": [
+                        "思わず",
+                        "つい"
+                    ],
+                    "vietnamese_pattern": "bất giác / không kìm được / lại...",
+                    "examples": [
+                        {
+                            "jp": "それよりも早くシャーロットさんがニコッと微笑んできたので、思わず見惚れてしまう",
+                            "literal": "Charlotte-san mỉm cười nên bất giác ngẩn người",
+                            "natural": "Charlotte-san đã mỉm cười toe toét với tôi trước, khiến tôi bất giác ngẩn người.",
+                            "source": "0b24_VN_corpus"
+                        },
+                        {
+                            "jp": "つい怒ってしまった",
+                            "literal": "Vô tình nổi giận",
+                            "natural": "Lại nổi nóng mất rồi."
+                        }
+                    ],
+                    "usage_rules": [
+                        "'bất giác' — involuntary, unintentional (literary)",
+                        "'không kìm được' — couldn't hold back",
+                        "'lại' — 'went and...' (casual regret)",
+                        "'vô tình' — unintentionally (but risky — can mean 'heartless')"
+                    ],
+                    "priority": "high",
+                    "corpus_frequency": 10320
+                },
+                {
+                    "id": "vn_futo_suddenly_realize",
+                    "japanese_structure": "ふと / なぜか",
+                    "japanese_indicators": [
+                        "ふと",
+                        "なぜか",
+                        "何故か"
+                    ],
+                    "vietnamese_pattern": "chợt / bỗng / không hiểu sao",
+                    "examples": [
+                        {
+                            "jp": "俺に注意されたエマちゃんは少し考えて、なぜか大きく腕を開きながら俺の顔を見上げた",
+                            "literal": "Emma-chan suy nghĩ rồi không hiểu sao dang tay nhìn tôi",
+                            "natural": "Bị tôi nhắc nhở, Emma-chan suy nghĩ một chút, rồi không hiểu sao lại dang rộng cánh tay và ngước nhìn tôi.",
+                            "source": "0b24_VN_corpus"
+                        },
+                        {
+                            "jp": "ふと気がついた",
+                            "literal": "Chợt nhận ra",
+                            "natural": "Chợt nhận ra / Bỗng nghĩ ra."
+                        }
+                    ],
+                    "usage_rules": [
+                        "'chợt' — sudden realization/thought",
+                        "'bỗng/bỗng dưng' — sudden unexpected",
+                        "'không hiểu sao' — for no reason",
+                        "'tự dưng' — spontaneously, no clear cause"
+                    ],
+                    "priority": "high",
+                    "corpus_frequency": 2565
+                },
+                {
+                    "id": "vn_douyara_apparently",
+                    "japanese_structure": "どうやら / まさに",
+                    "japanese_indicators": [
+                        "どうやら",
+                        "まさに"
+                    ],
+                    "vietnamese_pattern": "có vẻ như / đúng là",
+                    "examples": [
+                        {
+                            "jp": "どうやら本当らしい",
+                            "literal": "Có vẻ là thật",
+                            "natural": "Có vẻ là thật rồi."
+                        },
+                        {
+                            "jp": "まさに俺が思ったとおりだ",
+                            "literal": "Đúng như tôi nghĩ",
+                            "natural": "Đúng là như tôi nghĩ."
+                        }
+                    ],
+                    "usage_rules": [
+                        "'có vẻ như' — observation-based conclusion",
+                        "'xem ra' — 'it seems, looking at it...'",
+                        "'đúng là' — confirming thought",
+                        "'quả nhiên' — as expected"
+                    ],
+                    "priority": "medium",
+                    "corpus_frequency": 1762
+                }
+            ],
+            "negative_vectors": {
+                "description": "Suppress match when text is direct dialogue between characters, not inner thought",
+                "texts": [
+                    "Direct speech in quotation marks between two characters, conversation, verbal exchange",
+                    "Objective narration of physical events without internal perspective or thought",
+                    "Deliberate intentional action: he decided to, she chose to, purposeful planned action"
+                ]
+            }
+        },
+        "quotation_hearsay": {
+            "description": "って言う/という/そうだ reporting patterns → Vietnamese indirect speech",
+            "patterns": [
+                {
+                    "id": "vn_tte_iu_quoting",
+                    "japanese_structure": "って言う / っていう / という",
+                    "japanese_indicators": [
+                        "って言う",
+                        "っていう",
+                        "という",
+                        "と言う"
+                    ],
+                    "vietnamese_pattern": "gọi là / nói là / kiểu — natural quoting",
+                    "examples": [
+                        {
+                            "jp": "スポーツマンらしい短めの髪型をしており、モデルのスカウトを受けた経験があるほどに整った顔立ちをしている",
+                            "literal": "Kiểu tóc ngắn thể thao, gương mặt đẹp đến mức từng được mời làm người mẫu",
+                            "natural": "Kiểu tóc ngắn thể thao, với gương mặt hoàn hảo đến mức từng được hãng người mẫu chú ý.",
+                            "source": "0b24_VN_corpus"
+                        },
+                        {
+                            "jp": "彼女は天才だという話だ",
+                            "literal": "Nghe nói cô ấy là thiên tài",
+                            "natural": "Nghe nói cô ấy là thiên tài."
+                        }
+                    ],
+                    "usage_rules": [
+                        "'gọi là' — naming/calling: 'cái gọi là...'",
+                        "'nói là' — reported speech",
+                        "'nghe nói' — hearsay: 'Nghe nói...'",
+                        "'kiểu' — casual: 'Kiểu nào cũng được'",
+                        "Often restructure to remove quoting frame entirely"
+                    ],
+                    "priority": "medium",
+                    "corpus_frequency": 24231
+                },
+                {
+                    "id": "vn_sou_da_hearsay",
+                    "japanese_structure": "～そうだ (hearsay)",
+                    "japanese_indicators": [
+                        "そうだ"
+                    ],
+                    "vietnamese_pattern": "nghe nói / nghe bảo — indirect report",
+                    "examples": [
+                        {
+                            "jp": "明日は雨だそうだ",
+                            "literal": "Nghe nói ngày mai mưa",
+                            "natural": "Nghe nói mai mưa."
+                        },
+                        {
+                            "jp": "彼は来ないそうだ",
+                            "literal": "Nghe nói anh ấy không đến",
+                            "natural": "Nghe bảo anh ấy không đến."
+                        }
+                    ],
+                    "usage_rules": [
+                        "'nghe nói' — neutral hearsay",
+                        "'nghe bảo' — more casual, from specific person",
+                        "'nghe đâu' — uncertain hearsay: 'Nghe đâu là...'",
+                        "Distinguish from そうだ (appearance): 'có vẻ'"
+                    ],
+                    "priority": "medium",
+                    "corpus_frequency": 219
+                }
+            ],
+            "negative_vectors": {
+                "description": "Suppress match when text is first-hand knowledge or direct commands",
+                "texts": [
+                    "First-hand eyewitness account: I saw, I heard, I was there, direct personal experience",
+                    "Imperative command: do this, go there, stop that, direct instruction without reporting",
+                    "Internal certainty: I know for sure, I remember clearly, definitive personal knowledge"
+                ]
+            }
+        },
+        "desire_intention": {
+            "description": "たい/ほしい/気になる → Vietnamese wanting gradations: muốn/thích/tò mò",
+            "patterns": [
+                {
+                    "id": "vn_tai_want",
+                    "japanese_structure": "～たい / ～たいな",
+                    "japanese_indicators": [
+                        "たい",
+                        "たいな"
+                    ],
+                    "vietnamese_pattern": "muốn / thích + verb — context-dependent directness",
+                    "examples": [
+                        {
+                            "jp": "行きたい",
+                            "literal": "Muốn đi",
+                            "natural": "Muốn đi / Đi thôi."
+                        },
+                        {
+                            "jp": "行きたいな",
+                            "literal": "Muốn đi nhỉ",
+                            "natural": "Muốn đi nhỉ / Đi được hay nhỉ."
+                        }
+                    ],
+                    "usage_rules": [
+                        "'muốn' — direct want",
+                        "'thích' — softer preference: 'Thích đi'",
+                        "Add 'nhỉ' for wistful: 'Muốn đi nhỉ'",
+                        "Add 'quá' for emphasis: 'Muốn quá!'"
+                    ],
+                    "priority": "high",
+                    "corpus_frequency": 4996
+                },
+                {
+                    "id": "vn_ki_ni_naru_curious",
+                    "japanese_structure": "気になる",
+                    "japanese_indicators": [
+                        "気になる"
+                    ],
+                    "vietnamese_pattern": "tò mò / để ý / bận tâm",
+                    "examples": [
+                        {
+                            "jp": "彼女のことが気になる",
+                            "literal": "Tôi tò mò về cô ấy",
+                            "natural": "Tôi cứ để ý đến cô ấy / Cô ấy cứ lởn vởn trong đầu."
+                        },
+                        {
+                            "jp": "結果が気になる",
+                            "literal": "Tò mò về kết quả",
+                            "natural": "Muốn biết kết quả / Sốt ruột quá."
+                        }
+                    ],
+                    "usage_rules": [
+                        "'tò mò' — curious about information",
+                        "'để ý' — noticing, attracted to (person)",
+                        "'bận tâm' — worried/concerned about",
+                        "'sốt ruột' — anxious to know",
+                        "Context determines: person=để ý, info=tò mò, worry=bận tâm"
+                    ],
+                    "priority": "high",
+                    "corpus_frequency": 1929
+                }
+            ],
+            "negative_vectors": {
+                "description": "Suppress match when text describes completed facts or obligations",
+                "texts": [
+                    "Already done, completed task, finished action, past tense accomplishment",
+                    "Must do, obligation, duty, requirement — not desire but necessity",
+                    "Physical capability: can lift, able to run — ability not desire"
+                ]
+            }
+        },
+        "structure_particles": {
+            "description": "わけ/はず/こそ meaning shifts → Vietnamese equivalents",
+            "patterns": [
+                {
+                    "id": "vn_wake_reason",
+                    "japanese_structure": "わけだ / わけがない / わけにはいかない",
+                    "japanese_indicators": [
+                        "わけだ",
+                        "わけが",
+                        "わけで",
+                        "わけに",
+                        "わけじゃ",
+                        "わけない"
+                    ],
+                    "vietnamese_pattern": "tức là / không thể nào / không được",
+                    "examples": [
+                        {
+                            "jp": "今回はお前に用事があって戻ってきたわけじゃない",
+                            "literal": "Lần này không phải vì có việc với em mà quay lại",
+                            "natural": "Lần này cô quay lại không phải vì có việc với em.",
+                            "source": "0b24_VN_corpus"
+                        },
+                        {
+                            "jp": "さすがにこのまま見過ごすわけにはいかない",
+                            "literal": "Không thể bỏ mặc được",
+                            "natural": "Không thể cứ thế bỏ mặc được.",
+                            "source": "0b24_VN_corpus"
+                        }
+                    ],
+                    "usage_rules": [
+                        "わけだ → 'tức là', 'có nghĩa là' (explanation)",
+                        "わけがない → 'không đời nào', 'sao có thể' (impossibility)",
+                        "わけにはいかない → 'không thể...được' (moral impossibility)",
+                        "わけじゃない → 'không phải là' (clarifying denial)"
+                    ],
+                    "priority": "high",
+                    "corpus_frequency": 7716
+                },
+                {
+                    "id": "vn_hazu_expectation",
+                    "japanese_structure": "はずだ / はずがない",
+                    "japanese_indicators": [
+                        "はずだ",
+                        "はずが",
+                        "はずの",
+                        "はずな"
+                    ],
+                    "vietnamese_pattern": "chắc chắn / lẽ ra / sao có thể",
+                    "examples": [
+                        {
+                            "jp": "きっと次の休み時間には彼女はクラスメイトたちに囲まれてしまうはずだ",
+                            "literal": "Chắc chắn giờ giải lao cô ấy sẽ bị vây quanh",
+                            "natural": "Chắc chắn vào giờ giải lao tới, cô ấy sẽ ngay lập tức bị cả lớp vây quanh.",
+                            "source": "0b24_VN_corpus"
+                        },
+                        {
+                            "jp": "みんなから慕われないはずがないだろう",
+                            "literal": "Làm sao mà không được yêu quý",
+                            "natural": "Làm sao mà không được mọi người yêu quý cho được.",
+                            "source": "0b24_VN_corpus"
+                        }
+                    ],
+                    "usage_rules": [
+                        "はずだ → 'chắc chắn', 'đáng lẽ' (expected to be true)",
+                        "はずがない → 'sao có thể', 'làm sao mà' (impossible expectation)",
+                        "'lẽ ra' for broken expectation: 'Lẽ ra phải đến'",
+                        "'đáng lẽ' for should-have: 'Đáng lẽ phải biết'"
+                    ],
+                    "priority": "high",
+                    "corpus_frequency": 3677
+                }
+            ],
+            "negative_vectors": {
+                "description": "Suppress match when text has basic case particles or simple copula",
+                "texts": [
+                    "Basic subject-object particle usage: は as topic, が as subject, を as object — simple grammar",
+                    "Simple copula: it is, he is, this is — plain statement without structural nuance",
+                    "Conjunction particles: and, or, but — simple connectors without meaning shifts"
+                ]
+            }
+        },
+        "concession_contrast": {
+            "description": "のに/にしても/くせに despite-type patterns → Vietnamese concessive expressions",
+            "patterns": [
+                {
+                    "id": "vn_noni_frustration",
+                    "japanese_structure": "のに (frustration/surprise)",
+                    "japanese_indicators": [
+                        "のに"
+                    ],
+                    "vietnamese_pattern": "...mà / ...thế mà — frustration that despite A, B",
+                    "examples": [
+                        {
+                            "jp": "美優先生は美人なのに短気で男勝りなところが欠点だ",
+                            "literal": "Cô Miyuu xinh nhưng nóng tính",
+                            "natural": "Cô Miyuu xinh đẹp nhưng lại có khuyết điểm là nóng tính và mạnh mẽ như con trai.",
+                            "source": "0b24_VN_corpus"
+                        },
+                        {
+                            "jp": "明人も喋ってたのに！",
+                            "literal": "Akihito cũng nói chuyện mà!",
+                            "natural": "Akihito cũng nói chuyện mà!",
+                            "source": "0b24_VN_corpus"
+                        }
+                    ],
+                    "usage_rules": [
+                        "'mà' — simple frustration: 'Nói rồi mà!'",
+                        "'thế mà' — surprised frustration: 'Thế mà không được!'",
+                        "'nhưng lại' in narration for sophisticated contrast",
+                        "Stronger than けど — carries emotional weight"
+                    ],
+                    "priority": "high",
+                    "corpus_frequency": 10889
+                },
+                {
+                    "id": "vn_toshitemo_even_if",
+                    "japanese_structure": "としても / にしても / たとしても",
+                    "japanese_indicators": [
+                        "としても",
+                        "にしても",
+                        "たとしても"
+                    ],
+                    "vietnamese_pattern": "dù...đi nữa / cho dù / kể cả",
+                    "examples": [
+                        {
+                            "jp": "――まぁそれにしても、ラッキー…か",
+                            "literal": "Mà thôi, dù sao thì may mắn ư",
+                            "natural": "—Mà thôi, dù sao đi nữa, may mắn… ư.",
+                            "source": "0b24_VN_corpus"
+                        },
+                        {
+                            "jp": "家にまで送り届けたとしてもそこでまた駄々をこねると思いますが？",
+                            "literal": "Dù có đưa về nhà cũng sẽ nhõng nhẽo tiếp",
+                            "natural": "Dù có đưa về nhà đi nữa, e là cô bé sẽ lại nhõng nhẽo tiếp thôi.",
+                            "source": "0b24_VN_corpus"
+                        }
+                    ],
+                    "usage_rules": [
+                        "'dù...đi nữa' — even if, most natural",
+                        "'cho dù' — emphatic even if",
+                        "'kể cả' — 'even including'",
+                        "'dù sao đi nữa' — 'regardless/in any case'"
+                    ],
+                    "priority": "medium",
+                    "corpus_frequency": 2143
+                },
+                {
+                    "id": "vn_kuse_ni_despite_blame",
+                    "japanese_structure": "くせに / ながらも",
+                    "japanese_indicators": [
+                        "くせに",
+                        "くせして",
+                        "ながらも",
+                        "ながら"
+                    ],
+                    "vietnamese_pattern": "trong khi / mặc dù / vậy mà — blame or irony",
+                    "examples": [
+                        {
+                            "jp": "何も知らないくせに",
+                            "literal": "Biết gì đâu mà",
+                            "natural": "Biết gì đâu mà nói / Chả biết gì mà."
+                        },
+                        {
+                            "jp": "怖がりながらも前に進む",
+                            "literal": "Sợ nhưng vẫn tiến lên",
+                            "natural": "Dù sợ vẫn bước tới."
+                        }
+                    ],
+                    "usage_rules": [
+                        "くせに → 'biết gì đâu mà', 'trong khi' (blame)",
+                        "ながらも → 'dù...vẫn' (despite, admiring)",
+                        "くせに carries blame — ながらも carries respect",
+                        "Use casual tone for くせに: 'Chả biết gì mà nói!'"
+                    ],
+                    "priority": "medium",
+                    "corpus_frequency": 14536
+                }
+            ],
+            "negative_vectors": {
+                "description": "Suppress match when text has simple additive or sequential connectors",
+                "texts": [
+                    "And also, in addition, furthermore, additive connection without concessive tension",
+                    "Then, after that, next, sequential narration without despite-type relationship",
+                    "Because, therefore, so, causal connection not concessive"
+                ]
+            }
+        },
+        "keigo_register": {
+            "description": "Japanese politeness levels → Vietnamese register shifting (VN-specific category)",
+            "patterns": [
+                {
+                    "id": "vn_desu_masu_polite",
+                    "japanese_structure": "です / ます (polite form)",
+                    "japanese_indicators": [
+                        "です",
+                        "ます"
+                    ],
+                    "vietnamese_pattern": "ạ / dạ / vâng — particle-based register",
+                    "examples": [
+                        {
+                            "jp": "よろしくお願い致します",
+                            "literal": "Xin hãy chiếu cố ạ",
+                            "natural": "Xin hãy chiếu cố ạ.",
+                            "source": "0b24_VN_corpus"
+                        },
+                        {
+                            "jp": "大丈夫ですけど……",
+                            "literal": "Không sao nhưng...",
+                            "natural": "Không sao đâu ạ, nhưng..."
+                        }
+                    ],
+                    "usage_rules": [
+                        "Add 'ạ' to sentence end for polite register",
+                        "Use 'dạ' as polite affirmative: 'Dạ, vâng ạ'",
+                        "Use pronouns: em/anh/chị/cô for social hierarchy",
+                        "NEVER add ạ to casual peer dialogue"
+                    ],
+                    "priority": "high",
+                    "corpus_frequency": 45566
+                },
+                {
+                    "id": "vn_kudasai_please",
+                    "japanese_structure": "ください / お願いします",
+                    "japanese_indicators": [
+                        "ください",
+                        "下さい",
+                        "お願いします"
+                    ],
+                    "vietnamese_pattern": "...đi ạ / xin... / làm ơn...",
+                    "examples": [
+                        {
+                            "jp": "脅かさないでくださいよ",
+                            "literal": "Xin đừng dọa em",
+                            "natural": "Đừng dọa em nữa mà.",
+                            "source": "0b24_VN_corpus"
+                        },
+                        {
+                            "jp": "シャーロットとお呼び下さい",
+                            "literal": "Xin gọi tôi là Charlotte",
+                            "natural": "Hãy gọi em là Charlotte ạ.",
+                            "source": "0b24_VN_corpus"
+                        }
+                    ],
+                    "usage_rules": [
+                        "Formal request: 'xin hãy...'",
+                        "Casual request: 'đi', 'nào', 'nhé'",
+                        "Between peers: drop ください entirely",
+                        "To elders: 'ạ' at end"
+                    ],
+                    "priority": "high",
+                    "corpus_frequency": 3464
+                }
+            ],
+            "negative_vectors": {
+                "description": "Suppress match when text is casual peer dialogue without honorific context",
+                "texts": [
+                    "Casual conversation between close friends of same age, no honorific markers needed",
+                    "Internal monologue without social interaction, self-directed thought",
+                    "Informal narration in first person without addressing anyone"
+                ]
+            }
+        },
+        "anti_ai_ism_patterns": {
+            "description": "CRITICAL: Vietnamese-specific AI translation tells — eliminate on sight in post-processing",
+            "patterns": [
+                {
+                    "id": "vn_mot_cam_giac_elimination",
+                    "japanese_structure": "感じ / 気持ち / 雰囲気 (feeling/atmosphere)",
+                    "japanese_indicators": [
+                        "感じ",
+                        "気持ち",
+                        "雰囲気"
+                    ],
+                    "vietnamese_pattern": "FORBIDDEN: 'một cảm giác [X]' → Show emotion directly",
+                    "examples": [
+                        {
+                            "jp": "不安な気持ちが広がった",
+                            "literal": "Một cảm giác bất an tràn ngập",
+                            "natural": "Sự bất an tràn ngập / Lòng dạ bất an."
+                        },
+                        {
+                            "jp": "安心した",
+                            "literal": "Một cảm giác nhẹ nhõm",
+                            "natural": "Nhẹ nhõm / Thở phào nhẹ nhõm."
+                        },
+                        {
+                            "jp": "懐かしい",
+                            "literal": "Một cảm giác hoài niệm",
+                            "natural": "Nỗi hoài niệm dâng lên / Nhớ quá."
+                        }
+                    ],
+                    "usage_rules": [
+                        "NEVER use 'một cảm giác [noun]' — dead giveaway of AI",
+                        "Replace with direct emotion: 'Sự bất an', 'Nỗi hoài niệm'",
+                        "Use vivid verbs: 'dâng lên', 'xâm chiếm', 'bủa vây'",
+                        "Corpus: 121 instances detected in 98 VN chapters (severity: CRITICAL)"
+                    ],
+                    "priority": "critical",
+                    "corpus_frequency": 121
+                },
+                {
+                    "id": "vn_mot_cach_elimination",
+                    "japanese_structure": "～く / ～に (adverb form)",
+                    "japanese_indicators": [
+                        "ように",
+                        "のように"
+                    ],
+                    "vietnamese_pattern": "FORBIDDEN: 'một cách [adj]' → Use direct adverb or vivid verb",
+                    "examples": [
+                        {
+                            "jp": "丁寧に説明した",
+                            "literal": "Giải thích một cách trang trọng",
+                            "natural": "Giải thích kỹ lưỡng / Giải thích cẩn thận."
+                        },
+                        {
+                            "jp": "急いで出た",
+                            "literal": "Rời đi một cách vội vàng",
+                            "natural": "Vội vã rời đi / Hối hả chạy ra."
+                        },
+                        {
+                            "jp": "突然ドアが開いた",
+                            "literal": "Cánh cửa mở một cách đột ngột",
+                            "natural": "Cánh cửa bật mở."
+                        }
+                    ],
+                    "usage_rules": [
+                        "NEVER use 'một cách [adj]' — dead giveaway of AI",
+                        "Replace with: direct adverb or vivid verb",
+                        "一cách trang trọng → nghiêm trang",
+                        "一cách vội vàng → vội vã / hối hả",
+                        "Corpus: 476 instances (severity: CRITICAL — most common AI-ism)"
+                    ],
+                    "priority": "critical",
+                    "corpus_frequency": 476
+                },
+                {
+                    "id": "vn_viec_su_elimination",
+                    "japanese_structure": "こと / もの (nominalization)",
+                    "japanese_indicators": [
+                        "こと",
+                        "もの"
+                    ],
+                    "vietnamese_pattern": "FORBIDDEN: 'Việc/Sự [noun]' as sentence subject → Use verb directly",
+                    "examples": [
+                        {
+                            "jp": "彼女が来たのは驚きだった",
+                            "literal": "Việc cô ấy đến là bất ngờ",
+                            "natural": "Cô ấy đến là điều bất ngờ / Không ngờ cô ấy đến."
+                        },
+                        {
+                            "jp": "勉強は大切だ",
+                            "literal": "Việc học tập rất quan trọng",
+                            "natural": "Học tập rất quan trọng."
+                        }
+                    ],
+                    "usage_rules": [
+                        "Remove 'Việc' as subject — use verb directly",
+                        "Remove 'Sự' nominalization when possible",
+                        "Corpus: 148 Việc + 105 Sự instances (severity: HIGH)",
+                        "Exception: 'Sự thật' (truth), 'Sự kiện' (event) are real nouns"
+                    ],
+                    "priority": "critical",
+                    "corpus_frequency": 253
+                }
+            ],
+            "negative_vectors": {
+                "description": "Suppress match when text legitimately uses these forms in proper contexts",
+                "texts": [
+                    "Proper compound noun: sự kiện (event), sự thật (truth), sự cố (incident) — real words not AI nominalization",
+                    "Technical or academic prose where formal nominalization is appropriate register",
+                    "Deliberate formal tone in official speech, ceremony, announcement context"
+                ]
+            }
+        }
+    },
+    "rag_retrieval_strategy": {
+        "description": "How to retrieve Vietnamese patterns during JP→VN translation",
+        "steps": [
+            {
+                "step": 1,
+                "name": "Parse Japanese structure",
+                "method": "Identify particles, connectors, sentence patterns in JP source via grammar_pattern_detector (shared with EN pipeline: 16 regex categories, 97 patterns)"
+            },
+            {
+                "step": 2,
+                "name": "Batch embed & vector search",
+                "method": "Batch-embed all detected pattern contexts in 1 API call → ChromaDB cosine search filtered by category → return top-k matches from vietnamese_grammar_patterns collection"
+            },
+            {
+                "step": 3,
+                "name": "Negative anchor filtering",
+                "method": "For each match, compute cosine similarity between query and category negative_vectors. If similarity > 0.72, apply proportional penalty (up to -0.15) to suppress false positives."
+            },
+            {
+                "step": 4,
+                "name": "Threshold gate",
+                "method": "After penalty adjustment: similarity ≥ 0.78 → inject into prompt as few-shot example. 0.65-0.78 → log for audit. < 0.65 → discard."
+            },
+            {
+                "step": 5,
+                "name": "Priority ranking & injection",
+                "method": "Sort by CATEGORY_PRIORITIES, then similarity. Inject top 3-5 patterns as VN-specific guidance for LLM."
+            },
+            {
+                "step": 6,
+                "name": "Post-process AI-ism validation",
+                "method": "VN-SPECIFIC: Run anti_ai_ism_patterns regex sweep on output. Flag 'một cảm giác', 'một cách', 'Việc/Sự' constructions for correction."
+            }
+        ],
+        "negative_anchor_system": {
+            "description": "Prevents false-positive pattern matches using negative vector embeddings",
+            "implementation": {
+                "storage": "negative_vectors.texts[] in each category — 3 sentences describing what this category is NOT",
+                "embedding": "Lazily batch-embedded on first get_bulk_guidance() call via Gemini Embedding 001, cached as numpy arrays",
+                "scoring": "cosine_sim(query_embedding, negative_vector) → if > 0.72, penalty = overshoot × 0.15",
+                "effect": "A match with raw_similarity=0.82 but neg_penalty=0.08 becomes effective_similarity=0.74, dropping from inject to log-only"
+            },
+            "covered_categories": [
+                "contrastive_comparison",
+                "intensifiers",
+                "hedging",
+                "response_particles",
+                "natural_transitions",
+                "sentence_endings",
+                "emotional_nuance",
+                "action_emphasis",
+                "comedic_timing",
+                "modal_nuances",
+                "time_expressions",
+                "onomatopoeia",
+                "giving_receiving",
+                "inner_monologue",
+                "quotation_hearsay",
+                "desire_intention",
+                "structure_particles",
+                "concession_contrast",
+                "keigo_register",
+                "anti_ai_ism_patterns"
+            ]
+        },
+        "vn_specific_features": {
+            "particle_density_audit": "Check output VN particle density against target 60/1000w baseline (from vn_particle_density_rules.json)",
+            "sino_vietnamese_register": "Cross-reference with sino_vietnamese_context_rules.json for Hán-Việt vs native VN word choice",
+            "comedy_patterns": "Reference vn_comedy_patterns.json for tsukkomi/comedic timing preservation",
+            "archetype_voice": "Reference vn_particle_density_rules.json character_voice_profiles for per-character particle selection"
+        }
+    },
+    "integration_points": {
+        "phase_2_translation": {
+            "hook": "pre_translation",
+            "action": "Inject matched VN grammar patterns as few-shot examples alongside the translation prompt",
+            "config_key": "vietnamese_grammar_rag_enabled"
+        },
+        "phase_3_critics": {
+            "hook": "post_translation_review",
+            "action": "Validate anti_ai_ism patterns eliminated, particle density within range, register consistency",
+            "config_key": "vietnamese_grammar_audit_enabled"
+        }
+    },
+    "pattern_addition_workflow": {
+        "steps": [
+            "1. Identify missing pattern from corpus scan or translation review",
+            "2. Add to appropriate category with japanese_structure, japanese_indicators, vietnamese_pattern",
+            "3. Include ≥2 examples with jp/literal/natural triplets (use real corpus pairs)",
+            "4. Add usage_rules (3-5 rules minimum)",
+            "5. Set priority and corpus_frequency from scan data",
+            "6. Rebuild ChromaDB: instantiate VietnamesePatternStore (auto-rebuild on empty collection)"
+        ]
+    }
+}

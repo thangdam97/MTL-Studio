@@ -62,6 +62,10 @@ class ChapterProcessor:
             self._vn_cjk_cleaner = VietnameseCJKCleaner(strict_mode=True, log_substitutions=True)
             logger.info("✓ Vietnamese CJK post-processor initialized (hard substitution enabled)")
         
+        # Initialize Self-Healing Anti-AI-ism Agent for post-processing
+        self._anti_ai_ism_agent = None
+        self.enable_anti_ai_ism = False  # Will be enabled from agent if needed
+        
         # Load character names from manifest.json for name consistency
         self.character_names = self._load_character_names()
         if self.character_names:
@@ -728,6 +732,36 @@ This document contains the internal reasoning process that Gemini used while tra
                     logger.info(f"✓ CJK post-processor: {cjk_cleaned_count} hard substitutions applied")
                 if remaining_leaks > 0:
                     logger.warning(f"⚠ CJK post-processor: {remaining_leaks} unknown leaks remain (manual review needed)")
+            
+            # 9. Post-Processing: Self-Healing Anti-AI-ism Agent (if enabled)
+            ai_ism_healed_count = 0
+            if self.enable_anti_ai_ism and self._anti_ai_ism_agent:
+                try:
+                    logger.debug(f"[ANTI-AI-ISM] Running self-healing agent on {chapter_id}...")
+                    heal_report = self._anti_ai_ism_agent.heal_file(output_path)
+                    
+                    if heal_report and heal_report.issues:
+                        ai_ism_healed_count = len([i for i in heal_report.issues if i.corrected])
+                        total_issues = len(heal_report.issues)
+                        
+                        if ai_ism_healed_count > 0:
+                            logger.info(f"✓ Anti-AI-ism agent: {ai_ism_healed_count}/{total_issues} issues auto-corrected")
+                        
+                        # Log severity breakdown
+                        critical = len([i for i in heal_report.issues if i.severity == 'CRITICAL'])
+                        major = len([i for i in heal_report.issues if i.severity == 'MAJOR'])
+                        minor = len([i for i in heal_report.issues if i.severity == 'MINOR'])
+                        
+                        if critical > 0:
+                            logger.warning(f"  Critical: {critical}, Major: {major}, Minor: {minor}")
+                        elif major > 0:
+                            logger.info(f"  Major: {major}, Minor: {minor}")
+                    else:
+                        logger.debug(f"[ANTI-AI-ISM] No AI-isms detected in {chapter_id}")
+                        
+                except Exception as e:
+                    logger.warning(f"[ANTI-AI-ISM] Self-healing failed: {e}")
+                    logger.warning("[ANTI-AI-ISM] Continuing without auto-correction (run 'mtl.py heal' manually)")
             
             return TranslationResult(
                 success=True,

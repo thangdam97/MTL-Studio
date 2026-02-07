@@ -8,6 +8,7 @@ import json
 import logging
 import argparse
 import sys
+import os
 import time
 from pathlib import Path
 from datetime import datetime
@@ -247,6 +248,41 @@ class TranslatorAgent:
                 self.gap_analyzer = None
         else:
             self.gap_analyzer = None
+
+        # Initialize Self-Healing Anti-AI-ism Agent (always enabled for EN/VN)
+        if self.target_language in ['en', 'vn', 'vi']:
+            try:
+                from modules.anti_ai_ism_agent import AntiAIismAgent
+                from pipeline.config import get_gemini_config
+                
+                # Get API key from config
+                gemini_config = get_gemini_config()
+                api_key = gemini_config.get('api_key', os.getenv('GEMINI_API_KEY'))
+                
+                # Get config directory from prompt_loader
+                config_dir = self.prompt_loader.config_dir
+                
+                # Initialize agent with auto_heal=True for automatic corrections
+                anti_ai_ism_agent = AntiAIismAgent(
+                    config_dir=config_dir,
+                    persist_directory=work_dir / "chroma_anti_ai_ism",
+                    auto_heal=True,  # Enable automatic corrections
+                    dry_run=False,
+                    target_language=self.target_language,
+                    gemini_api_key=api_key,
+                    use_vector=True  # Enable Layer 2 (vector Bad Prose DB)
+                )
+                
+                # Enable anti-AI-ism in processor
+                self.processor.enable_anti_ai_ism = True
+                self.processor._anti_ai_ism_agent = anti_ai_ism_agent
+                logger.info("✓ Self-Healing Anti-AI-ism Agent initialized and connected to processor")
+                logger.info("  3-layer detection + auto-correction enabled (runs after CJK cleaning)")
+            except Exception as e:
+                logger.warning(f"Failed to initialize anti-AI-ism agent: {e}")
+                logger.warning("Continuing without self-healing (run 'mtl.py heal' manually after translation)")
+                self.processor.enable_anti_ai_ism = False
+                self.processor._anti_ai_ism_agent = None
 
         # Translation Log
         self.log_path = work_dir / "translation_log.json"

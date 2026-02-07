@@ -2,7 +2,7 @@
 
 **Machine Translation Publishing Pipeline for Japanese Light Novels**
 
-Version 5.0 | Production Ready | February 2026
+Version 5.1 | Production Ready | February 2026
 
 > Multi-Language Support: English & Vietnamese | Multimodal Vision + Vector Search | Literacy Techniques + Sarcasm Configuration + Character Profiles
 

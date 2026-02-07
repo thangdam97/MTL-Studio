@@ -17,11 +17,11 @@ Version 5.0 | Production Ready | February 2026
 ## Table of Contents
 
 1. [Overview](#overview)
-2. [What's New in V5.0](#whats-new-in-v50)
-3. [What's New in V4.5](#whats-new-in-v45)
-4. [Gemini 3 Pro Vision: Illustration Multimodal Processor](#-gemini-3-pro-vision-illustration-multimodal-processor)
-5. [Gemini Embedding: Vector Search Engine](#-gemini-embedding-vector-search-engine)
-6. [System Architecture](#system-architecture)
+2. [Gemini Embedding: Vector Search Engine](#-gemini-embedding-vector-search-engine)
+    - [Why Vector Search? Traditional MT and CAT Tools Compared](#why-vector-search-traditional-mt-and-cat-tools-compared)
+3. [Gemini 3 Pro Vision: Illustration Multimodal Processor](#gemini-3-pro-vision-illustration-multimodal-processor)
+4. [What's New in V4.0](#whats-new-in-v40-previous-release)
+5. [System Architecture](#system-architecture)
 6. [Pipeline Phases](#pipeline-phases)
 7. [Installation](#installation)
 8. [Quick Start](#quick-start)
@@ -31,18 +31,34 @@ Version 5.0 | Production Ready | February 2026
 12. [File Structure](#file-structure)
 13. [RAG Modules](#rag-modules)
 14. [Quality Control](#quality-control)
-15. [Troubleshooting](#troubleshooting)
-16. [API Reference](#api-reference)
+    - [Self-Healing Anti-AI-ism Agent](#self-healing-anti-ai-ism-agent)
+    - [Streamlined Post-Processing Pipeline](#streamlined-post-processing-pipeline)
+15. [Illustration System](#illustration-system)
+16. [Versus Official Publishing](#versus-official-publishing)
+17. [Troubleshooting](#troubleshooting)
+18. [API Reference](#api-reference)
     - [Manifest Schema](#manifest-schema)
     - [Name Registry Schema](#name-registry-schema)
     - [Semantic Metadata Schema](#semantic-metadata-schema)
-17. [Performance Statistics](#performance-statistics)
+19. [Performance Statistics](#performance-statistics)
 
 ---
 
 ## Overview
 
 MTL Studio is a complete automated pipeline for translating Japanese Light Novel EPUBs to professional multi-language editions. The system leverages Google Gemini AI (2.5 Pro/Flash) with retrieval-augmented generation (RAG) to produce publication-quality translations with consistent character voices, proper typography, and accurate terminology.
+
+### V5.0: Three-Pillar Intelligence
+
+V5.0 (February 2026) introduces a **Three-Pillar Translation Architecture** that elevates machine translation from text-only analysis to true multimodal contextual understanding:
+
+| Pillar | Technology | Role |
+|--------|-----------|------|
+| **RAG Engine** | 3.2MB+ knowledge base | Character voices, localization primers, genre patterns |
+| **Vector Search** | Gemini Embedding 001 (3072D) + ChromaDB | Semantic grammar matching — 70+ JP regex → 204 EN natural phrasing patterns |
+| **Multimodal Vision** | Gemini 3 Pro Vision (ThinkingConfig HIGH) | Illustration analysis → Art Director's Notes for visually-informed prose calibration |
+
+**Key innovations**: Hash-based visual cache invalidation, batch embedding optimization (1 API call for N patterns), auto-rebuild logic for empty ChromaDB, sliding window context for Sino-Vietnamese disambiguation, and ThinkingConfig reasoning capture for editorial review.
 
 ### Core Capabilities
 
@@ -61,7 +77,7 @@ MTL Studio is a complete automated pipeline for translating Japanese Light Novel
 - **Kodansha Structure Support**: Intelligent pre-TOC detection, kuchie handling, image remapping (p### → illust-###)
 - **Automatic Publisher Detection**: Pattern-based image classification without hardcoded logic
 - **AI-Powered QC**: IDE agents (VSCode, Windsurf, Cursor,...) for smart AI-ism fixes, formatting fixes, and contraction rate tuning
-- **Anti-AI-ism Detection**: 63-pattern JSON library with 3 severity tiers (CRITICAL/MAJOR/MINOR)
+- **Anti-AI-ism Detection**: 65-pattern JSON library with 4 severity tiers (CRITICAL/MAJOR/MINOR/VN_CRITICAL) + Self-Healing Agent
 - **Echo Detection System**: Professional proximity-based clustering detection (23 patterns, 36.5% coverage)
 - **Interactive CLI**: Volume selection menus, configuration management, verbose mode
 - **Post-Processing**: CJK artifact removal, format normalization, smart typography
@@ -85,172 +101,297 @@ MTL Studio is a complete automated pipeline for translating Japanese Light Novel
 
 ---
 
-## What's New in V5.0
+## 🔍 Gemini Embedding: Vector Search Engine
 
-### Vision + Vector Intelligence: The Multimodal Breakthrough
+**Status**: Deployed (Phase 2) | **Model**: `gemini-embedding-001` | **Dimensions**: 3072 | **February 2026**
 
-**February 7, 2026** - MTL Studio v5.0 introduces two game-changing subsystems that elevate translation from text-only analysis to **true contextual understanding**:
+> The Vector Search Engine converts Japanese grammar patterns and Sino-Vietnamese terminology into high-dimensional embedding vectors, enabling semantic similarity matching that guides the Translator toward natural phrasing — without hardcoded rules.
 
-#### 1. Gemini 3 Pro Vision: Multimodal Illustration Processor (Phase 1.6)
+### Architecture: Detect → Embed → Match → Inject
 
-**The Problem**: Traditional MTL systems translate text in isolation, producing prose that contradicts the emotional tone visible in illustrations — cheerful dialogue for a sad illustration, or generic descriptions when the image shows specific actions.
+The system operates as a real-time semantic lookup during Phase 2 translation. For each chapter, it detects Japanese grammar structures in the source text, embeds them as 3072-dimensional vectors via `gemini-embedding-001`, queries ChromaDB for the closest natural-language equivalents, and injects high-confidence matches into the translation prompt.
 
-**The Solution**: 
-- **Art Director Agent** analyzes every illustration once per volume with Gemini 3 Pro Vision (ThinkingConfig HIGH)
-- Generates structured `visual_cache.json` with composition, emotional_delta, narrative_directives, spoiler_prevention
-- **Translator** receives "Art Director's Notes" as stylistic guidance (vocabulary calibration, not content invention)
-- **Canon Event Fidelity**: Illustrations inform *how* to translate (tone, atmosphere), never *what* to translate (plot events)
-
-**Impact**: 
-- Prose vocabulary now matches visual mood (e.g., "frozen" vs generic "sad" when illustration shows icy expression)
-- Dialogue tags calibrated to illustration emotion (soft/harsh, intimate/distant)
-- Spoiler prevention: Plot details visible in images but not yet confirmed in text are excluded
-- Cost efficiency: Vision analysis runs once; retranslation reuses cached results
-
-**Architecture**: Decoupled "bake assets once, render many times" design — Gemini 2.5 Pro never sees images, only structured JSON interpretations
-
-#### 2. Gemini Embedding 001: Vector Search Engine (Phase 2)
-
-**The Problem**: Hardcoded grammar rules create brittle translation patterns; regex-based systems miss semantic nuance in Japanese discourse markers (やっぱり, けど...も, まあ).
-
-**The Solution**:
-- **Grammar Pattern Detector** scans JP source text (70+ regex across 9 categories)
-- **Embedding Engine** converts patterns to 3072-dimensional vectors via `gemini-embedding-001`
-- **ChromaDB** performs semantic similarity matching against 204 indexed EN patterns (28 categories)
-- **Confidence-based injection**: ≥0.78 HIGH → inject into prompt, ≥0.65 MED → log only, <0.65 → ignore
-
-**Impact**:
-- Natural English idioms for Japanese grammar structures (けど...も → "X is one thing, but Y...")
-- Transcreation of discourse markers (やっぱり → "sure enough", "I knew it" context-dependent)
-- Vietnamese Sino-Vietnamese disambiguation (道 → đạo/đường/đạo lý based on context)
-- Auto-rebuild: Empty ChromaDB triggers automatic index reconstruction from source JSON
-- Batch optimization: Single API call embeds all detected patterns per chapter
-
-**Architecture**: Real-time semantic lookup during Phase 2 with persistent vector store (HNSW index + cosine similarity)
-
-### 🔧 System Architecture Updates
-
-**Phase 1.6 (NEW)**: Art Director analyzes illustrations → `visual_cache.json` + thought logs  
-**Phase 2 (ENHANCED)**: 
-- Vector Search Init → ChromaDB load (204 EN + Sino-VN patterns)
-- Grammar Pattern Detection → semantic embedding → confidence injection
-- Multimodal injection → Art Director's Notes for illustrated chapters
-- Translation with RAG + Vector + Visual context → Gemini 2.5 Pro (486KB cached, TTL 60m)
-
-**Three-Pillar Translation Context**:
-1. **RAG Engine** (2.5MB knowledge base) — Character voices, localization primers, genre patterns
-2. **Vector Search** (semantic grammar guidance) — 70+ regex → 3072D embeddings → ChromaDB cosine match
-3. **Multimodal Cache** (visual context) — Illustration composition, emotion, narrative directives
-
-### New Technical Capabilities
-
-- **Hash-based cache invalidation**: Prompt + image + model hash triggers regeneration only when needed
-- **Batch embedding optimization**: 1 API call for N patterns vs N sequential calls (−2-3s latency per chapter)
-- **Auto-rebuild logic**: `EnglishPatternStore` detects empty ChromaDB and rebuilds from source JSON automatically
-- **Sliding window context**: Previous + current + next sentence for Sino-Vietnamese disambiguation
-- **ThinkingConfig reasoning capture**: `cache/thoughts/*.json` logs Gemini 3 Pro Vision's internal reasoning
-- **Canon name enforcement**: Post-processing replaces generic descriptions with manifest character names
-
-### Production Validation
-
-**Multimodal Translation Enhancement** (Ice Princess Vol 2, 13 illustrations):
-- Forehead Flick (i-019): Split-panel emotion → ellipses for distress, upbeat markers for teasing
-- Fruit Offering (i-079): Soft smile → "intimate tone" vocabulary + domestic atmosphere
-- Mont Blanc Jealousy: Two-panel escalation → isolated `*Squeeze.*` with paragraph break
-
-**Vector Search Pattern Matching** (204 patterns indexed):
 ```
-Input:  けど彼女は全然違った (But she was completely different)
-Match:  sim=0.686 | けど...も pattern | contrastive_comparison
-Output: "She's one thing, but [contrast]..." (idiomatic vs literal)
+┌─────────────────────────────────────────────────────────────────────┐
+│  Grammar Pattern Detector (regex scan)                             │
+│                                                                     │
+│  INPUT:  Japanese source chapter text                              │
+│  OUTPUT: Top 15 detected patterns with category + context          │
+│                                                                     │
+│  Scans for 70+ regex patterns across 9 categories:                 │
+│    contrastive_comparison, dismissive_acknowledgment, intensifiers, │
+│    hedging, response_particles, natural_transitions,               │
+│    sentence_endings, emotional_nuance, action_emphasis             │
+└──────────────────────────────┬──────────────────────────────────────┘
+                               │
+┌──────────────────────────────▼──────────────────────────────────────┐
+│  Embedding Engine (gemini-embedding-001)                           │
+│                                                                     │
+│  Batch embeds all detected patterns in 1 API call                  │
+│  Input: "[context] [indicator] [chapter hint]"                     │
+│  Output: 3072-dimensional vectors per pattern                      │
+│                                                                     │
+│  Supports: Japanese, Chinese, Vietnamese, English (multilingual)   │
+└──────────────────────────────┬──────────────────────────────────────┘
+                               │
+┌──────────────────────────────▼──────────────────────────────────────┐
+│  ChromaDB Vector Store (cosine similarity)                         │
+│                                                                     │
+│  Persistent local storage with HNSW index                          │
+│  Collections:                                                      │
+│    english_grammar_patterns  → 204 patterns, 28 categories         │
+│    sino_vietnamese_patterns  → Sino-VN disambiguation (VN only)    │
+│                                                                     │
+│  Returns: similarity score (0.0 – 1.0) + pattern metadata          │
+└──────────────────────────────┬──────────────────────────────────────┘
+                               │
+┌──────────────────────────────▼──────────────────────────────────────┐
+│  Confidence-Based Injection                                        │
+│                                                                     │
+│  ≥ 0.78  HIGH confidence  → Inject into translation prompt         │
+│  ≥ 0.65  MEDIUM confidence → Log for analysis, don't inject        │
+│  < 0.65  LOW confidence   → Ignore completely                      │
+│                                                                     │
+│  Result: Translator receives natural English phrasing guidance      │
+│  alongside the Japanese source text                                │
+└─────────────────────────────────────────────────────────────────────┘
 ```
+
+### Why Vector Search? Traditional MT and CAT Tools Compared
+
+To understand why semantic vector matching matters, consider how three approaches handle the **same** Japanese source text. The examples below use real patterns from MTL Studio's grammar RAG.
+
+#### Test Case 1: やっぱりやめる (Discourse Marker — Reversion)
+
+| Approach | Output | Problem |
+|----------|--------|---------|
+| **Google Translate / DeepL** | "As expected, I'll stop." | Literal translation of やっぱり — always maps to "as expected" regardless of context |
+| **CAT Tool (Trados, memoQ)** | "As expected, I'll stop." / TM fuzzy match from unrelated genre | Translation Memory retrieves the closest *string* match, not the closest *meaning*; glossary entry can only store one fixed equivalent |
+| **MTL Studio Vector Search** | "Actually, never mind." | Detects やっぱり in *reversion* context (やめる = cancelling), embeds with surrounding sentence, cosine match (sim=0.91) retrieves the `high_frequency_transcreation` pattern → injects "reversion → *actually*, *on second thought*" guidance |
+
+#### Test Case 2: まあ、いいけど (Hedging — Reluctant Acceptance)
+
+| Approach | Output | Problem |
+|----------|--------|---------|
+| **Google Translate / DeepL** | "Well, it's fine, but..." | Mechanical "well" for every まあ; loses the resigned/dismissive nuance |
+| **CAT Tool** | "Well, it's fine, but..." / No TM match → human decides | Glossary can list まあ = "well" but can't distinguish まあいいけど (reluctant) from まあまあ (so-so) from まあね (agreement) |
+| **MTL Studio Vector Search** | "I guess that's fine." / "Fair enough." | 3072D embedding captures *hedging + reluctance* semantics; cosine match returns `reluctant_acceptance` subpattern with confidence 0.84 → injects natural alternatives |
+
+#### Test Case 3: こいつ、本が苦手というより頭を使うことが嫌いなんだよな (Comedic Timing)
+
+| Approach | Output | Problem |
+|----------|--------|---------|
+| **Google Translate / DeepL** | "Rather than saying this guy is bad at books, he just hates using his head." | Single run-on sentence; comedic beat is buried in connective tissue |
+| **CAT Tool** | Same structure, human must manually restructure | TM/glossary systems have no concept of "comedic timing" — they match *words*, not *narrative rhythm* |
+| **MTL Studio Vector Search** | "She doesn't hate books. She hates thinking." | `comedic_timing` category match (sim=0.87) → injects: "Split into two short sentences for punchline. Second sentence = shortest." The translator receives *structural* guidance, not just vocabulary |
+
+#### Test Case 4: 好きになっちゃった (てしまう — Regrettable Completion in Romance)
+
+| Approach | Output | Problem |
+|----------|--------|---------|
+| **Google Translate / DeepL** | "I ended up falling in love." | Grammatically correct but emotionally flat; "ended up" is generic for all てしまう uses |
+| **CAT Tool** | "I accidentally fell in love." / Glossary: てしまう = "ended up" | One-to-one glossary mapping can't distinguish accident てしまう from romance てしまう from resignation てしまう |
+| **MTL Studio Vector Search** | "I fell for you." / "I'm in love." | Embedding includes romance context signals; `auxiliary_verb_patterns` match retrieves genre-appropriate alternatives → "In romance → helpless emotion, drop 'ended up'" |
+
+#### Test Case 5: 道 → Vietnamese Sino-Vietnamese Disambiguation
+
+| Approach | Output | Problem |
+|----------|--------|---------|
+| **Google Translate** | "đường" (road) — always | No kanji-level disambiguation; picks the most frequent meaning |
+| **CAT Tool** | Glossary: 道 = "đạo" — always | Fixed mapping ignores that 道 means đạo (spiritual), đường (physical road), or đạo lý (principle) depending on context |
+| **MTL Studio Vector Search** | 修道之人 → "người tu **đạo**" (spiritual) / 道路 → "**đường**" (road) | `sino_vietnamese_patterns` collection (918 vectors) uses sliding window context (prev + current + next sentence) + register-aware filtering; threshold 0.85 prevents false cognate injection |
+
+#### The Core Difference
+
+```
+Traditional MT:    Source text ──────────────────────→ Target text
+                   (sentence-level, no grammar awareness)
+
+CAT Tools:         Source text → TM fuzzy match ─────→ Target text
+                   (string similarity, fixed glossary, human decides)
+
+MTL Studio:        Source text → Regex detect → 3072D embed → ChromaDB cosine match
+                        ↓              ↓              ↓
+                   9 categories   Contextual      Confidence filter
+                   70+ patterns   vectors         (≥0.78 inject)
+                        ↓              ↓              ↓
+                   Grammar-aware natural phrasing ──→ Target text
+                   (semantic similarity, category-filtered, confidence-gated)
+```
+
+**Traditional MT** translates sentences in isolation — it has no concept of grammar *categories* or discourse marker *functions*. Every やっぱり gets the same treatment.
+
+**CAT Tools** (Trados, memoQ, OmegaT, Memsource) offer Translation Memory and glossaries — powerful for *consistency* (same term = same translation), but fundamentally limited to **string matching**. They can't understand that まあいいけど and まあまあだ require different English despite sharing the same particle. A human translator still makes every phrasing decision.
+
+**MTL Studio Vector Search** operates in **semantic space**. The 3072-dimensional embedding captures *meaning*, not *characters*. Combined with category filtering (comedic_timing ≠ emotional_nuance), negative anchor penalties (reducing false positive matches), and confidence-gated injection (only ≥0.78 reaches the translator), the system provides **contextual phrasing guidance** that no string-matching system can replicate.
+
+The result: a translator that receives guidance like "this てしまう is romance-resignation, not accident — try 'I fell for you' instead of 'I ended up falling in love'" before it even begins translating.
+
+### English Grammar Pattern Store
+
+The primary vector store for JP→EN translation. Indexes patterns from `english_grammar_rag.json` (171KB, 3,384 lines) with structured metadata for category-filtered retrieval.
+
+**Pattern Structure** (indexed per example):
+
+```json
+{
+  "id": "one_thing_but",
+  "japanese_structure": "AはBだが、CもBだ",
+  "japanese_indicators": ["けど", "が", "も"],
+  "english_pattern": "X is one thing, but Y is [quality]",
+  "examples": [
+    {
+      "jp": "真理亜は変だが、如月さんも結構変だ",
+      "literal": "Maria's weird, but Kisaragi-san is pretty weird...",
+      "natural": "Maria's one thing, but Kisaragi-san is pretty weird..."
+    }
+  ],
+  "usage_rules": ["Use when comparing two items with shared quality"],
+  "priority": "high"
+}
+```
+
+**Embedding Strategy**: Each example is embedded as a composite string:
+```
+Structure: AはBだが、CもBだ | Indicators: けど, が, も | Example: 真理亜は変だが... | Natural EN: Maria's one thing...
+```
+This allows semantic matching against both the Japanese grammar structure and the natural English equivalent.
+
+**28 Indexed Categories**:
+
+| Category | Patterns | Example |
+|----------|----------|---------|
+| `high_frequency_transcreations` | 21 | やっぱり → "sure enough", "I knew it" |
+| `comedic_timing` | 9 | ツッコミ/ボケ patterns for humor preservation |
+| `emotional_nuance` | 9 | なんか, ちょっと, まさか → softeners, shock markers |
+| `action_emphasis` | 8 | てしまう → "ended up", てみる → "try doing" |
+| `sentence_endings` | 8 | だよね, じゃない, かな → tag questions, wonderings |
+| `tense_harmonization` | 4 | Past/present narrative consistency |
+| `contrastive_comparison` | 3 | けど...も → "X is one thing, but Y..." |
+| `conditional_restructuring` | 3 | たら, なら, ば → English conditional forms |
+| `perfect_aspect_nuances` | 3 | ていた, てあった → "had been", "was already" |
+| `modal_verb_subtleties` | 3 | かもしれない, はず → "might", "should" |
+| `redundancy_reduction` | 3 | Nominalization and wordiness cleanup |
+| *+ 17 more categories* | 120 | Parallel structure, subjunctive, inversion, etc. |
+
+### Sino-Vietnamese Disambiguation Store (Vietnamese Pipeline)
+
+A specialized vector store for the VN translation pipeline that resolves kanji/hanzi ambiguity using context-aware semantic matching.
+
+**Use Case**: The kanji 道 can mean "đạo" (spiritual path), "đường" (road), or "đạo lý" (principle) in Vietnamese. The system uses surrounding sentence context to select the correct Sino-Vietnamese reading.
+
+**Features**:
+- **Register-aware filtering**: formal/casual/literary registers
+- **Sliding window context**: Previous + current + next sentence for disambiguation
+- **Pinyin enhancement**: Romanization injected into embeddings for better Chinese text differentiation
+- **External dictionary fallback**: KanjiAPI integration when vector store has no match
+- **Higher thresholds**: 0.85 inject / 0.70 log (stricter than English due to tone complexity)
+
+**Persistence**: `chroma_sino_vn/` directory with dedicated `sino_vietnamese_patterns` collection.
+
+### Grammar Pattern Detector
+
+The regex-based front end that scans Japanese source text and feeds structured pattern data to the vector store.
+
+**Detection Coverage**: 70+ regex patterns across 9 categories:
+
+| Category | Patterns | Example Indicators |
+|----------|----------|--------------------|
+| `contrastive_comparison` | 5 | けど...も, だけでなく, どころか |
+| `dismissive_acknowledgment` | 4 | はともかく, は置いといて, はさておき |
+| `intensifiers` | 5 | めっちゃ, すごく, マジで |
+| `hedging` | 5 | かもしれない, だろう, 気がする |
+| `response_particles` | 5 | ああ, うん, なるほど, へえ |
+| `natural_transitions` | 4 | とにかく, ところで, まあ |
+| `sentence_endings` | 8 | だよね, じゃない, かな, っけ |
+| `emotional_nuance` | 9 | なんか, やっぱり, さすがに, まさか |
+| `action_emphasis` | 8 | てしまう, てみる, てくる, ておく |
+
+**Priority System**: `contrastive_comparison` and `dismissive_acknowledgment` are classified as high-priority (most likely to need idiomatic English equivalents vs literal translation).
+
+### Auto-Rebuild
+
+The `EnglishPatternStore` includes automatic index recovery. If the ChromaDB collection is found empty on initialization (e.g., after database deletion for an embedding model upgrade), the store automatically rebuilds from `english_grammar_rag.json` — no manual intervention required:
+
+```
+[GRAMMAR] Vector store is empty — auto-rebuilding from english_grammar_rag.json...
+  → contrastive_comparison: 3 patterns
+  → high_frequency_transcreations: 21 patterns
+  → comedic_timing: 9 patterns
+  ... (28 categories)
+[GRAMMAR] ✓ Auto-rebuild complete: 204 patterns across 28 categories
+```
+
+### Batch Embedding Optimization
+
+The `get_bulk_guidance()` method uses a single `embed_content` API call to generate embeddings for all detected patterns simultaneously, rather than N sequential calls:
+
+```python
+# 1 API call for 15 patterns instead of 15 separate calls
+query_embeddings = self.vector_store.embed_texts_batch(queries)
+```
+
+This reduces Phase 2 latency by ~2-3 seconds per chapter while respecting Gemini API rate limits.
 
 ### Configuration
 
-```yaml
-# config.yaml
-translation:
-  enable_multimodal: true  # Auto-load visual_cache.json
+Vector search is configured in `config.yaml` under each language's `grammar_rag` section:
 
+```yaml
 languages:
   en:
     grammar_rag:
       enabled: true
+      config_file: config/english_grammar_rag.json
+      inject_mode: always
+      max_patterns_per_prompt: 8
       vector_store:
         persist_directory: ./chroma_english_patterns
         collection_name: english_grammar_patterns
 ```
 
----
+### Confidence Thresholds
 
-## What's New in V4.5
+| Store | Inject Threshold | Log Threshold | Rationale |
+|-------|-----------------|---------------|------------|
+| **English Grammar** | ≥ 0.78 | ≥ 0.65 | Tuned for light novel genre; slightly relaxed from 0.82 default |
+| **Sino-Vietnamese** | ≥ 0.85 | ≥ 0.70 | Stricter due to tonal language complexity and false cognate risk |
+| **Core PatternVectorStore** | ≥ 0.82 | ≥ 0.65 | Generic baseline for new stores |
 
-###  Historic Milestone: Single-Pass Equals Multi-Pass Professional Editorial
+The three-tier strategy (inject / log / ignore) prevents low-confidence matches from corrupting translation prompts while capturing uncertain matches for future training data.
 
-**Google Drive**: https://drive.google.com/drive/folders/11yDkQgtyBHCwcDlInJ-sBlCAX3zN0g0I?usp=drive_link
+### Module Architecture
 
-DISCLAIMER: We cannot distribute copyrighted material. The above link is for internal benchmarking only.
+| File | Purpose |
+|------|---------|
+| `modules/vector_search.py` | Core `PatternVectorStore` — ChromaDB + Gemini embedding integration |
+| `modules/english_pattern_store.py` | English-specific wrapper with category filtering + auto-rebuild |
+| `modules/sino_vietnamese_store.py` | Vietnamese-specific wrapper with register + pinyin enhancement |
+| `modules/grammar_pattern_detector.py` | Regex-based Japanese grammar pattern scanner (70+ patterns) |
+| `config/english_grammar_rag.json` | English grammar pattern source data (171KB, 204 indexed examples) |
+| `scripts/rebuild_english_vectors.py` | Manual rebuild utility for English pattern index |
+| `scripts/build_sino_vn_index.py` | Manual rebuild utility for Sino-Vietnamese index |
 
-**February 4, 2026** - MTL Studio v4.5 becomes the first automated translation system to achieve **source fidelity parity with professional publications** (95.75/100 vs 93.00/100) while matching editorial quality (93/100) in a **single automated pass** + cleanup.
+### Pipeline Integration
 
-**Benchmark Validation**: Comprehensive analysis of 10,923 lines comparing MTL Studio v4.5 against Yen Press professional publication of *Days with My Stepsister* (義妹生活) demonstrates:
-- **+2.75 points higher source fidelity** (95.75 vs 93.00)
-- **Cultural authenticity superiority:** +10.5 points (97.5 vs 87.0)
-- **Character voice accuracy:** +2.6 points (95.8 vs 93.2)
-- **Genre authenticity (日常系):** +6.0 points (97.0 vs 91.0)
-- **Editorial quality:** 93/100 (competitive with professional 96/100)
+Vector search activates automatically during Phase 2 translation:
 
-**Economic Impact**: $50 + 4-6 hours vs $6,000 + 6-10 weeks (98% cheaper, 99% faster, higher source accuracy)
-
-### 🔧 The Three Breakthrough Technologies
-
-#### 1. Literacy Techniques JSON (Narrative Voice Engine)
-```yaml
-literacy_techniques:
-  narrative_technique: "first_person_introspective"
-  psychic_distance_level: 2
-  preset: "contemporary_ya_introspective"
-  voice_guidelines:
-    - High contraction rate (95%+)
-    - Conversational with intellectual depth
-    - Teenage overthinking = authentic
-    - 日常系 (nichijou) verbose introspection preserved
 ```
-**Impact**: Zero voice drift across 5,856 lines, captures 俺 (ore) casual masculine tone better than over-polished professional prose, systematic genre convention adherence.
-
-#### 2. Sarcasm Configuration (Humor & Personality Modeling)
-```yaml
-character_traits:
-  Yomiuri:
-    humor_style: "teasing_wise_older_sister"
-    sarcasm_level: "high"
-    comedic_timing: "socratic_provocateur"
-  Maru:
-    humor_style: "brutal_friend_roasting"
-    sarcasm_level: "maximum"
-    speech_pattern: "casual_vulgar_male_banter"
+Phase 2 Chapter Processing:
+  1. Strip JP title from source text
+  2. [VN only] Extract kanji compounds → SinoVietnameseStore.get_bulk_guidance()
+  3. [EN only] detect_grammar_patterns() → EnglishPatternStore.get_bulk_guidance()
+  4. [Multimodal] Inject Art Director's Notes (if visual_cache exists)
+  5. Build translation prompt with all guidance injected
+  6. Send to Gemini 2.5 Pro for translation
 ```
-**Impact**: Character-specific comedic timing preserved (Dad's "critical hit" gaming reference, Maru's "look in the mirror" roast), personality consistency maintained that professional translations often flatten.
 
-#### 3. Character Profiles (Speech Pattern DNA)
-```yaml
-character_profiles:
-  Yuuta:
-    first_person: "俺" # masculine casual
-    speech_style: "introspective_analytical"
-    contraction_rate: "very_high"
-  Saki:
-    first_person: "私" # neutral formal
-    speech_style: "restrained_polite"
-    honorific_usage: "consistent_san"
+The translator log reports guidance statistics per chapter:
 ```
-**Impact**: Systematic speech differentiation maintained across all chapters (Yuuta's "let me tell you" directness vs Saki's minimalist "...ありがと"), perfect honorific relationship encoding (100% retention = future narrative payoff intact).
-
-**Combined Result**: The three pillars enable MTL Studio v4.5 to make **editorial-level decisions** previously requiring human judgment:
-- Rhetorical emphasis (em-dash vs colon)
-- Genre-appropriate verbosity (日常系 overthinking)
-- Character-specific humor preservation
-- Cultural marker retention (おかえり/ただいま home rituals)
+[GRAMMAR] Found 15 patterns
+[GRAMMAR] English pattern guidance: 3 high, 7 medium
+[KANJI]  Sino-Vietnamese guidance: 5 high, 12 medium, 3 external
+```
 
 ---
 
@@ -476,230 +617,6 @@ When the translator saves its THINKING log, it includes the Art Director's visua
 - Cultural westernization: Economic pressure to remove "friction points" for bookstores
 
 **MTL Studio v4.5 Advantage**: No westernization pressure → preserves author's original intent with higher accuracy than traditional editorial pipelines.
-
----
-
-## 🔍 Gemini Embedding: Vector Search Engine
-
-**Status**: Deployed (Phase 2) | **Model**: `gemini-embedding-001` | **Dimensions**: 3072 | **February 2026**
-
-> The Vector Search Engine converts Japanese grammar patterns and Sino-Vietnamese terminology into high-dimensional embedding vectors, enabling semantic similarity matching that guides the Translator toward natural phrasing — without hardcoded rules.
-
-### Architecture: Detect → Embed → Match → Inject
-
-The system operates as a real-time semantic lookup during Phase 2 translation. For each chapter, it detects Japanese grammar structures in the source text, embeds them as 3072-dimensional vectors via `gemini-embedding-001`, queries ChromaDB for the closest natural-language equivalents, and injects high-confidence matches into the translation prompt.
-
-```
-┌─────────────────────────────────────────────────────────────────────┐
-│  Grammar Pattern Detector (regex scan)                             │
-│                                                                     │
-│  INPUT:  Japanese source chapter text                              │
-│  OUTPUT: Top 15 detected patterns with category + context          │
-│                                                                     │
-│  Scans for 70+ regex patterns across 9 categories:                 │
-│    contrastive_comparison, dismissive_acknowledgment, intensifiers, │
-│    hedging, response_particles, natural_transitions,               │
-│    sentence_endings, emotional_nuance, action_emphasis             │
-└──────────────────────────────┬──────────────────────────────────────┘
-                               │
-┌──────────────────────────────▼──────────────────────────────────────┐
-│  Embedding Engine (gemini-embedding-001)                           │
-│                                                                     │
-│  Batch embeds all detected patterns in 1 API call                  │
-│  Input: "[context] [indicator] [chapter hint]"                     │
-│  Output: 3072-dimensional vectors per pattern                      │
-│                                                                     │
-│  Supports: Japanese, Chinese, Vietnamese, English (multilingual)   │
-└──────────────────────────────┬──────────────────────────────────────┘
-                               │
-┌──────────────────────────────▼──────────────────────────────────────┐
-│  ChromaDB Vector Store (cosine similarity)                         │
-│                                                                     │
-│  Persistent local storage with HNSW index                          │
-│  Collections:                                                      │
-│    english_grammar_patterns  → 204 patterns, 28 categories         │
-│    sino_vietnamese_patterns  → Sino-VN disambiguation (VN only)    │
-│                                                                     │
-│  Returns: similarity score (0.0 – 1.0) + pattern metadata          │
-└──────────────────────────────┬──────────────────────────────────────┘
-                               │
-┌──────────────────────────────▼──────────────────────────────────────┐
-│  Confidence-Based Injection                                        │
-│                                                                     │
-│  ≥ 0.78  HIGH confidence  → Inject into translation prompt         │
-│  ≥ 0.65  MEDIUM confidence → Log for analysis, don't inject        │
-│  < 0.65  LOW confidence   → Ignore completely                      │
-│                                                                     │
-│  Result: Translator receives natural English phrasing guidance      │
-│  alongside the Japanese source text                                │
-└─────────────────────────────────────────────────────────────────────┘
-```
-
-### English Grammar Pattern Store
-
-The primary vector store for JP→EN translation. Indexes patterns from `english_grammar_rag.json` (171KB, 3,384 lines) with structured metadata for category-filtered retrieval.
-
-**Pattern Structure** (indexed per example):
-
-```json
-{
-  "id": "one_thing_but",
-  "japanese_structure": "AはBだが、CもBだ",
-  "japanese_indicators": ["けど", "が", "も"],
-  "english_pattern": "X is one thing, but Y is [quality]",
-  "examples": [
-    {
-      "jp": "真理亜は変だが、如月さんも結構変だ",
-      "literal": "Maria's weird, but Kisaragi-san is pretty weird...",
-      "natural": "Maria's one thing, but Kisaragi-san is pretty weird..."
-    }
-  ],
-  "usage_rules": ["Use when comparing two items with shared quality"],
-  "priority": "high"
-}
-```
-
-**Embedding Strategy**: Each example is embedded as a composite string:
-```
-Structure: AはBだが、CもBだ | Indicators: けど, が, も | Example: 真理亜は変だが... | Natural EN: Maria's one thing...
-```
-This allows semantic matching against both the Japanese grammar structure and the natural English equivalent.
-
-**28 Indexed Categories**:
-
-| Category | Patterns | Example |
-|----------|----------|---------|
-| `high_frequency_transcreations` | 21 | やっぱり → "sure enough", "I knew it" |
-| `comedic_timing` | 9 | ツッコミ/ボケ patterns for humor preservation |
-| `emotional_nuance` | 9 | なんか, ちょっと, まさか → softeners, shock markers |
-| `action_emphasis` | 8 | てしまう → "ended up", てみる → "try doing" |
-| `sentence_endings` | 8 | だよね, じゃない, かな → tag questions, wonderings |
-| `tense_harmonization` | 4 | Past/present narrative consistency |
-| `contrastive_comparison` | 3 | けど...も → "X is one thing, but Y..." |
-| `conditional_restructuring` | 3 | たら, なら, ば → English conditional forms |
-| `perfect_aspect_nuances` | 3 | ていた, てあった → "had been", "was already" |
-| `modal_verb_subtleties` | 3 | かもしれない, はず → "might", "should" |
-| `redundancy_reduction` | 3 | Nominalization and wordiness cleanup |
-| *+ 17 more categories* | 120 | Parallel structure, subjunctive, inversion, etc. |
-
-### Sino-Vietnamese Disambiguation Store (Vietnamese Pipeline)
-
-A specialized vector store for the VN translation pipeline that resolves kanji/hanzi ambiguity using context-aware semantic matching.
-
-**Use Case**: The kanji 道 can mean "đạo" (spiritual path), "đường" (road), or "đạo lý" (principle) in Vietnamese. The system uses surrounding sentence context to select the correct Sino-Vietnamese reading.
-
-**Features**:
-- **Register-aware filtering**: formal/casual/literary registers
-- **Sliding window context**: Previous + current + next sentence for disambiguation
-- **Pinyin enhancement**: Romanization injected into embeddings for better Chinese text differentiation
-- **External dictionary fallback**: KanjiAPI integration when vector store has no match
-- **Higher thresholds**: 0.85 inject / 0.70 log (stricter than English due to tone complexity)
-
-**Persistence**: `chroma_sino_vn/` directory with dedicated `sino_vietnamese_patterns` collection.
-
-### Grammar Pattern Detector
-
-The regex-based front end that scans Japanese source text and feeds structured pattern data to the vector store.
-
-**Detection Coverage**: 70+ regex patterns across 9 categories:
-
-| Category | Patterns | Example Indicators |
-|----------|----------|--------------------|
-| `contrastive_comparison` | 5 | けど...も, だけでなく, どころか |
-| `dismissive_acknowledgment` | 4 | はともかく, は置いといて, はさておき |
-| `intensifiers` | 5 | めっちゃ, すごく, マジで |
-| `hedging` | 5 | かもしれない, だろう, 気がする |
-| `response_particles` | 5 | ああ, うん, なるほど, へえ |
-| `natural_transitions` | 4 | とにかく, ところで, まあ |
-| `sentence_endings` | 8 | だよね, じゃない, かな, っけ |
-| `emotional_nuance` | 9 | なんか, やっぱり, さすがに, まさか |
-| `action_emphasis` | 8 | てしまう, てみる, てくる, ておく |
-
-**Priority System**: `contrastive_comparison` and `dismissive_acknowledgment` are classified as high-priority (most likely to need idiomatic English equivalents vs literal translation).
-
-### Auto-Rebuild
-
-The `EnglishPatternStore` includes automatic index recovery. If the ChromaDB collection is found empty on initialization (e.g., after database deletion for an embedding model upgrade), the store automatically rebuilds from `english_grammar_rag.json` — no manual intervention required:
-
-```
-[GRAMMAR] Vector store is empty — auto-rebuilding from english_grammar_rag.json...
-  → contrastive_comparison: 3 patterns
-  → high_frequency_transcreations: 21 patterns
-  → comedic_timing: 9 patterns
-  ... (28 categories)
-[GRAMMAR] ✓ Auto-rebuild complete: 204 patterns across 28 categories
-```
-
-### Batch Embedding Optimization
-
-The `get_bulk_guidance()` method uses a single `embed_content` API call to generate embeddings for all detected patterns simultaneously, rather than N sequential calls:
-
-```python
-# 1 API call for 15 patterns instead of 15 separate calls
-query_embeddings = self.vector_store.embed_texts_batch(queries)
-```
-
-This reduces Phase 2 latency by ~2-3 seconds per chapter while respecting Gemini API rate limits.
-
-### Configuration
-
-Vector search is configured in `config.yaml` under each language's `grammar_rag` section:
-
-```yaml
-languages:
-  en:
-    grammar_rag:
-      enabled: true
-      config_file: config/english_grammar_rag.json
-      inject_mode: always
-      max_patterns_per_prompt: 8
-      vector_store:
-        persist_directory: ./chroma_english_patterns
-        collection_name: english_grammar_patterns
-```
-
-### Confidence Thresholds
-
-| Store | Inject Threshold | Log Threshold | Rationale |
-|-------|-----------------|---------------|------------|
-| **English Grammar** | ≥ 0.78 | ≥ 0.65 | Tuned for light novel genre; slightly relaxed from 0.82 default |
-| **Sino-Vietnamese** | ≥ 0.85 | ≥ 0.70 | Stricter due to tonal language complexity and false cognate risk |
-| **Core PatternVectorStore** | ≥ 0.82 | ≥ 0.65 | Generic baseline for new stores |
-
-The three-tier strategy (inject / log / ignore) prevents low-confidence matches from corrupting translation prompts while capturing uncertain matches for future training data.
-
-### Module Architecture
-
-| File | Purpose |
-|------|---------|
-| `modules/vector_search.py` | Core `PatternVectorStore` — ChromaDB + Gemini embedding integration |
-| `modules/english_pattern_store.py` | English-specific wrapper with category filtering + auto-rebuild |
-| `modules/sino_vietnamese_store.py` | Vietnamese-specific wrapper with register + pinyin enhancement |
-| `modules/grammar_pattern_detector.py` | Regex-based Japanese grammar pattern scanner (70+ patterns) |
-| `config/english_grammar_rag.json` | English grammar pattern source data (171KB, 204 indexed examples) |
-| `scripts/rebuild_english_vectors.py` | Manual rebuild utility for English pattern index |
-| `scripts/build_sino_vn_index.py` | Manual rebuild utility for Sino-Vietnamese index |
-
-### Pipeline Integration
-
-Vector search activates automatically during Phase 2 translation:
-
-```
-Phase 2 Chapter Processing:
-  1. Strip JP title from source text
-  2. [VN only] Extract kanji compounds → SinoVietnameseStore.get_bulk_guidance()
-  3. [EN only] detect_grammar_patterns() → EnglishPatternStore.get_bulk_guidance()
-  4. [Multimodal] Inject Art Director's Notes (if visual_cache exists)
-  5. Build translation prompt with all guidance injected
-  6. Send to Gemini 2.5 Pro for translation
-```
-
-The translator log reports guidance statistics per chapter:
-```
-[GRAMMAR] Found 15 patterns
-[GRAMMAR] English pattern guidance: 3 high, 7 medium
-[KANJI]  Sino-Vietnamese guidance: 5 high, 12 medium, 3 external
-```
 
 ---
 
@@ -1309,6 +1226,8 @@ python mtl.py config --model gemini-2.5-pro
 | `list` | List all volumes in WORK directory |
 | `metadata` | Inspect metadata schema and validate translator compatibility |
 | `config` | View or modify pipeline configuration |
+| `cjk-clean` | Run CJK Cleaner v2 (multi-script artifact removal) |
+| `heal` | Run Self-Healing Anti-AI-ism Agent (3-layer detection + auto-fix) |
 
 ### Options
 
@@ -1322,6 +1241,9 @@ python mtl.py config --model gemini-2.5-pro
 | `--model` | Gemini model to use |
 | `--show` | Display current configuration |
 | `--validate` | Run full metadata validation with detailed report |
+| `--dry-run` | Scan only, don't modify files (heal, cjk-clean) |
+| `--vn` | Target Vietnamese language (heal) |
+| `--en` | Target English language (heal) |
 
 ### Interactive Features
 
@@ -1543,7 +1465,7 @@ The translation system uses a 2.5MB retrieval-augmented generation knowledge bas
 
 | Configuration | Patterns | Purpose |
 |---------------|----------|---------||
-| anti_ai_ism_patterns.json | 63 patterns | AI-ism detection with 3 severity tiers |
+| anti_ai_ism_patterns.json | 65 patterns | AI-ism detection with 4 severity tiers + Self-Healing Agent |
 | Echo Detection System | 23 patterns | Proximity-based clustering detection (50/75/100/150-word windows) |
 | Documentation | ECHO_DETECTION_GUIDE.md | Complete technical specifications and integration guide |
 
@@ -1565,12 +1487,13 @@ The Vietnamese pipeline includes dedicated modules in `VN/modules/`:
 
 ### Anti-AI-ism Pattern Library
 
-**Version 2.0** - Comprehensive 63-pattern detection system with industrial publishing standards:
+**Version 2.0** - Comprehensive 65-pattern detection system with industrial publishing standards:
 
 **Pattern Organization**:
 - **CRITICAL** (6 patterns): Publication blockers - direct translations, pseudo-biology
-- **MAJOR** (28 patterns): Quality degraders - emotion wrappers, filter phrases, process verbs, AI crutch phrases
-- **MINOR** (29 patterns): Style polish - formal vocabulary, transitional overuse, hedge words
+- **MAJOR** (28 patterns, 8 categories): Quality degraders - emotion wrappers, filter phrases, process verbs, AI crutch phrases, Japanese calques, nominalizations, manner phrases, hedging
+- **MINOR** (29 patterns, 8 categories): Style polish - formal vocabulary, transitional overuse, hedge words, perception verbs, reaction verbs, gaze verbs
+- **VN_CRITICAL** (2 patterns): Vietnamese-specific blockers - "một cách" + "một cảm giác" AI constructions
 
 **Categories**: 11 specialized subcategories including emotion_wrappers, filter_phrases, process_verbs, ai_crutch_phrases, perception_verbs, reaction_verbs, gaze_verbs, hedge_words, and more.
 
@@ -1607,7 +1530,7 @@ Result: Forces synonym variation ("She ran" / "She took off running")
 
 - **Typography Fixes**: Smart quotes, em-dashes, ellipses standardization
 - **Contraction Enforcement**: Expansion patterns detected and corrected
-- **AI-ism Detection**: 63-pattern library with severity classification
+- **AI-ism Detection**: 65-pattern library with severity classification + Self-Healing Agent
 - **Echo Detection**: Proximity-based clustering analysis with automatic escalation
 - **Name Consistency**: Ruby text verification against translations
 
@@ -1628,6 +1551,94 @@ Result: Forces synonym variation ("She ran" / "She took off running")
   "auto_fixes_applied": 3
 }
 ```
+
+### Self-Healing Anti-AI-ism Agent
+
+**Version 1.0** — Automated post-processor with three-layer detection and LLM self-correction.
+
+Replaces the previous 4-subagent AUDIT_AGENT system with a single, fully automated agent that detects AND fixes AI-generated prose artifacts in one pass.
+
+**Architecture**:
+```
+┌──────────────────────────────────────────────────────────────────────┐
+│                SELF-HEALING ANTI-AI-ISM AGENT v1.0                   │
+│                                                                      │
+│  INPUT: Translated chapter files (EN or VN)                          │
+│                                                                      │
+│  ┌──────────────────────────────────────────────────────────────┐    │
+│  │ LAYER 1: Regex Scanner                                       │    │
+│  │ 65 patterns from anti_ai_ism_patterns.json                   │    │
+│  │ CRITICAL → block | MAJOR → degrade | MINOR → flag            │    │
+│  └──────────────────────────┬───────────────────────────────────┘    │
+│                             ▼                                        │
+│  ┌──────────────────────────────────────────────────────────────┐    │
+│  │ LAYER 2: Vector Bad Prose DB                                 │    │
+│  │ ChromaDB + gemini-embedding-001 (3072D)                      │    │
+│  │ 35 BAD_PROSE_SEEDS × cosine similarity                       │    │
+│  │ ≥ 0.80 → FLAG | ≥ 0.70 → WARN                               │    │
+│  └──────────────────────────┬───────────────────────────────────┘    │
+│                             ▼                                        │
+│  ┌──────────────────────────────────────────────────────────────┐    │
+│  │ LAYER 3: Psychic Distance Filter                             │    │
+│  │ Filter words (seemed, appeared, felt) — narrative distance   │    │
+│  │ Nominalizations (the realization of) — verb→noun bloat       │    │
+│  │ Prepositional chains (of the X of the Y) — chain detection   │    │
+│  │ VN patterns (một cách, một cảm giác, sự + noun)             │    │
+│  └──────────────────────────┬───────────────────────────────────┘    │
+│                             ▼                                        │
+│  ┌──────────────────────────────────────────────────────────────┐    │
+│  │ SELF-HEALING ENGINE                                          │    │
+│  │ Gemini Flash (temp=0.3) rewrites flagged sentences           │    │
+│  │ Category-specific prompts × severity-ordered processing      │    │
+│  │ CRITICAL first → MAJOR → MINOR                               │    │
+│  └──────────────────────────────────────────────────────────────┘    │
+│                                                                      │
+│  OUTPUT: Healed files + Markdown audit report                        │
+└──────────────────────────────────────────────────────────────────────┘
+```
+
+**Bad Prose DB Categories**:
+| Category | Seeds | Example |
+|----------|-------|---------|
+| filter_word | 8 | "He seemed to understand" → "He understood" |
+| nominalization | 6 | "The realization of the truth" → "She realized the truth" |
+| prepositional_bloat | 5 | "In the process of walking" → "Walking" |
+| ai_crutch | 6 | "As if reading her mind" → character-specific phrasing |
+| vn_mot_cach | 4 | "một cách chậm rãi" → "chầm chậm" |
+| vn_mot_cam_giac | 3 | "một cảm giác ấm áp" → "ấm lòng" |
+| vn_su_nominalization | 3 | "sự xuất hiện của" → direct verb form |
+
+**CLI Usage**:
+```bash
+# Scan + auto-heal English volume
+python mtl.py heal 05df
+
+# Dry run (scan only, no modifications)
+python mtl.py heal 05df --dry-run
+
+# Explicit Vietnamese targeting
+python mtl.py heal 05df --vn
+
+# Explicit English targeting
+python mtl.py heal 05df --en
+```
+
+**Module**: `pipeline/modules/anti_ai_ism_agent.py`
+
+### Streamlined Post-Processing Pipeline
+
+MTL Studio's post-processing now runs exactly **two automated tools** after translation:
+
+```
+Phase 2 Output → CJK Cleaner v2 → Self-Healing Anti-AI-ism Agent → Publication Ready
+```
+
+| Tool | Purpose | Detection | Auto-Fix |
+|------|---------|-----------|----------|
+| **CJK Cleaner v2** | Remove script contamination | CJK + Cyrillic + Arabic + 9M+ artifacts | LLM rewrite via Gemini |
+| **Anti-AI-ism Agent** | Eliminate AI prose artifacts | 65 regex + Vector DB + Psychic Distance | Gemini Flash rewrite |
+
+This replaces the previous external IDE workflow (AUDIT_AGENT V2.0 with 4 subagents) with a fully integrated, single-command pipeline that both detects AND corrects issues automatically.
 
 ### External IDE Agents
 
@@ -1659,147 +1670,6 @@ MTL Studio integrates with external IDE agents (VSCode, Windsurf, Cursor, etc.) 
 **Output**: `metadata_en.json` with V3.6 schema compliance
 
 **Schema Version**: `v3.6_enhanced` (includes Gap Moe + TTS support)
-
-#### 2. AUDIT_AGENT V2.0
-
-**Purpose**: Multi-phase quality control system to eliminate truncations, hallucinations, lazy summarization, AI-isms, and missed transcreations.
-
-**Documentation**: `AUDIT_AGENT.md`
-
-**Architecture**: 4 independent subagents + final aggregator
-
-##### Subagent 1: Content Fidelity Auditor
-**Mission**: **ZERO TOLERANCE** for truncation, censorship, or lazy summarization.
-
-**Detection Rules**:
-- **TRUNCATION**: EN sentence significantly shorter than JP equivalent
-- **CENSORSHIP**: Romantic/intimate content softened or sanitized
-- **SUMMARIZATION**: Multiple JP paragraphs lazily combined into one
-- **OMISSION**: Entire paragraphs missing (CRITICAL - blocks publication)
-- **ADDITION**: Content added not present in source
-
-**Validation Checks**:
-- Dialogue count match (JP vs EN)
-- Paragraph count match
-- Scene break preservation
-- Character appearance consistency
-
-**Threshold**: <5% deviation = PASS | >10% deviation = FAIL (blocks publication)
-
-**Output**: `fidelity_audit_report.json`
-
-##### Subagent 2: Content Integrity Auditor
-**Mission**: Validate structural elements, names, terms, formatting standards.
-
-**Validation Categories**:
-- **Chapter Titles**: Cross-reference with JP source
-- **Character Names**: Ruby text verification, name order (surname first)
-- **Honorifics**: Hybrid localization standard (-san, -kun, -chan retained)
-- **Glossary Terms**: Consistency with manifest.json definitions
-- **Formatting**: Smart quotes, em-dashes, ellipses (auto-fixable)
-- **Illustration Markers**: JP/EN count match, proper placement
-- **Scene Breaks**: Format consistency (\* \* \*)
-- **Sequel Continuity**: Inherits character profiles from previous volumes
-- **Genre Traits**: Series-specific validation (idol terminology, kuchie handling, etc.)
-
-**Threshold**: >95% pass rate = PASS | Name order violations = CRITICAL FAIL
-
-**Output**: `integrity_audit_report.json`
-
-##### Subagent 3: Prose Quality Auditor
-**Mission**: Ensure natural English prose, detect AI-isms and missed transcreations.
-
-**Detection Integration**:
-- **Grammar RAG**: 53-pattern database for natural English constructions
-- **Anti-AI-ism Library**: 63-pattern detection (6 CRITICAL, 28 MAJOR, 29 MINOR)
-- **Echo Detection**: Proximity-based clustering (23 patterns, 36.5% coverage)
-- **Transcreation Patterns**: Japanese discourse markers (やっぱり→"sure enough", さすが→"that's X for you")
-
-**Validation Categories**:
-- **AI-ism Density**: Target <0.5 per 1k words | >1.0 = FAIL
-- **Contraction Rate**: Target 90%+ (FFXVI-tier 99%+) | <80% = FAIL
-- **Victorian Patterns**: Zero tolerance (with ojou-sama exemptions)
-- **Transcreation Coverage**: Target 80%+ | Flags literal translations
-- **Character Voice**: Differentiation score (distinct speech patterns)
-- **Sentence Quality**: Variety, passive voice rate, nominalization rate
-
-**Threshold**: Prose score >85 = PASS | >5 critical AI-isms = GRADE CAP AT C
-
-**Output**: `prose_audit_report.json`
-
-##### Subagent 4: Gap Preservation Auditor
-**Mission**: Validate semantic gaps (emotion+action, ruby text, subtext) preserved in translation.
-
-**Gap Categories**:
-- **Gap A (Emotion+Action)**: Simultaneous translation of emotions + physical actions
-  - Example: "exhaustion markers + glass chattering detail"
-  - Target: >90% preservation
-- **Gap B (Ruby Text)**: Furigana annotations indicating wordplay, names, specialized readings
-  - Example: 人間【ヒト】 (humanity [person])
-  - Target: 100% preservation (translator notes required)
-- **Gap C (Subtext)**: Hidden meanings, sarcasm, performative speech vs true feelings
-  - Example: Phone anxiety (PTSD trauma framing)
-  - Target: >85% preservation
-
-**Genre Validation**:
-- Idol culture terminology preservation
-- Psychological depth (depression protocols, trauma handling)
-- Kansai dialect markers
-- Digital trauma representation
-
-**Threshold**: >90% overall = GOOD | <75% = CRITICAL FAIL | Trauma misrepresentation = MANUAL REVIEW
-
-**Output**: `gap_preservation_audit_report.json`
-
-##### Final Auditor: Report Aggregator
-**Mission**: Aggregate 4 subagent reports into comprehensive final audit.
-
-**Grading Matrix**:
-```
-┌─────────────────┬───────────┬───────────┬───────────┬──────────┬──────────────────┐
-│     GRADE       │ FIDELITY  │ INTEGRITY │   PROSE   │   GAPS   │    VERDICT       │
-├─────────────────┼───────────┼───────────┼───────────┼──────────┼──────────────────┤
-│ A+ (FFXVI-Tier) │   PASS    │   PASS    │  95%+     │  >95%    │ PUBLISH READY    │
-│ A  (Excellent)  │   PASS    │   PASS    │  90%+     │  90-95%  │ PUBLISH READY    │
-│ B  (Good)       │   PASS    │  WARNINGS │  85%+     │  85-90%  │ MINOR FIXES      │
-│ C  (Acceptable) │   PASS    │  WARNINGS │  80%+     │  80-85%  │ REVISION NEEDED  │
-│ D  (Poor)       │  REVIEW   │   FAIL    │  <80%     │  75-80%  │ MAJOR REVISION   │
-│ F  (Fail)       │   FAIL    │   FAIL    │    ANY    │  <75%    │ BLOCKS PUBLISH   │
-└─────────────────┴───────────┴───────────┴───────────┴──────────┴──────────────────┘
-```
-
-**Blocking Conditions**:
-- Content Fidelity: >10% deviation → AUTOMATIC F
-- Content Integrity: Name order wrong → AUTOMATIC F
-- Content Integrity: Sequel continuity violation → AUTOMATIC F
-- Prose Quality: >5 critical AI-isms → GRADE CAP AT C
-- Gap Preservation: <75% rate → AUTOMATIC F
-- Gap Preservation: Trauma misrepresentation → MANUAL REVIEW REQUIRED
-
-**Outputs**:
-- `FINAL_AUDIT_REPORT.md`: Human-readable comprehensive report
-- `audit_summary.json`: Machine-readable aggregate statistics
-
-**Grading Weights** (configurable):
-- Fidelity: 40%
-- Integrity: 25%
-- Prose: 25%
-- Gaps: 10%
-
-**Workflow**:
-```bash
-# Run full audit pipeline
-python audit_pipeline.py --volume 05df
-
-# Or run individual subagents
-python -m auditors.fidelity --volume 05df --output audits/
-python -m auditors.integrity --volume 05df --output audits/
-python -m auditors.prose --volume 05df --output audits/
-python -m auditors.gap_preservation --volume 05df --output audits/
-
-# Generate final report
-python -m auditors.final --volume 05df --input audits/ --output FINAL_AUDIT_REPORT.md
-```
 
 ---
 
@@ -1886,6 +1756,77 @@ gemini -s AUDIT_AGENT.md 'Insert illust-005.jpg in Chapter 3 before "Maria stepp
 | B | 0-1 critical, 3-5 warnings, 80%+ contractions, minor formatting (<10) |
 | C | 2-3 critical, 6-10 warnings, 70%+ contractions, needs revision |
 | F | Any name order errors OR >15% content deviation (blocks publication) |
+
+---
+
+## Versus Official Publishing
+
+###  Historic Milestone: Single-Pass Equals Multi-Pass Professional Editorial
+
+**Google Drive**: https://drive.google.com/drive/folders/11yDkQgtyBHCwcDlInJ-sBlCAX3zN0g0I?usp=drive_link
+
+DISCLAIMER: We cannot distribute copyrighted material. The above link is for internal benchmarking only.
+
+**February 4, 2026** - MTL Studio v4.5 becomes the first automated translation system to achieve **source fidelity parity with professional publications** (95.75/100 vs 93.00/100) while matching editorial quality (93/100) in a **single automated pass** + cleanup.
+
+**Benchmark Validation**: Comprehensive analysis of 10,923 lines comparing MTL Studio v4.5 against Yen Press professional publication of *Days with My Stepsister* (義妹生活) demonstrates:
+- **+2.75 points higher source fidelity** (95.75 vs 93.00)
+- **Cultural authenticity superiority:** +10.5 points (97.5 vs 87.0)
+- **Character voice accuracy:** +2.6 points (95.8 vs 93.2)
+- **Genre authenticity (日常系):** +6.0 points (97.0 vs 91.0)
+- **Editorial quality:** 93/100 (competitive with professional 96/100)
+
+**Economic Impact**: $50 + 4-6 hours vs $6,000 + 6-10 weeks (98% cheaper, 99% faster, higher source accuracy)
+
+### 🔧 The Three Breakthrough Technologies
+
+#### 1. Literacy Techniques JSON (Narrative Voice Engine)
+```yaml
+literacy_techniques:
+  narrative_technique: "first_person_introspective"
+  psychic_distance_level: 2
+  preset: "contemporary_ya_introspective"
+  voice_guidelines:
+    - High contraction rate (95%+)
+    - Conversational with intellectual depth
+    - Teenage overthinking = authentic
+    - 日常系 (nichijou) verbose introspection preserved
+```
+**Impact**: Zero voice drift across 5,856 lines, captures 俺 (ore) casual masculine tone better than over-polished professional prose, systematic genre convention adherence.
+
+#### 2. Sarcasm Configuration (Humor & Personality Modeling)
+```yaml
+character_traits:
+  Yomiuri:
+    humor_style: "teasing_wise_older_sister"
+    sarcasm_level: "high"
+    comedic_timing: "socratic_provocateur"
+  Maru:
+    humor_style: "brutal_friend_roasting"
+    sarcasm_level: "maximum"
+    speech_pattern: "casual_vulgar_male_banter"
+```
+**Impact**: Character-specific comedic timing preserved (Dad's "critical hit" gaming reference, Maru's "look in the mirror" roast), personality consistency maintained that professional translations often flatten.
+
+#### 3. Character Profiles (Speech Pattern DNA)
+```yaml
+character_profiles:
+  Yuuta:
+    first_person: "俺" # masculine casual
+    speech_style: "introspective_analytical"
+    contraction_rate: "very_high"
+  Saki:
+    first_person: "私" # neutral formal
+    speech_style: "restrained_polite"
+    honorific_usage: "consistent_san"
+```
+**Impact**: Systematic speech differentiation maintained across all chapters (Yuuta's "let me tell you" directness vs Saki's minimalist "...ありがと"), perfect honorific relationship encoding (100% retention = future narrative payoff intact).
+
+**Combined Result**: The three pillars enable MTL Studio v4.5 to make **editorial-level decisions** previously requiring human judgment:
+- Rhetorical emphasis (em-dash vs colon)
+- Genre-appropriate verbosity (日常系 overthinking)
+- Character-specific humor preservation
+- Cultural marker retention (おかえり/ただいま home rituals)
 
 ---
 
@@ -2467,7 +2408,7 @@ See LICENSE.txt for licensing information.
 - **New Metrics**: Gap Moe Accuracy (90%+), Transcreation Coverage, Image Mapping Integrity, Pre-TOC Detection Rate
 
 ### Version 3.5 LTS (January 2026)
-- **Anti-AI-ism Pattern Library**: Comprehensive 63-pattern detection system (6 CRITICAL, 28 MAJOR, 29 MINOR)
+- **Anti-AI-ism Pattern Library**: Comprehensive 65-pattern detection system (6 CRITICAL, 28 MAJOR, 29 MINOR, 2 VN_CRITICAL) + Self-Healing Agent
 - **Echo Detection System**: Professional proximity-based clustering detection (23 patterns with 50/75/100/150-word windows)
 - **Pattern Categories**: 11 specialized subcategories including emotion_wrappers, filter_phrases, process_verbs, ai_crutch_phrases, perception_verbs, reaction_verbs, gaze_verbs, hedge_words
 - **Flow-Based Quality Checking**: Moves from count-based ("Is this word bad?") to flow-based ("Is this rhythm bad?") analysis

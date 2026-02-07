@@ -91,6 +91,64 @@ GRAMMAR_INDICATORS = {
         (r"てあげる", "てあげる"),                 # do for someone
         (r"ておく", "ておく"),                     # do in advance
         (r"てしまった", "てしまった"),             # ended up doing (past)
+    ],
+    "onomatopoeia": [
+        (r"ドキドキ|どきどき|ドキッ", "ドキドキ"),     # heartbeat/excitement
+        (r"ニヤリ|にやり|ニヤニヤ|ニヤッ", "ニヤリ"),  # smirk/grin
+        (r"ニコニコ|にこにこ|ニコッ", "ニコニコ"),     # smile/beam
+        (r"チラッ|ちらっ|チラチラ|ちらり", "チラッ"),   # glance/peek
+        (r"ぼーっと|ボーッと", "ぼーっと"),           # spacing out
+        (r"ソワソワ|そわそわ", "ソワソワ"),           # fidgeting/restless
+        (r"モジモジ|もじもじ", "モジモジ"),           # shy fidgeting
+        (r"グッと|ぐっと|ぎゅっと", "グッと"),        # tightly/firmly
+        (r"キャッ|きゃっ|キャー|きゃあ", "キャッ"),    # shriek/squeal
+        (r"しっかり", "しっかり"),                    # firmly/properly
+        (r"はっきり", "はっきり"),                    # clearly/distinctly
+    ],
+    "giving_receiving": [
+        (r"てくれ[るたない]", "てくれる"),             # doing for speaker's benefit
+        (r"てもら[うった]|てもらえ", "てもらう"),       # getting someone to do
+        (r"てあげ[るた]", "てあげる"),                # doing for someone's benefit
+        (r"させ[るたて]|させられ", "させる"),          # make/let/cause to do
+    ],
+    "inner_monologue": [
+        (r"思わず", "思わず"),                        # involuntarily
+        (r"つい[つ]?", "つい"),                       # accidentally, couldn't help
+        (r"ふと", "ふと"),                            # suddenly (thought)
+        (r"なぜか|何故か", "なぜか"),                 # for some reason
+        (r"なんとなく", "なんとなく"),                 # somehow, vaguely
+        (r"どうやら", "どうやら"),                    # apparently, it seems
+        (r"それでも", "それでも"),                    # even so, and yet
+        (r"どうしても", "どうしても"),                # no matter what
+    ],
+    "quotation_hearsay": [
+        (r"って言[うった]|と言[うった]", "って言う"),    # said/called
+        (r"という[のもこと]", "という"),                # called/that/the fact
+        (r"だそうだ|だそうです", "だそうだ"),           # I heard/reportedly
+        (r"とのこと", "とのこと"),                     # reportedly/word is
+        (r"という話", "という話"),                     # so the story goes
+    ],
+    "desire_intention": [
+        (r"たい[。、]|たかった|たくな[いかっ]", "たい"),   # want to
+        (r"ほしい|欲しい|てほしい", "ほしい"),           # want (object/action)
+        (r"つもり[だで]", "つもり"),                    # intend to
+        (r"ようとす[るした]", "ようとする"),             # try to / attempt
+        (r"気になる|気になっ", "気になる"),              # curious about / bothered by
+    ],
+    "structure_particles": [
+        (r"わけに[はも]?い?か?ない", "わけにはいかない"),   # can't just / obligation
+        (r"わけ[がは]?ない", "わけない"),                 # no way / impossible
+        (r"わけ[ではじゃ]ない", "わけではない"),           # it's not like
+        (r"はず[だがなのに]", "はず"),                    # should / supposed to
+        (r"しかな[いかっ]", "しかない"),                  # no choice but
+        (r"ばかり|ばっかり", "ばかり"),                   # nothing but / just
+        (r"からこそ|こそ[がは]?", "こそ"),                # precisely / emphasis
+    ],
+    "concession_contrast": [
+        (r"のに[、。]|なのに", "のに"),                  # even though (emotional)
+        (r"にしても|としても", "にしても"),               # even if / granting that
+        (r"くせに|癖に", "くせに"),                      # even though (critical)
+        (r"ながらも", "ながらも"),                       # while / although
     ]
 }
 

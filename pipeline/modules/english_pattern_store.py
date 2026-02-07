@@ -11,6 +11,7 @@ This module provides:
 
 import json
 import logging
+import numpy as np
 from pathlib import Path
 from typing import Dict, List, Optional, Tuple, Any
 
@@ -34,6 +35,12 @@ class EnglishPatternStore:
     THRESHOLD_INJECT = 0.78  # High confidence: inject into prompt (lowered from 0.82)
     THRESHOLD_LOG = 0.65     # Medium confidence: log but don't inject
 
+    # Negative Anchor thresholds
+    # If a query's cosine similarity to any negative vector exceeds this,
+    # the match score is penalized to suppress false positives
+    NEGATIVE_ANCHOR_THRESHOLD = 0.72  # Above this → penalty kicks in
+    NEGATIVE_ANCHOR_PENALTY = 0.15    # Score reduction when negative fires
+
     # Category priorities (higher = more important)
     CATEGORY_PRIORITIES = {
         "contrastive_comparison": 10,       # "X is one thing, but Y..."
@@ -41,7 +48,14 @@ class EnglishPatternStore:
         "intensifiers": 8,                  # "pretty", "really"
         "hedging": 7,                       # "kind of", "sort of"
         "response_particles": 6,            # "Yeah", "I mean"
-        "natural_transitions": 5            # "anyway", "by the way"
+        "natural_transitions": 5,           # "anyway", "by the way"
+        "giving_receiving": 9,              # くれる/もらう/あげる social dynamics
+        "structure_particles": 8,           # わけ/はず/こそ meaning shifts
+        "desire_intention": 7,              # たい/ほしい/気になる motivation
+        "inner_monologue": 7,              # 思わず/ふと/なぜか narrator voice
+        "quotation_hearsay": 6,            # って言う/という/そうだ reporting
+        "onomatopoeia": 6,                 # ドキドキ/ニヤリ/チラッ mimetics
+        "concession_contrast": 5           # のに/にしても/くせに despite-type
     }
 
     def __init__(
@@ -83,6 +97,10 @@ class EnglishPatternStore:
             "by_category": {},
             "by_priority": {}
         }
+
+        # Negative anchor cache: {category: [np.array(embedding), ...]}
+        # Lazily built on first get_bulk_guidance() call
+        self._negative_anchor_cache: Optional[Dict[str, List[np.ndarray]]] = None
 
         logger.info(f"EnglishPatternStore initialized with persist_directory={persist_directory}")
 
@@ -284,6 +302,119 @@ class EnglishPatternStore:
 
         return indexed_count
 
+    def _build_negative_anchor_cache(self) -> Dict[str, List[np.ndarray]]:
+        """
+        Build and cache negative anchor embeddings from RAG JSON.
+
+        Reads negative_vectors from each category, batch-embeds them,
+        and stores as numpy arrays for fast cosine similarity computation.
+
+        Called lazily on first get_bulk_guidance() invocation.
+
+        Returns:
+            Dict mapping category name → list of numpy embedding arrays
+        """
+        if self._negative_anchor_cache is not None:
+            return self._negative_anchor_cache
+
+        rag_data = self.load_rag_data()
+        negative_texts_by_category: Dict[str, List[str]] = {}
+
+        # Collect negative vector texts from pattern_categories and advanced_patterns
+        for section_key in ["pattern_categories", "advanced_patterns"]:
+            section = rag_data.get(section_key, {})
+            for cat_name, cat_data in section.items():
+                if not isinstance(cat_data, dict):
+                    continue
+                neg_block = cat_data.get("negative_vectors", {})
+                neg_texts = neg_block.get("texts", [])
+                if neg_texts:
+                    negative_texts_by_category[cat_name] = neg_texts
+
+        if not negative_texts_by_category:
+            logger.info("[GRAMMAR] No negative_vectors found in RAG data")
+            self._negative_anchor_cache = {}
+            return self._negative_anchor_cache
+
+        # Batch embed all negative texts in one API call
+        all_texts = []
+        text_to_category_map = []  # (category, index_in_category)
+
+        for cat_name, texts in negative_texts_by_category.items():
+            for i, text in enumerate(texts):
+                all_texts.append(text)
+                text_to_category_map.append((cat_name, i))
+
+        logger.info(f"[GRAMMAR] Embedding {len(all_texts)} negative anchors across {len(negative_texts_by_category)} categories...")
+
+        try:
+            embeddings = self.vector_store.embed_texts_batch(all_texts)
+        except Exception as e:
+            logger.warning(f"[GRAMMAR] Failed to embed negative anchors: {e}")
+            self._negative_anchor_cache = {}
+            return self._negative_anchor_cache
+
+        # Organize into cache
+        cache: Dict[str, List[np.ndarray]] = {}
+        for (cat_name, _), embedding in zip(text_to_category_map, embeddings):
+            if cat_name not in cache:
+                cache[cat_name] = []
+            cache[cat_name].append(np.array(embedding, dtype=np.float32))
+
+        self._negative_anchor_cache = cache
+        logger.info(f"[GRAMMAR] ✓ Negative anchor cache built: {len(cache)} categories, {len(all_texts)} vectors")
+        return self._negative_anchor_cache
+
+    def _compute_negative_penalty(
+        self,
+        query_embedding: List[float],
+        category: str
+    ) -> float:
+        """
+        Compute penalty based on query similarity to negative anchors.
+
+        If the query is semantically close to a negative anchor for the category,
+        returns a penalty value to subtract from the match score.
+
+        Args:
+            query_embedding: The query's embedding vector
+            category: The pattern category to check negatives for
+
+        Returns:
+            Penalty value (0.0 = no penalty, up to NEGATIVE_ANCHOR_PENALTY)
+        """
+        cache = self._build_negative_anchor_cache()
+
+        if category not in cache:
+            return 0.0
+
+        query_vec = np.array(query_embedding, dtype=np.float32)
+        query_norm = np.linalg.norm(query_vec)
+        if query_norm == 0:
+            return 0.0
+        query_vec = query_vec / query_norm
+
+        max_neg_similarity = 0.0
+        for neg_vec in cache[category]:
+            neg_norm = np.linalg.norm(neg_vec)
+            if neg_norm == 0:
+                continue
+            cos_sim = float(np.dot(query_vec, neg_vec / neg_norm))
+            if cos_sim > max_neg_similarity:
+                max_neg_similarity = cos_sim
+
+        # If max negative similarity exceeds threshold, apply proportional penalty
+        if max_neg_similarity >= self.NEGATIVE_ANCHOR_THRESHOLD:
+            # Scale penalty: at threshold → 0, at 1.0 → full penalty
+            overshoot = (max_neg_similarity - self.NEGATIVE_ANCHOR_THRESHOLD) / (1.0 - self.NEGATIVE_ANCHOR_THRESHOLD)
+            penalty = overshoot * self.NEGATIVE_ANCHOR_PENALTY
+            logger.debug(
+                f"[NEG-ANCHOR] {category}: neg_sim={max_neg_similarity:.3f} → penalty={penalty:.3f}"
+            )
+            return penalty
+
+        return 0.0
+
     def search(
         self,
         query: str,
@@ -397,6 +528,10 @@ class EnglishPatternStore:
             query_embeddings = [self.vector_store.embed_text(q) for q in queries]
 
         # === Search ChromaDB with pre-computed embeddings ===
+        # Pre-build negative anchor cache (lazy, only on first call)
+        self._build_negative_anchor_cache()
+        neg_penalties_applied = 0
+
         for idx, (embedding, meta) in enumerate(zip(query_embeddings, query_metadata)):
             category = meta["category"]
 
@@ -412,17 +547,27 @@ class EnglishPatternStore:
                 where=where_filter if where_filter else None
             )
 
+            # === NEGATIVE ANCHOR: compute penalty for this query ===
+            neg_penalty = self._compute_negative_penalty(embedding, category)
+            if neg_penalty > 0:
+                neg_penalties_applied += 1
+
             # Format results
             if results['ids'] and results['ids'][0]:
                 for i in range(len(results['ids'][0])):
                     distance = results['distances'][0][i] if results['distances'] else 0
-                    similarity = 1 - distance
+                    raw_similarity = 1 - distance
                     metadata = results['metadatas'][0][i] if results['metadatas'] else {}
+
+                    # Apply negative anchor penalty
+                    similarity = max(0.0, raw_similarity - neg_penalty)
 
                     # Build guidance entry
                     guidance_entry = {
                         "pattern_id": results['ids'][0][i],
                         "similarity": similarity,
+                        "raw_similarity": raw_similarity,
+                        "neg_penalty": neg_penalty,
                         "japanese_structure": metadata.get("japanese_structure", ""),
                         "english_pattern": metadata.get("english_pattern", ""),
                         "natural_example": metadata.get("natural", ""),
@@ -431,7 +576,7 @@ class EnglishPatternStore:
                         "usage_rules": metadata.get("usage_rules", "").split(" | ") if metadata.get("usage_rules") else []
                     }
 
-                    # Categorize by confidence
+                    # Categorize by confidence (using penalty-adjusted similarity)
                     if similarity >= self.THRESHOLD_INJECT:
                         high_confidence.append(guidance_entry)
                     elif similarity >= self.THRESHOLD_LOG:
@@ -447,7 +592,8 @@ class EnglishPatternStore:
             "lookup_stats": {
                 "patterns_queried": len(patterns),
                 "high_conf_hits": len(high_confidence),
-                "medium_conf_hits": len(medium_confidence)
+                "medium_conf_hits": len(medium_confidence),
+                "neg_penalties_applied": neg_penalties_applied
             }
         }
 

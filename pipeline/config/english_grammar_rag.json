@@ -1,7 +1,7 @@
 {
-    "version": "1.0",
-    "description": "RAG Database for English Grammar Restructuring - Natural Idiom Patterns for JP→EN Translation",
-    "last_updated": "2026-01-31",
+    "version": "2.0",
+    "description": "RAG Database for English Grammar Restructuring - Natural Idiom Patterns for JP→EN Translation (Extended via 148-EPUB corpus analysis)",
+    "last_updated": "2026-02-07",
     "pattern_categories": {
         "contrastive_comparison": {
             "description": "Comparing two subjects where both share a quality, but one is notable/surprising",
@@ -118,8 +118,16 @@
                 }
             ]
         },
-        "emotional_intensifiers": {
-            "description": "Japanese emotional markers that need restructuring in English",
+        "intensifiers": {
+            "description": "Japanese emotional/degree markers that need natural English restructuring (aligned with grammar_pattern_detector category)",
+            "negative_vectors": {
+                "description": "Suppress match when source implies certainty or understatement, not emotional intensity",
+                "texts": [
+                    "completely certain, absolutely, without a doubt, definitely, 100 percent sure",
+                    "barely, hardly, a little bit, not very, slightly, faintly",
+                    "factual statement, objective description, technical specification"
+                ]
+            },
             "patterns": [
                 {
                     "id": "extreme_degree",
@@ -1719,6 +1727,817 @@
                     "priority": "medium"
                 }
             ]
+        },
+        "hedging": {
+            "description": "Japanese uncertainty/softening expressions requiring natural English hedging — 53,874 corpus hits across 148 EPUBs, previously a dead-end category",
+            "negative_vectors": {
+                "description": "Suppress match when source is definitive, commanding, or factually assertive",
+                "texts": [
+                    "absolutely certain, I know for a fact, without question, there is no doubt",
+                    "imperative command, do it now, you must, I order you",
+                    "definitive declaration, the truth is, the fact is, clearly and obviously"
+                ]
+            },
+            "patterns": [
+                {
+                    "id": "kamoshirenai_hedge",
+                    "japanese_structure": "かもしれない / かもしれません / かも (possibility/uncertainty)",
+                    "japanese_indicators": [
+                        "かもしれない",
+                        "かもしれません",
+                        "かも知れない",
+                        "かも"
+                    ],
+                    "english_pattern": "Context-dependent: might/could/maybe/perhaps",
+                    "examples": [
+                        {
+                            "jp": "一年生の夏休み明け、これほどの美少女が留学してきたのは確かに幸運かもしれない。",
+                            "literal": "It may be that it's certainly lucky that such a beautiful girl transferred in after summer break of first year.",
+                            "natural": "Having a girl that stunning transfer in right after summer break of freshman year? Yeah, that's pretty lucky."
+                        },
+                        {
+                            "jp": "まぁそれも仕方がないのかもしれない。",
+                            "literal": "Well, that also might not be able to be helped.",
+                            "natural": "Well, maybe that's just how it goes."
+                        },
+                        {
+                            "jp": "かまってもらえると期待したのかもしれない。",
+                            "literal": "She might have expected to be paid attention to.",
+                            "natural": "Maybe she was hoping someone would notice her."
+                        }
+                    ],
+                    "usage_rules": [
+                        "Dialogue: 'maybe', 'might' — keep casual",
+                        "Narration: 'perhaps', 'it's possible' — slightly more reflective",
+                        "Often can restructure as rhetorical question: 'Could it be that...?'",
+                        "かも alone (truncated) is very casual: 'maybe' or just trail off"
+                    ],
+                    "priority": "high",
+                    "corpus_frequency": 5142
+                },
+                {
+                    "id": "darou_deshou_hedge",
+                    "japanese_structure": "だろう / でしょう / だろうか (probability/conjecture)",
+                    "japanese_indicators": [
+                        "だろう",
+                        "でしょう",
+                        "だろうか",
+                        "でしょうか"
+                    ],
+                    "english_pattern": "Context-dependent: probably/I'd say/I imagine/wouldn't you say",
+                    "examples": [
+                        {
+                            "jp": "そして、きっと俺には無理だろう。",
+                            "literal": "And, surely it would be impossible for me.",
+                            "natural": "And honestly? There's no way I could pull that off."
+                        },
+                        {
+                            "jp": "そんなイケメンでコミュ力抜群な陽キャ男がみんなから慕われないはずがないだろう。",
+                            "literal": "There's no way such a handsome, sociable, outgoing guy wouldn't be admired by everyone.",
+                            "natural": "A guy that good-looking with social skills like that? Of course everyone adores him."
+                        },
+                        {
+                            "jp": "手を繫ぐだけでもハードルが高かったのに、抱っこなんてして大丈夫なのだろうか？",
+                            "literal": "Even just holding hands was a high hurdle, so is it okay to carry her?",
+                            "natural": "Holding hands alone was nerve-wracking enough — is carrying her really okay?"
+                        }
+                    ],
+                    "usage_rules": [
+                        "だろう (masculine): 'probably', 'I'd bet', or restructure as confident assertion",
+                        "でしょう (feminine/polite): 'don't you think?', 'right?', 'wouldn't you say?'",
+                        "だろうか (self-questioning): rhetorical question or 'I wonder if...'",
+                        "AVOID: mechanical 'probably' for every instance — vary by context"
+                    ],
+                    "priority": "high",
+                    "corpus_frequency": 21490
+                },
+                {
+                    "id": "rashii_ppoi_hedge",
+                    "japanese_structure": "らしい / っぽい (hearsay/appearance)",
+                    "japanese_indicators": [
+                        "らしい",
+                        "っぽい",
+                        "らしく"
+                    ],
+                    "english_pattern": "apparently/seems like/from what I hear/has that vibe",
+                    "examples": [
+                        {
+                            "jp": "日本が好きだという外国人の話はよく聞くが、どうやら彼女も同じらしい。",
+                            "literal": "I often hear stories of foreigners who like Japan, and apparently she is the same.",
+                            "natural": "You always hear about foreigners who love Japan, and she's clearly no exception."
+                        },
+                        {
+                            "jp": "どうやら彼女は気遣いまでできる女の子らしい。",
+                            "literal": "Apparently she is a girl who can even be considerate.",
+                            "natural": "Turns out she's the considerate type, too."
+                        },
+                        {
+                            "jp": "しかし、彼女には高い評価をしてもらえているらしい。",
+                            "literal": "However, apparently she has been highly evaluated.",
+                            "natural": "Still, it sounds like she thinks pretty highly of me."
+                        }
+                    ],
+                    "usage_rules": [
+                        "らしい (hearsay): 'apparently', 'from what I hear', 'it sounds like'",
+                        "らしい (characteristic): 'typical of', 'very X-like'",
+                        "っぽい (resemblance): 'kind of X', '-ish', 'has that X vibe'",
+                        "Often can omit and restructure: 'Turns out...' or 'So she's...'"
+                    ],
+                    "priority": "high",
+                    "corpus_frequency": 3272
+                },
+                {
+                    "id": "mitai_hedge",
+                    "japanese_structure": "みたいだ / みたいな / みたいに (similitude/appearance)",
+                    "japanese_indicators": [
+                        "みたいだ",
+                        "みたいな",
+                        "みたいに",
+                        "みたい"
+                    ],
+                    "english_pattern": "like/as if/kind of/seems",
+                    "examples": [
+                        {
+                            "jp": "本当に猪みたいにまっすぐな奴だ。",
+                            "literal": "He's really a straight-forward guy like a boar.",
+                            "natural": "The guy's got all the subtlety of a charging boar."
+                        },
+                        {
+                            "jp": "クラスメイトのほとんどは彼女の笑顔に気を取られているみたいだが。",
+                            "literal": "Most of the classmates seem to have their attention taken by her smile.",
+                            "natural": "Most of the class seemed too dazzled by her smile to notice, though."
+                        },
+                        {
+                            "jp": "寝顔は天使みたいにとてもかわいい。",
+                            "literal": "Her sleeping face is very cute like an angel.",
+                            "natural": "She looked like an absolute angel when she slept."
+                        }
+                    ],
+                    "usage_rules": [
+                        "Simile (みたいな/に): 'like', 'as if' — natural simile phrasing",
+                        "Appearance (みたいだ): 'seems like', 'looks like', 'apparently'",
+                        "Casual speech: often just 'like' — but avoid overusing 'like'",
+                        "Can restructure metaphorically: 'had all the X of a Y'"
+                    ],
+                    "priority": "medium",
+                    "corpus_frequency": 5526
+                },
+                {
+                    "id": "you_da_hedge",
+                    "japanese_structure": "ようだ / ような / ように (appearance/manner)",
+                    "japanese_indicators": [
+                        "ようだ",
+                        "ような",
+                        "ように"
+                    ],
+                    "english_pattern": "it seems/as though/as if/in a way that",
+                    "examples": [
+                        {
+                            "jp": "よく見れば、クラスメイトだけじゃなく他のクラスの奴等もいるようだ。",
+                            "literal": "Looking carefully, it seems there are people from other classes too, not just classmates.",
+                            "natural": "A closer look revealed students from other classes had gathered too."
+                        },
+                        {
+                            "jp": "どうやら今日怒られたことがまだトラウマになっているようだ。",
+                            "literal": "It seems that being scolded today is still a trauma.",
+                            "natural": "Getting chewed out earlier was clearly still eating at him."
+                        },
+                        {
+                            "jp": "とても強い力で握っているようだ。",
+                            "literal": "It seems she is gripping with very strong force.",
+                            "natural": "She was squeezing with a scary amount of force."
+                        }
+                    ],
+                    "usage_rules": [
+                        "Appearance (ようだ): 'it seems', 'apparently' — or just state it as fact in EN",
+                        "Simile (ような/ように): 'as if', 'as though', 'like'",
+                        "Purpose (ように): 'so that', 'in order to'",
+                        "Often best to DROP the hedging and state directly in English narration"
+                    ],
+                    "priority": "medium",
+                    "corpus_frequency": 5780
+                },
+                {
+                    "id": "to_omou_hedge",
+                    "japanese_structure": "と思う / と思った / と思います (personal opinion/thought)",
+                    "japanese_indicators": [
+                        "と思う",
+                        "と思った",
+                        "と思います",
+                        "と思っている"
+                    ],
+                    "english_pattern": "I think/I figured/it struck me that/in my opinion",
+                    "examples": [
+                        {
+                            "jp": "言ってやれば気が付いて踏みとどまるので、正直もったいない男だと思う。",
+                            "literal": "If you tell him he'll notice and stop, so honestly I think he's a wasteful guy.",
+                            "natural": "Give him a nudge and he catches on quick enough — honestly, the guy's got potential he keeps wasting."
+                        },
+                        {
+                            "jp": "あの子、彼氏いると思うか？",
+                            "literal": "Do you think that girl has a boyfriend?",
+                            "natural": "Think she's got a boyfriend?"
+                        },
+                        {
+                            "jp": "教えてもらったほうがエマちゃんを楽しませることができると思った。",
+                            "literal": "I thought that if I was taught, I could make Emma-chan enjoy herself.",
+                            "natural": "I figured I'd have a better shot at keeping Emma entertained if I got some pointers."
+                        }
+                    ],
+                    "usage_rules": [
+                        "Dialogue: 'I think' is fine, but vary with 'I figure', 'I'd say', 'if you ask me'",
+                        "Narration: often can DROP と思う entirely and just state the thought directly",
+                        "と思った (past): 'I figured', 'it hit me that', 'I realized'",
+                        "AVOID: starting every sentence with 'I think' — restructure for variety"
+                    ],
+                    "priority": "high",
+                    "corpus_frequency": 10451
+                },
+                {
+                    "id": "ki_ga_suru_hedge",
+                    "japanese_structure": "気がする / 気がした (vague intuition)",
+                    "japanese_indicators": [
+                        "気がする",
+                        "気がした",
+                        "気がして"
+                    ],
+                    "english_pattern": "I get the feeling/something tells me/I can't shake the sense",
+                    "examples": [
+                        {
+                            "jp": "前に読んだ小説で確かそんなことを書いていた気がする。",
+                            "literal": "I have a feeling that it was written like that in a novel I read before.",
+                            "natural": "Pretty sure I read something like that in a novel once."
+                        },
+                        {
+                            "jp": "彼女と目が合った気がした。",
+                            "literal": "I had the feeling that my eyes met with hers.",
+                            "natural": "For a second there, I could've sworn our eyes met."
+                        },
+                        {
+                            "jp": "どこかで見たことがある気がする。",
+                            "literal": "I have a feeling I've seen it somewhere.",
+                            "natural": "Something about it looked familiar."
+                        }
+                    ],
+                    "usage_rules": [
+                        "Often best as 'pretty sure', 'could've sworn', 'something about'",
+                        "More uncertain: 'I get this feeling that', 'something tells me'",
+                        "Can often restructure to remove hedging entirely in EN narration",
+                        "Past tense: 'I could have sworn' / 'I had this nagging feeling'"
+                    ],
+                    "priority": "medium",
+                    "corpus_frequency": 2213
+                }
+            ]
+        },
+        "response_particles": {
+            "description": "Japanese conversational response particles requiring natural English dialogue equivalents — 8,710 corpus hits, previously a dead-end category",
+            "negative_vectors": {
+                "description": "Suppress match on pure narration, internal exposition, or formal written prose",
+                "texts": [
+                    "narrative description, the scene was, the room looked, it was a quiet afternoon",
+                    "formal report, academic writing, official documentation, pursuant to",
+                    "inner monologue without conversational partner, thinking to oneself silently"
+                ]
+            },
+            "patterns": [
+                {
+                    "id": "aa_response",
+                    "japanese_structure": "ああ / あぁ (acknowledgment/realization)",
+                    "japanese_indicators": [
+                        "ああ",
+                        "あぁ",
+                        "あー"
+                    ],
+                    "english_pattern": "Context-dependent: Yeah/Oh/Right/Ah",
+                    "examples": [
+                        {
+                            "jp": "「ああ、そうだな」",
+                            "literal": "'Ah, that's right.'",
+                            "natural": "'Yeah, you're right.'"
+                        },
+                        {
+                            "jp": "「ああ……あれか」",
+                            "literal": "'Ah... that one.'",
+                            "natural": "'Oh... that.'"
+                        },
+                        {
+                            "jp": "「ああ、別にいいよ」",
+                            "literal": "'Ah, it's fine.'",
+                            "natural": "'Nah, it's fine.'"
+                        }
+                    ],
+                    "usage_rules": [
+                        "Agreement: 'Yeah', 'Right', 'Sure'",
+                        "Realization: 'Oh', 'Ah, right'",
+                        "Dismissive: 'Nah', 'Eh'",
+                        "Match character gender/personality for register"
+                    ],
+                    "priority": "high"
+                },
+                {
+                    "id": "un_response",
+                    "japanese_structure": "うん / うーん (casual affirmative/pondering)",
+                    "japanese_indicators": [
+                        "うん",
+                        "うーん",
+                        "ん"
+                    ],
+                    "english_pattern": "Yeah/Mm-hm/Hmm/Sure",
+                    "examples": [
+                        {
+                            "jp": "「うん、わかった」",
+                            "literal": "'Yes, I understood.'",
+                            "natural": "'Yeah, got it.'"
+                        },
+                        {
+                            "jp": "「うーん、どうだろう」",
+                            "literal": "'Hmm, how would it be?'",
+                            "natural": "'Hmm, hard to say.'"
+                        },
+                        {
+                            "jp": "「うん、大丈夫」",
+                            "literal": "'Yes, it's fine.'",
+                            "natural": "'Mm-hm, I'm good.'"
+                        }
+                    ],
+                    "usage_rules": [
+                        "うん (quick yes): 'Yeah', 'Mm-hm', 'Sure'",
+                        "うーん (thinking): 'Hmm', 'Well...', 'Let me think'",
+                        "Feminine: 'Mm-hm', 'Mhm' — Masculine: 'Yeah', 'Uh-huh'",
+                        "Can often omit and go straight to the response content"
+                    ],
+                    "priority": "medium"
+                },
+                {
+                    "id": "sou_response",
+                    "japanese_structure": "そうだね / そうか / そうなんだ (agreement/understanding)",
+                    "japanese_indicators": [
+                        "そうだね",
+                        "そうか",
+                        "そうなんだ",
+                        "そうだな",
+                        "そうね"
+                    ],
+                    "english_pattern": "I see/Right/Makes sense/Is that so",
+                    "examples": [
+                        {
+                            "jp": "「そうだな、確かに」",
+                            "literal": "'That's right, certainly.'",
+                            "natural": "'Yeah, fair point.'"
+                        },
+                        {
+                            "jp": "「そうなんだ……知らなかった」",
+                            "literal": "'Is that so... I didn't know.'",
+                            "natural": "'Huh, I had no idea.'"
+                        },
+                        {
+                            "jp": "「そうか、それなら仕方ないな」",
+                            "literal": "'Is that so, then it can't be helped.'",
+                            "natural": "'Ah, well if that's how it is, can't argue with that.'"
+                        }
+                    ],
+                    "usage_rules": [
+                        "そうだね/な (agreement): 'Yeah', 'True', 'Fair enough'",
+                        "そうか (understanding): 'I see', 'Ah', 'Got it'",
+                        "そうなんだ (surprise/interest): 'Oh really?', 'Huh', 'No kidding'",
+                        "AVOID: 'Is that so' — sounds stilted in casual dialogue"
+                    ],
+                    "priority": "high",
+                    "corpus_frequency": 2567
+                },
+                {
+                    "id": "hora_response",
+                    "japanese_structure": "ほら (drawing attention/I told you so)",
+                    "japanese_indicators": [
+                        "ほら",
+                        "ほらね",
+                        "ほらほら"
+                    ],
+                    "english_pattern": "See?/Look/C'mon/There/I told you",
+                    "examples": [
+                        {
+                            "jp": "「ほら、言っただろ」",
+                            "literal": "'See, I said so.'",
+                            "natural": "'See? Told you.'"
+                        },
+                        {
+                            "jp": "「ほら、あれ見て」",
+                            "literal": "'Look, look at that.'",
+                            "natural": "'Hey, check that out.'"
+                        },
+                        {
+                            "jp": "「ほら、早くしないと遅れるよ」",
+                            "literal": "'Look, if you don't hurry you'll be late.'",
+                            "natural": "'C'mon, we're gonna be late if you don't hurry up.'"
+                        }
+                    ],
+                    "usage_rules": [
+                        "Drawing attention: 'Look', 'Hey', 'Check it out'",
+                        "I-told-you-so: 'See?', 'Told you', 'What did I say?'",
+                        "Urging: 'C'mon', 'Come on', 'Let's go'",
+                        "Gentle prompting: 'Here', 'There you go'"
+                    ],
+                    "priority": "high",
+                    "corpus_frequency": 1612
+                },
+                {
+                    "id": "hee_response",
+                    "japanese_structure": "へえ / へぇ (surprised interest)",
+                    "japanese_indicators": [
+                        "へえ",
+                        "へぇ",
+                        "へー"
+                    ],
+                    "english_pattern": "Huh/Oh?/Really?/Wow",
+                    "examples": [
+                        {
+                            "jp": "「へえ、そうなんだ」",
+                            "literal": "'Heh, is that so.'",
+                            "natural": "'Oh, really?'"
+                        },
+                        {
+                            "jp": "「へぇ～、意外だな」",
+                            "literal": "'Heh~, that's unexpected.'",
+                            "natural": "'Huh, wouldn't have guessed.'"
+                        },
+                        {
+                            "jp": "「へえ、やるじゃん」",
+                            "literal": "'Heh, you can do it.'",
+                            "natural": "'Oh? Not bad.'"
+                        }
+                    ],
+                    "usage_rules": [
+                        "Mild surprise: 'Huh', 'Oh?'",
+                        "Impressed: 'Wow', 'Oh, nice'",
+                        "Teasing: 'Oh~?', 'Is that so~?'",
+                        "Can add to statement: 'Huh, interesting'"
+                    ],
+                    "priority": "medium",
+                    "corpus_frequency": 138
+                },
+                {
+                    "id": "oi_nee_attention",
+                    "japanese_structure": "おい / ねえ / ねぇ (attention-getting)",
+                    "japanese_indicators": [
+                        "おい",
+                        "ねえ",
+                        "ねぇ",
+                        "なあ"
+                    ],
+                    "english_pattern": "Hey/Excuse me/Listen/Yo",
+                    "examples": [
+                        {
+                            "jp": "「おい、聞いてるのか？」",
+                            "literal": "'Hey, are you listening?'",
+                            "natural": "'Hey, you even listening?'"
+                        },
+                        {
+                            "jp": "「ねえ、ちょっといい？」",
+                            "literal": "'Hey, is it okay for a moment?'",
+                            "natural": "'Hey, got a sec?'"
+                        },
+                        {
+                            "jp": "「なぁ、明人。俺たちラッキーだな」",
+                            "literal": "'Hey, Akito. We're lucky, aren't we?'",
+                            "natural": "'Man, Akito — we lucked out, huh?'"
+                        }
+                    ],
+                    "usage_rules": [
+                        "おい (masculine/rough): 'Hey', 'Yo', 'Oi'",
+                        "ねえ (feminine/soft): 'Hey', 'Listen', 'Say'",
+                        "なあ (masculine/casual): 'Man', 'Dude', 'Hey'",
+                        "Match character register — don't make everyone say 'Hey'"
+                    ],
+                    "priority": "medium"
+                }
+            ]
+        },
+        "natural_transitions": {
+            "description": "Japanese discourse connectors requiring natural English equivalents — 32,025 corpus hits, previously a dead-end category",
+            "negative_vectors": {
+                "description": "Suppress match when connector is logical/causal rather than conversational topic-shift",
+                "texts": [
+                    "therefore, consequently, as a result, thus, hence, it follows that",
+                    "because of this, due to, owing to, on account of, the reason being",
+                    "formal logical argumentation, premise, conclusion, proof, evidence shows"
+                ]
+            },
+            "patterns": [
+                {
+                    "id": "dakara_transition",
+                    "japanese_structure": "だから / ですから (reason/result connector)",
+                    "japanese_indicators": [
+                        "だから",
+                        "ですから",
+                        "だからこそ"
+                    ],
+                    "english_pattern": "So/That's why/Which is why/The thing is",
+                    "examples": [
+                        {
+                            "jp": "それだけ、シャーロットさんは凄くかわいいのだから。",
+                            "literal": "That's because Charlotte-san is incredibly cute.",
+                            "natural": "That's just how ridiculously cute Charlotte is."
+                        },
+                        {
+                            "jp": "だから言っただろう？",
+                            "literal": "That's why I said, right?",
+                            "natural": "See? What did I tell you?"
+                        },
+                        {
+                            "jp": "だからこそ、ここで諦めるわけにはいかない。",
+                            "literal": "That's precisely why I can't give up here.",
+                            "natural": "All the more reason I can't back down now."
+                        }
+                    ],
+                    "usage_rules": [
+                        "Causal: 'So', 'That's why', 'Which is why'",
+                        "Emphatic (だからこそ): 'All the more reason', 'That's exactly why'",
+                        "Exasperated: 'I keep telling you', 'Like I said'",
+                        "AVOID: mechanical 'Therefore' unless formal context"
+                    ],
+                    "priority": "high",
+                    "corpus_frequency": 8092
+                },
+                {
+                    "id": "demo_transition",
+                    "japanese_structure": "でも / だけど (soft contrast)",
+                    "japanese_indicators": [
+                        "でも",
+                        "だけど",
+                        "けど",
+                        "けれど"
+                    ],
+                    "english_pattern": "But/Still/Though/Then again",
+                    "examples": [
+                        {
+                            "jp": "でも、それが彰のいいところでもある。",
+                            "literal": "But, that is also Akira's good point.",
+                            "natural": "Then again, that's part of what makes him Akira."
+                        },
+                        {
+                            "jp": "でも、美優先生からしたら後味が悪かったのかもしれない。",
+                            "literal": "But, from Miyu-sensei's perspective, the aftertaste might have been bad.",
+                            "natural": "Still, Miyu-sensei probably felt bad about the whole thing."
+                        },
+                        {
+                            "jp": "だけど、まだバレていないと信じたい。",
+                            "literal": "But, I want to believe it hasn't been found out yet.",
+                            "natural": "But hey — a guy can hope he hasn't been found out yet."
+                        }
+                    ],
+                    "usage_rules": [
+                        "Sentence-initial: 'But', 'Still', 'Then again', 'That said'",
+                        "Mid-sentence: 'though', 'but then'",
+                        "Vary connectors — don't start every contrast with 'But'",
+                        "Sometimes omit entirely and let the contrast speak for itself"
+                    ],
+                    "priority": "high",
+                    "corpus_frequency": 7205
+                },
+                {
+                    "id": "soredewa_jaa_transition",
+                    "japanese_structure": "それでは / それじゃ / じゃあ (proceeding/concluding)",
+                    "japanese_indicators": [
+                        "それでは",
+                        "それじゃ",
+                        "じゃあ",
+                        "じゃ"
+                    ],
+                    "english_pattern": "Well then/Alright/Okay/So",
+                    "examples": [
+                        {
+                            "jp": "『じゃあ、エマちゃん。ロッティーさんに会いに行こうか？』",
+                            "literal": "'Well then, Emma-chan. Shall we go meet Lottie-san?'",
+                            "natural": "'Alright, Emma — let's go find Lottie, yeah?'"
+                        },
+                        {
+                            "jp": "「それじゃ、また明日」",
+                            "literal": "'Well then, see you tomorrow.'",
+                            "natural": "'Catch you tomorrow, then.'"
+                        },
+                        {
+                            "jp": "「じゃあ行こっか」",
+                            "literal": "'Well then, shall we go?'",
+                            "natural": "'Shall we?'"
+                        }
+                    ],
+                    "usage_rules": [
+                        "それでは (formal): 'Well then', 'In that case', 'If you'll excuse me'",
+                        "じゃあ (casual): 'Alright', 'So', 'Okay then', or just omit",
+                        "Farewell: 'See you', 'Later', 'Catch you later'",
+                        "Often can be dropped entirely in English"
+                    ],
+                    "priority": "medium",
+                    "corpus_frequency": 5650
+                },
+                {
+                    "id": "shikashi_transition",
+                    "japanese_structure": "しかし (strong contrast, often narration)",
+                    "japanese_indicators": [
+                        "しかし",
+                        "しかしながら"
+                    ],
+                    "english_pattern": "However/But/Still/And yet",
+                    "examples": [
+                        {
+                            "jp": "しかし、彼女には高い評価をしてもらえているらしい。",
+                            "literal": "However, apparently she has been highly evaluated.",
+                            "natural": "Still, it sounds like she thinks pretty highly of me."
+                        },
+                        {
+                            "jp": "しかし、俺は美優先生に用件を思い出させたことを後悔する羽目になる。",
+                            "literal": "However, I ended up regretting reminding Miyu-sensei of the matter.",
+                            "natural": "I'd soon regret reminding her, though."
+                        },
+                        {
+                            "jp": "しかし、そう簡単にいくはずがない。",
+                            "literal": "However, there's no way it would go that easily.",
+                            "natural": "Of course, nothing's ever that simple."
+                        }
+                    ],
+                    "usage_rules": [
+                        "Narration: 'Still', 'And yet', 'Of course' — avoid 'However' for LN prose",
+                        "Dialogue (rare): 'But', 'Thing is'",
+                        "Can often restructure: move contrast to end with 'though'",
+                        "AVOID: starting every paragraph with 'However'"
+                    ],
+                    "priority": "medium",
+                    "corpus_frequency": 1972
+                },
+                {
+                    "id": "tsumari_transition",
+                    "japanese_structure": "つまり (summarizing/rephrasing)",
+                    "japanese_indicators": [
+                        "つまり",
+                        "要するに"
+                    ],
+                    "english_pattern": "In other words/Basically/So basically/What I mean is",
+                    "examples": [
+                        {
+                            "jp": "つまり、彼女は俺のことが嫌いなわけじゃない。",
+                            "literal": "In other words, it's not that she hates me.",
+                            "natural": "So it's not that she hates me or anything."
+                        },
+                        {
+                            "jp": "つまり、全部お前のせいだ。",
+                            "literal": "In other words, it's all your fault.",
+                            "natural": "Long story short — this is all on you."
+                        },
+                        {
+                            "jp": "要するに、返事が欲しいってこと？",
+                            "literal": "In short, you want a reply?",
+                            "natural": "So basically, you want an answer?"
+                        }
+                    ],
+                    "usage_rules": [
+                        "Casual: 'Basically', 'So', 'Long story short'",
+                        "Explanatory: 'In other words', 'What I'm saying is'",
+                        "Impatient: 'Point is', 'Bottom line'",
+                        "AVOID: overusing 'In other words' — vary phrasing"
+                    ],
+                    "priority": "medium",
+                    "corpus_frequency": 1206
+                },
+                {
+                    "id": "tonikaku_transition",
+                    "japanese_structure": "とにかく (topic redirect/emphasis)",
+                    "japanese_indicators": [
+                        "とにかく",
+                        "ともかく"
+                    ],
+                    "english_pattern": "Anyway/In any case/Point is/Look",
+                    "examples": [
+                        {
+                            "jp": "とにかく、今は目の前のことに集中しよう。",
+                            "literal": "Anyway, let's concentrate on what's in front of us now.",
+                            "natural": "Anyway — gotta focus on what's right in front of me."
+                        },
+                        {
+                            "jp": "とにかくすごいんだ。",
+                            "literal": "Anyway, it's amazing.",
+                            "natural": "Seriously, it's incredible."
+                        },
+                        {
+                            "jp": "とにかく、お前は黙ってろ。",
+                            "literal": "Anyway, you be quiet.",
+                            "natural": "Look, just shut it."
+                        }
+                    ],
+                    "usage_rules": [
+                        "Topic redirect: 'Anyway', 'Moving on', 'Setting that aside'",
+                        "Emphasis: 'Seriously', 'Just', 'The point is'",
+                        "Impatient: 'Look', 'Just', 'Enough'",
+                        "Often can be dropped when the redirect is obvious in context"
+                    ],
+                    "priority": "high",
+                    "corpus_frequency": 1039
+                },
+                {
+                    "id": "soreni_transition",
+                    "japanese_structure": "それに / おまけに (additive connector)",
+                    "japanese_indicators": [
+                        "それに",
+                        "その上",
+                        "おまけに"
+                    ],
+                    "english_pattern": "Besides/On top of that/Plus/And",
+                    "examples": [
+                        {
+                            "jp": "それに、彼女は成績もいい。",
+                            "literal": "Besides, her grades are also good.",
+                            "natural": "On top of that, she's got the grades to match."
+                        },
+                        {
+                            "jp": "それに、まだ時間はある。",
+                            "literal": "Besides, there's still time.",
+                            "natural": "Plus, we've still got time."
+                        },
+                        {
+                            "jp": "おまけに雨まで降ってきた。",
+                            "literal": "On top of that, it even started raining.",
+                            "natural": "And to top it all off, it started raining."
+                        }
+                    ],
+                    "usage_rules": [
+                        "それに: 'Besides', 'Plus', 'And', 'What's more'",
+                        "おまけに (bonus/extra — often negative): 'To top it off', 'And on top of that'",
+                        "Casual: 'Plus', 'And' — Formal: 'Furthermore', 'Moreover'",
+                        "Can restructure: 'Not to mention [X]'"
+                    ],
+                    "priority": "medium",
+                    "corpus_frequency": 883
+                },
+                {
+                    "id": "datte_reason_transition",
+                    "japanese_structure": "だって (excuse/justification — sentence initial)",
+                    "japanese_indicators": [
+                        "だって",
+                        "だってさ"
+                    ],
+                    "english_pattern": "Because/But/I mean/Well",
+                    "examples": [
+                        {
+                            "jp": "「だって、仕方ないじゃん」",
+                            "literal": "'Because, it can't be helped.'",
+                            "natural": "'Well, what was I supposed to do?'"
+                        },
+                        {
+                            "jp": "「だって怖かったんだもん」",
+                            "literal": "'Because I was scared.'",
+                            "natural": "'I was scared, okay?'"
+                        },
+                        {
+                            "jp": "「だって、本当のことだし」",
+                            "literal": "'Because, it's the truth.'",
+                            "natural": "'I mean, it's true.'"
+                        }
+                    ],
+                    "usage_rules": [
+                        "Childish/defensive: 'But', 'I mean', 'Well' + reason",
+                        "Often restructure: move reason first, drop だって entirely",
+                        "Whiny: 'But [reason]!' — Casual: 'I mean, [reason]'",
+                        "AVOID: starting with bare 'Because' — sounds choppy in English"
+                    ],
+                    "priority": "high",
+                    "corpus_frequency": 2176
+                },
+                {
+                    "id": "sate_transition",
+                    "japanese_structure": "さて / さてと (topic shift/getting started)",
+                    "japanese_indicators": [
+                        "さて",
+                        "さてと",
+                        "さてさて"
+                    ],
+                    "english_pattern": "Now then/Well/Alright/So",
+                    "examples": [
+                        {
+                            "jp": "さて、どうしたものか。",
+                            "literal": "Well then, what should I do?",
+                            "natural": "Now then — what to do about this?"
+                        },
+                        {
+                            "jp": "さてと、帰るか。",
+                            "literal": "Well then, shall I go home?",
+                            "natural": "Right, time to head home."
+                        },
+                        {
+                            "jp": "さて、話を戻そう。",
+                            "literal": "Well, let's return to the topic.",
+                            "natural": "Anyway, back to the point."
+                        }
+                    ],
+                    "usage_rules": [
+                        "Starting action: 'Right', 'Alright', 'Well then'",
+                        "Narration transition: 'Now', 'Moving on'",
+                        "Monologue: 'So', 'Now then'",
+                        "Often best as 'Anyway,' or simply start the next thought"
+                    ],
+                    "priority": "low",
+                    "corpus_frequency": 676
+                }
+            ]
         }
     },
     "advanced_patterns": {
@@ -2346,6 +3165,14 @@
         },
         "sentence_endings": {
             "description": "Japanese sentence-final particles that add nuance, confirmation-seeking, or emotional coloring - critical for natural dialogue flow",
+            "negative_vectors": {
+                "description": "Suppress match when particle is mid-sentence conjunction or grammatical marker, not sentence-final emotional coloring",
+                "texts": [
+                    "mid-sentence conjunction, connecting clause, subordinate clause marker",
+                    "grammatical particle marking subject object or topic, structural case marker",
+                    "quotation frame, he said that, she mentioned that, reporting clause"
+                ]
+            },
             "patterns": [
                 {
                     "id": "confirmation_seeking_dayo_ne",
@@ -2625,6 +3452,14 @@
         },
         "emotional_nuance": {
             "description": "Japanese modal particles and adverbs that add speaker attitude, uncertainty, or emotional coloring - essential for authentic character voice",
+            "negative_vectors": {
+                "description": "Suppress match when modifier is factual/quantitative rather than emotional/attitudinal",
+                "texts": [
+                    "exactly three, precisely measured, specifically at noon, quantitative amount",
+                    "completely, totally, absolutely, entirely certain without emotional nuance",
+                    "objective narration without speaker attitude, camera-eye description, pure action"
+                ]
+            },
             "patterns": [
                 {
                     "id": "vague_nanka",
@@ -2929,6 +3764,14 @@
         },
         "action_emphasis": {
             "description": "Japanese auxiliary verbs that modify action nuance - completion, trial, motion, benefit - critical for capturing character intent and emotional undertones",
+            "negative_vectors": {
+                "description": "Suppress match when verb is plain past tense or habitual action without auxiliary nuance",
+                "texts": [
+                    "simple past tense, did it, went there, ate food, basic completed action",
+                    "habitual action, always does, every day, routine behavior, regular activity",
+                    "stative verb, knows, understands, believes, exists, possesses"
+                ]
+            },
             "patterns": [
                 {
                     "id": "regrettable_completion_te_shimau",
@@ -3211,6 +4054,1242 @@
                     "priority": "high"
                 }
             ]
+        },
+        "onomatopoeia": {
+            "description": "Japanese onomatopoeia and mimetic words (擬音語・擬態語) requiring creative English equivalents — 10,512 corpus hits across 148 EPUBs, critical for light novel atmosphere",
+            "negative_vectors": {
+                "description": "Suppress match on literal mechanical sounds, environmental noise descriptions, or non-mimetic katakana words",
+                "texts": [
+                    "literal machine sound, engine noise, alarm ringing, phone buzzing, mechanical beeping",
+                    "foreign loanword in katakana, コンピュータ computer, テレビ television, borrowed English word",
+                    "name in katakana, character name, place name, brand name, proper noun"
+                ]
+            },
+            "patterns": [
+                {
+                    "id": "ono_dokidoki",
+                    "japanese_structure": "ドキドキ / ドキッ (heartbeat/excitement/nervousness)",
+                    "japanese_indicators": [
+                        "ドキドキ",
+                        "どきどき",
+                        "ドキッ",
+                        "どきっ"
+                    ],
+                    "english_pattern": "Context-dependent: heart pounding/flutter/skip a beat/pulse racing",
+                    "examples": [
+                        {
+                            "jp": "彼女の顔を見た瞬間、ドキドキが止まらなかった。",
+                            "literal": "The moment I saw her face, the doki-doki wouldn't stop.",
+                            "natural": "The moment I saw her face, my heart wouldn't stop racing."
+                        },
+                        {
+                            "jp": "ドキッとした表情を浮かべる。",
+                            "literal": "She floated a doki expression.",
+                            "natural": "A startled look flashed across her face."
+                        },
+                        {
+                            "jp": "胸がドキドキして声が出ない。",
+                            "literal": "My chest is doki-doki and my voice won't come out.",
+                            "natural": "My heart was hammering so hard I couldn't get the words out."
+                        }
+                    ],
+                    "usage_rules": [
+                        "Romantic: 'heart skipped a beat', 'pulse quickened', 'flutter'",
+                        "Nervous: 'heart hammering', 'pounding', 'racing'",
+                        "Sudden (ドキッ): 'jolt', 'startled', 'caught off guard'",
+                        "AVOID: 'throbbing' — wrong connotation in English"
+                    ],
+                    "priority": "high",
+                    "corpus_frequency": 789
+                },
+                {
+                    "id": "ono_nikoniko",
+                    "japanese_structure": "ニコニコ / ニコッ (smiling/beaming)",
+                    "japanese_indicators": [
+                        "ニコニコ",
+                        "にこにこ",
+                        "ニコッ",
+                        "にこっ"
+                    ],
+                    "english_pattern": "beaming/grinning/with a smile/all smiles",
+                    "examples": [
+                        {
+                            "jp": "彼女はニコニコしながら手を振った。",
+                            "literal": "She waved while niko-niko-ing.",
+                            "natural": "She waved, all smiles."
+                        },
+                        {
+                            "jp": "ニコッと笑って答えた。",
+                            "literal": "She niko-ed and answered.",
+                            "natural": "She flashed a bright smile and answered."
+                        },
+                        {
+                            "jp": "いつもニコニコしている先生。",
+                            "literal": "The teacher who is always niko-niko.",
+                            "natural": "The teacher who always had a smile on her face."
+                        }
+                    ],
+                    "usage_rules": [
+                        "Continuous (ニコニコ): 'beaming', 'all smiles', 'with a warm smile'",
+                        "Sudden (ニコッ): 'flashed a smile', 'grinned', 'broke into a smile'",
+                        "AVOID: mechanical 'smiled' for every ニコ — vary descriptions"
+                    ],
+                    "priority": "medium",
+                    "corpus_frequency": 657
+                },
+                {
+                    "id": "ono_niyari",
+                    "japanese_structure": "ニヤリ / ニヤニヤ / ニヤッ (smirk/mischievous grin)",
+                    "japanese_indicators": [
+                        "ニヤリ",
+                        "にやり",
+                        "ニヤニヤ",
+                        "にやにや",
+                        "ニヤッ"
+                    ],
+                    "english_pattern": "smirked/grinned/sly smile/that look",
+                    "examples": [
+                        {
+                            "jp": "彰はニヤリと笑った。",
+                            "literal": "Akira niyari-laughed.",
+                            "natural": "Akira flashed a smug grin."
+                        },
+                        {
+                            "jp": "ニヤニヤしてるんじゃねえよ。",
+                            "literal": "Don't niya-niya.",
+                            "natural": "Wipe that smirk off your face."
+                        },
+                        {
+                            "jp": "何かを企んでいるようにニヤッとした。",
+                            "literal": "She niya-ed as if planning something.",
+                            "natural": "A mischievous glint crossed her face."
+                        }
+                    ],
+                    "usage_rules": [
+                        "ニヤリ (brief smirk): 'smirked', 'flashed a grin', 'sly smile'",
+                        "ニヤニヤ (continuous): 'kept grinning', 'that smug look', 'couldn't stop smirking'",
+                        "Playful: 'mischievous grin' — Malicious: 'sinister smile'",
+                        "Distinguish from ニコニコ (warm) vs ニヤニヤ (teasing/scheming)"
+                    ],
+                    "priority": "high",
+                    "corpus_frequency": 758
+                },
+                {
+                    "id": "ono_chira",
+                    "japanese_structure": "チラッ / チラチラ / ちらり (quick glance)",
+                    "japanese_indicators": [
+                        "チラッ",
+                        "ちらっ",
+                        "チラチラ",
+                        "ちらり",
+                        "チラリ"
+                    ],
+                    "english_pattern": "glanced/stole a look/peeked/snuck a glance",
+                    "examples": [
+                        {
+                            "jp": "彼女の方をチラッと見た。",
+                            "literal": "I chira-looked toward her.",
+                            "natural": "I stole a quick glance her way."
+                        },
+                        {
+                            "jp": "チラチラとこちらを見ている。",
+                            "literal": "She keeps chira-chira looking this way.",
+                            "natural": "She kept sneaking glances in my direction."
+                        },
+                        {
+                            "jp": "時計をチラリと確認した。",
+                            "literal": "I chirari-confirmed the clock.",
+                            "natural": "I checked the clock out of the corner of my eye."
+                        }
+                    ],
+                    "usage_rules": [
+                        "Single (チラッ/チラリ): 'glanced', 'stole a look', 'peeked'",
+                        "Repeated (チラチラ): 'kept glancing', 'sneaking looks', 'eyes kept darting'",
+                        "Furtive: 'snuck a glance', 'peeked' — Casual: 'glanced over'",
+                        "Very common in romcom — vary descriptions to avoid repetition"
+                    ],
+                    "priority": "high",
+                    "corpus_frequency": 877
+                },
+                {
+                    "id": "ono_boyatto",
+                    "japanese_structure": "ぼーっと / ボーッと (spacing out/dazed)",
+                    "japanese_indicators": [
+                        "ぼーっと",
+                        "ボーッと",
+                        "ぼうっと"
+                    ],
+                    "english_pattern": "spacing out/zoning out/staring blankly/in a daze",
+                    "examples": [
+                        {
+                            "jp": "窓の外をぼーっと眺めていた。",
+                            "literal": "I was bo~tto gazing outside the window.",
+                            "natural": "I was staring blankly out the window."
+                        },
+                        {
+                            "jp": "ぼーっとしていて、声をかけられたことに気づかなかった。",
+                            "literal": "I was bo~tto and didn't notice I was called.",
+                            "natural": "I was so zoned out I didn't even notice someone calling my name."
+                        },
+                        {
+                            "jp": "彼女の顔を見てぼーっとしてしまった。",
+                            "literal": "I ended up going bo~tto looking at her face.",
+                            "natural": "I caught myself staring, completely mesmerized."
+                        }
+                    ],
+                    "usage_rules": [
+                        "Inattentive: 'spacing out', 'zoning out', 'lost in thought'",
+                        "Stunned: 'in a daze', 'frozen', 'mesmerized'",
+                        "Idle: 'staring off into space', 'mind wandering'",
+                        "Context determines positive (dreamy) vs negative (distracted)"
+                    ],
+                    "priority": "medium",
+                    "corpus_frequency": 268
+                },
+                {
+                    "id": "ono_sowasowa_mojimuji",
+                    "japanese_structure": "ソワソワ / モジモジ (fidgeting/restless/shy)",
+                    "japanese_indicators": [
+                        "ソワソワ",
+                        "そわそわ",
+                        "モジモジ",
+                        "もじもじ"
+                    ],
+                    "english_pattern": "fidgeting/restless/squirming/shifting nervously",
+                    "examples": [
+                        {
+                            "jp": "彼女はモジモジしながら言った。",
+                            "literal": "She said while moji-moji-ing.",
+                            "natural": "She fidgeted shyly as she spoke."
+                        },
+                        {
+                            "jp": "ソワソワして落ち着かない。",
+                            "literal": "I'm sowa-sowa and can't calm down.",
+                            "natural": "I couldn't sit still — my nerves were shot."
+                        },
+                        {
+                            "jp": "モジモジと俯いている彼女がかわいかった。",
+                            "literal": "She was cute moji-moji-ing with her head down.",
+                            "natural": "The way she stood there fidgeting, eyes downcast — it was adorable."
+                        }
+                    ],
+                    "usage_rules": [
+                        "ソワソワ (anxious/restless): 'fidgeting', 'restless', 'on edge', 'antsy'",
+                        "モジモジ (shy/embarrassed): 'squirming', 'fidgeting shyly', 'hesitant'",
+                        "Action description: describe the fidgeting behavior instead of labeling it",
+                        "Very common in romcom scenes — essential for conveying shyness"
+                    ],
+                    "priority": "medium",
+                    "corpus_frequency": 341
+                },
+                {
+                    "id": "ono_gutto_gu",
+                    "japanese_structure": "グッと / ぐっと (tightly/firmly/with resolve)",
+                    "japanese_indicators": [
+                        "グッと",
+                        "ぐっと",
+                        "グッ",
+                        "ぎゅっと"
+                    ],
+                    "english_pattern": "clenched/gripped/tightened/steeled oneself",
+                    "examples": [
+                        {
+                            "jp": "拳をグッと握りしめた。",
+                            "literal": "I gu-tto clenched my fist.",
+                            "natural": "I balled my fists tight."
+                        },
+                        {
+                            "jp": "言葉をグッと飲み込んだ。",
+                            "literal": "I gu-tto swallowed the words.",
+                            "natural": "I bit back the words."
+                        },
+                        {
+                            "jp": "彼女がぎゅっと腕を掴んできた。",
+                            "literal": "She gyu-tto grabbed my arm.",
+                            "natural": "She latched onto my arm with a tight grip."
+                        }
+                    ],
+                    "usage_rules": [
+                        "Physical (gripping): 'clenched', 'tightened', 'squeezed', 'gripped'",
+                        "Emotional (enduring): 'bit back', 'swallowed', 'held in', 'steeled'",
+                        "ぎゅっと (squeeze): 'hugged tight', 'latched on', 'pressed close'",
+                        "Convey the intensity through verb choice, not adverb"
+                    ],
+                    "priority": "medium",
+                    "corpus_frequency": 448
+                },
+                {
+                    "id": "ono_kya_exclaim",
+                    "japanese_structure": "キャッ / キャー / きゃあ (shriek/squeal)",
+                    "japanese_indicators": [
+                        "キャッ",
+                        "きゃっ",
+                        "キャー",
+                        "きゃあ",
+                        "キャーキャー"
+                    ],
+                    "english_pattern": "shrieked/squealed/yelped/screamed",
+                    "examples": [
+                        {
+                            "jp": "「キャッ！」と小さな悲鳴を上げた。",
+                            "literal": "'Kya!' she raised a small scream.",
+                            "natural": "She let out a small yelp."
+                        },
+                        {
+                            "jp": "女子たちがキャーキャー騒いでいる。",
+                            "literal": "The girls are kya-kya making noise.",
+                            "natural": "The girls were squealing and carrying on."
+                        },
+                        {
+                            "jp": "「きゃあ！見ないで！」",
+                            "literal": "'Kyaa! Don't look!'",
+                            "natural": "'Eek! Don't look!'"
+                        }
+                    ],
+                    "usage_rules": [
+                        "Surprise: 'yelp', 'shriek', 'Eek!'",
+                        "Fangirling (キャーキャー): 'squealing', 'shrieking', 'going wild'",
+                        "Embarrassment: 'Eek!', 'Aah!', or describe the reaction instead",
+                        "AVOID: keeping 'Kyaa' in English — always transcreate"
+                    ],
+                    "priority": "medium",
+                    "corpus_frequency": 688
+                }
+            ]
+        },
+        "giving_receiving": {
+            "description": "Japanese giving/receiving auxiliary verbs (やりもらい) that encode social dynamics and favors — 21,405 corpus hits, critical for natural English dialogue",
+            "negative_vectors": {
+                "description": "Suppress match on plain transitive actions without social/benefactive nuance",
+                "texts": [
+                    "self-directed action, I did it myself, acting alone, independent action without beneficiary",
+                    "物を渡す physically handing object, literal give and take, commercial transaction, buying selling",
+                    "causative without social nuance, mechanical cause and effect, physics, natural process"
+                ]
+            },
+            "patterns": [
+                {
+                    "id": "kureru_favor",
+                    "japanese_structure": "てくれる / てくれた / てくれない (doing something for the speaker's benefit)",
+                    "japanese_indicators": [
+                        "てくれる",
+                        "てくれた",
+                        "てくれない",
+                        "くれる",
+                        "くれた"
+                    ],
+                    "english_pattern": "Restructure to show appreciation/benefit naturally",
+                    "examples": [
+                        {
+                            "jp": "シャーロットさんは日本への想いを教えてくれた。",
+                            "literal": "Charlotte-san taught-me-the-favor her feelings about Japan.",
+                            "natural": "Charlotte shared how she felt about Japan."
+                        },
+                        {
+                            "jp": "同意してくれる奴が欲しかったんだろう。",
+                            "literal": "He probably wanted someone who would agree-for-him.",
+                            "natural": "He probably just wanted someone to back him up."
+                        },
+                        {
+                            "jp": "彼女が笑顔を見せてくれた。",
+                            "literal": "She showed-me-the-favor a smile.",
+                            "natural": "She graced me with a smile."
+                        }
+                    ],
+                    "usage_rules": [
+                        "Most common: simply drop the 'for me' nuance and use natural EN verbs",
+                        "Gratitude context: 'was kind enough to', 'went ahead and', 'treated me to'",
+                        "Negative (てくれない): 'won't [verb] for me', or show frustration in tone",
+                        "てくれる encodes gratitude — sometimes restructure as 'I was grateful when...'",
+                        "AVOID: 'He did X for me' for every instance — it becomes repetitive"
+                    ],
+                    "priority": "high",
+                    "corpus_frequency": 11644
+                },
+                {
+                    "id": "morau_receive",
+                    "japanese_structure": "てもらう / てもらった / てもらえる (getting someone to do something)",
+                    "japanese_indicators": [
+                        "てもらう",
+                        "てもらった",
+                        "てもらえる",
+                        "もらう",
+                        "もらった"
+                    ],
+                    "english_pattern": "got [someone] to / had [someone] / asked [someone] to",
+                    "examples": [
+                        {
+                            "jp": "教えてもらったほうがエマちゃんを楽しませることができると思った。",
+                            "literal": "I thought I could make Emma enjoy herself more if I received-teaching.",
+                            "natural": "I figured I'd have a better shot at keeping Emma entertained if I got some pointers."
+                        },
+                        {
+                            "jp": "大目に見てもらえるだろう。",
+                            "literal": "I'll probably receive-overlooking.",
+                            "natural": "She'd probably let it slide."
+                        },
+                        {
+                            "jp": "先生に説明してもらった。",
+                            "literal": "I received-explaining from the teacher.",
+                            "natural": "The teacher walked me through it."
+                        }
+                    ],
+                    "usage_rules": [
+                        "Active restructuring: 'got X to', 'had X [verb]', 'asked X to'",
+                        "Passive restructuring: 'X walked me through', 'X helped me with'",
+                        "Formal (いただく): 'was kind enough to', 'graciously [verb]ed'",
+                        "Often best to flip to active voice with the helper as subject"
+                    ],
+                    "priority": "high",
+                    "corpus_frequency": 3652
+                },
+                {
+                    "id": "ageru_give",
+                    "japanese_structure": "てあげる / てあげた (doing something for someone else's benefit)",
+                    "japanese_indicators": [
+                        "てあげる",
+                        "てあげた",
+                        "てあげよう"
+                    ],
+                    "english_pattern": "Restructure to show action directed at beneficiary",
+                    "examples": [
+                        {
+                            "jp": "「じゃあお前の顔写真を撮ってやろうか？」",
+                            "literal": "'Then shall I take-for-you a photo of your face?'",
+                            "natural": "'Want me to snap a pic of your ugly mug?'"
+                        },
+                        {
+                            "jp": "エマちゃんを楽しませてあげたい。",
+                            "literal": "I want to make-for-her Emma enjoy herself.",
+                            "natural": "I wanted to give Emma a good time."
+                        },
+                        {
+                            "jp": "教えてあげるよ。",
+                            "literal": "I'll teach-for-you.",
+                            "natural": "I'll show you how."
+                        }
+                    ],
+                    "usage_rules": [
+                        "Generous: 'I'll [verb] for you', 'Let me [verb]'",
+                        "Condescending (てやる): can sound patronizing — match character tone",
+                        "Often just use normal verb without 'for you': 'I'll show you'",
+                        "AVOID: 'I'll do X for you' every time — gets patronizing in EN"
+                    ],
+                    "priority": "medium",
+                    "corpus_frequency": 1233
+                },
+                {
+                    "id": "saseru_causative",
+                    "japanese_structure": "させる / させた / させられる (make/let/force someone to do)",
+                    "japanese_indicators": [
+                        "させる",
+                        "させた",
+                        "させて",
+                        "させられ"
+                    ],
+                    "english_pattern": "made X [verb] / let X [verb] / had X [verb] / forced X to",
+                    "examples": [
+                        {
+                            "jp": "俺は美優先生に用件を思い出させたことを後悔する。",
+                            "literal": "I regret making Miyu-sensei remember the matter.",
+                            "natural": "I'd regret reminding Miyu-sensei about that."
+                        },
+                        {
+                            "jp": "この子に辛い思いをさせてしまう。",
+                            "literal": "I'll end up making this child have painful feelings.",
+                            "natural": "I'd be putting this poor kid through more pain."
+                        },
+                        {
+                            "jp": "彼女を待たせるわけにはいかない。",
+                            "literal": "I can't make her wait.",
+                            "natural": "I can't keep her waiting."
+                        }
+                    ],
+                    "usage_rules": [
+                        "Permission (させてあげる): 'let X', 'allow X to'",
+                        "Coercion (させる): 'made X', 'forced X to', 'had X'",
+                        "Causative-passive (させられる): 'was made to', 'was forced to'",
+                        "Often restructure entirely: 'remind' instead of 'make remember'"
+                    ],
+                    "priority": "high",
+                    "corpus_frequency": 4876
+                }
+            ]
+        },
+        "inner_monologue": {
+            "description": "Japanese narration markers for inner thoughts and involuntary reactions — 15,768 corpus hits, essential for light novel first-person narration",
+            "negative_vectors": {
+                "description": "Suppress match on direct dialogue between characters or objective third-person description",
+                "texts": [
+                    "direct dialogue, spoken aloud, said to another person, conversational exchange",
+                    "objective third-person narration, the room was, the sun shone, external description",
+                    "deliberate intentional action, consciously decided, planned carefully, on purpose"
+                ]
+            },
+            "patterns": [
+                {
+                    "id": "omowazu_involuntary",
+                    "japanese_structure": "思わず (involuntarily/without thinking/couldn't help but)",
+                    "japanese_indicators": [
+                        "思わず",
+                        "つい",
+                        "ついつい"
+                    ],
+                    "english_pattern": "couldn't help but/before I knew it/instinctively/without thinking",
+                    "examples": [
+                        {
+                            "jp": "思わず苦笑いを浮かべてしまう。",
+                            "literal": "I involuntarily float a bitter smile.",
+                            "natural": "I couldn't help but crack a wry smile."
+                        },
+                        {
+                            "jp": "つい彼女の方を見てしまった。",
+                            "literal": "I accidentally ended up looking at her.",
+                            "natural": "My eyes drifted her way before I could stop them."
+                        },
+                        {
+                            "jp": "ついつい目で追ってしまう。",
+                            "literal": "I keep accidentally following with my eyes.",
+                            "natural": "I kept catching myself watching her."
+                        }
+                    ],
+                    "usage_rules": [
+                        "思わず: 'couldn't help but', 'instinctively', 'without thinking'",
+                        "つい: 'accidentally', 'before I knew it', 'caught myself [verb]ing'",
+                        "ついつい (repeated): 'kept [verb]ing', 'couldn't stop [verb]ing'",
+                        "Often best to show the involuntary nature through action: 'my eyes drifted' vs 'I involuntarily looked'"
+                    ],
+                    "priority": "high",
+                    "corpus_frequency": 2063
+                },
+                {
+                    "id": "futo_sudden_thought",
+                    "japanese_structure": "ふと / ふっと (suddenly occurring thought/notice)",
+                    "japanese_indicators": [
+                        "ふと",
+                        "ふっと"
+                    ],
+                    "english_pattern": "suddenly/out of nowhere/it occurred to me/on a whim",
+                    "examples": [
+                        {
+                            "jp": "ふと、あることが気になった。",
+                            "literal": "Suddenly, a certain thing caught my attention.",
+                            "natural": "Something nagged at me all of a sudden."
+                        },
+                        {
+                            "jp": "ふと彼女の横顔を見た。",
+                            "literal": "Suddenly I looked at her profile.",
+                            "natural": "My gaze drifted to her profile."
+                        },
+                        {
+                            "jp": "ふと思い出したように彼女は言った。",
+                            "literal": "As if she suddenly remembered, she said.",
+                            "natural": "'Oh—' she started, as if something had just come back to her."
+                        }
+                    ],
+                    "usage_rules": [
+                        "Thought: 'it occurred to me', 'it hit me', 'something crossed my mind'",
+                        "Action: 'on impulse', 'without really thinking', 'my gaze drifted'",
+                        "Can often omit ふと and show spontaneity through sentence structure",
+                        "AVOID: 'suddenly' for every ふと — it loses impact"
+                    ],
+                    "priority": "medium",
+                    "corpus_frequency": 337
+                },
+                {
+                    "id": "nazeka_inexplicable",
+                    "japanese_structure": "なぜか / 何故か (for some reason/inexplicably)",
+                    "japanese_indicators": [
+                        "なぜか",
+                        "何故か",
+                        "なんとなく"
+                    ],
+                    "english_pattern": "for some reason/somehow/I couldn't put my finger on why",
+                    "examples": [
+                        {
+                            "jp": "なぜか彼女の言葉が頭から離れなかった。",
+                            "literal": "For some reason, her words wouldn't leave my head.",
+                            "natural": "Her words lingered in my head, and I couldn't figure out why."
+                        },
+                        {
+                            "jp": "なぜか少し寂しい気持ちになった。",
+                            "literal": "For some reason, I felt a little lonely.",
+                            "natural": "A pang of loneliness hit me out of nowhere."
+                        },
+                        {
+                            "jp": "なんとなく、今日はいい日になる気がした。",
+                            "literal": "Somehow, I had a feeling today would be a good day.",
+                            "natural": "I had this feeling — today was going to be a good day."
+                        }
+                    ],
+                    "usage_rules": [
+                        "なぜか: 'for some reason', 'inexplicably', 'I couldn't say why'",
+                        "なんとなく: 'somehow', 'vaguely', 'I just had this feeling'",
+                        "Can often restructure: show the unexpectedness through sentence structure",
+                        "In LN monologue: 'don't ask me why' or 'no idea where it came from'"
+                    ],
+                    "priority": "medium",
+                    "corpus_frequency": 1228
+                },
+                {
+                    "id": "douyara_inference",
+                    "japanese_structure": "どうやら (it seems/apparently — based on observation)",
+                    "japanese_indicators": [
+                        "どうやら",
+                        "どうも"
+                    ],
+                    "english_pattern": "it seems/apparently/from the looks of it/judging by",
+                    "examples": [
+                        {
+                            "jp": "どうやら今日怒られたことがまだトラウマになっているようだ。",
+                            "literal": "Apparently, being scolded today is still a trauma.",
+                            "natural": "Getting chewed out earlier was clearly still eating at him."
+                        },
+                        {
+                            "jp": "どうやら彼女も同じらしい。",
+                            "literal": "Apparently she is the same.",
+                            "natural": "Looks like she's no exception."
+                        },
+                        {
+                            "jp": "どうやら俺のことを覚えているらしい。",
+                            "literal": "Apparently she remembers me.",
+                            "natural": "She seemed to remember me, at least."
+                        }
+                    ],
+                    "usage_rules": [
+                        "Observation-based: 'from the looks of it', 'judging by', 'clearly'",
+                        "Narration: 'apparently', 'it seemed', 'evidently'",
+                        "Often best to state the observation directly and drop どうやら",
+                        "Combine with らしい/ようだ: don't double-hedge in English"
+                    ],
+                    "priority": "medium",
+                    "corpus_frequency": 1415
+                },
+                {
+                    "id": "soredemo_persistence",
+                    "japanese_structure": "それでも (even so/still/despite that)",
+                    "japanese_indicators": [
+                        "それでも",
+                        "それなのに",
+                        "にもかかわらず"
+                    ],
+                    "english_pattern": "Even so/Still/But even then/And yet",
+                    "examples": [
+                        {
+                            "jp": "それでも、俺は諦めたくなかった。",
+                            "literal": "Even so, I didn't want to give up.",
+                            "natural": "But I wasn't about to give up."
+                        },
+                        {
+                            "jp": "それでも彼女は笑っていた。",
+                            "literal": "Even so, she was smiling.",
+                            "natural": "And yet, there she was — smiling through it all."
+                        },
+                        {
+                            "jp": "辛いはずなのに、それでも前を向いている。",
+                            "literal": "It should be painful, but even so she faces forward.",
+                            "natural": "It had to be hard, but she kept looking forward anyway."
+                        }
+                    ],
+                    "usage_rules": [
+                        "Resolution: 'But even so', 'Still', 'Regardless'",
+                        "Admiration: 'And yet', 'Even then', 'In spite of everything'",
+                        "Can often restructure: 'but' + contrast without explicit 'even so'",
+                        "Powerful for character-defining moments — keep the weight"
+                    ],
+                    "priority": "high",
+                    "corpus_frequency": 2026
+                },
+                {
+                    "id": "doushitemo_insistence",
+                    "japanese_structure": "どうしても (no matter what/absolutely must/can't help it)",
+                    "japanese_indicators": [
+                        "どうしても",
+                        "何としても"
+                    ],
+                    "english_pattern": "no matter what/just can't/absolutely had to/there was no way around",
+                    "examples": [
+                        {
+                            "jp": "どうしても彼女のことが気になってしまう。",
+                            "literal": "No matter what, I end up being concerned about her.",
+                            "natural": "I just couldn't get her out of my head."
+                        },
+                        {
+                            "jp": "どうしても行きたい場所がある。",
+                            "literal": "There is a place I want to go no matter what.",
+                            "natural": "There's somewhere I absolutely have to go."
+                        },
+                        {
+                            "jp": "どうしても言えなかった。",
+                            "literal": "No matter what, I couldn't say it.",
+                            "natural": "The words just wouldn't come out."
+                        }
+                    ],
+                    "usage_rules": [
+                        "Inability: 'just can't', 'no matter how hard I tried', 'the words wouldn't come'",
+                        "Determination: 'absolutely must', 'no matter what', 'at all costs'",
+                        "Emotional: 'I couldn't help it', 'couldn't stop myself'",
+                        "Show through action rather than stating 'no matter what'"
+                    ],
+                    "priority": "medium",
+                    "corpus_frequency": 611
+                }
+            ]
+        },
+        "quotation_hearsay": {
+            "description": "Japanese quotation and hearsay structures that need natural English equivalents — 13,856 corpus hits, essential for dialogue-heavy light novels",
+            "negative_vectors": {
+                "description": "Suppress match when speaker is stating first-hand knowledge or direct experience, not reporting",
+                "texts": [
+                    "I saw it myself, with my own eyes, I was there, first-hand experience, I witnessed",
+                    "I know because, I'm certain, I can confirm, definitive personal knowledge",
+                    "direct command, imperative instruction, telling someone to do something now"
+                ]
+            },
+            "patterns": [
+                {
+                    "id": "tte_iu_quotation",
+                    "japanese_structure": "って言う / と言う / と言った (quotation/naming)",
+                    "japanese_indicators": [
+                        "って言う",
+                        "って言った",
+                        "と言う",
+                        "と言った",
+                        "と言って"
+                    ],
+                    "english_pattern": "said/called/told/went (casual)",
+                    "examples": [
+                        {
+                            "jp": "『エマちゃんって言うんだね』",
+                            "literal": "'You're called Emma-chan.'",
+                            "natural": "'Emma, huh? Cute name.'"
+                        },
+                        {
+                            "jp": "美優先生、バレなかったらいいって言ってたじゃないですか。",
+                            "literal": "Miyu-sensei, you said it's fine if we don't get caught.",
+                            "natural": "Miyu-sensei, you literally said it's fine as long as nobody finds out."
+                        },
+                        {
+                            "jp": "彼女は嫌だって言った。",
+                            "literal": "She said she doesn't want to.",
+                            "natural": "She flat-out said no."
+                        }
+                    ],
+                    "usage_rules": [
+                        "って言う (casual quote): 'said', 'told me', 'was like'",
+                        "って言うんだ (naming): 'called X', 'named X', 'goes by X'",
+                        "Casual speech: 'was like' is natural for dialogue retelling",
+                        "AVOID: mechanical 'said' for every instance — use 'told', 'mentioned', 'pointed out'"
+                    ],
+                    "priority": "high",
+                    "corpus_frequency": 6484
+                },
+                {
+                    "id": "to_iu_description",
+                    "japanese_structure": "という / というの / ということ (explanatory/defining)",
+                    "japanese_indicators": [
+                        "という",
+                        "というの",
+                        "ということ",
+                        "というのは",
+                        "というもの"
+                    ],
+                    "english_pattern": "called/known as/the fact that/which means",
+                    "examples": [
+                        {
+                            "jp": "彰はユースで活躍中のサッカー選手ということもあって。",
+                            "literal": "Given the fact that Akira is a soccer player active in youth leagues.",
+                            "natural": "Akira was a rising star in the youth soccer leagues, so..."
+                        },
+                        {
+                            "jp": "若干行き遅れてしまっているというのは、ここだけの話。",
+                            "literal": "The thing that she's slightly behind in getting married is a secret.",
+                            "natural": "Between you and me, she's fallen a bit behind on the marriage front."
+                        },
+                        {
+                            "jp": "幼い子供が泣いているというのに、誰も声をかけようとはしない。",
+                            "literal": "Despite the fact that a young child is crying, nobody tries to speak to her.",
+                            "natural": "A little kid was bawling her eyes out, and not a single person stopped to help."
+                        }
+                    ],
+                    "usage_rules": [
+                        "Defining (という + noun): 'called', 'known as', 'named' — often drop entirely",
+                        "Explanatory (ということ): 'the fact that', 'which means', 'in other words'",
+                        "Contrastive (というのに): 'and yet', 'despite', 'even though'",
+                        "AVOID: 'the thing called X' — always restructure naturally"
+                    ],
+                    "priority": "high",
+                    "corpus_frequency": 6345
+                },
+                {
+                    "id": "sou_da_hearsay",
+                    "japanese_structure": "そうだ / だそうだ / とのこと (reported information)",
+                    "japanese_indicators": [
+                        "だそうだ",
+                        "だそうです",
+                        "とのことだ",
+                        "という話だ",
+                        "らしい"
+                    ],
+                    "english_pattern": "I heard/apparently/from what I hear/word is",
+                    "examples": [
+                        {
+                            "jp": "彼女は留学生だそうだ。",
+                            "literal": "I hear she is an exchange student.",
+                            "natural": "Apparently, she's an exchange student."
+                        },
+                        {
+                            "jp": "明日はテストがあるとのことだ。",
+                            "literal": "It is that there is a test tomorrow.",
+                            "natural": "Word is there's a test tomorrow."
+                        },
+                        {
+                            "jp": "あの店は美味しいという話だ。",
+                            "literal": "There is talk that that restaurant is delicious.",
+                            "natural": "I've heard that place is pretty good."
+                        }
+                    ],
+                    "usage_rules": [
+                        "Casual: 'apparently', 'I heard', 'word is'",
+                        "Formal: 'reportedly', 'according to', 'I'm told'",
+                        "Can often drop hearsay marker and state as fact if source is clear",
+                        "AVOID: 'It is said that' — too stiff for LN prose"
+                    ],
+                    "priority": "medium",
+                    "corpus_frequency": 219
+                }
+            ]
+        },
+        "desire_intention": {
+            "description": "Japanese desire and intention expressions requiring natural English equivalents — 14,243 corpus hits, core to character motivation in LN",
+            "negative_vectors": {
+                "description": "Suppress match when action is completed fact, obligation, or external command rather than internal desire",
+                "texts": [
+                    "already completed, already did it, finished, done, accomplished, past fact",
+                    "external obligation, must do, have to, required by rules, duty, forced to",
+                    "objective capability, can do, is able to, has the skill, physical ability"
+                ]
+            },
+            "patterns": [
+                {
+                    "id": "tai_want_to",
+                    "japanese_structure": "たい / たかった / たくない (desire to do)",
+                    "japanese_indicators": [
+                        "たい",
+                        "たかった",
+                        "たくない",
+                        "たくなかった",
+                        "たくて"
+                    ],
+                    "english_pattern": "want to/was dying to/couldn't bring myself to/felt like",
+                    "examples": [
+                        {
+                            "jp": "さっさと立ち去りたい。",
+                            "literal": "I want to quickly leave.",
+                            "natural": "I just wanted to get out of there."
+                        },
+                        {
+                            "jp": "赤くなっている顔を彼女に見られたくなかった。",
+                            "literal": "I didn't want my red face to be seen by her.",
+                            "natural": "The last thing I needed was for her to see me blushing."
+                        },
+                        {
+                            "jp": "まだバレていないと信じたい。",
+                            "literal": "I want to believe it hasn't been found out yet.",
+                            "natural": "A guy can hope he hasn't been found out."
+                        }
+                    ],
+                    "usage_rules": [
+                        "Direct: 'want to', 'wanted to' — fine for most contexts",
+                        "Intense: 'was dying to', 'couldn't wait to', 'desperate to'",
+                        "Negative: 'didn't want to', 'couldn't bring myself to', 'the last thing I needed'",
+                        "Vary phrasing: 'felt like [verb]ing', 'was itching to', 'had the urge to'"
+                    ],
+                    "priority": "high",
+                    "corpus_frequency": 4996
+                },
+                {
+                    "id": "hoshii_want_object",
+                    "japanese_structure": "ほしい / 欲しい / てほしい (wanting object/wanting someone to do)",
+                    "japanese_indicators": [
+                        "ほしい",
+                        "欲しい",
+                        "ほしかった",
+                        "てほしい"
+                    ],
+                    "english_pattern": "want/need/wish/hoping for",
+                    "examples": [
+                        {
+                            "jp": "同意してくれる奴が欲しかったんだろう。",
+                            "literal": "He probably wanted a guy who would agree.",
+                            "natural": "He probably just wanted someone to back him up."
+                        },
+                        {
+                            "jp": "今後やめてほしい。",
+                            "literal": "I want you to stop in the future.",
+                            "natural": "I wish she'd cut it out."
+                        },
+                        {
+                            "jp": "起きていてほしかった。",
+                            "literal": "I wanted her to stay awake.",
+                            "natural": "I wished she'd stayed up."
+                        }
+                    ],
+                    "usage_rules": [
+                        "てほしい (wanting someone to): 'wish X would', 'need X to', 'want X to'",
+                        "ほしい (wanting object): 'want', 'need', 'could use'",
+                        "Past (ほしかった): 'wished', 'had been hoping for'",
+                        "Casual: 'could use a [noun]', 'wouldn't mind a [noun]'"
+                    ],
+                    "priority": "high",
+                    "corpus_frequency": 3383
+                },
+                {
+                    "id": "ki_ni_naru_curiosity",
+                    "japanese_structure": "気になる / 気になった (curious about/bothered by/can't stop thinking about)",
+                    "japanese_indicators": [
+                        "気になる",
+                        "気になった",
+                        "気になって"
+                    ],
+                    "english_pattern": "curious about/bugging me/can't stop thinking about/caught my attention",
+                    "examples": [
+                        {
+                            "jp": "彼女のことが気になって仕方がない。",
+                            "literal": "I can't help being concerned about her.",
+                            "natural": "I just couldn't get her off my mind."
+                        },
+                        {
+                            "jp": "一つだけ気になることがある。",
+                            "literal": "There is one thing that concerns me.",
+                            "natural": "One thing's been bugging me, though."
+                        },
+                        {
+                            "jp": "さっきの言葉が気になった。",
+                            "literal": "The words from earlier concerned me.",
+                            "natural": "What she said earlier stuck with me."
+                        }
+                    ],
+                    "usage_rules": [
+                        "Curiosity: 'curious about', 'wondering about', 'caught my attention'",
+                        "Worry: 'bugging me', 'nagging at me', 'on my mind'",
+                        "Romantic: 'can't stop thinking about', 'can't get X off my mind'",
+                        "Context determines positive (interest) vs negative (worry) nuance"
+                    ],
+                    "priority": "high",
+                    "corpus_frequency": 1929
+                }
+            ]
+        },
+        "structure_particles": {
+            "description": "Japanese structural particles that fundamentally change sentence meaning and need careful English restructuring — 13,507 corpus hits",
+            "negative_vectors": {
+                "description": "Suppress match on basic case particles or simple grammatical markers without semantic weight",
+                "texts": [
+                    "basic subject marker は が, object marker を, direction marker に へ, simple grammar",
+                    "simple copula です だ, plain existence いる ある, basic predicate without nuance",
+                    "straightforward affirmative statement, yes it is, that is correct, simple confirmation"
+                ]
+            },
+            "patterns": [
+                {
+                    "id": "wake_reason",
+                    "japanese_structure": "わけ / わけが / わけない / わけにはいかない (reason/impossibility)",
+                    "japanese_indicators": [
+                        "わけ",
+                        "わけが",
+                        "わけない",
+                        "わけにはいかない",
+                        "わけではない"
+                    ],
+                    "english_pattern": "Context-dependent: no way/it's not like/can't exactly/have to",
+                    "examples": [
+                        {
+                            "jp": "さすがにこのまま見過ごすわけにはいかない。",
+                            "literal": "As expected, I can't let this pass as is.",
+                            "natural": "I couldn't just stand by and do nothing."
+                        },
+                        {
+                            "jp": "そんなことできるわけないでしょ？",
+                            "literal": "There's no way I could do such a thing, right?",
+                            "natural": "You seriously think I could pull that off?"
+                        },
+                        {
+                            "jp": "嫌いなわけじゃない。",
+                            "literal": "It's not that I dislike it.",
+                            "natural": "It's not like I hate it or anything."
+                        }
+                    ],
+                    "usage_rules": [
+                        "わけにはいかない (obligation): 'can't exactly', 'couldn't just', 'have to'",
+                        "わけない (impossibility): 'no way', 'as if', 'like that would happen'",
+                        "わけではない (partial negation): 'it's not like', 'that doesn't mean'",
+                        "わけだ (explanation): 'so that's why', 'no wonder', 'that explains it'"
+                    ],
+                    "priority": "high",
+                    "corpus_frequency": 5053
+                },
+                {
+                    "id": "hazu_expectation",
+                    "japanese_structure": "はず / はずだ / はずがない (expectation/supposed to/impossible)",
+                    "japanese_indicators": [
+                        "はずだ",
+                        "はず",
+                        "はずがない",
+                        "はずなのに"
+                    ],
+                    "english_pattern": "should/supposed to/no way/there's no chance",
+                    "examples": [
+                        {
+                            "jp": "きっと彼女はクラスメイトたちに囲まれてしまうはずだ。",
+                            "literal": "Surely she will be surrounded by classmates.",
+                            "natural": "She'd be swarmed by classmates in no time."
+                        },
+                        {
+                            "jp": "慕われないはずがないだろう。",
+                            "literal": "There's no way he wouldn't be admired.",
+                            "natural": "Of course everyone adores him."
+                        },
+                        {
+                            "jp": "楽しいはずなのに、なぜか寂しかった。",
+                            "literal": "It should be fun, but for some reason I was lonely.",
+                            "natural": "It was supposed to be fun — so why did I feel so empty?"
+                        }
+                    ],
+                    "usage_rules": [
+                        "はずだ (confident): 'should', 'definitely will', or just assert it",
+                        "はずがない (impossible): 'no way', 'there's no chance', 'impossible'",
+                        "はずなのに (unmet expectation): 'was supposed to but', 'should have been but'",
+                        "Often can drop はず and state the expectation directly"
+                    ],
+                    "priority": "high",
+                    "corpus_frequency": 3677
+                },
+                {
+                    "id": "shika_nai_only",
+                    "japanese_structure": "しかない / しかなかった (no choice but/only option)",
+                    "japanese_indicators": [
+                        "しかない",
+                        "しかなかった",
+                        "よりほかない"
+                    ],
+                    "english_pattern": "no choice but to/all I could do was/the only option",
+                    "examples": [
+                        {
+                            "jp": "ここで頑張るしかない。",
+                            "literal": "There's nothing but to do my best here.",
+                            "natural": "All I could do was give it everything I had."
+                        },
+                        {
+                            "jp": "本人に聞くしかない。",
+                            "literal": "There's nothing but to ask the person.",
+                            "natural": "The only way to find out was to ask her directly."
+                        },
+                        {
+                            "jp": "待つしかなかった。",
+                            "literal": "There was nothing but to wait.",
+                            "natural": "All I could do was wait."
+                        }
+                    ],
+                    "usage_rules": [
+                        "Resigned: 'no choice but to', 'all I could do was', 'nothing for it but'",
+                        "Determined: 'just have to', 'the only way is', 'gotta'",
+                        "Can restructure: 'The only option was to [verb]'",
+                        "Match tone: resigned (sigh) vs determined (resolve)"
+                    ],
+                    "priority": "medium",
+                    "corpus_frequency": 1528
+                },
+                {
+                    "id": "bakari_only_nothing_but",
+                    "japanese_structure": "ばかり / ばっかり (only/nothing but/just did)",
+                    "japanese_indicators": [
+                        "ばかり",
+                        "ばっかり",
+                        "ばかりだ"
+                    ],
+                    "english_pattern": "nothing but/all [subject] does is/just/keep [verb]ing",
+                    "examples": [
+                        {
+                            "jp": "最近は勉強ばかりしている。",
+                            "literal": "Recently I'm doing nothing but studying.",
+                            "natural": "Lately, all I've been doing is studying."
+                        },
+                        {
+                            "jp": "文句ばっかり言うな。",
+                            "literal": "Don't say nothing but complaints.",
+                            "natural": "Quit complaining all the time."
+                        },
+                        {
+                            "jp": "食べたばかりなのに、もうお腹が空いた。",
+                            "literal": "Even though I just ate, I'm already hungry.",
+                            "natural": "I literally just ate, and I'm already hungry again."
+                        }
+                    ],
+                    "usage_rules": [
+                        "Exclusive (ばかり): 'nothing but', 'all [subject] does is', 'only'",
+                        "Just completed (たばかり): 'just [verb]ed', 'barely finished [verb]ing'",
+                        "Exasperation: 'keep [verb]ing', 'always [verb]ing', 'all the time'",
+                        "Casual ばっかり is more emphatic than ばかり"
+                    ],
+                    "priority": "medium",
+                    "corpus_frequency": 1260
+                },
+                {
+                    "id": "koso_emphasis",
+                    "japanese_structure": "こそ (emphatic particle — precisely/it is X that)",
+                    "japanese_indicators": [
+                        "こそ",
+                        "こそが",
+                        "こそは",
+                        "からこそ"
+                    ],
+                    "english_pattern": "precisely/it's X that/the very thing/that's exactly why",
+                    "examples": [
+                        {
+                            "jp": "だからこそ、諦めるわけにはいかない。",
+                            "literal": "Precisely because of that, I can't give up.",
+                            "natural": "That's exactly why I can't give up."
+                        },
+                        {
+                            "jp": "あなたにこそ聞いてほしい。",
+                            "literal": "It's precisely you I want to listen.",
+                            "natural": "You're the one I want to hear this."
+                        },
+                        {
+                            "jp": "今こそ行動するときだ。",
+                            "literal": "Precisely now is the time to act.",
+                            "natural": "If there was ever a time to act, it's now."
+                        }
+                    ],
+                    "usage_rules": [
+                        "からこそ (reason emphasis): 'that's exactly why', 'all the more reason'",
+                        "Noun + こそ (focus): 'it's X that', 'X is the one who', 'X above all'",
+                        "今こそ (temporal): 'now is the time', 'this is the moment'",
+                        "Carries strong emotional weight — preserve the emphasis in EN"
+                    ],
+                    "priority": "high",
+                    "corpus_frequency": 1397
+                }
+            ]
+        },
+        "concession_contrast": {
+            "description": "Japanese concessive expressions for 'even though/despite' structures — 9,540 corpus hits, expanding existing concessive_clauses",
+            "negative_vectors": {
+                "description": "Suppress match when connector is additive or sequential rather than concessive/contrastive",
+                "texts": [
+                    "and also, in addition, furthermore, moreover, plus, on top of that, additive",
+                    "then, next, after that, subsequently, following that, sequential narration",
+                    "because, since, as a result, therefore, causal relationship not contrast"
+                ]
+            },
+            "patterns": [
+                {
+                    "id": "noni_despite",
+                    "japanese_structure": "のに (even though/despite — with emotional nuance)",
+                    "japanese_indicators": [
+                        "のに",
+                        "なのに",
+                        "だったのに"
+                    ],
+                    "english_pattern": "even though/and yet/despite/when",
+                    "examples": [
+                        {
+                            "jp": "彰は顔がよくて運動神経もいいのに、グイグイと行き過ぎるせいで相手に引かれてしまう。",
+                            "literal": "Even though Akira has a good face and athletic ability, he ends up being rejected because he pushes too hard.",
+                            "natural": "Akira's got the looks and the athleticism, but he comes on way too strong and scares people off."
+                        },
+                        {
+                            "jp": "来週からテストが始まるのに、そんなことをしている暇はないだろ？",
+                            "literal": "Even though tests start next week, you don't have time for that, right?",
+                            "natural": "Tests start next week — you really think you've got time for this?"
+                        },
+                        {
+                            "jp": "手を繫ぐだけでもハードルが高かったのに。",
+                            "literal": "Even just holding hands was a high hurdle, and yet.",
+                            "natural": "Holding hands was already nerve-wracking enough, and now this?"
+                        }
+                    ],
+                    "usage_rules": [
+                        "Frustration/complaint: 'and yet', 'but still', dash + contrast",
+                        "Surprise: 'even though', 'despite the fact that'",
+                        "Trailing のに (regret): 'and yet...' or 'if only...'",
+                        "Often restructure: state both halves with 'but' or dash instead of 'despite'"
+                    ],
+                    "priority": "high",
+                    "corpus_frequency": 5631
+                },
+                {
+                    "id": "nishitemo_granting",
+                    "japanese_structure": "にしても / としても (even if/granting that)",
+                    "japanese_indicators": [
+                        "にしても",
+                        "としても",
+                        "にしたって",
+                        "だとしても"
+                    ],
+                    "english_pattern": "even if/granting that/even so/be that as it may",
+                    "examples": [
+                        {
+                            "jp": "冗談にしても、言っていいことと悪いことがある。",
+                            "literal": "Even if it's a joke, there are things you should and shouldn't say.",
+                            "natural": "Joke or not, there are lines you don't cross."
+                        },
+                        {
+                            "jp": "忙しいにしても、連絡くらいはできるだろう。",
+                            "literal": "Even if busy, you could at least contact me.",
+                            "natural": "Busy or not, the least you could do is send a text."
+                        },
+                        {
+                            "jp": "好きだとしても、それは関係ない。",
+                            "literal": "Even if I like her, that's irrelevant.",
+                            "natural": "Even if I did like her, that's beside the point."
+                        }
+                    ],
+                    "usage_rules": [
+                        "Concessive: 'even if', 'even granting that', 'be that as it may'",
+                        "X にしても Y にしても: 'whether X or Y', 'either way'",
+                        "Often can use 'X or not' structure: 'Joke or not', 'Busy or not'",
+                        "Emphatic: 'even so', 'regardless', 'that still doesn't explain'"
+                    ],
+                    "priority": "medium",
+                    "corpus_frequency": 2143
+                },
+                {
+                    "id": "kuseni_critical",
+                    "japanese_structure": "くせに / 癖に (even though — with criticism/annoyance)",
+                    "japanese_indicators": [
+                        "くせに",
+                        "癖に"
+                    ],
+                    "english_pattern": "for someone who/and yet/even though (with attitude)",
+                    "examples": [
+                        {
+                            "jp": "自分だってできないくせに。",
+                            "literal": "Even though you can't do it either.",
+                            "natural": "Like you're one to talk."
+                        },
+                        {
+                            "jp": "何も知らないくせに偉そうにするな。",
+                            "literal": "Don't act important even though you know nothing.",
+                            "natural": "Don't act all high and mighty when you don't know anything."
+                        },
+                        {
+                            "jp": "男のくせに泣くなよ。",
+                            "literal": "Even though you're a man, don't cry.",
+                            "natural": "You're a guy — quit crying."
+                        }
+                    ],
+                    "usage_rules": [
+                        "Always carries criticism or frustration — never neutral",
+                        "Restructure as accusation: 'for someone who [claim], you sure [contradiction]'",
+                        "Dismissive: 'Like you're one to talk', 'As if you'd know'",
+                        "Can use 'when' + accusatory tone: 'Don't X when you can't even Y'"
+                    ],
+                    "priority": "high",
+                    "corpus_frequency": 549
+                }
+            ]
         }
     },
     "rag_retrieval_strategy": {
@@ -3219,29 +5298,59 @@
             {
                 "step": 1,
                 "name": "Parse Japanese structure",
-                "method": "Identify particles, connectors, sentence patterns in source"
+                "method": "Identify particles, connectors, sentence patterns in source via grammar_pattern_detector (16 regex categories, 97 patterns)"
             },
             {
                 "step": 2,
-                "name": "Match indicators",
-                "method": "Search pattern database for matching japanese_indicators"
+                "name": "Batch embed & vector search",
+                "method": "Batch-embed all detected pattern contexts in 1 API call → ChromaDB cosine search filtered by category → return top-k matches"
             },
             {
                 "step": 3,
-                "name": "Rank by priority",
-                "method": "High priority patterns take precedence, context-aware selection"
+                "name": "Negative anchor filtering",
+                "method": "For each match, compute cosine similarity between query and category negative_vectors. If similarity > 0.72, apply proportional penalty (up to -0.15) to suppress false positives. Example: intensifiers pattern won't fire on 'completely certain' sentences."
             },
             {
                 "step": 4,
-                "name": "Inject into prompt",
-                "method": "Add matched patterns as few-shot examples before translation"
+                "name": "Threshold gate",
+                "method": "After penalty adjustment: similarity ≥ 0.78 → inject into prompt as few-shot example. 0.65-0.78 → log for audit. < 0.65 → discard."
             },
             {
                 "step": 5,
+                "name": "Priority ranking & injection",
+                "method": "Sort by CATEGORY_PRIORITIES (10=highest), then similarity. Inject top 3-5 high-confidence patterns as context for LLM."
+            },
+            {
+                "step": 6,
                 "name": "Post-process validation",
                 "method": "Check if LLM applied pattern correctly, suggest fixes if needed"
             }
-        ]
+        ],
+        "negative_anchor_system": {
+            "description": "Prevents false-positive pattern matches by penalizing queries that are semantically close to known anti-patterns for each category",
+            "implementation": {
+                "storage": "negative_vectors.texts[] in each category — 3 English sentences describing what this category is NOT",
+                "embedding": "Lazily batch-embedded on first get_bulk_guidance() call via Gemini Embedding 001, cached as numpy arrays",
+                "scoring": "cosine_sim(query_embedding, negative_vector) → if > NEGATIVE_ANCHOR_THRESHOLD (0.72), penalty = overshoot × NEGATIVE_ANCHOR_PENALTY (0.15)",
+                "effect": "A match with raw_similarity=0.82 but neg_penalty=0.08 becomes effective_similarity=0.74, dropping it from inject tier to log-only tier"
+            },
+            "covered_categories": [
+                "intensifiers — negatives: certainty, understatement, factual",
+                "hedging — negatives: definitive, commanding, assertive",
+                "response_particles — negatives: narration, formal prose, silent thought",
+                "natural_transitions — negatives: logical/causal connectors",
+                "sentence_endings — negatives: mid-sentence particles, case markers",
+                "emotional_nuance — negatives: quantitative, absolute certainty, objective",
+                "action_emphasis — negatives: simple past, habitual, stative",
+                "onomatopoeia — negatives: mechanical sounds, loanwords, proper nouns",
+                "giving_receiving — negatives: self-action, transactions, mechanical cause",
+                "inner_monologue — negatives: direct dialogue, objective narration, intentional",
+                "quotation_hearsay — negatives: first-hand knowledge, commands",
+                "desire_intention — negatives: completed fact, obligation, capability",
+                "structure_particles — negatives: basic case particles, simple copula",
+                "concession_contrast — negatives: additive, sequential, causal"
+            ]
+        }
     },
     "integration_points": {
         "phase_2_translation": {

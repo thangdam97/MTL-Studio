@@ -1,5 +1,5 @@
 project:
-  target_language: en
+  target_language: vn
   languages:
     en:
       master_prompt: prompts/master_prompt_en_compressed.xml
@@ -97,7 +97,7 @@ kimi:
     cache_file: WORK/.kimi_validation_cache.json
     cache_ttl_hours: 168
 translation:
-  enable_multimodal: true  # Auto-load visual_cache.json for context-aware translation
+  enable_multimodal: true
   quality:
     contraction_rate_min: 0.95
     contraction_rate_gold: 0.99

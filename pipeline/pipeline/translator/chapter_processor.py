@@ -67,6 +67,11 @@ class ChapterProcessor:
         if self.character_names:
             logger.info(f"✓ Loaded {len(self.character_names)} character names from manifest")
         
+        # Load book genre from manifest for Sino-VN disambiguation (v2)
+        self.book_genre = self._load_genre()
+        if self.book_genre != "general":
+            logger.info(f"✓ Book genre detected: {self.book_genre}")
+        
         # Initialize gap analyzer (Week 2-3 integration)
         self.gap_analyzer = None
         self.enable_gap_analysis = False  # Will be enabled from agent if needed
@@ -102,6 +107,113 @@ class ChapterProcessor:
         except Exception as e:
             logger.warning(f"Failed to load character names: {e}")
             return {}
+    
+    def _load_genre(self) -> str:
+        """Load book genre from metadata_en.json or manifest.json.
+        
+        Handles multiple manifest versions:
+          - v1.0: top-level "genre" (string, e.g. "romcom_school_life")
+          - v3.5+: metadata_en.genre (string) or content_info.genre (array)
+          - v3.6+: translation_guidance.genre (array) or content_info.genre (array)
+        
+        Returns first genre tag that matches the Sino-VN v2 genre_mapping.
+        Falls back to "japanese_light_novel" (broadest LN category).
+        """
+        # Known genres in sino_vietnamese_rag_v2.json genre_mapping
+        KNOWN_GENRES = {
+            "academic", "contemporary", "fantasy_classical", "historical",
+            "isekai_medieval", "legal_thriller", "medical_drama", "modern_urban",
+            "period_drama", "political", "psychological", "romcom",
+            "school_life", "slice_of_life", "wuxia", "yandere",
+        }
+        
+        try:
+            work_dir = self.context_manager.work_dir
+            
+            # ── Cascade 1: metadata_en.json (preferred) ──
+            metadata_en_path = work_dir / "metadata_en.json"
+            if metadata_en_path.exists():
+                with open(metadata_en_path, 'r', encoding='utf-8') as f:
+                    meta = json.load(f)
+                # Try top-level "genre" (string in v3.5+: "romcom", "romcom_yandere")
+                genre_val = meta.get('genre')
+                result = self._resolve_genre(genre_val, KNOWN_GENRES)
+                if result:
+                    return result
+                # Try content_info.genre (array)
+                ci = meta.get('content_info', {})
+                genre_val = ci.get('genre') or ci.get('genres')
+                result = self._resolve_genre(genre_val, KNOWN_GENRES)
+                if result:
+                    return result
+            
+            # ── Cascade 2: manifest.json ──
+            manifest_path = work_dir / "manifest.json"
+            if manifest_path.exists():
+                with open(manifest_path, 'r', encoding='utf-8') as f:
+                    manifest = json.load(f)
+                # v1.0: top-level "genre" (string)
+                genre_val = manifest.get('genre')
+                result = self._resolve_genre(genre_val, KNOWN_GENRES)
+                if result:
+                    return result
+                # v3.5+: translation_guidance.genre (array)
+                tg = manifest.get('translation_guidance', {})
+                genre_val = tg.get('genre') or tg.get('genres')
+                result = self._resolve_genre(genre_val, KNOWN_GENRES)
+                if result:
+                    return result
+                # v3.5+: content_info.genre (array) — can be nested under metadata_en
+                meta_en = manifest.get('metadata_en', {})
+                ci = meta_en.get('content_info', manifest.get('content_info', {}))
+                genre_val = ci.get('genre') or ci.get('genres')
+                result = self._resolve_genre(genre_val, KNOWN_GENRES)
+                if result:
+                    return result
+            
+            logger.debug("[GENRE] No matching genre found in manifest, using 'japanese_light_novel'")
+            return "japanese_light_novel"
+            
+        except Exception as e:
+            logger.warning(f"[GENRE] Failed to load genre: {e}")
+            return "japanese_light_novel"
+    
+    @staticmethod
+    def _resolve_genre(genre_val, known_genres: set) -> Optional[str]:
+        """Resolve a genre value (string or array) to a known Sino-VN genre.
+        
+        For compound strings like "romcom_school_life", splits on '_' and
+        checks each segment against known genres.
+        For arrays, returns first matching element.
+        """
+        if not genre_val:
+            return None
+        
+        # Normalize to list
+        if isinstance(genre_val, str):
+            candidates = [genre_val]
+        elif isinstance(genre_val, list):
+            candidates = genre_val
+        else:
+            return None
+        
+        for candidate in candidates:
+            if not isinstance(candidate, str):
+                continue
+            c = candidate.lower().strip()
+            # Direct match
+            if c in known_genres:
+                return c
+            # Compound split: "romcom_school_life" → ["romcom", "school_life"]
+            parts = c.split('_')
+            # Try longest sub-sequences first ("school_life" from "romcom_school_life")
+            for length in range(len(parts), 0, -1):
+                for start in range(len(parts) - length + 1):
+                    sub = '_'.join(parts[start:start + length])
+                    if sub in known_genres:
+                        return sub
+        
+        return None
     
     def _save_thinking_process(
         self, 
@@ -330,7 +442,7 @@ This document contains the internal reasoning process that Gemini used while tra
                         
                         sino_vn_guidance = store.get_bulk_guidance(
                             terms=kanji_terms,
-                            genre="general",  # TODO: Extract genre from manifest metadata
+                            genre=self.book_genre,  # v2: extracted from manifest
                             max_per_term=2,
                             min_confidence=0.68,
                             context=context_hint,  # Current chapter context

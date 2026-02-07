@@ -40,6 +40,7 @@ chroma_sino_vn/
 chroma_english_patterns/
 pipeline/chroma_sino_vn/
 pipeline/chroma_english_patterns/
+pipeline/chroma_vietnamese_patterns/
 
 # ============================================
 # DOCUMENTATION - INTERNAL/DEVELOPMENT NOTES
@@ -108,6 +109,13 @@ pipeline/scripts/*_test.py
 *_analysis_results.txt
 *_analysis.json
 *_pattern_analysis.json
+pipeline/scripts/corpus_scan_results*.json
+pipeline/scripts/corpus_scan_sino_vn.json
+pipeline/scripts/scan_output.txt
+
+# Backup files
+*_v1_backup.py
+*_backup.py
 
 # ============================================
 # PYTHON ARTIFACTS

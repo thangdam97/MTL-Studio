@@ -1250,66 +1250,83 @@ class PipelineController:
             logger.error(f"CJK cleaning failed: {e}")
             return False
     
-    def run_vn_audit(self, volume_id: str, reference_id: Optional[str] = None) -> bool:
+    def run_heal(self, volume_id: str, dry_run: bool = False, target_language: str = None) -> bool:
         """
-        Run Vietnamese Critics Audit on translated chapters.
+        Run Self-Healing Anti-AI-ism Agent on translated chapters.
         
-        This 3-subagent audit system checks:
-        1. Content Fidelity - Line counts, structure completeness
-        2. Content Integrity - Names, formatting, illustrations
-        3. Prose Quality - Vietnamese AI-ism detection
+        Three-layer detection + LLM auto-correction:
+        Layer 1: Regex patterns (65+ from anti_ai_ism_patterns.json)
+        Layer 2: Vector Bad Prose DB (ChromaDB semantic matching)
+        Layer 3: Psychic Distance Filter (filter words, nominalizations, bloat)
         
         Args:
-            volume_id: Volume to audit
-            reference_id: Optional reference volume for comparison
+            volume_id: Volume to heal
+            dry_run: Preview issues without modifying files
+            target_language: Override language detection ('en' or 'vn')
             
         Returns:
             True if successful, False otherwise
         """
         logger.info("="*60)
-        logger.info("VN CRITICS AUDIT (3-Subagent System)")
+        logger.info(f"SELF-HEALING ANTI-AI-ISM AGENT {'(DRY RUN)' if dry_run else ''}")
         logger.info("="*60)
         
         try:
-            from modules.vn_critics_auditor import run_vn_critics_audit
-            run_vn_critics_audit(volume_id, reference_id)
-            return True
-        except ImportError as e:
-            logger.error(f"Failed to import VN auditor: {e}")
-            return False
-        except Exception as e:
-            logger.error(f"VN audit failed: {e}")
-            return False
-    
-    def run_vn_refine(self, volume_id: str, dry_run: bool = False) -> bool:
-        """
-        Run Vietnamese Prose Refiner to eliminate AI-isms.
-        
-        This post-processor fixes common AI-ism patterns:
-        - "một cách [adj]" → direct adverb
-        - "một cảm giác [emotion]" → direct emotion
-        - "sự [noun] của X" → verb form
-        
-        Args:
-            volume_id: Volume to refine
-            dry_run: Preview changes without modifying files
+            from modules.anti_ai_ism_agent import AntiAIismAgent
             
-        Returns:
-            True if successful, False otherwise
-        """
-        logger.info("="*60)
-        logger.info(f"VN PROSE REFINER {'(DRY RUN)' if dry_run else ''}")
-        logger.info("="*60)
-        
-        try:
-            from modules.vn_prose_refiner import run_vn_prose_refiner
-            run_vn_prose_refiner(volume_id, dry_run)
-            return True
+            # Find volume directory
+            volume_dirs = list(self.work_dir.glob(f"*{volume_id}*"))
+            if not volume_dirs:
+                logger.error(f"Volume not found: {volume_id}")
+                return False
+            
+            work_dir = volume_dirs[0]
+            
+            # Auto-detect language from config or directory structure
+            if target_language is None:
+                if (work_dir / "VN").exists() and not (work_dir / "EN").exists():
+                    target_language = "vn"
+                elif (work_dir / "EN").exists() and not (work_dir / "VN").exists():
+                    target_language = "en"
+                else:
+                    # Check config
+                    try:
+                        import yaml
+                        config_path = Path(__file__).parent / "config.yaml"
+                        if config_path.exists():
+                            with open(config_path) as f:
+                                cfg = yaml.safe_load(f)
+                            target_language = cfg.get("target_language", "en")
+                        else:
+                            target_language = "en"
+                    except Exception:
+                        target_language = "en"
+            
+            logger.info(f"Target language: {target_language.upper()}")
+            
+            agent = AntiAIismAgent(
+                config_dir=Path(__file__).parent / "config",
+                auto_heal=not dry_run,
+                dry_run=dry_run,
+                target_language=target_language,
+            )
+            
+            report = agent.heal_volume(work_dir)
+            agent.print_summary(report)
+            
+            # Save report
+            audit_dir = work_dir / "audits"
+            agent.save_report(report, audit_dir)
+            
+            return report.total_issues == 0 or report.total_healed > 0
+            
         except ImportError as e:
-            logger.error(f"Failed to import VN refiner: {e}")
+            logger.error(f"Failed to import Anti-AI-ism Agent: {e}")
             return False
         except Exception as e:
-            logger.error(f"VN refinement failed: {e}")
+            logger.error(f"Self-healing failed: {e}")
+            import traceback
+            traceback.print_exc()
             return False
     
     def inspect_visual_cache(self, volume_id: str, detail: bool = False) -> bool:
@@ -1404,38 +1421,6 @@ class PipelineController:
         logger.info("="*60)
         return True
 
-    def run_gap_analysis(self, volume_id: str, chapters: List[int] = None) -> bool:
-        """
-        Run Gap Analysis on a volume to flag passages requiring special attention.
-        
-        Gap Types:
-        - Gap A: Emotion + Action sentence surgery (temp=0.4, conservative)
-        - Gap B: Ruby visual joke preservation
-        - Gap C: Sarcasm/Subtext layer preservation (temp=1.0, creative)
-        
-        Args:
-            volume_id: Volume to analyze
-            chapters: Specific chapters to analyze (None = all)
-            
-        Returns:
-            True if successful, False otherwise
-        """
-        logger.info("="*60)
-        logger.info("GAP ANALYSIS (Week 2-3 Implementation)")
-        logger.info("="*60)
-        
-        try:
-            from modules.gap_integration import run_gap_analysis
-            return run_gap_analysis(volume_id, chapters)
-        except ImportError as e:
-            logger.error(f"Failed to import gap analysis module: {e}")
-            return False
-        except Exception as e:
-            logger.error(f"Gap analysis failed: {e}")
-            import traceback
-            traceback.print_exc()
-            return False
-    
     def run_visual_thinking(
         self,
         volume_id: str,
@@ -2183,23 +2168,13 @@ Supported Metadata Schemas:
     cjk_clean_parser.add_argument('volume_id', type=str, help='Volume ID')
     cjk_clean_parser.add_argument('--dry-run', action='store_true', help='Preview substitutions without modifying files')
     
-    # VN Audit (Vietnamese Critics Auditor)
-    vn_audit_parser = subparsers.add_parser('vn-audit', parents=[parent_parser],
-        help='Run Vietnamese Critics Audit (Fidelity, Integrity, Prose Quality)')
-    vn_audit_parser.add_argument('volume_id', type=str, help='Volume ID to audit')
-    vn_audit_parser.add_argument('--reference', '-r', type=str, help='Reference volume ID for comparison')
-    
-    # VN Refine (Vietnamese Prose Refiner)
-    vn_refine_parser = subparsers.add_parser('vn-refine', parents=[parent_parser],
-        help='Run Vietnamese Prose Refiner (eliminate AI-isms: một cách → direct adverb)')
-    vn_refine_parser.add_argument('volume_id', type=str, help='Volume ID to refine')
-    vn_refine_parser.add_argument('--dry-run', action='store_true', help='Preview refinements without modifying files')
-    
-    # Gap Analysis (Week 2-3 Implementation)
-    gap_parser = subparsers.add_parser('gap-analysis', parents=[parent_parser],
-        help='Run Gap Analysis (emotion+action surgery, ruby jokes, sarcasm/subtext detection)')
-    gap_parser.add_argument('volume_id', type=str, nargs='?', help='Volume ID (optional - will prompt if not provided)')
-    gap_parser.add_argument('--chapters', nargs='+', type=int, help='Specific chapters to analyze')
+    # Self-Healing Anti-AI-ism Agent
+    heal_parser = subparsers.add_parser('heal', parents=[parent_parser],
+        help='Run Self-Healing Anti-AI-ism Agent (3-layer detection + LLM auto-correction)')
+    heal_parser.add_argument('volume_id', type=str, help='Volume ID to heal')
+    heal_parser.add_argument('--dry-run', action='store_true', help='Scan only, don\'t modify files')
+    heal_parser.add_argument('--vn', action='store_true', help='Target Vietnamese (default: auto-detect)')
+    heal_parser.add_argument('--en', action='store_true', help='Target English (default: auto-detect)')
     
     # Cache Inspect (Multimodal)
     cache_parser = subparsers.add_parser('cache-inspect', parents=[parent_parser],
@@ -2289,7 +2264,7 @@ Supported Metadata Schemas:
         'cache-inspect': 'Visual Cache Inspector (Multimodal)',
         'metadata': 'Metadata Schema Inspection',
         'schema': 'Schema Manipulator',
-        'gap-analysis': 'Gap Analysis (Emotion+Action, Ruby, Sarcasm)',
+        'heal': 'Self-Healing Anti-AI-ism Agent (3-Layer Detection + LLM Correction)',
         'visual-thinking': 'Visual Thinking Log Converter (JSON → Markdown)'
     }
     
@@ -2414,18 +2389,13 @@ Supported Metadata Schemas:
         success = controller.run_cjk_clean(args.volume_id, args.dry_run)
         sys.exit(0 if success else 1)
     
-    elif args.command == 'vn-audit':
-        reference_id = args.reference if hasattr(args, 'reference') else None
-        success = controller.run_vn_audit(args.volume_id, reference_id)
-        sys.exit(0 if success else 1)
-    
-    elif args.command == 'vn-refine':
-        success = controller.run_vn_refine(args.volume_id, args.dry_run)
-        sys.exit(0 if success else 1)
-    
-    elif args.command == 'gap-analysis':
-        chapters = getattr(args, 'chapters', None)
-        success = controller.run_gap_analysis(args.volume_id, chapters)
+    elif args.command == 'heal':
+        target_lang = None
+        if getattr(args, 'vn', False):
+            target_lang = 'vn'
+        elif getattr(args, 'en', False):
+            target_lang = 'en'
+        success = controller.run_heal(args.volume_id, args.dry_run, target_lang)
         sys.exit(0 if success else 1)
     
     elif args.command == 'visual-thinking':

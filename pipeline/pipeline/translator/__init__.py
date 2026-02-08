@@ -48,6 +48,12 @@ def __getattr__(name):
     elif name == 'AuditResult':
         from .quality_metrics import AuditResult
         return AuditResult
+    elif name == 'GlossaryLock':
+        from .glossary_lock import GlossaryLock
+        return GlossaryLock
+    elif name == 'ChunkMerger':
+        from .chunk_merger import ChunkMerger
+        return ChunkMerger
     raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
 
 __all__ = [
@@ -67,4 +73,6 @@ __all__ = [
     'ContextManager',
     'ChapterProcessor',
     'QualityMetrics',
+    'GlossaryLock',
+    'ChunkMerger',
 ]

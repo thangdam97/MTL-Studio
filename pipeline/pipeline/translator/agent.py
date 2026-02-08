@@ -22,10 +22,35 @@ from pipeline.translator.context_manager import ContextManager
 from pipeline.translator.chapter_processor import ChapterProcessor, TranslationResult
 from pipeline.translator.continuity_manager import detect_and_offer_continuity, ContinuityPackManager
 from pipeline.translator.per_chapter_workflow import PerChapterWorkflow
+from pipeline.translator.glossary_lock import GlossaryLock
 from pipeline.config import get_target_language, get_language_config, PIPELINE_ROOT
 from pipeline.post_processor.format_normalizer import FormatNormalizer
-from pipeline.post_processor.cjk_cleaner import CJKArtifactCleaner, format_results_report
 from modules.gap_integration import GapIntegrationEngine
+
+try:
+    from pipeline.post_processor.cjk_cleaner import CJKArtifactCleaner, format_results_report
+    CJK_CLEANER_AVAILABLE = True
+except ModuleNotFoundError:
+    CJK_CLEANER_AVAILABLE = False
+
+    class CJKArtifactCleaner:  # type: ignore[override]
+        """No-op fallback when legacy CJK cleaner module is unavailable."""
+
+        def __init__(self, *args, **kwargs):
+            pass
+
+        def clean_volume(self, work_dir: Path) -> Dict[str, Any]:
+            return {
+                "volume": work_dir.name,
+                "languages_processed": 0,
+                "total_files": 0,
+                "total_artifacts": 0,
+                "files_modified": 0,
+                "language_results": {},
+            }
+
+    def format_results_report(_results: Dict[str, Any]) -> str:
+        return "CJK artifact cleaner unavailable: skipped legacy CJK detection."
 
 
 @dataclass
@@ -53,6 +78,9 @@ logging.basicConfig(
     handlers=[logging.StreamHandler(sys.stdout)]
 )
 logger = logging.getLogger("TranslatorAgent")
+
+if not CJK_CLEANER_AVAILABLE:
+    logger.warning("Legacy cjk_cleaner module not found; CJK artifact detection will be skipped.")
 
 class TranslatorAgent:
     def __init__(self, work_dir: Path, target_language: str = None, enable_continuity: bool = False,
@@ -98,12 +126,16 @@ class TranslatorAgent:
             raise FileNotFoundError(f"Manifest not found at {self.manifest_path}")
 
         self.manifest = self._load_manifest()
+        self.translation_config = get_translation_config()
+
+        massive_cfg = self.translation_config.get("massive_chapter", {})
+        self.volume_cache_enabled = massive_cfg.get("enable_volume_cache", True)
+        self.volume_cache_ttl_seconds = int(massive_cfg.get("volume_cache_ttl_seconds", 7200))
+        self.volume_cache_name: Optional[str] = None
         
         # Auto-detect enable_multimodal from config.yaml if not explicitly set
         if not enable_multimodal:
-            from pipeline.config import get_config_section
-            translation_config = get_config_section('translation')
-            enable_multimodal = translation_config.get('enable_multimodal', False)
+            enable_multimodal = self.translation_config.get('enable_multimodal', False)
             if enable_multimodal:
                 logger.info("✓ Multimodal translation enabled (config.yaml)")
         
@@ -161,6 +193,12 @@ class TranslatorAgent:
 
         # Load and inject character names from manifest (for cached system instruction)
         character_names = self._load_character_names()
+        self.glossary_lock = GlossaryLock(work_dir, target_language=self.target_language)
+        locked_glossary = self.glossary_lock.get_locked_names()
+        if locked_glossary:
+            logger.info(f"✓ GlossaryLock loaded {len(locked_glossary)} locked name mappings")
+        else:
+            logger.warning("GlossaryLock found no manifest name mappings; name drift checks may be weaker")
         
         # Load full semantic metadata (Enhanced v2.1)
         semantic_metadata = self._load_semantic_metadata()
@@ -169,7 +207,7 @@ class TranslatorAgent:
         if self.continuity_pack:
             # Extract character names and glossary from continuity pack
             continuity_names = self.continuity_pack.roster
-            continuity_glossary = self.continuity_pack.glossary
+            continuity_glossary = self.continuity_pack.glossary or {}
             
             # Merge with current volume's names (current volume overrides continuity)
             merged_names = {**continuity_names, **character_names}  # Current volume takes precedence
@@ -180,9 +218,13 @@ class TranslatorAgent:
                 logger.info(f"✓ Loaded {len(merged_names)} character names (including {len(continuity_names)} from continuity pack)")
             
             # Set glossary for caching
-            if continuity_glossary:
-                self.prompt_loader.set_glossary(continuity_glossary)
-                logger.info(f"✓ Loaded {len(continuity_glossary)} glossary terms from continuity pack")
+            merged_glossary = {**continuity_glossary, **locked_glossary}
+            if merged_glossary:
+                self.prompt_loader.set_glossary(merged_glossary)
+                logger.info(
+                    f"✓ Loaded {len(merged_glossary)} glossary terms "
+                    f"({len(continuity_glossary)} continuity + {len(locked_glossary)} locked)"
+                )
             
             # Format and inject full continuity pack (relationships, narrative flags, etc.)
             continuity_manager = ContinuityPackManager(work_dir)
@@ -193,6 +235,12 @@ class TranslatorAgent:
             # No continuity pack, just use current volume's names
             self.prompt_loader.set_character_names(character_names)
             logger.info(f"✓ Character names loaded and set for caching ({len(character_names)} entries)")
+            if locked_glossary:
+                self.prompt_loader.set_glossary(locked_glossary)
+                logger.info(f"✓ Loaded {len(locked_glossary)} locked glossary terms from manifest")
+        elif locked_glossary:
+            self.prompt_loader.set_glossary(locked_glossary)
+            logger.info(f"✓ Loaded {len(locked_glossary)} locked glossary terms from manifest")
         
         # Inject semantic metadata (Enhanced v2.1) into system instruction
         if semantic_metadata:
@@ -208,6 +256,7 @@ class TranslatorAgent:
             self.context_manager,
             target_language=self.target_language
         )
+        self.processor.set_glossary_lock(self.glossary_lock)
 
         # Initialize multimodal visual cache if enabled
         self.visual_cache_manager = None
@@ -660,6 +709,70 @@ class TranslatorAgent:
         except Exception as e:
             logger.warning(f"Cache pre-warming error: {e}. Will create cache during first chapter.")
 
+    def _create_volume_cache(
+        self,
+        chapter_configs: List[Dict[str, Any]],
+        model_name: Optional[str] = None,
+    ) -> Optional[str]:
+        """
+        Create one Gemini cache containing full JP volume text + system instruction.
+
+        This cache is shared across all chapter translations in the run.
+        """
+        if not self.client.enable_caching:
+            return None
+        if not self.volume_cache_enabled:
+            logger.info("Volume-level cache disabled by translation.massive_chapter.enable_volume_cache")
+            return None
+
+        chapter_blocks: List[str] = []
+        missing_files = 0
+
+        for chapter in chapter_configs:
+            chapter_id = chapter.get("id", "unknown")
+            jp_file = chapter.get("jp_file") or chapter.get("source_file")
+            if not jp_file:
+                continue
+
+            source_path = self.work_dir / "JP" / jp_file
+            if not source_path.exists():
+                missing_files += 1
+                continue
+
+            try:
+                jp_text = source_path.read_text(encoding="utf-8")
+                chapter_blocks.append(f"<CHAPTER id='{chapter_id}'>\n{jp_text}\n</CHAPTER>")
+            except Exception as e:
+                logger.warning(f"Failed reading JP source for cache ({chapter_id}): {e}")
+
+        if not chapter_blocks:
+            logger.warning("Volume cache skipped: no JP chapter text available")
+            return None
+
+        full_volume_text = "\n\n---\n\n".join(chapter_blocks)
+        system_instruction = self.prompt_loader.build_system_instruction()
+
+        try:
+            target_model = model_name or get_model_name()
+            cache_name = self.client.create_cache(
+                model=target_model,
+                system_instruction=system_instruction,
+                contents=[full_volume_text],
+                ttl_seconds=self.volume_cache_ttl_seconds,
+                display_name=f"{self.manifest.get('volume_id', self.work_dir.name)}_full",
+            )
+            if cache_name:
+                logger.info(
+                    f"[CACHE] Created volume cache {cache_name} "
+                    f"({len(chapter_blocks)} chapters, {len(full_volume_text)} chars, "
+                    f"missing={missing_files})"
+                )
+                return cache_name
+        except Exception as e:
+            logger.warning(f"Failed to create volume-level cache: {e}")
+
+        return None
+
     def translate_volume(self, clean_start: bool = False, chapters: List[str] = None):
         """
         Run translation for the volume.
@@ -730,10 +843,14 @@ class TranslatorAgent:
         self.manifest["pipeline_state"]["translator"]["started_at"] = datetime.now().isoformat()
         self._save_manifest()
 
-        # Pre-warm cache with system instruction before first chapter
+        # Create single full-volume cache for this run (fallback to internal prewarm)
         if self.client.enable_caching:
-            logger.info("Pre-warming context cache...")
-            self._prewarm_cache()
+            self.volume_cache_name = self._create_volume_cache(target_chapters, model_name=get_model_name())
+            if self.volume_cache_name:
+                logger.info(f"[CACHE] Volume cache ready for run: {self.volume_cache_name}")
+            else:
+                logger.info("Pre-warming context cache (volume cache unavailable)...")
+                self._prewarm_cache()
         
         success_count = 0
         
@@ -782,9 +899,11 @@ class TranslatorAgent:
             if chapter_model:
                 logger.info(f"     [OVERRIDE] Using model: {chapter_model}")
             
-            # === CHECK FOR CACHED SCHEMA FROM PREVIOUS CHAPTER ===
-            cached_content_name = None
-            if self.enable_continuity and i > 0:  # Not first chapter
+            # Select cache for this chapter:
+            # 1) Volume-level full JP cache (preferred for massive LNs)
+            # 2) Continuity schema cache (legacy fallback)
+            cached_content_name = self.volume_cache_name
+            if self.enable_continuity and i > 0 and not cached_content_name:  # Not first chapter
                 try:
                     cached_content_name = self.per_chapter_workflow.get_cache_for_chapter(i + 1)
                     if cached_content_name:
@@ -793,13 +912,23 @@ class TranslatorAgent:
                     logger.warning(f"Could not load cached schema: {e}")
             # === END CACHE CHECK ===
 
+            effective_cache_name = cached_content_name
+            default_model = get_model_name()
+            if chapter_model and chapter_model != default_model and cached_content_name:
+                logger.info(
+                    f"     [CACHE] Skipping cache for model override "
+                    f"({chapter_model} != {default_model})"
+                )
+                effective_cache_name = None
+
             result = self.processor.translate_chapter(
                 source_path,
                 output_path,
                 chapter_id,
                 en_title=translated_title,  # en_title param kept for backward compatibility
                 model_name=chapter_model,
-                cached_content=cached_content_name if self.enable_continuity else None
+                cached_content=effective_cache_name,
+                volume_cache=effective_cache_name if self.volume_cache_name else None,
             )
 
             # Fallback to configured fallback model on failure (safety blocks, rate limits, etc)
@@ -817,7 +946,9 @@ class TranslatorAgent:
                     output_path,
                     chapter_id,
                     en_title=translated_title,
-                    model_name=fallback_model
+                    model_name=fallback_model,
+                    cached_content=None,
+                    volume_cache=None,
                 )
                 if result.success:
                     logger.info(f"     [FALLBACK] Successfully translated with {fallback_model}")
@@ -893,6 +1024,11 @@ class TranslatorAgent:
                 self.context_manager.add_chapter_context(chapter_id, "Translated", {}) 
                 
                 success_count += 1
+                if result.warnings:
+                    logger.warning(
+                        f"{chapter_id} completed with {len(result.warnings)} warning(s): "
+                        f"{'; '.join(result.warnings[:3])}"
+                    )
                 logger.info(f"Completed {chapter_id}. Audit passed: {result.audit_result.passed if result.audit_result else 'N/A'}")
             else:
                 chapter["translation_status"] = "failed"
@@ -959,6 +1095,17 @@ class TranslatorAgent:
             except Exception as e:
                 logger.warning(f"Quality audit failed: {e}")
                 logger.warning("Continuing without audit report...")
+
+            # Run cross-chapter name consistency audit (romanization drift detection)
+            if self.target_language == "en":
+                logger.info("\n" + "=" * 60)
+                logger.info("POST-PROCESSING: Name Consistency Audit")
+                logger.info("=" * 60)
+                try:
+                    self._run_name_consistency_audit(output_dir)
+                except Exception as e:
+                    logger.warning(f"Name consistency audit failed: {e}")
+                    logger.warning("Continuing without name consistency report...")
             
             # Finalize continuity pack (aggregate all chapter snapshots)
             logger.info("\nFinalizing continuity pack...")
@@ -985,6 +1132,10 @@ class TranslatorAgent:
 
         # Clean up context cache
         if self.client.enable_caching:
+            if self.volume_cache_name:
+                logger.info(f"Clearing volume cache: {self.volume_cache_name}...")
+                self.client.delete_cache(self.volume_cache_name)
+                self.volume_cache_name = None
             logger.info("Clearing context cache...")
             self.client.clear_cache()
     
@@ -1076,6 +1227,91 @@ class TranslatorAgent:
             
         except Exception as e:
             logger.error(f"❌ Final aggregation failed: {e}")
+
+    def _run_name_consistency_audit(self, en_output_dir: Path) -> None:
+        """Detect cross-chapter name-variant drift and write audit report."""
+        try:
+            from auditors import NameConsistencyAuditor
+        except ImportError:
+            logger.warning("NameConsistencyAuditor unavailable (auditors module not found)")
+            return
+
+        auditor = NameConsistencyAuditor()
+        canonical_names_set = set()
+
+        metadata = (
+            self.manifest.get(f"metadata_{self.target_language}", {})
+            or self.manifest.get("metadata_en", {})
+            or {}
+        )
+        character_profiles = metadata.get("character_profiles", {})
+        if isinstance(character_profiles, dict):
+            for profile in character_profiles.values():
+                if not isinstance(profile, dict):
+                    continue
+                for key in ("full_name", "nickname", "ruby_reading"):
+                    value = profile.get(key)
+                    if isinstance(value, str) and self._is_likely_person_name(value):
+                        canonical_names_set.add(value.strip())
+
+        if not canonical_names_set and getattr(self, "glossary_lock", None):
+            for value in self.glossary_lock.get_locked_names().values():
+                if isinstance(value, str) and self._is_likely_person_name(value):
+                    canonical_names_set.add(value.strip())
+
+        canonical_names = sorted(canonical_names_set)
+
+        report = auditor.audit_volume(en_output_dir, canonical_names=canonical_names or None)
+
+        audit_dir = self.work_dir / "audits"
+        audit_dir.mkdir(exist_ok=True)
+        report_path = audit_dir / "name_consistency_report.json"
+        report_payload = {
+            "chapter_count": report.chapter_count,
+            "variant_groups": [
+                {
+                    "canonical": group.canonical,
+                    "variants": sorted(group.variants),
+                    "occurrences": group.occurrences,
+                }
+                for group in report.groups
+            ],
+        }
+        with report_path.open("w", encoding="utf-8") as f:
+            json.dump(report_payload, f, indent=2, ensure_ascii=False)
+
+        if report.has_variants():
+            logger.warning(
+                f"[NAME-CONSISTENCY] Detected {len(report.groups)} variant group(s). "
+                f"Report: {report_path}"
+            )
+            for group in report.groups[:5]:
+                variants = ", ".join(sorted(group.variants))
+                logger.warning(
+                    f"  Canonical '{group.canonical}' has variants: {variants}"
+                )
+        else:
+            logger.info(f"✓ Name consistency audit passed (no drift). Report: {report_path}")
+
+    def _is_likely_person_name(self, value: str) -> bool:
+        token = value.strip()
+        if not token or len(token) < 3:
+            return False
+        stopwords = {
+            "The", "This", "That", "Some", "Soon", "Many", "More", "Maybe",
+            "Skill", "Sword", "Kingdom", "Army", "War", "Act", "Chapter",
+        }
+        if token in stopwords:
+            return False
+        if not any(ch.isalpha() for ch in token):
+            return False
+        # Reject lowercase terms like "sword", "skill", etc.
+        if token.lower() == token:
+            return False
+        if any(char.isdigit() for char in token):
+            return False
+        # Accept "Tigre", "Eleonora Viltaria", "Ludmila's" style tokens.
+        return bool(token[0].isupper())
 
     def generate_report(self) -> TranslationReport:
         """Generate a summary report of the translation."""

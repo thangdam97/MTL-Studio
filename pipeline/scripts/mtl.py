@@ -49,6 +49,7 @@ Configuration:
   mtl.py config --top-p 0.9              # Adjust nucleus sampling (0.0-1.0)
   mtl.py config --top-k 50               # Adjust top-k sampling (1-100)
   mtl.py config --toggle-pre-toc         # Toggle pre-TOC content detection
+  mtl.py config --toggle-smart-chunking  # Toggle smart chunking for massive chapters
 
 Target Languages:
   en:  English - Natural dialogue, American English conventions
@@ -145,6 +146,99 @@ class PipelineController:
         if subtitle:
             logger.info(subtitle)
         logger.info(line)
+
+    def _phase2_runtime_profile_lines(self, enable_multimodal: bool) -> List[str]:
+        """
+        Build concise advanced runtime lines for Phase 2.
+        """
+        try:
+            from pipeline.config import (
+                PIPELINE_ROOT as CONFIG_PIPELINE_ROOT,
+                get_config_section,
+                get_language_config,
+                get_target_language,
+            )
+            from pipeline.translator.config import get_fallback_model_name, get_model_name
+
+            target_lang = get_target_language()
+            lang_config = get_language_config(target_lang)
+
+            translation_cfg = get_config_section("translation")
+            gemini_cfg = get_config_section("gemini")
+            multimodal_cfg = get_config_section("multimodal")
+            massive_cfg = translation_cfg.get("massive_chapter", {})
+
+            # Tiered RAG signals
+            modules_dir = CONFIG_PIPELINE_ROOT / lang_config.get("modules_dir", "modules/")
+            core_module_count = len(list(modules_dir.glob("*.md"))) if modules_dir.exists() else 0
+            grammar_rag_cfg = lang_config.get("grammar_rag", {})
+            grammar_rag_enabled = bool(grammar_rag_cfg.get("enabled", False))
+            reference_count = len(lang_config.get("reference_modules", []))
+            lookback = translation_cfg.get("context", {}).get("lookback_chapters", 2)
+
+            # Vector search signals (config-backed where available)
+            vector_cfg = grammar_rag_cfg.get("vector_store", {})
+            if vector_cfg:
+                vector_hint = vector_cfg.get("collection_name") or vector_cfg.get("persist_directory") or "configured"
+            else:
+                vector_hint = "language pattern stores"
+
+            # Caching signals
+            caching_cfg = gemini_cfg.get("caching", {})
+            cache_enabled = bool(caching_cfg.get("enabled", True))
+            cache_ttl = int(caching_cfg.get("ttl_minutes", 60))
+
+            # Multimodal signals
+            multimodal_allowed = bool(multimodal_cfg.get("enabled", False))
+            multimodal_default = bool(translation_cfg.get("enable_multimodal", False))
+            multimodal_active = multimodal_allowed and (enable_multimodal or multimodal_default)
+            vision_model = multimodal_cfg.get("models", {}).get("vision", "n/a")
+
+            rag_status = "RUN" if core_module_count > 0 else "FAIL"
+            vector_status = "RUN" if grammar_rag_enabled else "TODO"
+            cache_status = "RUN" if cache_enabled else "TODO"
+            smart_chunking_enabled = bool(massive_cfg.get("enable_smart_chunking", True))
+            chunk_status = "RUN" if smart_chunking_enabled else "TODO"
+            chunk_threshold_chars = int(massive_cfg.get("chunk_threshold_chars", 50000))
+            chunk_threshold_bytes = int(massive_cfg.get("chunk_threshold_bytes", 120000))
+            if multimodal_active:
+                multimodal_status = "RUN"
+            elif multimodal_allowed:
+                multimodal_status = "TODO"
+            else:
+                multimodal_status = "FAIL"
+
+            lines = [
+                (
+                    f"Runtime Profile: DONE | {target_lang.upper()} ({lang_config.get('language_name', target_lang.upper())}) "
+                    f"| Model={get_model_name()} | Fallback={get_fallback_model_name()}"
+                ),
+                (
+                    f"Tiered RAG: {rag_status} | T1 Core={core_module_count} | T1 Grammar={'ON' if grammar_rag_enabled else 'OFF'} "
+                    f"| T2 Reference={reference_count} | T3 Lookback={lookback}"
+                ),
+                (
+                    f"Vector Search: {vector_status} | {'ON' if grammar_rag_enabled else 'AUTO'} | Source={vector_hint}"
+                ),
+                (
+                    f"Context Cache: {cache_status} | {'ON' if cache_enabled else 'OFF'} | TTL={cache_ttl}m"
+                ),
+                (
+                    f"Smart Chunking: {chunk_status} | {'ON' if smart_chunking_enabled else 'OFF'} "
+                    f"| Threshold={chunk_threshold_chars}c/{chunk_threshold_bytes}b"
+                ),
+                (
+                    f"Multimodal: {multimodal_status} | {'ON' if multimodal_active else 'OFF'} "
+                    f"| {'Vision=' + vision_model if multimodal_active else 'Hint=--enable-multimodal'}"
+                ),
+            ]
+            return lines
+        except Exception as e:
+            if self.verbose:
+                logger.debug(f"[Phase2 Profile] Fallback profile due to config read issue: {e}")
+            return [
+                "Runtime profile: Tiered RAG + Vector Search + Context Cache + Multimodal",
+            ]
 
     def _status_badge(self, status: str) -> str:
         """Convert manifest status to compact badge."""
@@ -807,8 +901,12 @@ class PipelineController:
         """Run Phase 2: Translator (Gemini MT)."""
         self._ui_header(
             "Phase 2 - Translator",
-            "Three-pillar context: RAG + Vector Search + Multimodal (when enabled)"
+            "Advanced stack: Tiered RAG + Vector Search + Multimodal (optional)"
         )
+        runtime_lines = self._phase2_runtime_profile_lines(enable_multimodal)
+        if not self.ui.render_phase2_runtime_panel(runtime_lines):
+            for line in runtime_lines:
+                logger.info(line)
         
         # Verify manifest exists before proceeding
         manifest = self.load_manifest(volume_id)
@@ -2043,7 +2141,8 @@ class PipelineController:
                      model: Optional[str] = None, temperature: Optional[float] = None,
                      top_p: Optional[float] = None, top_k: Optional[int] = None,
                      language: Optional[str] = None, show_language: bool = False,
-                     toggle_multimodal: bool = False) -> None:
+                     toggle_multimodal: bool = False,
+                     toggle_smart_chunking: bool = False) -> None:
         """Handle configuration commands."""
         import yaml
         import sys
@@ -2179,7 +2278,16 @@ class PipelineController:
             changes_made.append(f"top_k: {old_top_k} → {top_k}")
         
         # Show current settings
-        if show or (not toggle_pre_toc and not toggle_multimodal and not model and temperature is None and top_p is None and top_k is None and not language):
+        if show or (
+            not toggle_pre_toc
+            and not toggle_multimodal
+            and not toggle_smart_chunking
+            and not model
+            and temperature is None
+            and top_p is None
+            and top_k is None
+            and not language
+        ):
             self._ui_header("Pipeline Configuration", "MTL Studio 5.1 runtime settings")
 
             # Target Language
@@ -2291,6 +2399,17 @@ class PipelineController:
                 logger.info("  Enable with: mtl.py config --toggle-multimodal")
                 logger.info("  Workflow: phase1.6 → phase2 --enable-multimodal")
 
+            # Smart chunking configuration
+            massive_cfg = config.get('translation', {}).get('massive_chapter', {})
+            smart_chunking_enabled = massive_cfg.get('enable_smart_chunking', True)
+            smart_chunking_status = "✓ ENABLED" if smart_chunking_enabled else "✗ DISABLED"
+            logger.info(f"\nSmart Chunking (Massive Chapters): {smart_chunking_status}")
+            logger.info(f"  Threshold chars: {massive_cfg.get('chunk_threshold_chars', 50000)}")
+            logger.info(f"  Threshold bytes: {massive_cfg.get('chunk_threshold_bytes', 120000)}")
+            logger.info(f"  Target chunk chars: {massive_cfg.get('target_chunk_chars', 45000)}")
+            if not smart_chunking_enabled:
+                logger.info("  Enable with: mtl.py config --toggle-smart-chunking")
+
             logger.info("")
             logger.info("Quick Commands:")
             logger.info("  --language en|vn             Switch target language")
@@ -2302,6 +2421,7 @@ class PipelineController:
             logger.info("  --top-k 40                   Adjust top-k sampling")
             logger.info("  --toggle-pre-toc             Toggle pre-TOC detection")
             logger.info("  --toggle-multimodal          Toggle multimodal visual context")
+            logger.info("  --toggle-smart-chunking      Toggle smart chunking for massive chapters")
             logger.info("")
         
         # Toggle pre-TOC detection
@@ -2327,6 +2447,19 @@ class PipelineController:
             changes_made.append(f"Multimodal Visual Context: {status}")
             if new_value:
                 changes_made.append("  Workflow: phase1.6 <vol> → phase2 <vol> --enable-multimodal")
+
+        # Toggle smart chunking for massive chapters
+        if toggle_smart_chunking:
+            if 'translation' not in config:
+                config['translation'] = {}
+            if 'massive_chapter' not in config['translation']:
+                config['translation']['massive_chapter'] = {}
+
+            current = config['translation']['massive_chapter'].get('enable_smart_chunking', True)
+            new_value = not current
+            config['translation']['massive_chapter']['enable_smart_chunking'] = new_value
+            status = "ENABLED" if new_value else "DISABLED"
+            changes_made.append(f"Smart Chunking: {status}")
         
         # Save changes if any were made
         if changes_made:

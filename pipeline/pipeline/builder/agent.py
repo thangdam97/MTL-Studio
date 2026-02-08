@@ -343,6 +343,15 @@ class BuilderAgent:
             print(f"     Target Language: {actual_language_name}")
             print(f"     Chapters: {len(chapters)}")
 
+            # Detect multi-act structure
+            volume_structure = manifest.get('volume_structure', {})
+            volume_acts = volume_structure.get('acts', [])
+            is_multi_act = volume_structure.get('is_multi_act', False) and len(volume_acts) >= 2
+            if is_multi_act:
+                print(f"     [MULTI-ACT] {len(volume_acts)} acts detected")
+                for act in volume_acts:
+                    print(f"       Act {act['act_number']}: {act.get('title_en') or act.get('title', '')}")
+
             # Step 2: Create build directory
             print("\n[STEP 2/8] Creating EPUB structure...")
             build_dir = Path(tempfile.mkdtemp(prefix='epub_build_'))
@@ -366,6 +375,16 @@ class BuilderAgent:
             frontmatter_items = self._generate_frontmatter(manifest, paths, chapter_info, kuchie_metadata, actual_language_code, actual_lang_config, actual_target_lang)
             print(f"     Generated: cover, kuchi-e, TOC pages")
 
+            # Step 5.5: Generate act interstitials (separators + per-act kuchie) for multi-act
+            act_items = []
+            if is_multi_act:
+                print("\n[STEP 5.5/8] Generating act interstitials...")
+                act_items = self._generate_act_interstitials(
+                    manifest, paths, chapter_info, kuchie_metadata,
+                    actual_language_code, actual_lang_config, actual_target_lang
+                )
+                print(f"     Generated: {len(act_items)} act separator/kuchie pages")
+
             # Step 6: Generate navigation
             print("\n[STEP 6/8] Generating navigation...")
             nav_items = self._generate_navigation(manifest, paths, chapter_info, actual_language_code, actual_lang_config, actual_target_lang)
@@ -378,7 +397,7 @@ class BuilderAgent:
 
             # Step 8: Generate OPF and package
             print("\n[STEP 8/8] Generating OPF and packaging...")
-            all_items = nav_items + css_items + frontmatter_items + chapter_items + image_items
+            all_items = nav_items + css_items + frontmatter_items + act_items + chapter_items + image_items
 
             # Find cover image ID
             # Prioritize exact match for 'cover-image' to avoid matching 'allcover' first
@@ -1044,9 +1063,35 @@ class BuilderAgent:
 
         # 2. Kuchi-e pages (NEW!)
         kuchie_list = self._detect_kuchie_images(assets, manifest)
-        for i, kuchie in enumerate(kuchie_list):
-            kuchie_id = f"kuchie-{i+1:03d}"
-            kuchie_xhtml = f"kuchie{i+1:03d}.xhtml"
+        
+        # Multi-act: only place Act 1 kuchie in front matter
+        volume_structure = manifest.get('volume_structure', {})
+        is_multi_act = volume_structure.get('is_multi_act', False) and len(volume_structure.get('acts', [])) >= 2
+        
+        if is_multi_act:
+            # Filter to Act 1 kuchie only (by checking assets.kuchie metadata)
+            kuchie_assets = assets.get('kuchie', [])
+            act1_kuchie_files = set()
+            for k in kuchie_assets:
+                if isinstance(k, dict) and k.get('act', 1) == 1:
+                    act1_kuchie_files.add(k.get('file', ''))
+                elif isinstance(k, str):
+                    act1_kuchie_files.add(k)  # Legacy format: assume Act 1
+            
+            # If no act tags found, use kuchie from volume_structure.acts[0]
+            if not act1_kuchie_files and volume_structure.get('acts'):
+                act1_kuchie_files = set(volume_structure['acts'][0].get('kuchie_files', []))
+            
+            frontmatter_kuchie = [k for k in kuchie_list if k in act1_kuchie_files]
+            print(f"     [MULTI-ACT] Placing {len(frontmatter_kuchie)} Act 1 kuchie in front matter")
+        else:
+            frontmatter_kuchie = kuchie_list
+        
+        for i, kuchie in enumerate(frontmatter_kuchie):
+            # Use global kuchie_list index for consistent IDs across acts
+            global_idx = kuchie_list.index(kuchie) if kuchie in kuchie_list else i
+            kuchie_id = f"kuchie-{global_idx+1:03d}"
+            kuchie_xhtml = f"kuchie{global_idx+1:03d}.xhtml"
             kuchie_path = paths.text_dir / kuchie_xhtml
 
             # Check if horizontal
@@ -1083,11 +1128,44 @@ class BuilderAgent:
 
         # 3. Visual TOC page
         toc_entries = []
-        for ch in chapter_info:
-            toc_entries.append({
-                'href': ch['xhtml_filename'],
-                'label': ch['title']
-            })
+        
+        # Multi-act: group chapters under act headings
+        volume_structure = manifest.get('volume_structure', {})
+        vis_acts = volume_structure.get('acts', [])
+        is_vis_multi_act = volume_structure.get('is_multi_act', False) and len(vis_acts) >= 2
+        
+        if is_vis_multi_act:
+            # Build chapter-to-act mapping
+            chapters_manifest = manifest.get('chapters', [])
+            chapters_sorted = sorted(chapters_manifest, key=lambda c: c.get('toc_order', 999))
+            ch_id_to_act = {}
+            for act in vis_acts:
+                first_idx = act.get('first_chapter_index', 0)
+                last_idx = act.get('last_chapter_index', len(chapters_sorted) - 1)
+                for j in range(first_idx, min(last_idx + 1, len(chapters_sorted))):
+                    ch_id_to_act[chapters_sorted[j].get('id', '')] = act
+            
+            current_act_num = 0
+            for ch in chapter_info:
+                act = ch_id_to_act.get(ch['id'])
+                if act and act['act_number'] != current_act_num:
+                    current_act_num = act['act_number']
+                    act_label = act.get('title_en') or act.get('title', f"Act {current_act_num}")
+                    separator_href = f"act{current_act_num:03d}_separator.xhtml" if current_act_num >= 2 else ch['xhtml_filename']
+                    toc_entries.append({
+                        'href': separator_href,
+                        'label': f"— {act_label} —"
+                    })
+                toc_entries.append({
+                    'href': ch['xhtml_filename'],
+                    'label': ch['title']
+                })
+        else:
+            for ch in chapter_info:
+                toc_entries.append({
+                    'href': ch['xhtml_filename'],
+                    'label': ch['title']
+                })
 
         toc_path = paths.text_dir / "toc.xhtml"
         StructureBuilder.create_toc_xhtml(
@@ -1099,6 +1177,120 @@ class BuilderAgent:
             media_type="application/xhtml+xml"
         ))
 
+        return manifest_items
+
+    def _generate_act_interstitials(
+        self,
+        manifest: dict,
+        paths: EPUBPaths,
+        chapter_info: List[dict],
+        kuchie_metadata: Dict[str, dict],
+        language_code: str,
+        lang_config: dict,
+        target_language: str
+    ) -> List[ManifestItem]:
+        """
+        Generate act separator pages and per-act kuchie for multi-act EPUBs.
+        
+        For each act >= 2, generates:
+        1. An act separator page (tobira equivalent) with act title
+        2. Kuchie pages for that act's color plates
+        
+        Args:
+            manifest: Manifest dictionary
+            paths: EPUB paths structure
+            chapter_info: List of chapter information
+            kuchie_metadata: Kuchi-e dimension metadata
+            language_code: Language code for XHTML
+            lang_config: Language configuration dict
+            target_language: Target language code
+            
+        Returns:
+            List of manifest items for act interstitials
+        """
+        volume_structure = manifest.get('volume_structure', {})
+        volume_acts = volume_structure.get('acts', [])
+        assets = manifest.get('assets', {})
+        metadata_jp = manifest.get('metadata', {})
+        metadata_key = f'metadata_{target_language}'
+        metadata_translated = manifest.get(metadata_key) or manifest.get('metadata_en', {})
+        title_key = f'title_{target_language}'
+        book_title = (metadata_translated.get(title_key) or
+                     metadata_translated.get('title_en') or
+                     manifest.get('title_en') or
+                     metadata_jp.get('title', ''))
+        
+        # Get full kuchie list for global indexing
+        kuchie_list = self._detect_kuchie_images(assets, manifest)
+        
+        manifest_items = []
+        
+        for act in volume_acts:
+            if act['act_number'] < 2:
+                continue  # Act 1 handled in frontmatter
+            
+            act_num = act['act_number']
+            act_title = act.get('title_en') or act.get('title', f'Act {act_num}')
+            
+            # 1. Generate act separator page
+            separator_id = f"act-{act_num:03d}-separator"
+            separator_xhtml = f"act{act_num:03d}_separator.xhtml"
+            separator_path = paths.text_dir / separator_xhtml
+            
+            StructureBuilder.create_act_separator_xhtml(
+                separator_path,
+                act_title,
+                act_num,
+                book_title,
+                language_code
+            )
+            
+            manifest_items.append(ManifestItem(
+                id=separator_id,
+                href=f"Text/{separator_xhtml}",
+                media_type="application/xhtml+xml"
+            ))
+            print(f"     [OK] Generated act separator: {separator_xhtml}")
+            
+            # 2. Generate kuchie pages for this act
+            act_kuchie_files = set(act.get('kuchie_files', []))
+            
+            # Also check assets.kuchie for act-tagged entries
+            kuchie_assets = assets.get('kuchie', [])
+            for k in kuchie_assets:
+                if isinstance(k, dict) and k.get('act') == act_num:
+                    act_kuchie_files.add(k.get('file', ''))
+            
+            act_kuchie = [k for k in kuchie_list if k in act_kuchie_files]
+            
+            for kuchie in act_kuchie:
+                # Use global kuchie_list index for consistent IDs
+                global_idx = kuchie_list.index(kuchie) if kuchie in kuchie_list else 0
+                kuchie_id = f"kuchie-{global_idx+1:03d}"
+                kuchie_xhtml = f"kuchie{global_idx+1:03d}.xhtml"
+                kuchie_path = paths.text_dir / kuchie_xhtml
+                
+                meta = kuchie_metadata.get(kuchie, {})
+                if meta.get('is_horizontal', False):
+                    StructureBuilder.create_horizontal_kuchie_xhtml(
+                        kuchie_path, kuchie,
+                        meta['width'], meta['height'],
+                        kuchie_id, book_title, language_code
+                    )
+                else:
+                    StructureBuilder.create_image_page_xhtml(
+                        kuchie_path, kuchie, kuchie_id,
+                        book_title, language_code, "kuchie-image"
+                    )
+                
+                manifest_items.append(ManifestItem(
+                    id=kuchie_id,
+                    href=f"Text/{kuchie_xhtml}",
+                    media_type="application/xhtml+xml"
+                ))
+                orientation = 'horizontal' if meta.get('is_horizontal') else 'vertical'
+                print(f"     [OK] Generated Act {act_num} kuchie: {kuchie_xhtml} ({orientation})")
+        
         return manifest_items
 
     def _generate_navigation(
@@ -1136,11 +1328,55 @@ class BuilderAgent:
         toc_entries = [TOCEntry(label=cover_title, href="cover.xhtml")]
         toc_entries.append(TOCEntry(label=toc_title, href="toc.xhtml"))
 
-        for ch in chapter_info:
-            toc_entries.append(TOCEntry(
-                label=ch['title'],
-                href=ch['xhtml_filename']
-            ))
+        # Check for multi-act structure → nested TOC
+        volume_structure = manifest.get('volume_structure', {})
+        volume_acts = volume_structure.get('acts', [])
+        is_multi_act = volume_structure.get('is_multi_act', False) and len(volume_acts) >= 2
+
+        if is_multi_act:
+            # Build nested TOC: act headings with child chapter entries
+            # Create a set of chapter IDs per act for lookup
+            chapters_manifest = manifest.get('chapters', [])
+            chapters_sorted = sorted(chapters_manifest, key=lambda c: c.get('toc_order', 999))
+            
+            for act in volume_acts:
+                act_title = act.get('title_en') or act.get('title', f"Act {act['act_number']}")
+                first_idx = act.get('first_chapter_index', 0)
+                last_idx = act.get('last_chapter_index', len(chapters_sorted) - 1)
+                
+                # Get chapter IDs for this act
+                act_chapter_ids = set()
+                for j in range(first_idx, min(last_idx + 1, len(chapters_sorted))):
+                    act_chapter_ids.add(chapters_sorted[j].get('id', ''))
+                
+                # Build child entries from chapter_info that match this act
+                child_entries = []
+                for ch in chapter_info:
+                    if ch['id'] in act_chapter_ids:
+                        child_entries.append(TOCEntry(
+                            label=ch['title'],
+                            href=ch['xhtml_filename']
+                        ))
+                
+                # First child's href is the act entry's href (or separator)
+                if child_entries:
+                    act_href = child_entries[0].href
+                else:
+                    act_href = f"act{act['act_number']:03d}_separator.xhtml"
+                
+                act_entry = TOCEntry(
+                    label=act_title,
+                    href=act_href,
+                    children=child_entries
+                )
+                toc_entries.append(act_entry)
+        else:
+            # Flat TOC (original behavior)
+            for ch in chapter_info:
+                toc_entries.append(TOCEntry(
+                    label=ch['title'],
+                    href=ch['xhtml_filename']
+                ))
 
         # Landmarks
         first_chapter = chapter_info[0]['xhtml_filename'] if chapter_info else "chapter001.xhtml"
@@ -1189,6 +1425,9 @@ class BuilderAgent:
                 play_order=play_order
             ))
             play_order += 1
+
+        # For multi-act, NCX also uses flat structure (NCX doesn't support nesting well
+        # in most readers). The nav.xhtml handles the nested display.
 
         # Generate toc.ncx
         ncx_gen = NCXGenerator()
@@ -1319,21 +1558,87 @@ class BuilderAgent:
         # Cover first
         spine_items.append(SpineItem(idref="cover", linear="no"))
 
+        # Detect multi-act structure for spine ordering
+        volume_structure = manifest.get('volume_structure', {})
+        volume_acts = volume_structure.get('acts', [])
+        is_multi_act = volume_structure.get('is_multi_act', False) and len(volume_acts) >= 2
+
         # Kuchi-e pages (frontmatter position)
         kuchie_list = self._detect_kuchie_images(
             manifest.get('assets', {}), 
             manifest, 
             manifest.get('structure', {})
         )
-        for i in range(len(kuchie_list)):
-            spine_items.append(SpineItem(idref=f"kuchie-{i+1:03d}"))
 
-        # TOC page
-        spine_items.append(SpineItem(idref="toc-page"))
+        if is_multi_act:
+            # === ACT-AWARE SPINE ===
+            # Cover → Act 1 kuchie → TOC → Act 1 chapters →
+            # Act 2 separator → Act 2 kuchie → Act 2 chapters → ...
+            
+            # Build chapter-to-act mapping
+            chapters_manifest = manifest.get('chapters', [])
+            chapters_sorted = sorted(chapters_manifest, key=lambda c: c.get('toc_order', 999))
+            
+            # Map chapter IDs to their act number
+            chapter_act_map = {}  # chapter_id -> act_number
+            for act in volume_acts:
+                first_idx = act.get('first_chapter_index', 0)
+                last_idx = act.get('last_chapter_index', len(chapters_sorted) - 1)
+                for j in range(first_idx, min(last_idx + 1, len(chapters_sorted))):
+                    ch_id = chapters_sorted[j].get('id', '')
+                    chapter_act_map[ch_id] = act['act_number']
+            
+            # Build per-act kuchie sets
+            act_kuchie_map = {}  # act_number -> [kuchie_global_indices]
+            kuchie_assets = manifest.get('assets', {}).get('kuchie', [])
+            for global_idx, kuchie in enumerate(kuchie_list):
+                # Determine act from kuchie metadata
+                kuchie_act = 1  # default
+                for k in kuchie_assets:
+                    if isinstance(k, dict) and k.get('file') == kuchie:
+                        kuchie_act = k.get('act', 1)
+                        break
+                # Also check volume_structure.acts[].kuchie_files
+                for act in volume_acts:
+                    if kuchie in act.get('kuchie_files', []):
+                        kuchie_act = act['act_number']
+                        break
+                act_kuchie_map.setdefault(kuchie_act, []).append(global_idx)
+            
+            # Act 1 kuchie
+            for idx in act_kuchie_map.get(1, []):
+                spine_items.append(SpineItem(idref=f"kuchie-{idx+1:03d}"))
+            
+            # TOC page
+            spine_items.append(SpineItem(idref="toc-page"))
+            
+            # Interleave chapters with act boundaries
+            current_act = 1
+            for ch in chapter_info:
+                ch_act = chapter_act_map.get(ch['id'], current_act)
+                
+                # If we've crossed into a new act, insert separator + kuchie
+                if ch_act > current_act:
+                    for new_act_num in range(current_act + 1, ch_act + 1):
+                        # Act separator
+                        spine_items.append(SpineItem(idref=f"act-{new_act_num:03d}-separator"))
+                        # Act kuchie
+                        for idx in act_kuchie_map.get(new_act_num, []):
+                            spine_items.append(SpineItem(idref=f"kuchie-{idx+1:03d}"))
+                    current_act = ch_act
+                
+                spine_items.append(SpineItem(idref=ch['id']))
+        else:
+            # === SINGLE-VOLUME SPINE (original behavior) ===
+            for i in range(len(kuchie_list)):
+                spine_items.append(SpineItem(idref=f"kuchie-{i+1:03d}"))
 
-        # Chapters
-        for ch in chapter_info:
-            spine_items.append(SpineItem(idref=ch['id']))
+            # TOC page
+            spine_items.append(SpineItem(idref="toc-page"))
+
+            # Chapters
+            for ch in chapter_info:
+                spine_items.append(SpineItem(idref=ch['id']))
 
         # Generate OPF
         opf_gen = OPFGenerator()

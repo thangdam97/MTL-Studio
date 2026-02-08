@@ -15,13 +15,15 @@ from .integrity_auditor import IntegrityAuditor
 from .prose_auditor import ProseAuditor
 from .gap_preservation_auditor import GapPreservationAuditor
 from .final_auditor import FinalAuditor
+from .name_consistency_auditor import NameConsistencyAuditor
 
 __all__ = [
     'FidelityAuditor',
     'IntegrityAuditor', 
     'ProseAuditor',
     'GapPreservationAuditor',
-    'FinalAuditor'
+    'FinalAuditor',
+    'NameConsistencyAuditor',
 ]
 
 __version__ = '2.0.0'

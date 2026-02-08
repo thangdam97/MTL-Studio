@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import sys
+import re
 from contextlib import contextmanager
 from typing import Iterable, List, Sequence
 
@@ -302,4 +303,66 @@ class ModernCLIUI:
         self.console.print(
             f"[bold cyan]{label}[/bold cyan] [{color}]{bar}[/{color}] {completed}/{total}"
         )
+        return True
+
+    def render_phase2_runtime_panel(self, lines: Sequence[str]) -> bool:
+        """Render a boxed runtime profile for Phase 2."""
+        if not self.rich_enabled:
+            return False
+        if not lines:
+            return False
+
+        status_styles = {
+            "DONE": "bold green",
+            "RUN": "bold cyan",
+            "FAIL": "bold red",
+            "TODO": "bold yellow",
+        }
+
+        key_styles = {
+            "runtime profile": ("[SYS]", "bold white"),
+            "tiered rag": ("[RAG]", "bold magenta"),
+            "vector search": ("[VEC]", "bold cyan"),
+            "context cache": ("[CAC]", "bold green"),
+            "multimodal": ("[MM ]", "bold yellow"),
+        }
+
+        def style_runtime_value(raw: str) -> str:
+            value = raw.strip()
+
+            for token, style in status_styles.items():
+                value = re.sub(rf"\b{token}\b", f"[{style}]{token}[/{style}]", value)
+
+            value = re.sub(r"\bON\b", "[bold green]ON[/bold green]", value)
+            value = re.sub(r"\bOFF\b", "[bold red]OFF[/bold red]", value)
+            value = re.sub(r"\bAUTO\b", "[bold yellow]AUTO[/bold yellow]", value)
+            return value
+
+        rendered_lines: List[str] = []
+        for line in lines:
+            if ":" in line:
+                key, value = line.split(":", 1)
+                normalized = key.strip().lower()
+                icon, key_style = key_styles.get(normalized, ("[INF]", "bold cyan"))
+                styled_value = style_runtime_value(value)
+                rendered_lines.append(f"{icon} [{key_style}]{key.strip()}:[/{key_style}] {styled_value}")
+            else:
+                rendered_lines.append(f"[bold cyan]{line}[/bold cyan]")
+
+        rendered_lines.append("")
+        rendered_lines.append(
+            "[dim]Legend:[/dim] "
+            "[bold green]DONE[/bold green] "
+            "[bold cyan]RUN[/bold cyan] "
+            "[bold red]FAIL[/bold red] "
+            "[bold yellow]TODO[/bold yellow]"
+        )
+
+        panel = Panel(
+            "\n".join(rendered_lines),
+            title="Phase 2 Runtime Profile",
+            border_style="bright_blue",
+            padding=(0, 1),
+        )
+        self.console.print(panel)
         return True

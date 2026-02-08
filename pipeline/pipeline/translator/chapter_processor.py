@@ -6,6 +6,7 @@ Handles the translation of a single chapter using Gemini and RAG context.
 import re
 import json
 import logging
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import Dict, List, Optional, Any
 from dataclasses import dataclass
@@ -14,10 +15,19 @@ from pipeline.common.gemini_client import GeminiClient
 from pipeline.translator.prompt_loader import PromptLoader
 from pipeline.translator.context_manager import ContextManager
 from pipeline.translator.quality_metrics import QualityMetrics, AuditResult
-from pipeline.translator.config import get_generation_params, get_model_name, get_safety_settings
+from pipeline.translator.config import (
+    get_generation_params,
+    get_model_name,
+    get_safety_settings,
+    get_translation_config,
+)
 from pipeline.translator.scene_break_formatter import SceneBreakFormatter
+from pipeline.translator.chunk_merger import ChunkMerger
+from pipeline.translator.glossary_lock import GlossaryLock
+from pipeline.post_processor.truncation_validator import TruncationValidator
 from pipeline.post_processor.vn_cjk_cleaner import VietnameseCJKCleaner
 from modules.gap_integration import GapIntegrationEngine
+from modules.rtas_calculator import RTASCalculator, VoiceSettings
 
 # Dialect detection (v1.0 - 2026-02-01)
 try:
@@ -83,6 +93,85 @@ class ChapterProcessor:
         # Initialize multimodal (visual context injection)
         self.enable_multimodal = False  # Will be enabled from agent if needed
         self.visual_cache = None  # VisualCacheManager, set by agent
+
+        # Massive chapter handling
+        translation_config = get_translation_config()
+        massive_cfg = translation_config.get("massive_chapter", {})
+        self.smart_chunking_enabled = bool(massive_cfg.get("enable_smart_chunking", True))
+        self.chunk_threshold_chars = int(massive_cfg.get("chunk_threshold_chars", 50000))
+        self.chunk_threshold_bytes = int(massive_cfg.get("chunk_threshold_bytes", 120000))
+        self.target_chunk_chars = int(massive_cfg.get("target_chunk_chars", 45000))
+
+        self.truncation_validator = TruncationValidator()
+        self.glossary_lock: Optional[GlossaryLock] = None
+
+        # RTAS Calculator - derives voice settings from manifest character metadata
+        self.rtas_calculator = RTASCalculator()
+        self.voice_settings: Dict[str, VoiceSettings] = {}
+        self.enable_rtas = True  # Enable RTAS guidance by default for English
+        self._load_voice_settings()
+
+    def set_glossary_lock(self, glossary_lock: Optional[GlossaryLock]) -> None:
+        """Attach manifest glossary lock from TranslatorAgent."""
+        self.glossary_lock = glossary_lock
+
+    def _load_voice_settings(self) -> None:
+        """Load RTAS voice settings from manifest character profiles."""
+        try:
+            work_dir = self.context_manager.work_dir
+            manifest_path = work_dir / "manifest.json"
+            
+            if not manifest_path.exists():
+                logger.debug("No manifest.json found for RTAS calculation")
+                return
+            
+            with open(manifest_path, 'r', encoding='utf-8') as f:
+                manifest = json.load(f)
+            
+            self.voice_settings = self.rtas_calculator.calculate_from_manifest(manifest)
+            
+            if self.voice_settings:
+                logger.info(f"✓ RTAS: Derived voice settings for {len(self.voice_settings)} characters")
+                for char_id, settings in list(self.voice_settings.items())[:3]:
+                    logger.debug(f"  {char_id}: RTAS={settings.rtas_score}, contraction={settings.contraction_rate}%")
+        except Exception as e:
+            logger.warning(f"Failed to load RTAS voice settings: {e}")
+            self.voice_settings = {}
+
+    def _format_rtas_guidance(self) -> Optional[str]:
+        """Format RTAS voice settings for prompt injection."""
+        if not self.voice_settings or not self.enable_rtas:
+            return None
+        
+        if self.target_language.lower() not in ['en', 'english']:
+            # RTAS contraction rules are English-specific
+            return None
+        
+        lines = [
+            "=== CHARACTER VOICE SETTINGS (RTAS-DERIVED) ===",
+            "Adjust dialogue style based on these per-character settings:",
+            ""
+        ]
+        
+        for char_id, settings in self.voice_settings.items():
+            # Only include characters with non-default settings
+            if settings.rtas_score != 3.0 or settings.forbidden_vocab or settings.required_vocab:
+                lines.append(f"**{char_id}** [RTAS: {settings.rtas_score:.1f}]")
+                lines.append(f"  • Contraction rate: {settings.contraction_rate}%")
+                if settings.forbidden_vocab:
+                    forbidden = ", ".join(sorted(settings.forbidden_vocab)[:5])
+                    lines.append(f"  • AVOID: {forbidden}")
+                if settings.required_vocab:
+                    required = ", ".join(sorted(settings.required_vocab)[:5])
+                    lines.append(f"  • PREFER: {required}")
+                lines.append("")
+        
+        if len(lines) <= 3:
+            # No characters with notable settings
+            return None
+        
+        lines.append("Apply these constraints to dialogue attributed to each character.")
+        return "\n".join(lines)
     
     def _load_character_names(self) -> Dict[str, str]:
         """Load character names from manifest.json metadata_en."""
@@ -323,7 +412,9 @@ This document contains the internal reasoning process that Gemini used while tra
         chapter_id: str,
         en_title: Optional[str] = None,
         model_name: Optional[str] = None,
-        cached_content: Optional[str] = None
+        cached_content: Optional[str] = None,
+        volume_cache: Optional[str] = None,
+        allow_chunking: bool = True,
     ) -> TranslationResult:
         """
         Translate a single chapter file.
@@ -335,8 +426,11 @@ This document contains the internal reasoning process that Gemini used while tra
             en_title: Translated chapter title
             model_name: Model override
             cached_content: Cached content name for continuity (from previous chapter schema)
+            volume_cache: Optional alias for cached_content (volume-level cache)
+            allow_chunking: If False, force direct translation without chunk splitting
         """
         try:
+            effective_cache = volume_cache or cached_content
             logger.debug(f"[VERBOSE] Starting translation for {chapter_id}")
             logger.debug(f"[VERBOSE] Source: {source_path}")
             logger.debug(f"[VERBOSE] Output: {output_path}")
@@ -349,6 +443,33 @@ This document contains the internal reasoning process that Gemini used while tra
             with open(source_path, 'r', encoding='utf-8') as f:
                 source_text = f.read()
             logger.debug(f"[VERBOSE] Source text length: {len(source_text)} characters")
+
+            source_bytes = len(source_text.encode("utf-8"))
+            is_massive = (
+                len(source_text) >= self.chunk_threshold_chars
+                or source_bytes >= self.chunk_threshold_bytes
+            )
+            if allow_chunking and self.smart_chunking_enabled and is_massive:
+                logger.info(
+                    f"[CHUNK] {chapter_id} is massive "
+                    f"({len(source_text)} chars, {source_bytes} bytes); "
+                    f"thresholds=({self.chunk_threshold_chars} chars, {self.chunk_threshold_bytes} bytes). "
+                    f"Using chunked translation flow."
+                )
+                return self._translate_chapter_in_chunks(
+                    source_path=source_path,
+                    output_path=output_path,
+                    chapter_id=chapter_id,
+                    source_text=source_text,
+                    en_title=en_title,
+                    model_name=model_name,
+                    cached_content=effective_cache,
+                )
+            if allow_chunking and not self.smart_chunking_enabled and is_massive:
+                logger.info(
+                    f"[CHUNK] Smart chunking disabled; processing {chapter_id} as single chapter "
+                    f"({len(source_text)} chars, {source_bytes} bytes)"
+                )
             
             # === GAP ANALYSIS (Pre-Translation) ===
             gap_flags = None
@@ -601,9 +722,9 @@ This document contains the internal reasoning process that Gemini used while tra
             # 2. Build Prompt
             # Skip rebuilding system instruction if cache is available
             # Check: external cached_content OR internal client cache
-            if cached_content or (self.client.enable_caching and self.client._is_cache_valid(model_name)):
-                cache_type = "external" if cached_content else "internal"
-                cache_name = cached_content or self.client._cached_content_name
+            if effective_cache or (self.client.enable_caching and self.client._is_cache_valid(model_name)):
+                cache_type = "external" if effective_cache else "internal"
+                cache_name = effective_cache or self.client._cached_content_name
                 logger.debug(f"[VERBOSE] Using {cache_type} cached system instruction ({cache_name})")
                 system_instruction = None  # Not needed when cache is active
             else:
@@ -643,9 +764,14 @@ This document contains the internal reasoning process that Gemini used while tra
                 temperature=self.gen_params.get("temperature", 0.7),
                 max_output_tokens=self.gen_params.get("max_output_tokens", 65536),
                 model=model_name or self.model_name,
-                cached_content=cached_content  # Inject cached schema for continuity
+                cached_content=effective_cache  # Inject cached schema for continuity
             )
-            logger.debug(f"[VERBOSE] Gemini response received. Tokens: {response.input_tokens} in, {response.output_tokens} out")
+            logger.debug(
+                f"[VERBOSE] Gemini response received. "
+                f"finish_reason={response.finish_reason}, "
+                f"tokens={response.input_tokens} in/{response.output_tokens} out, "
+                f"cached_tokens={response.cached_tokens}"
+            )
             
             # Save thinking process to separate markdown file if enabled
             if response.thinking_content:
@@ -658,11 +784,31 @@ This document contains the internal reasoning process that Gemini used while tra
                 )
             
             if not response.content:
+                finish_reason = response.finish_reason or "UNKNOWN"
+                upper_reason = finish_reason.upper()
+                blocked = any(marker in upper_reason for marker in ("SAFETY", "PROHIBITED", "BLOCK"))
+
+                if blocked:
+                    logger.error(
+                        f"[GEMINI-BLOCK] Chapter {chapter_id} blocked by Gemini "
+                        f"(finish_reason={finish_reason}, "
+                        f"in={response.input_tokens}, out={response.output_tokens})"
+                    )
+                else:
+                    logger.error(
+                        f"[GEMINI-EMPTY] Chapter {chapter_id} returned empty content "
+                        f"(finish_reason={finish_reason}, "
+                        f"in={response.input_tokens}, out={response.output_tokens})"
+                    )
+
                 return TranslationResult(
                     False, output_path,
                     input_tokens=response.input_tokens,
                     output_tokens=response.output_tokens,
-                    error="Gemini returned empty response (possible safety block)"
+                    error=(
+                        f"Gemini returned empty response "
+                        f"(finish_reason={finish_reason}; possible safety block)"
+                    )
                 )
             
             # 4. Parse Response
@@ -762,6 +908,31 @@ This document contains the internal reasoning process that Gemini used while tra
                 except Exception as e:
                     logger.warning(f"[ANTI-AI-ISM] Self-healing failed: {e}")
                     logger.warning("[ANTI-AI-ISM] Continuing without auto-correction (run 'mtl.py heal' manually)")
+
+            validation_warnings = list(audit.warnings or [])
+
+            truncation_report = self.truncation_validator.validate_chapter(output_path)
+            if truncation_report.has_critical():
+                critical_count = len(truncation_report.critical)
+                logger.error(f"[TRUNCATION] {critical_count} CRITICAL issue(s) in {chapter_id}")
+                validation_warnings.append(
+                    f"Truncation validator detected {critical_count} critical issue(s)"
+                )
+            elif truncation_report.has_any():
+                validation_warnings.append(
+                    f"Truncation validator detected {len(truncation_report.all_issues)} potential issue(s)"
+                )
+
+            if self.glossary_lock and self.glossary_lock.is_locked():
+                chapter_text = output_path.read_text(encoding="utf-8")
+                glossary_report = self.glossary_lock.validate_output(chapter_text)
+                if glossary_report.has_critical():
+                    logger.error(
+                        f"[GLOSSARY] {len(glossary_report.critical)} variant(s) detected in {chapter_id}"
+                    )
+                    validation_warnings.append(
+                        f"Glossary lock detected {len(glossary_report.critical)} name variant(s)"
+                    )
             
             return TranslationResult(
                 success=True,
@@ -769,12 +940,223 @@ This document contains the internal reasoning process that Gemini used while tra
                 input_tokens=response.input_tokens,
                 output_tokens=response.output_tokens,
                 audit_result=audit,
-                warnings=audit.warnings
+                warnings=validation_warnings
             )
 
         except Exception as e:
             logger.exception(f"Translation failed for {chapter_id}")
             return TranslationResult(False, output_path, error=str(e))
+
+    def _translate_chapter_in_chunks(
+        self,
+        source_path: Path,
+        output_path: Path,
+        chapter_id: str,
+        source_text: str,
+        en_title: Optional[str],
+        model_name: Optional[str],
+        cached_content: Optional[str],
+    ) -> TranslationResult:
+        """Translate massive chapters via resumable chunk JSON flow."""
+        try:
+            source_content_only = source_text
+            jp_title_match = re.match(r'^#\s*(.*?)\n+', source_text)
+            if jp_title_match:
+                source_content_only = source_text[jp_title_match.end():].strip()
+
+            chunks = self._split_large_chapter(source_content_only)
+            if not chunks:
+                return TranslationResult(False, output_path, error="Chunk splitter produced no chunks")
+
+            total_chunks = len(chunks)
+            temp_dir = self.context_manager.work_dir / "temp" / "chunks"
+            temp_dir.mkdir(parents=True, exist_ok=True)
+
+            total_input_tokens = 0
+            total_output_tokens = 0
+
+            for idx, chunk in enumerate(chunks, start=1):
+                chunk_json_path = temp_dir / f"{chapter_id}_chunk_{idx:03d}.json"
+                chunk_payload = self._load_chunk_payload(chunk_json_path)
+                if chunk_payload and chunk_payload.get("content"):
+                    logger.info(f"[CHUNK] Reusing existing chunk JSON {idx}/{total_chunks} for {chapter_id}")
+                    total_input_tokens += int(chunk_payload.get("tokens_in", 0))
+                    total_output_tokens += int(chunk_payload.get("tokens_out", 0))
+                    continue
+
+                chunk_source_path = temp_dir / f"{chapter_id}_chunk_{idx:03d}_JP.md"
+                chunk_output_path = temp_dir / f"{chapter_id}_chunk_{idx:03d}_EN.md"
+                chunk_source_path.write_text(str(chunk["content"]).strip() + "\n", encoding="utf-8")
+
+                chunk_result = self.translate_chapter(
+                    source_path=chunk_source_path,
+                    output_path=chunk_output_path,
+                    chapter_id=f"{chapter_id}_chunk_{idx:03d}",
+                    en_title=None,
+                    model_name=model_name,
+                    cached_content=cached_content,
+                    volume_cache=None,
+                    allow_chunking=False,
+                )
+                if not chunk_result.success:
+                    return TranslationResult(
+                        False,
+                        output_path,
+                        input_tokens=total_input_tokens + chunk_result.input_tokens,
+                        output_tokens=total_output_tokens + chunk_result.output_tokens,
+                        error=f"Chunk {idx}/{total_chunks} failed: {chunk_result.error}",
+                    )
+
+                translated_chunk = chunk_output_path.read_text(encoding="utf-8").strip()
+                chunk_payload = {
+                    "chapter_id": chapter_id,
+                    "chunk_index": idx,
+                    "total_chunks": total_chunks,
+                    "source_line_range": [chunk["line_start"], chunk["line_end"]],
+                    "scene_break_before": chunk["scene_break_before"],
+                    "scene_break_after": chunk["scene_break_after"],
+                    "content": translated_chunk,
+                    "last_sentence": self._extract_last_sentence(translated_chunk),
+                    "tokens_in": chunk_result.input_tokens,
+                    "tokens_out": chunk_result.output_tokens,
+                    "timestamp": datetime.now(timezone.utc).isoformat(),
+                }
+                with chunk_json_path.open("w", encoding="utf-8") as f:
+                    json.dump(chunk_payload, f, ensure_ascii=False, indent=2)
+
+                total_input_tokens += chunk_result.input_tokens
+                total_output_tokens += chunk_result.output_tokens
+
+                try:
+                    chunk_source_path.unlink()
+                    chunk_output_path.unlink()
+                except Exception:
+                    pass
+
+            merger = ChunkMerger(self.context_manager.work_dir)
+            merge_result = merger.merge_chapter(chapter_id, output_filename=output_path.name)
+            merged_content = merge_result.output_path.read_text(encoding="utf-8")
+
+            if en_title and not merged_content.lstrip().startswith("# "):
+                merged_content = f"# {en_title}\n\n{merged_content.strip()}\n"
+
+            merged_content, _ = SceneBreakFormatter.format_scene_breaks(merged_content)
+            output_path.parent.mkdir(parents=True, exist_ok=True)
+            output_path.write_text(merged_content, encoding="utf-8")
+
+            audit = QualityMetrics.quick_audit(merged_content, source_text)
+            validation_warnings = list(audit.warnings or [])
+
+            if merge_result.truncation_issues:
+                critical = [i for i in merge_result.truncation_issues if i.severity == "CRITICAL"]
+                if critical:
+                    validation_warnings.append(
+                        f"Truncation validator detected {len(critical)} critical issue(s) in merged output"
+                    )
+                else:
+                    validation_warnings.append(
+                        f"Truncation validator detected {len(merge_result.truncation_issues)} potential issue(s)"
+                    )
+
+            if self.glossary_lock and self.glossary_lock.is_locked():
+                glossary_report = self.glossary_lock.validate_output(merged_content)
+                if glossary_report.has_critical():
+                    validation_warnings.append(
+                        f"Glossary lock detected {len(glossary_report.critical)} name variant(s)"
+                    )
+
+            return TranslationResult(
+                success=True,
+                output_path=output_path,
+                input_tokens=total_input_tokens,
+                output_tokens=total_output_tokens,
+                audit_result=audit,
+                warnings=validation_warnings,
+            )
+        except Exception as e:
+            logger.exception(f"Chunk translation failed for {chapter_id}")
+            return TranslationResult(False, output_path, error=str(e))
+
+    def _split_large_chapter(self, source_text: str) -> List[Dict[str, Any]]:
+        """
+        Split large chapter into line-accurate chunks.
+
+        Prefers scene breaks ('◆') and blank lines as split boundaries.
+        """
+        lines = source_text.splitlines()
+        if not lines:
+            return []
+
+        chunks: List[Dict[str, Any]] = []
+        current: List[str] = []
+        chunk_line_start = 1
+        current_len = 0
+        last_break_index = 0
+
+        def flush(count: int) -> None:
+            nonlocal current, chunk_line_start, current_len, last_break_index
+            if count <= 0:
+                return
+            chunk_lines = current[:count]
+            current = current[count:]
+
+            chunk_line_end = chunk_line_start + count - 1
+            chunk_text = "\n".join(chunk_lines).strip()
+            if chunk_text:
+                first_non_empty = next((ln.strip() for ln in chunk_lines if ln.strip()), "")
+                last_non_empty = next((ln.strip() for ln in reversed(chunk_lines) if ln.strip()), "")
+                chunks.append(
+                    {
+                        "content": chunk_text,
+                        "line_start": chunk_line_start,
+                        "line_end": chunk_line_end,
+                        "scene_break_before": first_non_empty == "◆",
+                        "scene_break_after": last_non_empty == "◆",
+                    }
+                )
+
+            chunk_line_start = chunk_line_end + 1
+            current_len = sum(len(ln) + 1 for ln in current)
+            last_break_index = 0
+            for i, ln in enumerate(current, start=1):
+                if ln.strip() == "◆" or not ln.strip():
+                    last_break_index = i
+
+        for line in lines:
+            current.append(line)
+            current_len += len(line) + 1
+            if line.strip() == "◆" or not line.strip():
+                last_break_index = len(current)
+
+            if current_len >= self.target_chunk_chars:
+                split_at = last_break_index if last_break_index > 0 else len(current)
+                flush(split_at)
+
+        if current:
+            flush(len(current))
+
+        return chunks
+
+    def _load_chunk_payload(self, chunk_json_path: Path) -> Optional[Dict[str, Any]]:
+        if not chunk_json_path.exists():
+            return None
+        try:
+            with chunk_json_path.open("r", encoding="utf-8") as f:
+                return json.load(f)
+        except Exception as e:
+            logger.warning(f"[CHUNK] Failed to read {chunk_json_path.name}: {e}")
+            return None
+
+    def _extract_last_sentence(self, text: str) -> str:
+        normalized = re.sub(r"\s+", " ", text.strip())
+        if not normalized:
+            return ""
+        sentences = re.split(r"(?<=[.!?。！？])\s+", normalized)
+        for sentence in reversed(sentences):
+            cleaned = sentence.strip()
+            if len(cleaned) >= 8:
+                return cleaned
+        return sentences[-1].strip() if sentences else ""
 
     def _build_user_prompt(
         self,
@@ -830,6 +1212,11 @@ This document contains the internal reasoning process that Gemini used while tra
         if visual_guidance:
             from modules.multimodal.prompt_injector import MULTIMODAL_STRICT_SUFFIX
             base_prompt = f"{base_prompt}\n\n{visual_guidance}\n{MULTIMODAL_STRICT_SUFFIX}"
+
+        # Inject RTAS character voice settings (English translations only)
+        rtas_guidance = self._format_rtas_guidance()
+        if rtas_guidance:
+            base_prompt = f"{base_prompt}\n\n{rtas_guidance}"
 
         return base_prompt
     

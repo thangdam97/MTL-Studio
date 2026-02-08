@@ -185,6 +185,33 @@ class ConfigBridge:
         """Set debug mode."""
         self.set('debug.verbose_api', value)
 
+    @property
+    def multimodal_processor_enabled(self) -> bool:
+        """
+        Check if multimodal processing is enabled by default.
+
+        Uses both the global multimodal gate and translation default.
+        """
+        translation_enabled = bool(self.get('translation.enable_multimodal', False))
+        multimodal_enabled = bool(self.get('multimodal.enabled', True))
+        return translation_enabled and multimodal_enabled
+
+    @multimodal_processor_enabled.setter
+    def multimodal_processor_enabled(self, value: bool) -> None:
+        """Enable/disable multimodal processor defaults in config."""
+        self.set('translation.enable_multimodal', bool(value))
+        self.set('multimodal.enabled', bool(value))
+
+    @property
+    def smart_chunking_enabled(self) -> bool:
+        """Check if smart chunking for massive chapters is enabled."""
+        return bool(self.get('translation.massive_chapter.enable_smart_chunking', True))
+
+    @smart_chunking_enabled.setter
+    def smart_chunking_enabled(self, value: bool) -> None:
+        """Enable/disable smart chunking for massive chapters."""
+        self.set('translation.massive_chapter.enable_smart_chunking', bool(value))
+
     def get_available_languages(self) -> List[str]:
         """Get list of available target languages."""
         languages = self.get('project.languages', {})

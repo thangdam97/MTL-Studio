@@ -6,7 +6,21 @@ that may leak through translation into any target language output.
 """
 
 from .format_normalizer import FormatNormalizer
-from .cjk_cleaner import CJKArtifactCleaner
 from .vn_cjk_cleaner import VietnameseCJKCleaner, format_cleaner_report
+from .truncation_validator import TruncationValidator, TruncationIssue, TruncationReport
 
-__all__ = ['FormatNormalizer', 'CJKArtifactCleaner', 'VietnameseCJKCleaner', 'format_cleaner_report']
+# Keep package import resilient when legacy cjk_cleaner.py is absent.
+try:
+    from .cjk_cleaner import CJKArtifactCleaner
+except ModuleNotFoundError:  # pragma: no cover - defensive fallback
+    CJKArtifactCleaner = None
+
+__all__ = [
+    'FormatNormalizer',
+    'CJKArtifactCleaner',
+    'VietnameseCJKCleaner',
+    'format_cleaner_report',
+    'TruncationValidator',
+    'TruncationIssue',
+    'TruncationReport',
+]

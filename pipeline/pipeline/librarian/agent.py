@@ -70,6 +70,7 @@ class Manifest:
     assets: Dict[str, Any] = field(default_factory=dict)
     toc: Dict[str, Any] = field(default_factory=dict)
     ruby_names: List[Dict[str, Any]] = field(default_factory=list)  # Ruby-extracted character names
+    volume_structure: Dict[str, Any] = field(default_factory=dict)  # Multi-act/merged volume structure
 
     def to_dict(self) -> Dict[str, Any]:
         return asdict(self)
@@ -315,6 +316,13 @@ class LibrarianAgent:
         spine_parser.detect_illustration_pages(spine)
         print(f"     Spine: {len(spine.items)} items ({len([i for i in spine.items if i.is_illustration])} illustration pages)")
 
+        # Detect multi-act/multi-volume structure (e.g., merged Shueisha publications)
+        volume_acts = self._detect_volume_acts(spine, toc, extraction.content_dir)
+        if volume_acts:
+            print(f"     [MULTI-ACT] Detected {len(volume_acts)} acts in merged volume")
+            for act in volume_acts:
+                print(f"       Act {act['act_number']}: {act['title']} ({len(act['kuchie_spine_indices'])} kuchie pages)")
+
         # Get publisher profile for content handling configuration
         profile_manager = get_profile_manager()
         publisher_name = extraction.publisher_canonical
@@ -409,7 +417,8 @@ class LibrarianAgent:
         spine_kuchie = self._extract_kuchie_from_spine(
             spine,
             extraction.content_dir,
-            publisher_profile
+            publisher_profile,
+            volume_acts=volume_acts
         )
         print(f"     Found {len(spine_kuchie)} kuchie pages in spine order")
         if spine_kuchie:
@@ -529,7 +538,8 @@ class LibrarianAgent:
                 "spine_content_files": len([i for i in spine.items if i.linear and not i.is_illustration]),
                 "toc_coverage": toc_coverage,
                 "missing_from_toc": sorted(list(missing_files)) if missing_files else []
-            }
+            },
+            volume_acts=volume_acts
         )
 
         # Sync manifest filenames with normalized names
@@ -1686,13 +1696,17 @@ class LibrarianAgent:
         self,
         spine: Spine,
         content_dir: Path,
-        publisher_profile: Optional[PublisherProfile]
+        publisher_profile: Optional[PublisherProfile],
+        volume_acts: Optional[List[Dict[str, Any]]] = None
     ) -> List[Dict[str, Any]]:
         """
         Extract kuchie (color plates) from spine order - THE AUTHORITATIVE SOURCE.
         
         This replaces pattern-based kuchie detection with spine-based extraction.
         The OPF spine defines the canonical reading order, which we preserve here.
+        
+        Supports multi-act EPUBs: when volume_acts is provided, extracts kuchie
+        for ALL acts (front matter of each act), not just the initial front matter.
         
         Why spine-based?
         - OPF spine is the authoritative source of reading order
@@ -1704,11 +1718,17 @@ class LibrarianAgent:
             spine: Parsed spine with reading order
             content_dir: Extracted EPUB content directory
             publisher_profile: Optional publisher profile for validation
+            volume_acts: Optional list of act metadata from _detect_volume_acts.
+                        If provided, extracts kuchie for all acts.
             
         Returns:
             List of kuchie dicts with metadata: 
-            [{"file": "kuchie-001.jpg", "original": "P000a.jpg", "spine_index": 2}, ...]
+            [{"file": "kuchie-001.jpg", "original": "P000a.jpg", "spine_index": 2, "act": 1}, ...]
         """
+        # Multi-act dispatch: extract kuchie for each act's front matter region
+        if volume_acts:
+            return self._extract_kuchie_multi_act(spine, content_dir, volume_acts)
+        
         from lxml import etree
         
         kuchie_list = []
@@ -1909,6 +1929,288 @@ class LibrarianAgent:
         
         return coverage, missing_files
 
+    def _detect_volume_acts(
+        self,
+        spine: Spine,
+        toc: TableOfContents,
+        content_dir: Path
+    ) -> Optional[List[Dict[str, Any]]]:
+        """
+        Detect multi-act/multi-volume structure from spine analysis.
+        
+        Identifies act boundaries by detecting tobira (title page) patterns
+        that appear mid-spine after chapter content has begun. This is
+        characteristic of merged multi-volume Japanese light novel EPUBs
+        (e.g., Shueisha Dash X Bunko "Act 1 + Act 2" releases).
+        
+        Detection signals:
+        - Spine idrefs containing 'tobira' keyword (most reliable)
+        - Multiple tobira groups separated by content pages
+        - TOC entries matching act naming patterns (幕, Act, Part)
+        
+        Reference: 25d9 (魔弾の王と戦姫) spine structure:
+        - p-tobira-001/001-2 → Act 1 header
+        - p-fmatter-001..006 → Act 1 kuchie (6 plates)
+        - p-001..p-028 → Act 1 content
+        - p-tobira-002 → Act 2 header (mid-spine boundary!)
+        - p-fmatter-007..008 → Act 2 kuchie (2 plates)
+        - p-029..p-054 → Act 2 content
+        
+        Args:
+            spine: Parsed spine with reading order
+            toc: Parsed table of contents
+            content_dir: Extracted EPUB content directory
+            
+        Returns:
+            List of act dicts, or None if single-volume.
+            Each dict contains:
+            {
+                "act_number": int,
+                "title": str,
+                "tobira_spine_indices": [int],
+                "kuchie_spine_indices": [int],
+                "first_content_spine_index": int,
+                "toc_index": int,  # Index into TOC flat list
+            }
+        """
+        # Phase 1: Find tobira pages in spine by idref pattern
+        tobira_entries = []
+        for idx, item in enumerate(spine.items):
+            if 'tobira' in item.idref.lower():
+                tobira_entries.append((idx, item))
+        
+        if len(tobira_entries) < 2:
+            return None  # Need at least 2 tobira references for multi-act
+        
+        # Phase 2: Group consecutive tobira pages into act boundaries
+        # Consecutive tobira pages (e.g., tobira-001, tobira-001-2) = same act header
+        # Tobira separated by content pages = different act boundary
+        tobira_groups = []
+        current_group = [tobira_entries[0]]
+        skip_idrefs = {'cover', 'caution', 'titlepage', 'colophon'}
+        
+        for i in range(1, len(tobira_entries)):
+            prev_idx = tobira_entries[i - 1][0]
+            curr_idx = tobira_entries[i][0]
+            
+            # Check if content pages exist between consecutive tobira entries
+            has_content_between = False
+            for j in range(prev_idx + 1, curr_idx):
+                item = spine.items[j]
+                idref_lower = item.idref.lower()
+                if (item.linear
+                        and 'fmatter' not in idref_lower
+                        and 'tobira' not in idref_lower
+                        and not any(s in idref_lower for s in skip_idrefs)):
+                    has_content_between = True
+                    break
+            
+            if has_content_between:
+                tobira_groups.append(current_group)
+                current_group = [tobira_entries[i]]
+            else:
+                current_group.append(tobira_entries[i])
+        
+        tobira_groups.append(current_group)
+        
+        if len(tobira_groups) < 2:
+            return None  # All tobira pages in same group = single volume
+        
+        # Phase 3: Build act metadata
+        # Cross-reference TOC entries with tobira spine items for act titles
+        toc_flat = toc.get_flat_list()
+        toc_map = {}  # filename -> (label, toc_index)
+        for np_idx, np in enumerate(toc_flat):
+            filename = np.content_src.split('#')[0]
+            if '/' in filename:
+                filename = filename.split('/')[-1]
+            toc_map[filename] = (np.label, np_idx)
+        
+        acts = []
+        for act_num, group in enumerate(tobira_groups, 1):
+            last_tobira_idx = group[-1][0]
+            tobira_indices = [idx for idx, _ in group]
+            
+            # Find act title and TOC index from TOC by matching tobira href
+            act_title = ""
+            act_toc_index = -1
+            for _, tobira_item in group:
+                filename = tobira_item.href.split('/')[-1] if '/' in tobira_item.href else tobira_item.href
+                if filename in toc_map:
+                    act_title, act_toc_index = toc_map[filename]
+                    break
+            
+            if not act_title:
+                act_title = f"Act {act_num}"
+            
+            # Find fmatter (kuchie) pages following this tobira group
+            kuchie_indices = []
+            scan_idx = last_tobira_idx + 1
+            while scan_idx < len(spine.items):
+                item = spine.items[scan_idx]
+                if 'fmatter' in item.idref.lower() or item.is_illustration:
+                    kuchie_indices.append(scan_idx)
+                    scan_idx += 1
+                else:
+                    break
+            
+            # First content page after kuchie
+            first_content_idx = scan_idx
+            
+            acts.append({
+                "act_number": act_num,
+                "title": act_title,
+                "tobira_spine_indices": tobira_indices,
+                "kuchie_spine_indices": kuchie_indices,
+                "first_content_spine_index": first_content_idx,
+                "toc_index": act_toc_index,
+            })
+        
+        return acts
+
+    def _extract_kuchie_multi_act(
+        self,
+        spine: Spine,
+        content_dir: Path,
+        volume_acts: List[Dict[str, Any]]
+    ) -> List[Dict[str, Any]]:
+        """
+        Extract kuchie for each act in a multi-act EPUB.
+        
+        For each act, scans both tobira (title) and fmatter (kuchie) spine items
+        for image content. This ensures Act 2+ kuchie are properly captured
+        instead of being misclassified as inline illustrations.
+        
+        Args:
+            spine: Parsed spine with reading order
+            content_dir: Extracted EPUB content directory
+            volume_acts: Act boundary metadata from _detect_volume_acts
+            
+        Returns:
+            List of kuchie dicts with act tags:
+            [{"file": "kuchie-001.jpg", ..., "act": 1}, ...]
+        """
+        from lxml import etree
+        
+        kuchie_list = []
+        
+        for act in volume_acts:
+            act_num = act['act_number']
+            # Scan both tobira pages (may contain title card images) and fmatter pages
+            scan_indices = act['tobira_spine_indices'] + act['kuchie_spine_indices']
+            
+            for spine_idx in scan_indices:
+                if spine_idx >= len(spine.items):
+                    continue
+                
+                spine_item = spine.items[spine_idx]
+                xhtml_path = content_dir / spine_item.href
+                if not xhtml_path.exists():
+                    continue
+                
+                try:
+                    tree = etree.parse(str(xhtml_path))
+                    root = tree.getroot()
+                    
+                    body = root.find(".//{http://www.w3.org/1999/xhtml}body")
+                    if body is None:
+                        body = root.find(".//body")
+                    if body is None:
+                        continue
+                    
+                    # Check text content - skip pages with substantial text (chapter pages)
+                    text_parts = []
+                    char_count = 0
+                    for elem in body.iter():
+                        if char_count > 200:
+                            break
+                        tag_name = elem.tag.split('}')[-1] if '}' in str(elem.tag) else str(elem.tag)
+                        if tag_name in ('img', 'image', 'svg'):
+                            continue
+                        if elem.text:
+                            text_parts.append(elem.text.strip())
+                            char_count += len(elem.text.strip())
+                        if elem.tail:
+                            text_parts.append(elem.tail.strip())
+                            char_count += len(elem.tail.strip())
+                    
+                    text_content = ' '.join(text_parts).strip()
+                    if len(text_content) > 200:
+                        continue  # Too much text, likely a chapter page
+                    
+                    # Find image references
+                    img_src = None
+                    
+                    # Check <img> elements
+                    for ns_prefix in ['{http://www.w3.org/1999/xhtml}', '']:
+                        for img in body.findall(f".//{ns_prefix}img"):
+                            src = img.get('src')
+                            if src:
+                                img_src = self._resolve_image_path(spine_item.href, src)
+                                break
+                        if img_src:
+                            break
+                    
+                    # Check SVG <image> elements
+                    if not img_src:
+                        for img in body.findall(".//{http://www.w3.org/2000/svg}image"):
+                            src = img.get('{http://www.w3.org/1999/xlink}href') or img.get('href')
+                            if src:
+                                img_src = self._resolve_image_path(spine_item.href, src)
+                                break
+                    
+                    if not img_src:
+                        continue
+                    
+                    original_filename = Path(img_src).name
+                    
+                    # Skip known non-kuchie patterns
+                    skip_patterns = ['white', 'logo', 'blank', 'separator']
+                    if any(p in original_filename.lower() for p in skip_patterns):
+                        continue
+                    
+                    # Check image file size (skip tiny icons < 5KB)
+                    img_file_path = content_dir / img_src
+                    if img_file_path.exists() and img_file_path.stat().st_size < 5000:
+                        continue
+                    
+                    # Generate sequential kuchie filename
+                    kuchie_number = len(kuchie_list) + 1
+                    extension = Path(original_filename).suffix
+                    normalized_filename = f"kuchie-{kuchie_number:03d}{extension}"
+                    
+                    # Determine type based on spine idref
+                    is_tobira = spine_idx in act['tobira_spine_indices']
+                    kuchie_type = "tobira" if is_tobira else "color_plate"
+                    
+                    kuchie_list.append({
+                        "file": normalized_filename,
+                        "original": original_filename,
+                        "spine_index": spine_idx,
+                        "spine_href": spine_item.href,
+                        "image_path": img_src,
+                        "act": act_num,
+                        "type": kuchie_type,
+                    })
+                    
+                except Exception:
+                    continue
+        
+        return kuchie_list
+
+    def _resolve_image_path(self, xhtml_href: str, img_src: str) -> str:
+        """Resolve relative image path from XHTML location to content-dir-relative path."""
+        from pathlib import PurePosixPath
+        xhtml_dir = PurePosixPath(xhtml_href).parent
+        resolved = []
+        for part in (xhtml_dir / img_src).parts:
+            if part == '..':
+                if resolved:
+                    resolved.pop()
+            elif part != '.':
+                resolved.append(part)
+        return '/'.join(resolved)
+
     def _build_manifest(
         self,
         volume_id: str,
@@ -1922,7 +2224,8 @@ class LibrarianAgent:
         ruby_data: Dict[str, List],
         source_lang: str,
         target_lang: str,
-        recovery_info: Optional[Dict[str, Any]] = None
+        recovery_info: Optional[Dict[str, Any]] = None,
+        volume_acts: Optional[List[Dict[str, Any]]] = None
     ) -> Manifest:
         """Build complete manifest from extraction results."""
         now = datetime.now().isoformat()
@@ -2000,6 +2303,46 @@ class LibrarianAgent:
         # Build metadata_en with enhanced schema structure
         metadata_en = self._create_metadata_en_template(chapters, ruby_data["names"])
 
+        # Build volume_structure for multi-act EPUBs
+        volume_structure_data = {}
+        if volume_acts and len(volume_acts) >= 2:
+            # Map acts to chapter ranges using TOC indices
+            toc_flat = toc.get_flat_list()
+            act_details = []
+            for i, act in enumerate(volume_acts):
+                toc_idx = act.get('toc_index', 0)
+                # Next act's toc_index is the boundary, or end of chapters
+                if i + 1 < len(volume_acts):
+                    next_toc_idx = volume_acts[i + 1].get('toc_index', len(chapters))
+                else:
+                    next_toc_idx = len(chapters)
+                
+                # Get chapter IDs for this act
+                first_ch_id = chapter_entries[toc_idx]['id'] if toc_idx < len(chapter_entries) else ''
+                last_ch_idx = min(next_toc_idx - 1, len(chapter_entries) - 1)
+                last_ch_id = chapter_entries[last_ch_idx]['id'] if last_ch_idx >= 0 else ''
+                
+                # Get kuchie files for this act
+                act_kuchie = [k['file'] for k in spine_kuchie if k.get('act') == act['act_number']]
+                
+                act_details.append({
+                    "act_number": act['act_number'],
+                    "title": act['title'],
+                    "title_en": "",  # Placeholder for translator
+                    "first_chapter_id": first_ch_id,
+                    "last_chapter_id": last_ch_id,
+                    "first_chapter_index": toc_idx,
+                    "last_chapter_index": last_ch_idx,
+                    "chapter_count": next_toc_idx - toc_idx,
+                    "kuchie_files": act_kuchie,
+                })
+            
+            volume_structure_data = {
+                "is_multi_act": True,
+                "act_count": len(volume_acts),
+                "acts": act_details,
+            }
+
         return Manifest(
             version="1.0",
             volume_id=volume_id,
@@ -2024,6 +2367,7 @@ class LibrarianAgent:
             assets=assets,
             toc=toc.to_dict(),
             ruby_names=ruby_data["names"],  # Character names from ruby annotations
+            volume_structure=volume_structure_data,
         )
 
 

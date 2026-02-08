@@ -94,6 +94,54 @@ class GeminiClient:
         """Set cache TTL in minutes (max 60)."""
         self._cache_ttl_minutes = min(minutes, 60)
 
+    def create_cache(
+        self,
+        *,
+        model: Optional[str] = None,
+        system_instruction: Optional[str] = None,
+        contents: Optional[List[str]] = None,
+        ttl_seconds: Optional[int] = None,
+        display_name: Optional[str] = None,
+    ) -> Optional[str]:
+        """
+        Create a Gemini cached content resource and return its name.
+
+        Supports both:
+        - System-instruction-only cache (legacy behavior)
+        - Full volume cache via `contents=[...]`
+        """
+        if not self.enable_caching:
+            return None
+
+        target_model = model or self.model
+        ttl = ttl_seconds if ttl_seconds is not None else (self._cache_ttl_minutes * 60)
+
+        try:
+            config = types.CreateCachedContentConfig(ttl=f"{int(ttl)}s")
+            if display_name:
+                config.display_name = display_name
+            if system_instruction:
+                config.system_instruction = system_instruction
+            if contents:
+                config.contents = contents
+
+            cache = self.client.caches.create(model=target_model, config=config)
+            return cache.name
+        except Exception as e:
+            logger.warning(f"Failed to create cache (model={target_model}): {e}")
+            return None
+
+    def delete_cache(self, cache_name: str) -> bool:
+        """Delete a cache by resource name."""
+        if not cache_name:
+            return False
+        try:
+            self.client.caches.delete(name=cache_name)
+            return True
+        except Exception as e:
+            logger.warning(f"Failed to delete cache {cache_name}: {e}")
+            return False
+
     def _create_cached_content(self, system_instruction: str, model: str) -> str:
         """Create cached content and return resource name."""
         if not self.enable_caching:
@@ -103,24 +151,24 @@ class GeminiClient:
             logger.info(f"Creating context cache for system instruction ({len(system_instruction)} chars)...")
             start_time = time.time()
 
-            # Create cached content
-            # TTL must be in seconds format (e.g., "3600s"), not minutes
-            ttl_seconds = self._cache_ttl_minutes * 60
-            cached_content = self.client.caches.create(
+            cached_content_name = self.create_cache(
                 model=model,
-                config=types.CreateCachedContentConfig(
-                    system_instruction=system_instruction,
-                    ttl=f"{ttl_seconds}s"
-                )
+                system_instruction=system_instruction,
+                ttl_seconds=self._cache_ttl_minutes * 60,
             )
+            if not cached_content_name:
+                raise RuntimeError("create_cache returned no cache name")
 
             duration = time.time() - start_time
-            self._cached_content_name = cached_content.name
+            self._cached_content_name = cached_content_name
             self._cache_created_at = time.time()
             self._cached_model = model  # Track model for cache validation
 
-            logger.info(f"✓ Context cache created: {cached_content.name} (TTL: {self._cache_ttl_minutes}m) in {duration:.2f}s")
-            return cached_content.name
+            logger.info(
+                f"✓ Context cache created: {cached_content_name} "
+                f"(TTL: {self._cache_ttl_minutes}m) in {duration:.2f}s"
+            )
+            return cached_content_name
 
         except Exception as e:
             logger.warning(f"Failed to create context cache: {e}. Falling back to non-cached mode.")
@@ -150,7 +198,7 @@ class GeminiClient:
         if self._cached_content_name:
             try:
                 logger.info(f"Clearing context cache: {self._cached_content_name}")
-                self.client.caches.delete(name=self._cached_content_name)
+                self.delete_cache(self._cached_content_name)
             except Exception as e:
                 logger.warning(f"Failed to delete cache: {e}")
             finally:

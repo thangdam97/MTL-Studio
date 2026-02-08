@@ -100,6 +100,18 @@ def _translation_settings(config: ConfigBridge) -> None:
         lang_config = config.get_language_config(selected_lang)
         console.print(f"[green]✓ Language changed to {lang_config.get('language_name', selected_lang)}[/green]")
 
+    # Multimodal processor default switch
+    toggle_multimodal = questionary.confirm(
+        f"Enable Multimodal Processor by default? (currently {'ON' if config.multimodal_processor_enabled else 'OFF'})",
+        default=config.multimodal_processor_enabled,
+        style=custom_style,
+    ).ask()
+
+    if toggle_multimodal != config.multimodal_processor_enabled:
+        config.multimodal_processor_enabled = bool(toggle_multimodal)
+        status = "enabled" if toggle_multimodal else "disabled"
+        console.print(f"[green]✓ Multimodal processor {status}[/green]")
+
 
 def _model_settings(config: ConfigBridge) -> None:
     """Handle model and parameters settings submenu."""
@@ -209,6 +221,18 @@ def _performance_settings(config: ConfigBridge) -> None:
         if new_ttl:
             config.cache_ttl = int(new_ttl)
 
+    # Smart Chunking toggle
+    toggle_chunking = questionary.confirm(
+        f"Enable Smart Chunking for massive chapters? (currently {'ON' if config.smart_chunking_enabled else 'OFF'})",
+        default=config.smart_chunking_enabled,
+        style=custom_style,
+    ).ask()
+
+    if toggle_chunking != config.smart_chunking_enabled:
+        config.smart_chunking_enabled = bool(toggle_chunking)
+        status = "enabled" if toggle_chunking else "disabled"
+        console.print(f"[green]✓ Smart chunking {status}[/green]")
+
 
 def _advanced_settings(config: ConfigBridge) -> None:
     """Handle advanced settings submenu."""
@@ -272,6 +296,7 @@ def show_current_settings(config: ConfigBridge) -> None:
     # Translation
     table.add_row("Translation", "Target Language", f"{lang_name} ({lang.upper()})")
     table.add_row("", "Model", config.model)
+    table.add_row("", "Multimodal Processor", "Enabled" if config.multimodal_processor_enabled else "Disabled")
 
     # Parameters
     table.add_row("Parameters", "Temperature", str(config.temperature))
@@ -283,6 +308,7 @@ def show_current_settings(config: ConfigBridge) -> None:
     table.add_row("Performance", "Context Caching", cache_status)
     if config.caching_enabled:
         table.add_row("", "Cache TTL", f"{config.cache_ttl} minutes")
+    table.add_row("", "Smart Chunking", "Enabled" if config.smart_chunking_enabled else "Disabled")
 
     # Advanced
     pre_toc_status = "Enabled" if config.pre_toc_enabled else "Disabled"

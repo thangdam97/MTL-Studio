@@ -4,7 +4,7 @@
 
 Version 5.1 | Production Ready | February 2026
 
-> Multi-Language Support: English & Vietnamese | Multimodal Vision + Vector Search | Literacy Techniques + Sarcasm Configuration + Character Profiles
+> Multi-Language Support: English & Vietnamese | Multimodal Vision + Vector Search | Smart Chunking + Volume Cache | Glossary Lock + Truncation Guardrails
 
 ---
 
@@ -104,6 +104,15 @@ V5.1 (February 2026) introduces a **Three-Pillar Translation Architecture** that
 - **Modern UI mode (v1.1)**: Optional rich CLI panels, live status bars, and chapter progress tracking (`--ui rich`), with safe plain fallback (`--ui plain`).
 - **Terminal-safe controls**: `--no-color` mode for CI/logging environments and deterministic non-rich output paths.
 - **Runtime configurability**: Hot-switch language/model/sampling parameters and multimodal toggles via `mtl.py config`.
+
+#### 7) Massive LN Reliability Layer (New)
+
+- **Smart Chunking for oversized chapters**: Massive source files are split at scene/paragraph boundaries and translated in resumable chunk units.
+- **Volume-level Gemini cache**: Entire JP volume can be cached once and reused across chapter calls for stronger cross-chapter consistency.
+- **Manifest glossary lock**: Character/name romanizations from manifest metadata are enforced during translation output validation.
+- **Truncation guardrails**: Post-translation validation detects likely mid-sentence/mid-word cutoffs before final packaging.
+- **Chunk merge + dedupe**: Chunk outputs are merged with scene-break deduplication and boundary overlap cleanup.
+- **Cross-chapter drift auditing**: Final EN audit detects likely name variants across chapters (e.g., `Mashas` vs `Maschas`).
 
 ### Translation Quality Standards
 
@@ -688,9 +697,26 @@ This section uses the same capability taxonomy as **Core Capabilities** so the r
 - **Modern UI mode baseline (v1.1)**: Rich panels, status bars, and live progress tracking complement legacy plain mode for deterministic scriptability.
 - **IDE-centric review loop**: VSCode/Windsurf/Cursor-friendly external agent workflows are treated as first-class QC execution paths.
 
+### 7) Massive LN Guardrails and Recovery (New)
+
+- **Smart Chunking toggleable via UI and CLI config**:
+  - TUI settings switch: `Smart Chunking`
+  - CLI switch: `mtl.py config --toggle-smart-chunking`
+- **Multimodal default switch in UI**:
+  - TUI settings switch: `Multimodal Processor`
+- **Resumable chunk artifacts**:
+  - `WORK/<volume>/temp/chunks/<chapter>_chunk_###.json`
+  - Failed long-chapter runs can resume from completed chunks.
+- **Validation-first finishing**:
+  - Truncation validator runs after chapter/chunk merge.
+  - Glossary lock checks canonical name consistency.
+  - Name consistency auditor runs on final EN output set.
+
 ---
 
 ## System Architecture
+
+### Redesigned Architecture (Massive-LN Ready)
 
 ```
                                 WORKSPACE/
@@ -703,56 +729,51 @@ This section uses the same capability taxonomy as **Core Capabilities** so the r
 │ (EPUB)  │                 │ (MD+JSON)│                │ (EPUB)  │
 └─────────┘                 └─────────┘                 └─────────┘
     │                             │                             ▲
-    │                             │                             │
     ▼                             ▼                             │
 ┌─────────────┐            ┌─────────────┐                      │
 │  LIBRARIAN  │───────────►│  METADATA   │                      │
 │   (Python)  │            │  PROCESSOR  │                      │
 └──────┬──────┘            └──────┬──────┘                      │
        │                          │                             │
-       │  _assets/illustrations/  │                             │
        ▼                          ▼                             │
-┌─────────────────┐        ┌─────────────────────────────────┐  │
-│  ART DIRECTOR   │        │          TRANSLATOR             │  │
-│ Gemini 3 Pro    │        │        Gemini 2.5 Pro           │  │
-│   Vision        │        │                                 │  │
-│                 │        │  ┌───────────┐ ┌─────────────┐  │  │
-│ Analyzes every  │───────►│  │  Visual   │ │ RAG Engine  │  │  │
-│ illustration    │ visual │  │  Context  │ │  (2.5MB)    │  │  │
-│ → visual_cache  │ _cache │  │  Injector │ │ modules/    │  │  │
-│   .json         │ .json  │  └───────────┘ └─────────────┘  │  │
-└─────────────────┘        │                                 │  │
-                           │  ┌───────────┐ ┌─────────────┐  │  │
-┌─────────────────┐        │  │  Grammar  │ │  Embedding  │  │  │
-│  GRAMMAR PATTERN │───────►│  │  Pattern  │ │  Engine     │  │  │
-│  DETECTOR        │pattern │  │  Guidance │ │gemini-emb-  │  │  │
-│ 70+ regex across │ data   │  │  (inject) │ │  001 3072D  │  │  │
-│ 9 categories     │        │  └───────────┘ └──────┬──────┘  │  │
-└─────────────────┘        │                       │         │  │
-                           │                ┌──────▼──────┐  │  │
-                           │                │  ChromaDB   │  │  │
-                           │                │  204 EN +   │  │  │
-                           │                │  Sino-VN    │  │  │
-                           │                │  patterns   │  │  │
-                           │                └─────────────┘  │  │
-                           └────────────────┬────────────────┘  │
-                                            │                   │
-                                            ▼                   │
-                                     ┌─────────────┐           │
-                                     │  EN/*.md    │           │
-                                     │  (chapters) │           │
-                                     └──────┬──────┘           │
-                                            │                   │
-                                            ▼                   │
-┌─────────────┐                      ┌─────────────┐           │
-│   BUILDER   │◄─────────────────────│   CRITICS   │           │
-│   (Python)  │                      │ (IDE Agent) │           │
-└──────┬──────┘                      └─────────────┘           │
-       │                                                        │
-       ▼                                                        │
-┌─────────────┐                                                │
-│  final.epub │ ───────────────────────────────────────────────┘
-└─────────────┘
+┌─────────────────┐        ┌────────────────────────────────────────────────────┐
+│  ART DIRECTOR   │        │                    TRANSLATOR                      │
+│ Gemini 3 Pro    │        │                  Gemini 2.5 Pro                    │
+│   Vision        │        │                                                    │
+│ → visual_cache  │───────►│  RAG + Vector Search + (optional) Visual Context  │
+│   .json         │        │                                                    │
+└─────────────────┘        │  NEW RELIABILITY LAYER                             │
+                           │  • Volume Cache (full JP volume cached once)       │
+                           │  • Smart Chunking for massive chapters              │
+                           │  • Resumable chunk JSONs (temp/chunks/*.json)      │
+                           │  • Chunk Merge + boundary dedupe                    │
+                           │  • Truncation Validator                             │
+                           │  • Manifest Glossary Lock                           │
+                           └──────────────────────────┬─────────────────────────┘
+                                                      │
+                                                      ▼
+                                               ┌─────────────┐
+                                               │  EN/*.md    │
+                                               │  + THINKING │
+                                               └──────┬──────┘
+                                                      │
+                                                      ▼
+                           ┌────────────────────────────────────────────────────┐
+                           │ QC & AUDIT LAYER                                   │
+                           │ • Critics / Anti-AI-ism / CJK checks               │
+                           │ • Name Consistency Auditor (cross-chapter drift)   │
+                           └──────────────────────────┬─────────────────────────┘
+                                                      │
+                                                      ▼
+                                               ┌─────────────┐
+                                               │   BUILDER   │
+                                               │   (Python)  │
+                                               └──────┬──────┘
+                                                      │
+                                                      ▼
+                                               ┌─────────────┐
+                                               │  final.epub │
+                                               └─────────────┘
 ```
 
 ### Agent Communication Protocol
@@ -780,11 +801,16 @@ TRANSLATOR reads      → checks librarian.status == "completed"
                       → Grammar Pattern Detector scans JP source (70+ regex)
                       → Vector Search injects high-confidence matches (≥0.78)
                       → Art Director's Notes injected for illustrated chapters
+                      → Full-volume cache created once (optional)
+                      → Massive chapters use Smart Chunking (optional)
+                      → Chunk JSONs merged and validated
+                      → Truncation + glossary lock checks executed
                       → EN/*.md files created
                       → manifest.json (translator.status = "completed")
 
 CRITICS reads         → checks translator.status == "completed"
                       → QC/*.json reports created
+                      → name_consistency_report.json (drift audit)
 
 BUILDER reads         → assembles EPUB from all resources
                       → OUTPUT/[title]_EN.epub
@@ -920,6 +946,11 @@ WORK/[volume_id]/
 - Context-aware translation with 2-chapter lookback
 - **Vector Search**: Grammar pattern detection → semantic embedding → confidence-based injection
 - **Multimodal**: Art Director's Notes injected for chapters with `[ILLUSTRATION:]` markers
+- **Smart Chunking (massive chapters)**: byte/char-threshold split + resumable chunk translation
+- **Volume-level cache**: one cache for the full volume to stabilize cross-chapter context
+- **Glossary Lock**: manifest-based canonical name enforcement during output validation
+- **Truncation Validator**: post-translation detection of likely incomplete output
+- **Chunk Merger**: deduplicates scene-break overlap at chunk boundaries
 - Trope-aware Light Novel patterns via 2.5MB RAG knowledge base
 - Smart typography (curly quotes, em-dashes, proper ellipses)
 - Character name consistency enforcement from manifest profiles
@@ -1238,6 +1269,8 @@ python mtl.py config --show
 python mtl.py config --language en    # Switch to English
 python mtl.py config --language vn    # Switch to Vietnamese
 python mtl.py config --model 2.5-pro
+python mtl.py config --toggle-smart-chunking
+python mtl.py config --toggle-multimodal
 ```
 
 ### Command Details
@@ -1274,6 +1307,8 @@ python mtl.py config --model 2.5-pro
 | `--language` | Target language (en/vn) |
 | `--model` | Gemini model to use |
 | `--show` | Display current configuration |
+| `--toggle-smart-chunking` | Toggle Smart Chunking for massive chapters |
+| `--toggle-multimodal` | Toggle default multimodal visual context mode |
 | `--validate` | Run full metadata validation with detailed report |
 | `--dry-run` | Scan only, don't modify files (heal, cjk-clean) |
 | `--vn` | Target Vietnamese language (heal) |
@@ -1318,6 +1353,14 @@ gemini:
     thinking_level: medium
 
 translation:
+  enable_multimodal: true
+  massive_chapter:
+    enable_smart_chunking: true
+    enable_volume_cache: true
+    chunk_threshold_chars: 50000
+    chunk_threshold_bytes: 120000
+    target_chunk_chars: 45000
+    volume_cache_ttl_seconds: 7200
   quality:
     contraction_rate_min: 0.8
     max_ai_isms_per_chapter: 5
@@ -2480,6 +2523,9 @@ See LICENSE.txt for licensing information.
 - **Three-Pillar Translation Architecture**: Unified RAG + Vector Search + Multimodal Vision workflow
 - **Gemini Embedding Vector Search**: Semantic grammar matching pipeline with confidence-gated injection and auto-rebuild
 - **Phase 1.6 Multimodal Processor**: Gemini 3 Pro Vision Art Director's Notes with hash-based visual cache invalidation
+- **Massive LN Reliability Layer**: Smart Chunking + volume-level cache + resumable chunk JSON workflow
+- **Output Safety Guardrails**: Truncation validator + manifest glossary lock + cross-chapter name drift auditing
+- **Config/TUI Enhancements**: Smart Chunking and Multimodal toggles in settings + `mtl.py config --toggle-smart-chunking`
 - **Self-Healing Quality Pipeline**: Integrated CJK cleaning + Anti-AI-ism healing for post-translation stabilization
 - **CLI Expansion**: `phase1.6`, `multimodal`, `cache-inspect`, `visual-thinking`, and richer schema tooling
 

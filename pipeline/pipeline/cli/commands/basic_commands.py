@@ -31,7 +31,8 @@ def handle_config(args: Any, controller: Any) -> CommandResult:
         top_k=args.top_k if hasattr(args, 'top_k') else None,
         language=args.language if hasattr(args, 'language') else None,
         show_language=args.show_language if hasattr(args, 'show_language') else False,
-        toggle_multimodal=args.toggle_multimodal if hasattr(args, 'toggle_multimodal') else False
+        toggle_multimodal=args.toggle_multimodal if hasattr(args, 'toggle_multimodal') else False,
+        toggle_smart_chunking=args.toggle_smart_chunking if hasattr(args, 'toggle_smart_chunking') else False
     )
     return CommandResult(exit_code=0)
 
@@ -48,4 +49,3 @@ HANDLERS = {
     'config': handle_config,
     'metadata': handle_metadata,
 }
-

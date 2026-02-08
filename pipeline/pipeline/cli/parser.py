@@ -57,7 +57,19 @@ Metadata Schema Auto-Transform:
     _add_ui_flags(parser)
 
     parent_parser = argparse.ArgumentParser(add_help=False)
-    parent_parser.add_argument('--verbose', action='store_true', help='Show detailed logs')
+    parent_parser.add_argument(
+        '--verbose',
+        dest='verbose',
+        action='store_true',
+        default=True,
+        help='Show detailed logs (default: enabled)',
+    )
+    parent_parser.add_argument(
+        '--quiet',
+        dest='verbose',
+        action='store_false',
+        help='Use concise logs (disables verbose debug output)',
+    )
     _add_ui_flags(parent_parser)
 
     subparsers = parser.add_subparsers(dest='command', help='Command to run')
@@ -207,6 +219,7 @@ Metadata Schema Auto-Transform:
     config_parser.add_argument('--show', action='store_true', help='Show current configuration')
     config_parser.add_argument('--toggle-pre-toc', action='store_true', help='Toggle pre-TOC content detection (rare opening hooks before prologue)')
     config_parser.add_argument('--toggle-multimodal', action='store_true', help='Toggle multimodal visual context (experimental)')
+    config_parser.add_argument('--toggle-smart-chunking', action='store_true', help='Toggle smart chunking for massive chapters')
     config_parser.add_argument('--language', type=str, choices=['en', 'vn'], help='Switch target language (en=English, vn=Vietnamese)')
     config_parser.add_argument('--show-language', action='store_true', help='Show current target language details')
     config_parser.add_argument(

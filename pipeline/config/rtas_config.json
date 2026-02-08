@@ -1,0 +1,371 @@
+{
+    "version": "2.0",
+    "description": "RTAS algorithm config. Derived from 79 volumes (437 personality traits, 97 relationship types, 313 keigo registers).",
+    "baseline": 3.0,
+    "relationship_patterns": {
+        "protagonist|self|pov_character": {
+            "baseline_override": null,
+            "is_pov": true
+        },
+        "girlfriend|lover|romantic_interest|love_interest|main_heroine": {
+            "baseline_shift": 1.2,
+            "min": 4.0,
+            "max": 5.0
+        },
+        "childhood_friend|osananajimi|best_friend|close_friend": {
+            "baseline_shift": 0.9,
+            "min": 3.8,
+            "max": 4.8
+        },
+        "sister|imouto|onee|sibling|twin": {
+            "baseline_shift": 0.6,
+            "min": 3.5,
+            "max": 4.5
+        },
+        "neighbor|classmate|kohai|senpai": {
+            "baseline_shift": 0.3,
+            "min": 3.0,
+            "max": 4.0
+        },
+        "friend|ally|nakama|acquaintance": {
+            "baseline_shift": 0.2,
+            "min": 2.8,
+            "max": 4.0
+        },
+        "teacher|homeroom|sensei": {
+            "baseline_shift": -0.3,
+            "min": 2.5,
+            "max": 3.5
+        },
+        "servant|maid|vassal|aide|butler|attendant": {
+            "baseline_shift": -0.4,
+            "min": 2.2,
+            "max": 3.5
+        },
+        "parent|father|mother|guardian": {
+            "baseline_shift": 0.0,
+            "min": 2.5,
+            "max": 4.0
+        },
+        "stranger|unknown|new_acquaintance": {
+            "baseline_shift": 0.0,
+            "min": 2.5,
+            "max": 3.2
+        },
+        "rival|competitor|antagonistic": {
+            "baseline_shift": -0.5,
+            "min": 1.8,
+            "max": 3.0
+        },
+        "ex-girlfriend|ex-boyfriend|former": {
+            "baseline_shift": -0.2,
+            "min": 2.0,
+            "max": 3.5
+        },
+        "hostile|enemy|antagonist|villain": {
+            "baseline_shift": -1.5,
+            "min": 1.0,
+            "max": 2.0
+        }
+    },
+    "personality_modifiers": {
+        "protective|caring|kind|kind-hearted|supportive|devoted": {
+            "contraction_rate_shift": 5,
+            "warmth": "high"
+        },
+        "self-deprecating|modest|reserved|anxious": {
+            "contraction_rate_shift": -5,
+            "confidence": "low"
+        },
+        "playful|energetic|bright|outgoing|sociable|friendly": {
+            "contraction_rate_shift": 20,
+            "filler_density": "high"
+        },
+        "perceptive|pragmatic|calculating|intelligent|competent": {
+            "contraction_rate_shift": 0,
+            "precision": "high"
+        },
+        "elegant|graceful|polite|refined": {
+            "contraction_rate_shift": -25,
+            "vocabulary_tier": "elevated"
+        },
+        "direct|blunt|straightforward|sharp": {
+            "contraction_rate_shift": 10,
+            "sentence_length": "short"
+        },
+        "gentle|warm|earnest|sincere": {
+            "contraction_rate_shift": 5,
+            "tone": "soft"
+        },
+        "professional|mature|composed": {
+            "contraction_rate_shift": -10,
+            "demeanor": "controlled"
+        },
+        "athletic|physical|sporty": {
+            "contraction_rate_shift": 15,
+            "energy": "high"
+        },
+        "jealous|possessive|obsessive": {
+            "contraction_rate_shift": 0,
+            "intensity": "high"
+        },
+        "shy|timid|quiet|introverted": {
+            "contraction_rate_shift": -10,
+            "sentence_length": "short",
+            "fillers": [
+                "um",
+                "uh"
+            ]
+        },
+        "cold|aloof|distant|kuudere": {
+            "contraction_rate_shift": -20,
+            "filler_density": "low"
+        },
+        "tsundere|defensive|easily_flustered": {
+            "contraction_rate_shift": 10,
+            "stutter_probability": 0.25
+        },
+        "yandere|obsessive|possessive|intense": {
+            "contraction_rate_shift": 5,
+            "tone_shifts": true
+        }
+    },
+    "keigo_switch_mappings": {
+        "casual|casual_bro|casual_friendly|friendly_casual": {
+            "rtas_tier": 3.8
+        },
+        "casual_boyfriend|affectionate": {
+            "rtas_tier": 4.2
+        },
+        "casual_sibling|casual_family": {
+            "rtas_tier": 4.0
+        },
+        "affectionate_childlike|gentle_motherly|caring_older_sister": {
+            "rtas_tier": 3.8
+        },
+        "polite|polite_formal|respectful_formal|respectful_polite": {
+            "rtas_tier": 2.5
+        },
+        "polite_nervous|polite_student": {
+            "rtas_tier": 2.3
+        },
+        "polite-casual|casual_respectful": {
+            "rtas_tier": 3.2
+        },
+        "very_formal|formal_court_language": {
+            "rtas_tier": 1.8
+        },
+        "sharp_direct": {
+            "rtas_tier": 2.8
+        },
+        "playful_teasing|flirty": {
+            "rtas_tier": 4.0
+        }
+    },
+    "contraction_tiers": {
+        "1.0-1.9": {
+            "base_rate": 0,
+            "allowed_contractions": [],
+            "notes": "Very formal/hostile"
+        },
+        "2.0-2.4": {
+            "base_rate": 20,
+            "allowed_contractions": [
+                "it's",
+                "that's"
+            ]
+        },
+        "2.5-2.9": {
+            "base_rate": 40,
+            "allowed_contractions": [
+                "it's",
+                "that's",
+                "there's",
+                "I'm"
+            ]
+        },
+        "3.0-3.4": {
+            "base_rate": 60,
+            "allowed_contractions": [
+                "don't",
+                "can't",
+                "won't",
+                "I'm",
+                "you're",
+                "we're"
+            ]
+        },
+        "3.5-3.9": {
+            "base_rate": 75,
+            "allowed_contractions": [
+                "ALL_STANDARD"
+            ]
+        },
+        "4.0-4.4": {
+            "base_rate": 85,
+            "allowed_contractions": [
+                "ALL_STANDARD"
+            ]
+        },
+        "4.5-5.0": {
+            "base_rate": 95,
+            "allowed_contractions": [
+                "ALL_STANDARD",
+                "gonna",
+                "wanna",
+                "gotta",
+                "kinda"
+            ]
+        }
+    },
+    "archetype_forbidden_vocab": {
+        "elegant|graceful|polite|refined|ojou": {
+            "forbidden": [
+                "slay",
+                "lit",
+                "vibe",
+                "sucks",
+                "awesome",
+                "cool",
+                "gonna",
+                "wanna",
+                "crap",
+                "damn"
+            ],
+            "required": [
+                "indeed",
+                "quite",
+                "gracious",
+                "delightful",
+                "permit",
+                "pardon"
+            ],
+            "notes": "High-class/noble characters"
+        },
+        "playful|energetic|bright|genki": {
+            "forbidden": [
+                "inquire",
+                "request",
+                "permit",
+                "henceforth",
+                "wherefore",
+                "thus"
+            ],
+            "required": [
+                "awesome",
+                "totally",
+                "super",
+                "gonna",
+                "wanna",
+                "let's go",
+                "come on"
+            ],
+            "notes": "Genki girl archetype"
+        },
+        "cold|aloof|distant|kuudere": {
+            "forbidden": [
+                "amazing",
+                "wonderful",
+                "thrilled",
+                "excited",
+                "OMG",
+                "yay"
+            ],
+            "required": [
+                "fine",
+                "adequate",
+                "understood",
+                "whatever",
+                "I see"
+            ],
+            "max_exclamations_per_chapter": 5,
+            "notes": "Cool/emotionless type"
+        },
+        "tsundere|defensive|easily_flustered": {
+            "forbidden_until_rtas_4.5": [
+                "love",
+                "adore",
+                "care about you",
+                "I like you"
+            ],
+            "required": [
+                "whatever",
+                "idiot",
+                "not like",
+                "don't get the wrong idea",
+                "it's not like"
+            ],
+            "notes": "Tsundere denial patterns"
+        },
+        "professional|mature|composed|stoic": {
+            "forbidden": [
+                "thrilled",
+                "devastated",
+                "gonna",
+                "wanna",
+                "awesome",
+                "OMG"
+            ],
+            "required": [
+                "understood",
+                "affirmative",
+                "confirmed",
+                "acknowledged"
+            ],
+            "contraction_cap": 30,
+            "notes": "Military/professional characters"
+        },
+        "self-deprecating|modest|anxious": {
+            "forbidden": [
+                "I'm the best",
+                "obviously",
+                "of course I can"
+            ],
+            "required": [
+                "sorry",
+                "my bad",
+                "I'll try",
+                "if that's okay"
+            ],
+            "notes": "Low-confidence protagonists"
+        },
+        "shy|timid|quiet|dandere": {
+            "forbidden": [
+                "hey everyone",
+                "listen up",
+                "pay attention"
+            ],
+            "required": [
+                "um",
+                "uh",
+                "maybe",
+                "I think",
+                "if you don't mind"
+            ],
+            "sentence_length_cap": 15,
+            "notes": "Quiet/shy characters"
+        }
+    },
+    "runtime_notes": {
+        "derived_from": "79 volumes, 437 unique personality traits, 97 relationship types, 313 keigo registers",
+        "top_traits": [
+            "protective(15)",
+            "caring(9)",
+            "self-deprecating(9)",
+            "playful(8)",
+            "perceptive(8)"
+        ],
+        "top_relationships": [
+            "protagonist(5)",
+            "best_friend(4)",
+            "girlfriend(2)",
+            "classmate(2)"
+        ],
+        "top_registers": [
+            "polite(13)",
+            "casual(13)",
+            "casual_bro(12)",
+            "polite_formal(9)"
+        ]
+    }
+}

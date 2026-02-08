@@ -35,6 +35,8 @@ def show_header(config: ConfigBridge) -> None:
 
     # Caching indicator
     cache_indicator = "[green]ON[/green]" if config.caching_enabled else "[dim]OFF[/dim]"
+    multimodal_indicator = "[green]ON[/green]" if config.multimodal_processor_enabled else "[dim]OFF[/dim]"
+    chunking_indicator = "[green]ON[/green]" if config.smart_chunking_enabled else "[dim]OFF[/dim]"
 
     header_content = (
         f"[bold cyan]MT PUBLISHING PIPELINE[/bold cyan] v2.0\n"
@@ -43,7 +45,9 @@ def show_header(config: ConfigBridge) -> None:
         f"[bold]Verbose:[/bold] {mode_indicator}  |  "
         f"[bold]Language:[/bold] {lang_name} ({lang})  |  "
         f"[bold]Model:[/bold] {model}\n"
-        f"[bold]Caching:[/bold] {cache_indicator}"
+        f"[bold]Caching:[/bold] {cache_indicator}  |  "
+        f"[bold]Chunking:[/bold] {chunking_indicator}  |  "
+        f"[bold]Multimodal:[/bold] {multimodal_indicator}"
     )
 
     console.print()

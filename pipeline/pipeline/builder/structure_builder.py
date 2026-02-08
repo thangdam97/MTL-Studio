@@ -254,6 +254,81 @@ class StructureBuilder:
 
 
     @staticmethod
+    def create_act_separator_xhtml(
+        output_path: Path,
+        act_title: str,
+        act_number: int,
+        book_title: str,
+        lang_code: str = "en"
+    ) -> None:
+        """
+        Create an act separator XHTML page for multi-act EPUBs.
+        
+        This is the translated equivalent of a tobira (扉) page that
+        separates acts in merged multi-volume Japanese light novel EPUBs.
+        
+        Args:
+            output_path: Path where to write the XHTML file
+            act_title: Title of the act (e.g., "Act II — The Frozen Snow Princess")
+            act_number: Act number (2, 3, ...)
+            book_title: Book title for metadata
+            lang_code: Language code for html attributes
+        """
+        escaped_title = escape(act_title)
+        escaped_book_title = escape(book_title)
+        epub_version = get_epub_version()
+        page_id = f"act-{act_number:03d}-separator"
+
+        if epub_version == "EPUB3":
+            xhtml = f'''<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:epub="http://www.idpf.org/2007/ops"
+      lang="{lang_code}"
+      xml:lang="{lang_code}">
+<head>
+  <meta charset="UTF-8"/>
+  <title>{escaped_book_title}</title>
+  <link href="{CSS_PATH}" rel="stylesheet" type="text/css"/>
+</head>
+
+<body>
+<section epub:type="part" id="{page_id}">
+  <div class="main">
+    <h1 style="text-align: center; margin-top: 40%; font-size: 1.8em;">{escaped_title}</h1>
+  </div>
+</section>
+</body>
+</html>
+'''
+        else:
+            xhtml = f'''<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN"
+  "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+      lang="{lang_code}"
+      xml:lang="{lang_code}">
+<head>
+  <meta http-equiv="Content-Type" content="application/xhtml+xml; charset=UTF-8"/>
+  <title>{escaped_book_title}</title>
+  <link href="{CSS_PATH}" rel="stylesheet" type="text/css"/>
+</head>
+
+<body>
+<div id="{page_id}" class="act-separator">
+  <div class="main">
+    <h1 style="text-align: center; margin-top: 40%; font-size: 1.8em;">{escaped_title}</h1>
+  </div>
+</div>
+</body>
+</html>
+'''
+        output_path.parent.mkdir(parents=True, exist_ok=True)
+        output_path.write_text(xhtml, encoding='utf-8')
+
+    @staticmethod
     def create_toc_xhtml(
         output_path: Path,
         toc_entries: List[Dict[str, str]],

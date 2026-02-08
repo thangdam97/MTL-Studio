@@ -60,6 +60,13 @@ class CJKBlock(Enum):
 
     # Strokes
     CJK_STROKES = ("CJK Strokes", 0x31C0, 0x31EF, "Components")
+    
+    # Japanese Kana (ADDED - these should be detected as CJK leaks in English text!)
+    HIRAGANA = ("Hiragana", 0x3040, 0x309F, "Japanese Kana")
+    KATAKANA = ("Katakana", 0x30A0, 0x30FF, "Japanese Kana")
+    KATAKANA_PHONETIC_EXT = ("Katakana Phonetic Extensions", 0x31F0, 0x31FF, "Japanese Kana")
+    HALFWIDTH_KATAKANA = ("Halfwidth Katakana", 0xFF65, 0xFF9F, "Japanese Kana")
+
 
     def __init__(self, name: str, start: int, end: int, rarity: str):
         self.block_name = name

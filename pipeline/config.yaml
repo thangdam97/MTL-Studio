@@ -1,5 +1,5 @@
 project:
-  target_language: vn
+  target_language: en
   languages:
     en:
       master_prompt: prompts/master_prompt_en_compressed.xml

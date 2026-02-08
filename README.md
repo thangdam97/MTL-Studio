@@ -1551,10 +1551,52 @@ Result: Forces synonym variation ("She ran" / "She took off running")
 
 **Documentation**: See `pipeline/docs/ECHO_DETECTION_GUIDE.md` for complete technical specifications, integration examples, and best practices.
 
+### CJK Pattern Detection (Unicode-Level)
+
+MTL Studio includes a Unicode-aware CJK detection layer for script contamination that basic `[\u4E00-\u9FFF]` scanning misses.
+
+#### Why this happens in LLM translation
+
+CJK leaks in generated EN/VN output usually come from three sources:
+
+1. **Cross-script token priors in multilingual models**: LLMs are trained on mixed Japanese/Chinese/Korean corpora, so near-homograph tokens can leak into output under ambiguity.
+2. **Source noise from EPUB extraction**: OCR/encoding artifacts, publisher glyph variants, and compatibility ideographs can survive extraction and get copied into generation.
+3. **Long-context drift during post-editing/rewrite steps**: During iterative translation and cleanup, model outputs can preserve or re-introduce foreign-script fragments in low-salience spans.
+
+#### `cjk_unicode_detector.py` function map
+
+File: `pipeline/pipeline/post_processor/cjk_unicode_detector.py`
+
+- `CJKBlock`: Enumerates 14+ CJK Unicode blocks (Unified, Ext A-G, Compatibility, Radicals, Symbols, etc.).
+- `CJKCharInfo`: Per-character metadata (`codepoint`, block, compatibility, encoding hints).
+- `ComprehensiveCJKDetector.detect_all_cjk(text)`: Detects all CJK chars across full Unicode coverage.
+- `ComprehensiveCJKDetector.calculate_suspicion(char, left_context, right_context)`: Scores leak risk (0-1) using block rarity, Chinese-only sets, kana-neighbor context, and encoding clues.
+- `ComprehensiveCJKDetector.generate_coverage_report(text)`: Produces block-level statistics and high-suspicion counts for audit reports.
+
+#### IDE integration and automated fix workflow
+
+The detector is integrated through QC modules used in IDE terminals (VSCode/Windsurf/Cursor):
+
+1. **Auto-detect after Phase 2**:
+   - `python mtl.py phase2 <volume_id>`
+   - Calls `scripts/cjk_validator.py` automatically for leak summary.
+2. **Deep Unicode scan (comprehensive)**:
+   - `python scripts/scan_cjk_comprehensive.py <volume_id>`
+   - Uses `ComprehensiveCJKDetector` for full-block/suspicion analysis.
+3. **Automated fix pass**:
+   - `python mtl.py cjk-clean <volume_id>` (deterministic VN substitutions)
+   - `python mtl.py heal <volume_id> --vn` (LLM contextual rewrite for remaining artifacts)
+4. **Re-validation gate**:
+   - `python scripts/cjk_validator.py --scan-volume <volume_id>`
+   - Continue to Phase 4 only when no blocking leaks remain.
+
+Implementation note: `cjk_cleaner_v2.py` and `multi_script_detector.py` both consume `ComprehensiveCJKDetector`, so IDE-side automation can operate on the same Unicode logic as pipeline QC.
+
 ### Automatic QC Features
 
 - **Typography Fixes**: Smart quotes, em-dashes, ellipses standardization
 - **Contraction Enforcement**: Expansion patterns detected and corrected
+- **CJK Pattern Detection**: Full Unicode block scanning via `ComprehensiveCJKDetector` with suspicion scoring
 - **AI-ism Detection**: 65-pattern library with severity classification + Self-Healing Agent
 - **Echo Detection**: Proximity-based clustering analysis with automatic escalation
 - **Name Consistency**: Ruby text verification against translations

@@ -132,6 +132,7 @@ class TranslatorAgent:
         self.volume_cache_enabled = massive_cfg.get("enable_volume_cache", True)
         self.volume_cache_ttl_seconds = int(massive_cfg.get("volume_cache_ttl_seconds", 7200))
         self.volume_cache_name: Optional[str] = None
+        self._volume_cache_stats: Dict[str, Any] = {}
         
         # Auto-detect enable_multimodal from config.yaml if not explicitly set
         if not enable_multimodal:
@@ -159,7 +160,7 @@ class TranslatorAgent:
         gemini_config = get_gemini_config()
         caching_config = gemini_config.get("caching", {})
         enable_caching = caching_config.get("enabled", True)
-        cache_ttl = caching_config.get("ttl_minutes", 60)
+        cache_ttl = caching_config.get("ttl_minutes", 120)
 
         if enable_caching:
             logger.info(f"✓ Context caching enabled (TTL: {cache_ttl} minutes)")
@@ -362,23 +363,27 @@ class TranslatorAgent:
             if metadata_lang_path.exists():
                 with open(metadata_lang_path, 'r', encoding='utf-8') as f:
                     metadata_lang = json.load(f)
-                    return metadata_lang.get('character_names', {})
+                    if isinstance(metadata_lang, dict):
+                        return metadata_lang.get('character_names', {})
             
             # Fallback to metadata_en for backward compatibility
             metadata_en_path = self.work_dir / "metadata_en.json"
             if metadata_en_path.exists():
                 with open(metadata_en_path, 'r', encoding='utf-8') as f:
                     metadata_en = json.load(f)
-                    return metadata_en.get('character_names', {})
+                    if isinstance(metadata_en, dict):
+                        return metadata_en.get('character_names', {})
             
             # Fallback to manifest.json
             if self.manifest:
                 metadata_key = f'metadata_{self.target_language}'
                 metadata_lang = self.manifest.get(metadata_key, {})
-                if metadata_lang:
+                if isinstance(metadata_lang, dict) and metadata_lang:
                     return metadata_lang.get('character_names', {})
                 # Last resort: metadata_en from manifest
                 metadata_en = self.manifest.get('metadata_en', {})
+                if not isinstance(metadata_en, dict):
+                    return {}
                 return metadata_en.get('character_names', {})
             
             return {}
@@ -414,7 +419,7 @@ class TranslatorAgent:
             if metadata_lang_path.exists():
                 with open(metadata_lang_path, 'r', encoding='utf-8') as f:
                     full_metadata = json.load(f)
-                    semantic_data = self._extract_semantic_metadata(full_metadata)
+                    semantic_data = self._extract_semantic_metadata(full_metadata if isinstance(full_metadata, dict) else {})
                     
                     if semantic_data:
                         schema_type = "Enhanced v2.1" if 'characters' in full_metadata else "Legacy V2 (transformed)"
@@ -428,7 +433,7 @@ class TranslatorAgent:
                 metadata_key = f'metadata_{self.target_language}'
                 metadata_lang = self.manifest.get(metadata_key, {})
                 
-                if metadata_lang:
+                if isinstance(metadata_lang, dict) and metadata_lang:
                     semantic_data = self._extract_semantic_metadata(metadata_lang)
                     
                     if semantic_data:
@@ -452,6 +457,9 @@ class TranslatorAgent:
         
         Handles all schema versions with automatic transformation.
         """
+        if not isinstance(full_metadata, dict):
+            return {}
+
         semantic_data = {}
         
         # ===== ENHANCED V2.1 SCHEMA (preferred) =====
@@ -491,14 +499,15 @@ class TranslatorAgent:
         # ===== V4 NESTED SCHEMA (character_names with objects) =====
         # Check if character_names contains nested objects (not flat strings)
         if 'character_names' in full_metadata and 'characters' not in semantic_data:
-            char_names = full_metadata['character_names']
-            # Detect V4 schema: first value is dict, not string
-            first_value = next(iter(char_names.values()), None) if char_names else None
-            if isinstance(first_value, dict):
-                transformed_v4 = self._transform_v4_character_names(char_names)
-                if transformed_v4:
-                    semantic_data['characters'] = transformed_v4
-                    logger.debug(f"  → Transformed {len(transformed_v4)} V4 nested character_names to characters format")
+            char_names = full_metadata.get('character_names') or {}
+            if isinstance(char_names, dict):
+                # Detect V4 schema: first value is dict, not string
+                first_value = next(iter(char_names.values()), None) if char_names else None
+                if isinstance(first_value, dict):
+                    transformed_v4 = self._transform_v4_character_names(char_names)
+                    if transformed_v4:
+                        semantic_data['characters'] = transformed_v4
+                        logger.debug(f"  → Transformed {len(transformed_v4)} V4 nested character_names to characters format")
         
         return semantic_data
     
@@ -556,17 +565,27 @@ class TranslatorAgent:
         Enhanced v2.1: [{"name_en": "Charlotte Bennett", "pronouns": {"subject": "she"}, ...}]
         """
         characters = []
+        if not isinstance(profiles, dict):
+            return characters
+
         for name, profile in profiles.items():
+            if not isinstance(profile, dict):
+                continue
+
+            pronouns_raw = profile.get('pronouns', '')
+            if not isinstance(pronouns_raw, str):
+                pronouns_raw = str(pronouns_raw)
+
             char = {
                 'name_en': name,
                 'name_kanji': profile.get('full_name', name),
                 'role': profile.get('relationship_to_protagonist', 'supporting'),
-                'gender': 'female' if 'she/her' in profile.get('pronouns', '') else 'male' if 'he/him' in profile.get('pronouns', '') else 'unknown',
+                'gender': 'female' if 'she/her' in pronouns_raw else 'male' if 'he/him' in pronouns_raw else 'unknown',
                 'age': profile.get('age', 'unknown'),
             }
             
             # Parse pronouns string to dict
-            pronouns_str = profile.get('pronouns', '')
+            pronouns_str = pronouns_raw
             if pronouns_str:
                 if 'she/her' in pronouns_str.lower():
                     char['pronouns'] = {'subject': 'she', 'object': 'her', 'possessive': 'her'}
@@ -603,25 +622,29 @@ class TranslatorAgent:
         Transform legacy localization_notes to Enhanced v2.1 translation_guidelines.
         """
         guidelines = {}
+        if not isinstance(notes, dict):
+            return guidelines
         
         # British speech exception → character_exceptions
         if 'british_speech_exception' in notes:
             bse = notes['british_speech_exception']
-            guidelines['character_exceptions'] = {
-                bse.get('character', 'Unknown'): {
-                    'allowed_patterns': bse.get('allowed_patterns', []),
-                    'rationale': bse.get('rationale', ''),
-                    'examples': bse.get('examples', [])
+            if isinstance(bse, dict):
+                guidelines['character_exceptions'] = {
+                    bse.get('character', 'Unknown'): {
+                        'allowed_patterns': bse.get('allowed_patterns', []),
+                        'rationale': bse.get('rationale', ''),
+                        'examples': bse.get('examples', [])
+                    }
                 }
-            }
         
         # All other characters → forbidden_patterns & target_metrics
         if 'all_other_characters' in notes:
             aoc = notes['all_other_characters']
-            guidelines['forbidden_patterns'] = aoc.get('forbidden_patterns', [])
-            guidelines['preferred_alternatives'] = aoc.get('preferred_alternatives', {})
-            guidelines['target_metrics'] = aoc.get('target_metrics', {})
-            guidelines['narrator_voice'] = aoc.get('narrator_voice', '')
+            if isinstance(aoc, dict):
+                guidelines['forbidden_patterns'] = aoc.get('forbidden_patterns', [])
+                guidelines['preferred_alternatives'] = aoc.get('preferred_alternatives', {})
+                guidelines['target_metrics'] = aoc.get('target_metrics', {})
+                guidelines['narrator_voice'] = aoc.get('narrator_voice', '')
         
         # Name order → naming_conventions
         if 'name_order' in notes:
@@ -647,16 +670,23 @@ class TranslatorAgent:
         Enhanced v2.1: dialogue_patterns.{name} = {"speech_style": "...", "common_phrases": [...]}
         """
         patterns = {}
+        if not isinstance(profiles, dict):
+            return patterns
+
         for name, profile in profiles.items():
-            if 'speech_pattern' in profile:
+            if not isinstance(profile, dict):
+                continue
+
+            speech_pattern = profile.get('speech_pattern')
+            if isinstance(speech_pattern, str) and speech_pattern:
                 patterns[name] = {
-                    'speech_style': profile['speech_pattern'],
+                    'speech_style': speech_pattern,
                     'common_phrases': [],  # Will be populated from profile analysis
                     'tone_shifts': {}
                 }
                 
                 # Extract common phrases from speech_pattern description
-                speech = profile['speech_pattern'].lower()
+                speech = speech_pattern.lower()
                 if 'i shall' in speech or 'quite' in speech:
                     patterns[name]['common_phrases'] = ['I shall', 'quite', 'rather', 'would you kindly']
                 elif 'casual' in speech or 'slang' in speech:
@@ -726,23 +756,30 @@ class TranslatorAgent:
             return None
 
         chapter_blocks: List[str] = []
+        cached_chapter_ids: List[str] = []
+        missing_chapter_ids: List[str] = []
+        total_target_chapters = len(chapter_configs)
         missing_files = 0
 
         for chapter in chapter_configs:
             chapter_id = chapter.get("id", "unknown")
             jp_file = chapter.get("jp_file") or chapter.get("source_file")
             if not jp_file:
+                missing_chapter_ids.append(chapter_id)
                 continue
 
             source_path = self.work_dir / "JP" / jp_file
             if not source_path.exists():
                 missing_files += 1
+                missing_chapter_ids.append(chapter_id)
                 continue
 
             try:
                 jp_text = source_path.read_text(encoding="utf-8")
                 chapter_blocks.append(f"<CHAPTER id='{chapter_id}'>\n{jp_text}\n</CHAPTER>")
+                cached_chapter_ids.append(chapter_id)
             except Exception as e:
+                missing_chapter_ids.append(chapter_id)
                 logger.warning(f"Failed reading JP source for cache ({chapter_id}): {e}")
 
         if not chapter_blocks:
@@ -762,11 +799,28 @@ class TranslatorAgent:
                 display_name=f"{self.manifest.get('volume_id', self.work_dir.name)}_full",
             )
             if cache_name:
+                self._volume_cache_stats = {
+                    "target_chapters": total_target_chapters,
+                    "cached_chapters": len(cached_chapter_ids),
+                    "missing_files": missing_files,
+                    "missing_chapter_ids": missing_chapter_ids,
+                    "cached_chapter_ids": cached_chapter_ids,
+                    "volume_chars": len(full_volume_text),
+                }
                 logger.info(
                     f"[CACHE] Created volume cache {cache_name} "
                     f"({len(chapter_blocks)} chapters, {len(full_volume_text)} chars, "
                     f"missing={missing_files})"
                 )
+                logger.info(
+                    f"[CACHE] Source coverage verification: "
+                    f"{len(cached_chapter_ids)}/{total_target_chapters} chapters packaged"
+                )
+                if missing_chapter_ids:
+                    logger.warning(
+                        f"[CACHE] Chapters missing from cache payload: "
+                        f"{', '.join(missing_chapter_ids[:10])}"
+                    )
                 return cache_name
         except Exception as e:
             logger.warning(f"Failed to create volume-level cache: {e}")
@@ -848,6 +902,12 @@ class TranslatorAgent:
             self.volume_cache_name = self._create_volume_cache(target_chapters, model_name=get_model_name())
             if self.volume_cache_name:
                 logger.info(f"[CACHE] Volume cache ready for run: {self.volume_cache_name}")
+                if self._volume_cache_stats:
+                    logger.info(
+                        f"[CACHE] Run verification: "
+                        f"cached {self._volume_cache_stats.get('cached_chapters', 0)}/"
+                        f"{self._volume_cache_stats.get('target_chapters', 0)} chapter sources"
+                    )
             else:
                 logger.info("Pre-warming context cache (volume cache unavailable)...")
                 self._prewarm_cache()

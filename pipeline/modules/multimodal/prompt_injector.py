@@ -38,9 +38,16 @@ class CanonNameEnforcer:
     
     def _load_canon_names(self) -> None:
         """Load canon names from manifest character_profiles."""
-        profiles = self.manifest.get("metadata_en", {}).get("character_profiles", {})
+        metadata_en = self.manifest.get("metadata_en", {})
+        if not isinstance(metadata_en, dict):
+            metadata_en = {}
+        profiles = metadata_en.get("character_profiles", {})
+        if not isinstance(profiles, dict):
+            profiles = {}
         
         for kanji_name, profile in profiles.items():
+            if not isinstance(profile, dict):
+                continue
             full_name = profile.get("full_name", "")
             nickname = profile.get("nickname", "")
             
@@ -368,4 +375,3 @@ def build_visual_thinking_log(
     ]
     
     return "\n".join(header) + "\n\n".join(sections)
-

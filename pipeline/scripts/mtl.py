@@ -187,7 +187,7 @@ class PipelineController:
             # Caching signals
             caching_cfg = gemini_cfg.get("caching", {})
             cache_enabled = bool(caching_cfg.get("enabled", True))
-            cache_ttl = int(caching_cfg.get("ttl_minutes", 60))
+            cache_ttl = int(caching_cfg.get("ttl_minutes", 120))
 
             # Multimodal signals
             multimodal_allowed = bool(multimodal_cfg.get("enabled", False))

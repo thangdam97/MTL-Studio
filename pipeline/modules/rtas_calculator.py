@@ -134,10 +134,17 @@ class RTASCalculator:
         Returns:
             Dict mapping character_id → VoiceSettings
         """
-        profiles = manifest.get("metadata_en", {}).get("character_profiles", {})
+        metadata_en = manifest.get("metadata_en", {})
+        if not isinstance(metadata_en, dict):
+            metadata_en = {}
+        profiles = metadata_en.get("character_profiles", {})
+        if not isinstance(profiles, dict):
+            profiles = {}
         
         results = {}
         for char_id, profile in profiles.items():
+            if not isinstance(profile, dict):
+                continue
             settings = self._calculate_for_character(char_id, profile)
             results[char_id] = settings
             logger.debug(f"[RTAS] {char_id}: {settings.rtas_score:.1f} ({settings.archetype})")
@@ -152,7 +159,13 @@ class RTASCalculator:
         contraction_shift = 0
         
         # 2. Match relationship_to_protagonist
-        relationship = profile.get("relationship_to_protagonist", "")
+        relationship_raw = profile.get("relationship_to_protagonist", "")
+        if isinstance(relationship_raw, list):
+            relationship = " ".join(str(x) for x in relationship_raw)
+        elif isinstance(relationship_raw, str):
+            relationship = relationship_raw
+        else:
+            relationship = str(relationship_raw)
         for pattern, values in self.relationship_patterns:
             if pattern.search(relationship):
                 rtas += values.get("baseline_shift", 0)
@@ -162,7 +175,13 @@ class RTASCalculator:
                 break
         
         # 3. Match personality_traits
-        personality = profile.get("personality_traits", "")
+        personality_raw = profile.get("personality_traits", "")
+        if isinstance(personality_raw, list):
+            personality = " ".join(str(x) for x in personality_raw)
+        elif isinstance(personality_raw, str):
+            personality = personality_raw
+        else:
+            personality = str(personality_raw)
         detected_archetype = "neutral"
         for pattern, values in self.personality_patterns:
             if pattern.search(personality):
@@ -212,19 +231,33 @@ class RTASCalculator:
         Uses keigo_switch.speaking_to[addressee] if available,
         otherwise falls back to general RTAS.
         """
-        profiles = manifest.get("metadata_en", {}).get("character_profiles", {})
+        metadata_en = manifest.get("metadata_en", {})
+        if not isinstance(metadata_en, dict):
+            metadata_en = {}
+        profiles = metadata_en.get("character_profiles", {})
+        if not isinstance(profiles, dict):
+            profiles = {}
+
         speaker = profiles.get(speaker_id, {})
+        if not isinstance(speaker, dict):
+            speaker = {}
         
         # Check for direct keigo_switch override
         keigo_switch = speaker.get("keigo_switch", {})
+        if not isinstance(keigo_switch, dict):
+            keigo_switch = {}
         speaking_to = keigo_switch.get("speaking_to", {})
+        if not isinstance(speaking_to, dict):
+            speaking_to = {}
         
         # Try to find addressee by various name formats
         addressee_profile = profiles.get(addressee_id, {})
+        if not isinstance(addressee_profile, dict):
+            addressee_profile = {}
         addressee_names = [
             addressee_id,
             addressee_profile.get("nickname", ""),
-            addressee_profile.get("full_name", "").split()[0]  # First name
+            str(addressee_profile.get("full_name", "")).split()[0] if addressee_profile.get("full_name") else ""  # First name
         ]
         
         for name in addressee_names:

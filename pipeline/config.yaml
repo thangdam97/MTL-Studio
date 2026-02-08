@@ -84,7 +84,7 @@ gemini:
     retry_delay_seconds: 5
   caching:
     enabled: true
-    ttl_minutes: 60
+    ttl_minutes: 120
 kimi:
   web_url: https://kimi.com
   validation:

@@ -5,6 +5,15 @@
   "notes": "Major Japanese publisher. Uses embed#### naming with _HD suffix for high-quality images. Kuchie extracted from spine (p-cover, p-fmatter).",
 
   "image_patterns": {
+    "exclude": {
+      "patterns": [
+        "^embed0000\\.jpe?g$"
+      ],
+      "examples": [
+        "embed0000.jpg"
+      ],
+      "notes": "Exclude publisher logo/gaiji image from extraction and chapter markdown."
+    },
     "cover": {
       "patterns": [
         "cover\\.jpe?g",

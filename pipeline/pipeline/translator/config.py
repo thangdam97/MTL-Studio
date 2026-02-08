@@ -136,7 +136,7 @@ def get_caching_config() -> Dict[str, Any]:
     caching = gemini_conf.get("caching", {})
     return {
         "enabled": caching.get("enabled", True),
-        "ttl_minutes": caching.get("ttl_minutes", 60),
+        "ttl_minutes": caching.get("ttl_minutes", 120),
     }
 
 

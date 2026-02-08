@@ -704,9 +704,12 @@ This document contains the internal reasoning process that Gemini used while tra
 
                     illustration_ids = extract_all_illustration_ids(source_content_only)
                     if illustration_ids:
+                        cache_manifest = self.visual_cache.get_manifest()
+                        if not isinstance(cache_manifest, dict):
+                            cache_manifest = {}
                         visual_guidance = build_chapter_visual_guidance(
                             illustration_ids, self.visual_cache,
-                            manifest=self.visual_cache.get_manifest()
+                            manifest=cache_manifest
                         )
                         if visual_guidance:
                             logger.info(f"[MULTIMODAL] Injecting visual context for {len(illustration_ids)} illustration(s)")

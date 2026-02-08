@@ -10,7 +10,7 @@ Language-agnostic conversion that handles:
 
 import re
 from pathlib import Path
-from typing import List, Optional, Dict, Tuple
+from typing import List, Optional, Dict, Tuple, Callable
 from dataclasses import dataclass
 from bs4 import BeautifulSoup, NavigableString, Tag
 
@@ -48,7 +48,13 @@ class XHTMLToMarkdownConverter:
         'svg': None,
     }
 
-    def __init__(self, remove_ruby: bool = True, scene_break: str = "* * *", content_dir: Path = None):
+    def __init__(
+        self,
+        remove_ruby: bool = True,
+        scene_break: str = "* * *",
+        content_dir: Path = None,
+        exclude_image_matcher: Optional[Callable[[str], bool]] = None,
+    ):
         """
         Initialize converter.
 
@@ -56,10 +62,21 @@ class XHTMLToMarkdownConverter:
             remove_ruby: Whether to strip ruby tags (keep base text only)
             scene_break: Marker for scene breaks in output
             content_dir: Path to EPUB content directory (for image analysis)
+            exclude_image_matcher: Optional callback to skip inline images by filename
         """
         self.remove_ruby = remove_ruby
         self.scene_break = scene_break
         self.content_dir = content_dir
+        self.exclude_image_matcher = exclude_image_matcher
+
+    def _is_excluded_image(self, image_filename: str) -> bool:
+        """Check whether an image should be excluded from markdown output."""
+        if not self.exclude_image_matcher:
+            return False
+        try:
+            return bool(self.exclude_image_matcher(image_filename))
+        except Exception:
+            return False
 
     def convert_file(self, xhtml_path: Path, chapter_title: str = "") -> ConvertedChapter:
         """
@@ -338,6 +355,8 @@ class XHTMLToMarkdownConverter:
             src = element.get('src', element.get('xlink:href', ''))
             if src:
                 img_name = Path(src).name
+                if self._is_excluded_image(img_name):
+                    return
                 css_class = element.get('class', [])
                 
                 # Classify the image type
@@ -364,6 +383,8 @@ class XHTMLToMarkdownConverter:
             href = element.get('href', element.get('{http://www.w3.org/1999/xlink}href', ''))
             if href:
                 img_name = Path(href).name
+                if self._is_excluded_image(img_name):
+                    return
                 css_class = element.get('class', [])
                 
                 # Classify the image type
@@ -392,6 +413,8 @@ class XHTMLToMarkdownConverter:
                 href = img.get('href', img.get('{http://www.w3.org/1999/xlink}href', ''))
                 if href:
                     img_name = Path(href).name
+                    if self._is_excluded_image(img_name):
+                        return
                     css_class = img.get('class', [])
                     
                     # Classify the image type

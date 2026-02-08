@@ -118,7 +118,7 @@ class ConfigBridge:
     @property
     def cache_ttl(self) -> int:
         """Get cache TTL in minutes."""
-        return self.get('gemini.caching.ttl_minutes', 60)
+        return self.get('gemini.caching.ttl_minutes', 120)
 
     @cache_ttl.setter
     def cache_ttl(self, value: int) -> None:

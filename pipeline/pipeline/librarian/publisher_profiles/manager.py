@@ -331,6 +331,18 @@ class PublisherProfileManager:
             confidence="unmatched"
         )
 
+    def is_excluded_image(self, filename: str, publisher: str = None) -> bool:
+        """
+        Check whether filename matches exclusion patterns for a publisher.
+
+        Unlike match_image(), this method does not track mismatches.
+        """
+        profile = self._profiles.get(publisher, self._fallback_profile)
+        for pattern in profile._compiled_patterns.get("exclude", []):
+            if pattern.match(filename):
+                return True
+        return False
+
     def _track_mismatch(self, filename: str, publisher: str) -> None:
         """Track unmatched filename for later review."""
         suggested = self._suggest_type(filename)

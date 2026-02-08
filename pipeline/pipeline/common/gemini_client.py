@@ -43,7 +43,7 @@ class GeminiClient:
         # Thinking mode configuration
         self.thinking_mode_config = self._load_thinking_config()
         self._cache_created_at = None
-        self._cache_ttl_minutes = 60  # Default 1 hour TTL
+        self._cache_ttl_minutes = 120  # Default 2 hour TTL
         self._cached_model = None  # Track which model the cache was created for
     
     def _load_thinking_config(self) -> Dict[str, Any]:
@@ -91,8 +91,8 @@ class GeminiClient:
             self._rate_limit_delay = 60.0 / requests_per_minute
 
     def set_cache_ttl(self, minutes: int):
-        """Set cache TTL in minutes (max 60)."""
-        self._cache_ttl_minutes = min(minutes, 60)
+        """Set cache TTL in minutes (max 120)."""
+        self._cache_ttl_minutes = min(minutes, 120)
 
     def create_cache(
         self,

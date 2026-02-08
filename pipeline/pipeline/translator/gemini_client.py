@@ -339,7 +339,7 @@ class GeminiClient:
         self,
         content: str,
         display_name: str,
-        ttl_minutes: int = 60
+        ttl_minutes: int = 120
     ) -> Optional[str]:
         """
         Create cached content for repeated use (RAG modules).

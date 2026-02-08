@@ -304,7 +304,7 @@ def check_illustration_integrity(volume_path: Path) -> IntegrityReport:
         )
 
     # ── Check A: Every JP tag maps to an asset on disk ────────────────────
-    asset_set = set(illustrations)
+    asset_set = set(illustrations) | set(kuchie)
     mapped_assets: Set[str] = set()
 
     for tag in report.tags_found:
@@ -327,7 +327,7 @@ def check_illustration_integrity(volume_path: Path) -> IntegrityReport:
             report.missing_assets.append(cache_id)
             report.add_error(
                 f"Missing asset: {tag.file}:{tag.line} tag [{tag.epub_id}] "
-                f"maps to [{cache_id}] but {cache_id}.jpg not found in {assets_dir}/illustrations/"
+                f"maps to [{cache_id}] but {cache_id}.jpg not found in {assets_dir}"
             )
         else:
             mapped_assets.add(cache_id)

@@ -58,7 +58,7 @@ V5.1 (February 2026) introduces a **Three-Pillar Translation Architecture** that
 | **Vector Search** | Gemini Embedding 001 (3072D) + ChromaDB | Semantic grammar matching — 70+ JP regex → 204 EN natural phrasing patterns |
 | **Multimodal Vision** | Gemini 3 Pro Vision (ThinkingConfig HIGH) | Illustration analysis → Art Director's Notes for visually-informed prose calibration |
 
-**Key innovations**: Hash-based visual cache invalidation, batch embedding optimization (1 API call for N patterns), auto-rebuild logic for empty ChromaDB, sliding window context for Sino-Vietnamese disambiguation, and ThinkingConfig reasoning capture for editorial review.
+**Key innovations**: Hash-based visual cache invalidation, batch embedding optimization (1 API call for N patterns), auto-rebuild logic for empty ChromaDB, schema auto-update via Gemini 2.5 Flash, sliding window context for Sino-Vietnamese disambiguation, and ThinkingConfig reasoning capture for editorial review.
 
 ### Core Capabilities
 
@@ -86,7 +86,8 @@ V5.1 (February 2026) introduces a **Three-Pillar Translation Architecture** that
 #### 4) Metadata, Continuity, and Schema Safety
 
 - **Schema auto-transform compatibility**: Enhanced v2.1, Legacy V2, and V4 nested metadata normalize into translator-compatible internal structures.
-- **Phase 1.5 safe metadata processing**: Translates title/author/chapter fields while preserving deeper semantic configuration assets.
+- **Schema Agent auto-update (in-pipeline)**: After Librarian extraction, MTL Studio calls Gemini (`gemini-2.5-flash`, `temperature=0.5`, default `top_p/top_k`, `max_output_tokens=32768`) to enrich schema and merge updates into manifest metadata.
+- **Phase 1.5 safe metadata processing**: Translates title/author/chapter fields while preserving deeper semantic configuration assets and schema-agent enrichments.
 - **Sequel-aware continuity**: Character names, glossary, and series conventions can be inherited for cross-volume consistency.
 - **Schema operations CLI**: `mtl.py metadata` and `mtl.py schema` provide compatibility checks, validation, and controlled metadata manipulation.
 
@@ -658,7 +659,7 @@ This section uses the same capability taxonomy as **Core Capabilities** so the r
 
 ### 1) Full Pipeline Orchestration (Phase 1 → 1.5 → 1.6 → 2 → 3 → 4)
 
-- **Phase model standardized around v5.1**: The production workflow is explicitly structured as Librarian → Metadata → Art Director → Translator → Critics → Builder.
+- **Phase model standardized around v5.1**: The production workflow is explicitly structured as Librarian → Schema Agent Autoupdate → Metadata → Art Director → Translator → Critics → Builder.
 - **Builder/navigation hardening**: Chapters marked `is_pre_toc_content: true` are excluded from reader navigation generation (`nav.xhtml`) for publisher-correct frontmatter handling.
 - **Image mapping continuity**: Source image naming and normalized image IDs are tracked in manifest-level mapping for reliable downstream packaging.
 
@@ -678,7 +679,8 @@ This section uses the same capability taxonomy as **Core Capabilities** so the r
 ### 4) Metadata, Continuity, and Schema Safety
 
 - **Schema v3.6 enrichment**: Metadata now includes `gap_moe_markers`, `dual_voice_analysis`, and `transcreation_notes`.
-- **Schema Agent v3.6 support path**: External IDE schema workflows are aligned with continuity-safe metadata generation and chapter-aware enrichment.
+- **Schema Agent v3.6 auto-run in Phase 1.5**: Flow is now `Librarian Extraction -> Schema Agent autoupdate merge -> Title/Chapter title translation -> Phase 2`.
+- **Official localization preference**: When a series has an established localized title, schema auto-update prioritizes official localization metadata over literal fallback naming.
 - **Continuity-focused validation**: Name consistency, sequel inheritance safety, and schema integrity checks are emphasized earlier in the pipeline.
 
 ### 5) Quality Control and Self-Healing Stack
@@ -696,6 +698,9 @@ This section uses the same capability taxonomy as **Core Capabilities** so the r
 - **Operational command surface unified**: v5.1 documentation and command semantics now align with the full CLI set and phase model.
 - **Modern UI mode baseline (v1.1)**: Rich panels, status bars, and live progress tracking complement legacy plain mode for deterministic scriptability.
 - **IDE-centric review loop**: VSCode/Windsurf/Cursor-friendly external agent workflows are treated as first-class QC execution paths.
+- **Config toggles for non-menu workflows**:
+  - `mtl.py config --toggle-smart-chunking`
+  - `mtl.py config --toggle-multimodal`
 
 ### 7) Massive LN Guardrails and Recovery (New)
 
@@ -711,6 +716,9 @@ This section uses the same capability taxonomy as **Core Capabilities** so the r
   - Truncation validator runs after chapter/chunk merge.
   - Glossary lock checks canonical name consistency.
   - Name consistency auditor runs on final EN output set.
+- **Volume cache verification logging**:
+  - Translator now logs explicit source coverage (e.g. `19/19 chapters packaged`) when creating full-volume cache.
+  - Run-level verification is printed before chapter translation starts.
 
 ---
 
@@ -731,8 +739,8 @@ This section uses the same capability taxonomy as **Core Capabilities** so the r
     │                             │                             ▲
     ▼                             ▼                             │
 ┌─────────────┐            ┌─────────────┐                      │
-│  LIBRARIAN  │───────────►│  METADATA   │                      │
-│   (Python)  │            │  PROCESSOR  │                      │
+│  LIBRARIAN  │───────────►│ METADATA +  │                      │
+│   (Python)  │            │ SCHEMA AGENT│                      │
 └──────┬──────┘            └──────┬──────┘                      │
        │                          │                             │
        ▼                          ▼                             │
@@ -785,8 +793,12 @@ LIBRARIAN completes   → manifest.json (librarian.status = "completed")
                       → JP/*.md files created
                       → _assets/illustrations/*.jpg extracted
 
+SCHEMA AGENT AUTO-UPDATE
+ (Phase 1.5 pre-step) → Gemini 2.5 Flash enriches schema metadata
+                      → merges manifest-level chapter/localization guidance
+
 METADATA PROCESSOR    → manifest.json (metadata_processor.status = "completed")
-                      → metadata_en.json created
+                      → metadata_en.json created/updated
 
 ART DIRECTOR          → Gemini 3 Pro Vision analyzes all illustrations
  (Phase 1.6)          → visual_cache.json created (hash-based invalidation)
@@ -856,15 +868,17 @@ WORK/[volume_id]/
 **Purpose**: Translate and localize book metadata
 
 **Responsibilities**:
+- Run Schema Agent auto-update first (Gemini 2.5 Flash API call) and merge enriched schema metadata into manifest
 - Translate main title with creative localization
 - Romanize author/illustrator names (Standard Hepburn)
 - Batch translate character names from ruby text
 - Translate all chapter titles from TOC
 - Detect sequels and inherit terminology
+- Prioritize official localized series naming when available
 
 **Output**:
 - `metadata_en.json` - Localized metadata configuration
-- Updated `manifest.json` with English titles
+- Updated `manifest.json` with English titles + merged schema-agent enrichments
 
 ### Phase 1.6: Art Director (Multimodal)
 
@@ -933,7 +947,7 @@ WORK/[volume_id]/
               ┌─────────────────────┐
               │  Gemini 2.5 Pro     │
               │  (cached context    │
-              │   486KB, TTL 60m)   │
+              │   486KB, TTL 120m)  │
               └──────────┬──────────┘
                          ▼
               ┌─────────────────────┐
@@ -956,7 +970,7 @@ WORK/[volume_id]/
 - Character name consistency enforcement from manifest profiles
 - Batch embedding optimization (single API call for all detected patterns per chapter)
 - Safety block handling with fallback strategies
-- Context caching (486KB cached context with 60-minute TTL)
+- Context caching (486KB cached context with 120-minute TTL)
 
 ### Phase 3: Critics
 
@@ -1357,7 +1371,7 @@ translation:
   massive_chapter:
     enable_smart_chunking: true
     enable_volume_cache: true
-    chunk_threshold_chars: 50000
+    chunk_threshold_chars: 60000
     chunk_threshold_bytes: 120000
     target_chunk_chars: 45000
     volume_cache_ttl_seconds: 7200
@@ -1419,7 +1433,7 @@ MTL Studio includes a comprehensive reverse-engineered pattern database for majo
 | **SB Creative** | 5 patterns | `P000a/P000b` letter-suffixed kuchie |
 | **Hifumi Shobo** | 7 patterns | `p002_003.jpg` spreads, spine fallback TOC |
 | **Hobby Japan** | 3 patterns | Standard EPUB3 structure |
-| **Shueisha** | 6 patterns | `embed####_HD.jpg`, spine-based kuchie extraction |
+| **Shueisha** | 7 patterns | `embed####_HD.jpg`, spine-based kuchie extraction, `embed0000.jpg` exclusion |
 | **Kodansha** | 8+ patterns | Pre-TOC detection, `p###.jpg` remapping, kuchie handling |
 
 **Total Coverage**: 8 publishers, 65+ documented patterns, modular JSON-based system
@@ -1429,7 +1443,7 @@ MTL Studio includes a comprehensive reverse-engineered pattern database for majo
 - **Cover Recognition**: 11 variations (including `allcover`, `hyoushi`, `frontcover`, `h1`)
 - **Kuchie Detection**: 13 variations (including spine-based extraction for Shueisha)
 - **Illustration Patterns**: 13 variations (with HD variants, prefix systems)
-- **Exclusion Rules**: 2 patterns (`gaiji` special character glyphs)
+- **Exclusion Rules**: Includes `gaiji` glyph filters and Shueisha `embed0000.jpg` publisher-page exclusion
 - **Fallback Patterns**: 16 generic patterns for unknown publishers
 
 ### Unique Features Discovered
@@ -1785,11 +1799,15 @@ This replaces the previous external IDE workflow (AUDIT_AGENT V2.0 with 4 subage
 
 ### External IDE Agents
 
-MTL Studio integrates with external IDE agents (VSCode, Windsurf, Cursor, etc.) for advanced quality control and metadata enrichment:
+MTL Studio supports external IDE agents (VSCode, Windsurf, Cursor, etc.) for advanced review workflows. Core schema enrichment now runs automatically in-pipeline; IDE agents are optional augmentation:
 
 #### 1. Schema Agent V3.6
 
 **Purpose**: Generates enriched metadata following V3.6 Enhanced Schema specifications.
+
+**Execution Mode**:
+- **Default**: Runs automatically during Phase 1.5 using Gemini API (`gemini-2.5-flash`, `temperature=0.5`, default `top_p/top_k`, `max_output_tokens=32768`).
+- **IDE Agent Usage**: Optional for manual review, debugging, or custom overrides.
 
 **Documentation**: `SCHEMA_V3.6_AGENT.md`
 
@@ -2524,8 +2542,11 @@ See LICENSE.txt for licensing information.
 - **Gemini Embedding Vector Search**: Semantic grammar matching pipeline with confidence-gated injection and auto-rebuild
 - **Phase 1.6 Multimodal Processor**: Gemini 3 Pro Vision Art Director's Notes with hash-based visual cache invalidation
 - **Massive LN Reliability Layer**: Smart Chunking + volume-level cache + resumable chunk JSON workflow
+- **Schema Agent Automation**: Phase 1.5 now auto-runs schema enrichment through Gemini 2.5 Flash and merges into manifest/metadata before chapter translation
 - **Output Safety Guardrails**: Truncation validator + manifest glossary lock + cross-chapter name drift auditing
-- **Config/TUI Enhancements**: Smart Chunking and Multimodal toggles in settings + `mtl.py config --toggle-smart-chunking`
+- **Config/TUI Enhancements**: Smart Chunking and Multimodal toggles in settings + `mtl.py config --toggle-smart-chunking` / `--toggle-multimodal`
+- **Cache Runtime Upgrade**: Context cache TTL standardized to 120 minutes with explicit volume-cache source coverage verification logging
+- **Publisher Profile Hardening**: Shueisha-specific `embed0000.jpg` exclusion to suppress publisher-logo gaiji noise in JP extraction and translation flow
 - **Self-Healing Quality Pipeline**: Integrated CJK cleaning + Anti-AI-ism healing for post-translation stabilization
 - **CLI Expansion**: `phase1.6`, `multimodal`, `cache-inspect`, `visual-thinking`, and richer schema tooling
 

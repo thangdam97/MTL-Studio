@@ -371,7 +371,11 @@ class LibrarianAgent:
 
         # Preserve ruby readings for translator (format: 愛歌{まなか})
         # Pass content_dir for scene break icon detection
-        converter = XHTMLToMarkdownConverter(remove_ruby=False, content_dir=extraction.content_dir)
+        converter = XHTMLToMarkdownConverter(
+            remove_ruby=False,
+            content_dir=extraction.content_dir,
+            exclude_image_matcher=lambda img_name: profile_manager.is_excluded_image(img_name, publisher_name),
+        )
 
         if use_spine_fallback:
             # Use spine-based chapter detection (for minimal-TOC publishers like Hifumi Shobo)

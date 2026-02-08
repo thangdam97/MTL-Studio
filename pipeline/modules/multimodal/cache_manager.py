@@ -54,7 +54,11 @@ class VisualCacheManager:
     
     def get_character_profiles(self) -> Dict[str, Any]:
         """Get character profiles from manifest (Librarian's ruby extraction)."""
-        return self.manifest.get("metadata_en", {}).get("character_profiles", {})
+        metadata_en = self.manifest.get("metadata_en", {})
+        if not isinstance(metadata_en, dict):
+            return {}
+        profiles = metadata_en.get("character_profiles", {})
+        return profiles if isinstance(profiles, dict) else {}
     
     def get_canon_name(self, japanese_name: str) -> Optional[str]:
         """
@@ -70,6 +74,8 @@ class VisualCacheManager:
         """
         profiles = self.get_character_profiles()
         profile = profiles.get(japanese_name, {})
+        if not isinstance(profile, dict):
+            return None
         return profile.get("full_name")
 
     def _load_cache(self) -> Dict[str, Any]:
@@ -155,6 +161,8 @@ class VisualCacheManager:
         stats = {"total": 0, "cached": 0, "safety_blocked": 0, "manual_override": 0}
         for entry in self.cache.values():
             stats["total"] += 1
+            if not isinstance(entry, dict):
+                continue
             status = entry.get("status", "other")
             if status in stats:
                 stats[status] += 1

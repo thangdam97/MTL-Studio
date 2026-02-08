@@ -440,6 +440,13 @@
       "country": "JP",
       "confidence": "confirmed",
       "image_patterns": {
+        "exclude": [
+          {
+            "pattern": "^embed0000\\.jpe?g$",
+            "flags": "i",
+            "note": "Publisher logo/gaiji image; should not be treated as illustration content"
+          }
+        ],
         "cover": [
           {
             "pattern": "^cover\\.jpe?g$",
@@ -509,6 +516,13 @@
       "genre_specialization": "shoujo",
       "description": "Shueisha's premier shoujo light novel imprint, established 1976. Known for emotionally introspective prose, romantic narratives, and premium illustrated editions (カラーイラスト付) featuring 10-20 full-page color frontispieces (kuchie).",
       "image_patterns": {
+        "exclude": [
+          {
+            "pattern": "^embed0000\\.jpe?g$",
+            "flags": "i",
+            "note": "Publisher logo/gaiji image; should not be treated as illustration content"
+          }
+        ],
         "cover": [
           {
             "pattern": "^cover\\.(jpe?g|png)$",

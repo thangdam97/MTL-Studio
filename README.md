@@ -62,25 +62,48 @@ V5.1 (February 2026) introduces a **Three-Pillar Translation Architecture** that
 
 ### Core Capabilities
 
-- **End-to-End Automation**: Single command transforms Japanese EPUB to translated EPUB
-- **Multi-Language Support**: Full English and Vietnamese translation pipelines
-- **Multimodal Vision Intelligence**: Gemini 3 Pro Vision analyzes every illustration, generates Art Director's Notes (composition, emotional_delta, narrative_directives, spoiler_prevention) for visually-informed prose calibration
-- **Vector Search Engine**: Gemini Embedding 001 (3072D) converts 70+ Japanese grammar patterns to semantic embeddings, ChromaDB cosine matching against 204 indexed English patterns for confidence-based natural phrasing injection
-- **RAG-Enhanced Translation**: 3.2MB+ knowledge base for context-aware translation with three-pillar context (RAG + Vector Search + Visual Cache)
-- **Gap Moe Detection**: Semantic analysis of character behavioral transitions (cute→scary, cold→warm)
-- **Grammar Reference System**: English/Vietnamese grammar JSON as Tier-1 RAG for natural output
-- **Intelligent Typography**: Professional quotation marks, em-dashes, ellipses
-- **Illustration Management**: Automatic extraction, orientation detection, semantic insertion with hash-based visual cache invalidation
-- **Sequel Intelligence**: Character names and terminology inherit across volumes
-- **Multi-Publisher Support**: KADOKAWA, Overlap, SB Creative, Hifumi Shobo, Hobby Japan, Media Factory, Shueisha, Kodansha,...
-- **Publisher Pattern Database**: 65+ documented EPUB structure patterns across 8 major publishers
-- **Kodansha Structure Support**: Intelligent pre-TOC detection, kuchie handling, image remapping (p### → illust-###)
-- **Automatic Publisher Detection**: Pattern-based image classification without hardcoded logic
-- **AI-Powered QC**: IDE agents (VSCode, Windsurf, Cursor,...) for smart AI-ism fixes, formatting fixes, and contraction rate tuning
-- **Anti-AI-ism Detection**: 65-pattern JSON library with 4 severity tiers (CRITICAL/MAJOR/MINOR/VN_CRITICAL) + Self-Healing Agent
-- **Echo Detection System**: Professional proximity-based clustering detection (23 patterns, 36.5% coverage)
-- **Interactive CLI**: Volume selection menus, configuration management, verbose mode
-- **Post-Processing**: CJK artifact removal, format normalization, smart typography
+#### 1) Full Pipeline Orchestration (Phase 1 → 1.5 → 1.6 → 2 → 3 → 4)
+
+- **Single-command production flow**: `mtl.py run <epub>` executes extraction, metadata translation, multimodal analysis, translation, and EPUB build in sequence.
+- **Modular phase control**: Each stage can run independently (`phase1`, `phase1.5`, `phase1.6`, `phase2`, `phase3`, `phase4`) for iterative workflows and targeted retries.
+- **Backward-compatible operation**: Legacy paths remain supported while v5.1 behavior is standardized around the Three-Pillar architecture.
+- **Manifest-driven state tracking**: `manifest.json` stores pipeline state, chapter status, language outputs, and audit metadata for resumable execution.
+
+#### 2) Three-Pillar Translation Intelligence (v5.1 Core)
+
+- **RAG + Vector + Multimodal fusion**: Translator prompts combine knowledge-base context, semantic grammar guidance, and optional Art Director notes in one decision frame.
+- **Gemini Embedding semantic matching**: `gemini-embedding-001` (3072D) maps Japanese structures to natural target phrasing using confidence-gated ChromaDB retrieval.
+- **Multimodal Art Director layer**: Gemini 3 Pro Vision pre-analyzes illustrations (Phase 1.6) into `visual_cache.json` and injects non-spoiler style directives during Phase 2.
+- **Context-aware style calibration**: Emotional deltas, composition, and narrative directives influence lexical choices without introducing off-canon events.
+
+#### 3) Language and Localization Systems
+
+- **Dual production pipelines**: Full English and Vietnamese translation support with language-specific prompts, modules, and output suffixes.
+- **Sino-Vietnamese disambiguation**: Sliding-window semantic lookup handles context-sensitive kanji readings (register-aware, threshold-gated injection).
+- **Pronoun and archetype control**: Vietnamese pipeline preserves role-consistent interpersonal voice and honorific logic across scenes.
+- **Publisher-aware adaptation**: Structure-aware handling for KADOKAWA, Overlap, SB Creative, Hifumi Shobo, Hobby Japan, Media Factory, Shueisha, Kodansha, and others.
+
+#### 4) Metadata, Continuity, and Schema Safety
+
+- **Schema auto-transform compatibility**: Enhanced v2.1, Legacy V2, and V4 nested metadata normalize into translator-compatible internal structures.
+- **Phase 1.5 safe metadata processing**: Translates title/author/chapter fields while preserving deeper semantic configuration assets.
+- **Sequel-aware continuity**: Character names, glossary, and series conventions can be inherited for cross-volume consistency.
+- **Schema operations CLI**: `mtl.py metadata` and `mtl.py schema` provide compatibility checks, validation, and controlled metadata manipulation.
+
+#### 5) Quality Control and Self-Healing Stack
+
+- **CJK leak detection and cleanup**: Automated validation plus dedicated cleanup commands for post-translation script artifacts.
+- **Self-Healing Anti-AI-ism Agent**: Pattern + vector + LLM correction stack removes translationese and recurring machine-style phrasing.
+- **Echo/proximity detection**: Cluster-level repetition detection reduces local stylistic redundancy and preserves prose variation.
+- **Post-processing hardening**: Format normalization, typography cleanup, and quality audit integration run at translation completion.
+
+#### 6) Modern v5.1 CLI Operations and UX
+
+- **Command-complete operational surface**: `run`, `phase*`, `multimodal`, `cleanup`, `cjk-clean`, `heal`, `cache-inspect`, `visual-thinking`, `status`, `list`, `config`, `metadata`, `schema`.
+- **Interactive volume resolution**: Partial IDs and ambiguity handling with phase-aware selection menus.
+- **Modern UI mode (v1.1)**: Optional rich CLI panels, live status bars, and chapter progress tracking (`--ui rich`), with safe plain fallback (`--ui plain`).
+- **Terminal-safe controls**: `--no-color` mode for CI/logging environments and deterministic non-rich output paths.
+- **Runtime configurability**: Hot-switch language/model/sampling parameters and multimodal toggles via `mtl.py config`.
 
 ### Translation Quality Standards
 
@@ -622,61 +645,48 @@ When the translator saves its THINKING log, it includes the Art Director's visua
 
 ## What's New in V5.1 (Current Release)
 
-### Gap Moe Semantic Analysis
-- **Behavioral Transition Detection**: Automatically identifies character personality shifts (e.g., yandere gap moe: cute→scary)
-- **Context-Aware Translation**: Preserves tonal whiplash in translations (flat delivery for intense moments, soft for cute scenes)
-- **Pattern Recognition**: Detects 4 core gap patterns:
-  - Possessive language markers (21+ patterns)
-  - Surveillance subtext (25+ patterns)
-  - Emotional intensity shifts (14+ patterns)
-  - Explicit gap moe transitions (cute→scary, sweet→interrogation)
-- **Dual Voice Analysis**: Identifies characters with contrasting personas (e.g., "cute voice that sounds like interrogation")
+This section uses the same capability taxonomy as **Core Capabilities** so the release deltas are easy to map to operational behavior.
 
-### 📚 Kodansha EPUB Support
-- **Publisher Detection**: Automatic identification via OPF metadata markers (`<!-- Kodansha ver. X.XX -->`)
-- **Pre-TOC Content Handling**: Intelligent detection of cover, caution pages, kuchie (color plates), credits
-- **Image Remapping**: Automatic conversion from Kodansha's `p###.jpg` format to standard `illust-###.jpg`
-- **Kuchie Orientation**: Detects multi-page spreads (`p002-003.jpg`) for horizontal viewport
-- **Chapter Detection**: Uses `<h2>` heading analysis instead of spine order
-- **TOC Generation**: Excludes pre-TOC pages, generates chapter-level navigation from headings
-- **Documentation**: Complete structure analysis in [docs/KODANSHA_STRUCTURE.md](pipeline/docs/KODANSHA_STRUCTURE.md)
-- **Configuration**: Publisher-specific settings in `config/publishers/kodansha.json`
+### 1) Full Pipeline Orchestration (Phase 1 → 1.5 → 1.6 → 2 → 3 → 4)
 
-### 📖 Grammar Reference System (Tier-1 RAG)
-- **English Grammar JSON**: Comprehensive reference for natural English patterns, idioms, and constructions
-- **Vietnamese Grammar JSON**: VN-specific sentence structures, particles, and colloquialisms
-- **RAG Integration**: Grammar rules injected as Tier-1 context for every translation
-- **Anti-Pattern Detection**: Prevents translationese by referencing native grammar structures
-- **Example-Driven**: Each rule includes correct/incorrect examples for AI guidance
+- **Phase model standardized around v5.1**: The production workflow is explicitly structured as Librarian → Metadata → Art Director → Translator → Critics → Builder.
+- **Builder/navigation hardening**: Chapters marked `is_pre_toc_content: true` are excluded from reader navigation generation (`nav.xhtml`) for publisher-correct frontmatter handling.
+- **Image mapping continuity**: Source image naming and normalized image IDs are tracked in manifest-level mapping for reliable downstream packaging.
 
-### 🔍 Enhanced Quality Control
-- **AUDIT_AGENT V2.0**: 4-subagent quality control system running in external IDEs
-  - Subagent 1: Content Fidelity (ZERO TOLERANCE for truncation/censorship)
-  - Subagent 2: Content Integrity (name consistency, formatting, sequel continuity)
-  - Subagent 3: Prose Quality (AI-ism detection, transcreation validation)
-  - Subagent 4: Gap Preservation (emotion+action, ruby text, subtext)
-- **Schema Agent V3.6**: Enriched metadata generation in external IDEs
-  - Gap Moe analysis (behavioral transitions, dual voice detection)
-  - Character profiles with TTS assignments
-  - POV tracking and transcreation notes
-- **Gap Preservation Audit**: Validates behavioral transitions are maintained in translation
-- **Publisher Structure Validation**: Ensures EPUB conforms to detected publisher pattern
-- **Image Reference Integrity**: Verifies all `[ILLUSTRATION: ...]` tags point to existing files
-- **Pre-TOC Content Check**: Confirms cover/kuchie pages excluded from reader navigation
-- **Transcreation Detection**: Identifies Japanese discourse markers (まあ, やっぱり, さすが) needing localization
+### 2) Three-Pillar Translation Intelligence (v5.1 Core)
 
-### 🛠️ Technical Improvements
-- **Schema V3.6**: Added gap_moe_markers, dual_voice_analysis, and transcreation_notes to metadata
-- **Builder Agent Update**: Excludes `is_pre_toc_content: true` chapters from nav.xhtml generation
-- **Image Mapping System**: Maintains source→target filename relationships in manifest
-- **Multi-Replace Tool**: Batch file editing for illustration remapping and transcreations
-- **Markdown Format Standardization**: `[ILLUSTRATION: filename.jpg]` format enforced across all volumes
+- **Gap Moe semantic layer added**: Behavioral transitions (cute→scary, sweet→interrogation, warmth shifts) are explicitly detected and preserved in translation decisions.
+- **Dual-voice awareness**: Characters with contrasting personas are flagged so tonal flips remain intentional instead of being flattened.
+- **Grammar reference expansion (Tier-1 RAG)**: English and Vietnamese grammar reference JSONs are integrated as first-line prompt guidance to reduce translationese.
+- **Transcreation marker awareness**: High-value discourse markers (e.g., まあ, やっぱり, さすが) are surfaced for localization-sensitive handling.
 
-### 📊 New Metrics
-- **Gap Moe Accuracy**: Percentage of behavioral transitions correctly detected and preserved
-- **Transcreation Coverage**: Count of Japanese discourse markers localized (vs. literal translation)
-- **Image Mapping Integrity**: Verification that all p###.jpg files have valid illust-### mappings
-- **Pre-TOC Detection Rate**: Accuracy of identifying non-chapter content for TOC exclusion
+### 3) Language and Localization Systems
+
+- **Vietnamese nuance improvements**: Gap-preservation and pronoun/voice consistency are reinforced for VN pipeline outputs.
+- **Publisher-aware localization path**: Kodansha-specific structure quirks (pre-TOC blocks, image naming, chapter heading extraction) are handled in dedicated logic.
+- **Kuchie-aware rendering path**: Color plate orientation and spread behavior are normalized for correct reading flow.
+
+### 4) Metadata, Continuity, and Schema Safety
+
+- **Schema v3.6 enrichment**: Metadata now includes `gap_moe_markers`, `dual_voice_analysis`, and `transcreation_notes`.
+- **Schema Agent v3.6 support path**: External IDE schema workflows are aligned with continuity-safe metadata generation and chapter-aware enrichment.
+- **Continuity-focused validation**: Name consistency, sequel inheritance safety, and schema integrity checks are emphasized earlier in the pipeline.
+
+### 5) Quality Control and Self-Healing Stack
+
+- **AUDIT_AGENT v2.0 (4-subagent model)**:
+  - Content Fidelity (zero-tolerance truncation/censorship checks)
+  - Content Integrity (names/formatting/sequel continuity)
+  - Prose Quality (AI-ism and transcreation quality)
+  - Gap Preservation (emotion+action+ruby/subtext carryover)
+- **Enhanced structural QA**: Publisher structure validation, image reference integrity, and pre-TOC exclusion checks are included as explicit gates.
+- **Expanded metric surface**: Gap Moe accuracy, transcreation coverage, image mapping integrity, and pre-TOC detection rate are now tracked.
+
+### 6) Modern v5.1 CLI Operations and UX
+
+- **Operational command surface unified**: v5.1 documentation and command semantics now align with the full CLI set and phase model.
+- **Modern UI mode baseline (v1.1)**: Rich panels, status bars, and live progress tracking complement legacy plain mode for deterministic scriptability.
+- **IDE-centric review loop**: VSCode/Windsurf/Cursor-friendly external agent workflows are treated as first-class QC execution paths.
 
 ---
 

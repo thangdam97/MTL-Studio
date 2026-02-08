@@ -90,16 +90,20 @@ import argparse
 import json
 import logging
 import readline  # Enable delete key, arrow keys, and command history in CLI
+from collections import deque
 from pathlib import Path
 from datetime import datetime
 from typing import Optional, Dict, Any, List
 import subprocess
 import re
 import os
+import hashlib
+import time
 
 # Import CJK validator for quality control
 sys.path.insert(0, str(Path(__file__).parent))
 from scripts.cjk_validator import CJKValidator
+from pipeline.cli.ui import ModernCLIUI
 
 # Setup logging
 logging.basicConfig(
@@ -118,45 +122,204 @@ OUTPUT_DIR = PROJECT_ROOT / "OUTPUT"
 class PipelineController:
     """Unified controller for the MT Publishing Pipeline."""
     
-    def __init__(self, work_dir: Path = WORK_DIR, verbose: bool = False):
+    def __init__(
+        self,
+        work_dir: Path = WORK_DIR,
+        verbose: bool = False,
+        ui_mode: str = "auto",
+        no_color: bool = False,
+    ):
         self.work_dir = work_dir
         self.work_dir.mkdir(parents=True, exist_ok=True)
         self.verbose = verbose
+        self.ui = ModernCLIUI(mode=ui_mode, no_color=no_color)
+
+    def _ui_header(self, title: str, subtitle: str = "") -> None:
+        """Print a consistent v5.1 CLI header."""
+        if self.ui.print_header(title, subtitle):
+            return
+
+        line = "=" * 78
+        logger.info(line)
+        logger.info(f"MTL Studio 5.1 | {title}")
+        if subtitle:
+            logger.info(subtitle)
+        logger.info(line)
+
+    def _status_badge(self, status: str) -> str:
+        """Convert manifest status to compact badge."""
+        value = (status or "").lower()
+        if value == "completed":
+            return "DONE"
+        if value in {"in_progress", "running"}:
+            return "RUN"
+        if value in {"failed", "error"}:
+            return "FAIL"
+        if value in {"pending", "not started", ""}:
+            return "TODO"
+        return value[:4].upper()
+
+    def _visual_phase_badge(self, volume_id: str) -> str:
+        """Return Phase 1.6 visual cache badge."""
+        cache_path = self.work_dir / volume_id / "visual_cache.json"
+        if not cache_path.exists():
+            return "TODO"
+        try:
+            with open(cache_path, 'r', encoding='utf-8') as f:
+                cache = json.load(f)
+            return f"DONE({len(cache)})"
+        except Exception:
+            return "WARN"
+
+    def _short_volume_id(self, volume_id: str) -> str:
+        """Return a compact, stable ASCII key for table displays."""
+        match = re.search(r"(\d{8}_[0-9a-fA-F]{4,8})$", volume_id)
+        if match:
+            return match.group(1)
+
+        compact = re.sub(r"[^A-Za-z0-9_-]+", "", volume_id)
+        if compact:
+            return compact[-14:]
+
+        digest = hashlib.sha1(volume_id.encode("utf-8")).hexdigest()[:8]
+        return f"id_{digest}"
         
     def _run_command(self, cmd: list, description: str) -> bool:
         """Run a command with verbosity control."""
-        if not self.verbose:
-            print(f"⏳ Running {description}...", end="", flush=True)
-            
-        try:
-            # If verbose, stream output (capture_output=False). 
-            # If minimal, capture output to hide it unless error.
-            capture = not self.verbose
-            
-            result = subprocess.run(
-                cmd, 
-                check=True, 
-                capture_output=capture, 
-                env=self._get_env()
-            )
-            
-            if not self.verbose:
-                print(f"\r✅ {description} Completed    ")
-                
-            return True
-            
-        except subprocess.CalledProcessError as e:
-            if not self.verbose:
-                print(f"\r✗ {description} Failed        ")
-                # Dump output for debugging
+        if self.verbose:
+            try:
+                subprocess.run(
+                    cmd,
+                    check=True,
+                    capture_output=False,
+                    env=self._get_env()
+                )
+                return True
+            except subprocess.CalledProcessError as e:
+                logger.error(f"✗ {description} failed: {e}")
+                return False
+
+        if self.ui.rich_enabled:
+            started = time.monotonic()
+            try:
+                with self.ui.command_status(f"Running {description}"):
+                    subprocess.run(
+                        cmd,
+                        check=True,
+                        capture_output=True,
+                        env=self._get_env()
+                    )
+                elapsed = time.monotonic() - started
+                self.ui.print_success(f"{description} completed ({elapsed:.1f}s)")
+                return True
+            except subprocess.CalledProcessError as e:
+                elapsed = time.monotonic() - started
+                self.ui.print_error(f"{description} failed ({elapsed:.1f}s)")
                 if e.stdout:
                     print("\n--- STDOUT ---\n" + e.stdout.decode())
                 if e.stderr:
                     print("\n--- STDERR ---\n" + e.stderr.decode())
-            else:
-                logger.error(f"✗ {description} failed: {e}")
-                
+                return False
+
+        print(f"⏳ Running {description}...", end="", flush=True)
+        try:
+            subprocess.run(
+                cmd,
+                check=True,
+                capture_output=True,
+                env=self._get_env()
+            )
+            print(f"\r✅ {description} Completed    ")
+            return True
+        except subprocess.CalledProcessError as e:
+            print(f"\r✗ {description} Failed        ")
+            if e.stdout:
+                print("\n--- STDOUT ---\n" + e.stdout.decode())
+            if e.stderr:
+                print("\n--- STDERR ---\n" + e.stderr.decode())
             return False
+
+    def _run_phase2_command_with_progress(self, cmd: list, expected_total: int = 1) -> bool:
+        """Run translator command with live chapter progress in rich mode."""
+        if self.verbose or not self.ui.rich_enabled:
+            return self._run_command(cmd, "Phase 2 (Translator)")
+
+        target_re = re.compile(r"Targeting\s+(\d+)\s+chapters")
+        start_re = re.compile(r"Translating\s+\[(\d+)/(\d+)\]\s+(\S+)\s+to")
+        complete_re = re.compile(r"Completed\s+([^.\s]+)\.")
+        failed_re = re.compile(r"Failed\s+([^:\s]+):")
+        skip_re = re.compile(r"Skipping completed chapter\s+(\S+)")
+
+        seen_terminal = set()
+        line_tail: deque[str] = deque(maxlen=60)
+        started = time.monotonic()
+
+        process = subprocess.Popen(
+            cmd,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.STDOUT,
+            text=True,
+            bufsize=1,
+            env=self._get_env(),
+        )
+
+        with self.ui.chapter_progress("Phase 2 Chapters", total=max(expected_total, 1)) as tracker:
+            for raw_line in iter(process.stdout.readline, ''):
+                line = raw_line.rstrip("\n")
+                if not line:
+                    continue
+                line_tail.append(line)
+
+                target_match = target_re.search(line)
+                if target_match:
+                    tracker.set_total(int(target_match.group(1)))
+
+                start_match = start_re.search(line)
+                if start_match:
+                    index = int(start_match.group(1))
+                    total = int(start_match.group(2))
+                    chapter_id = start_match.group(3)
+                    tracker.set_total(total)
+                    tracker.start(chapter_id, index=index, total=total)
+
+                complete_match = complete_re.search(line)
+                if complete_match:
+                    chapter_id = complete_match.group(1)
+                    if chapter_id not in seen_terminal:
+                        tracker.complete(chapter_id)
+                        seen_terminal.add(chapter_id)
+
+                failed_match = failed_re.search(line)
+                if failed_match:
+                    chapter_id = failed_match.group(1)
+                    if chapter_id not in seen_terminal:
+                        tracker.fail(chapter_id)
+                        seen_terminal.add(chapter_id)
+
+                skip_match = skip_re.search(line)
+                if skip_match:
+                    chapter_id = skip_match.group(1)
+                    if chapter_id not in seen_terminal:
+                        tracker.skip(chapter_id)
+                        seen_terminal.add(chapter_id)
+
+                if "[ERROR]" in line or "Volume translation" in line:
+                    logger.info(line)
+
+            process.stdout.close()
+            return_code = process.wait()
+
+        elapsed = time.monotonic() - started
+        if return_code == 0:
+            self.ui.print_success(f"Phase 2 (Translator) completed ({elapsed:.1f}s)")
+            return True
+
+        self.ui.print_error(f"Phase 2 (Translator) failed ({elapsed:.1f}s)")
+        if line_tail:
+            logger.error("Last translator output lines:")
+            for tail_line in list(line_tail)[-20:]:
+                logger.error(tail_line)
+        return False
 
     def _get_env(self) -> Dict[str, str]:
         """Get environment with updated PYTHONPATH."""
@@ -235,36 +398,71 @@ class PipelineController:
         if not volumes:
             logger.error("No volumes found with manifest.json")
             return None
-        
-        print("\n" + "="*60)
-        print(f"SELECT VOLUME FOR {phase_name}")
-        print("="*60)
-        
+
+        rows = []
         for i, vol in enumerate(volumes, 1):
-            title = vol['title'][:50] + "..." if len(vol['title']) > 50 else vol['title']
-            vol_id = vol['id'][-30:] + "..." if len(vol['id']) > 30 else vol['id']
-            
-            # Show status indicators
+            title = vol['title'][:55] + "..." if len(vol['title']) > 58 else vol['title']
+            vol_key = self._short_volume_id(vol['id'])
             status = vol['status']
-            indicators = []
-            if status.get('librarian', {}).get('status') == 'completed':
-                indicators.append("📚")
-            # Check for visual cache (Phase 0)
-            visual_cache = self.work_dir / vol['id'] / "visual_cache.json"
-            if visual_cache.exists():
-                indicators.append("🎨")
-            if status.get('translator', {}).get('status') == 'completed':
-                indicators.append("✍️")
-            if status.get('builder', {}).get('status') == 'completed':
-                indicators.append("📦")
-            
-            status_str = " ".join(indicators) if indicators else "⏸️"
-            
-            print(f"  [{i}] {status_str} {title}")
-            print(f"      ID: {vol_id}")
-        
-        print("\n  [0] Cancel")
-        print("="*60)
+
+            p1 = self._status_badge(status.get('librarian', {}).get('status', ''))
+            p15 = self._status_badge(status.get('metadata_processor', {}).get('status', ''))
+            p16 = self._visual_phase_badge(vol['id'])
+            p2 = self._status_badge(status.get('translator', {}).get('status', ''))
+            p4 = self._status_badge(status.get('builder', {}).get('status', ''))
+
+            rows.append({
+                "index": i,
+                "p1": p1,
+                "p15": p15,
+                "p16": p16,
+                "p2": p2,
+                "p4": p4,
+                "id_key": vol_key,
+                "title": title,
+            })
+
+        if self.ui.rich_enabled:
+            rich_rows = []
+            for row in rows:
+                stage_summary = " ".join([
+                    self.ui.format_compact_badge(row["p1"]),
+                    self.ui.format_compact_badge(row["p15"]),
+                    self.ui.format_compact_badge(row["p16"]),
+                    self.ui.format_compact_badge(row["p2"]),
+                    self.ui.format_compact_badge(row["p4"]),
+                ])
+                rich_rows.append([
+                    str(row["index"]),
+                    stage_summary,
+                    row["id_key"],
+                    row["title"],
+                ])
+            self.ui.render_table(
+                title=f"Select Volume for {phase_name}",
+                columns=[
+                    {"header": "#", "justify": "right", "style": "bold"},
+                    {"header": "Stages (P1/P1.5/P1.6/P2/P4)", "no_wrap": True},
+                    {"header": "ID Key", "style": "cyan", "no_wrap": True},
+                    {"header": "Title", "no_wrap": True, "overflow": "ellipsis", "max_width": 56},
+                ],
+                rows=rich_rows,
+                caption="0 = Cancel",
+            )
+        else:
+            print("\n" + "=" * 108)
+            print(f"MTL Studio 5.1 | Select Volume for {phase_name}")
+            print("=" * 108)
+            print(" #  P1   P1.5  P1.6     P2    P4    ID key          Title")
+            print("-" * 108)
+            for row in rows:
+                print(
+                    f"{row['index']:>2}  {row['p1']:<4} {row['p15']:<5} {row['p16']:<8} "
+                    f"{row['p2']:<5} {row['p4']:<5} {row['id_key']:<14} {row['title']}"
+                )
+            print("-" * 108)
+            print(" 0  Cancel")
+            print("=" * 108)
         
         while True:
             try:
@@ -279,7 +477,7 @@ class PipelineController:
                 
                 if 1 <= idx <= len(volumes):
                     selected = volumes[idx - 1]['id']
-                    logger.info(f"✓ Selected: {volumes[idx - 1]['title']}")
+                    logger.info(f"Selected volume: {volumes[idx - 1]['title']}")
                     return selected
                 else:
                     print(f"Invalid choice. Please enter 0-{len(volumes)}")
@@ -398,9 +596,7 @@ class PipelineController:
         """Run Phase 1: Librarian (EPUB Extraction)."""
         from pipeline.config import get_target_language
         
-        logger.info("="*60)
-        logger.info("PHASE 1: LIBRARIAN - EPUB Extraction")
-        logger.info("="*60)
+        self._ui_header("Phase 1 - Librarian", "Extract EPUB, chapters, assets, and manifest state")
         
         # Get target language from config
         target_lang = get_target_language()
@@ -430,9 +626,7 @@ class PipelineController:
         - Updates: title_en, author_en, chapter titles, character_names
         - Preserves: character_profiles, localization_notes, keigo_switch configs
         """
-        logger.info("="*60)
-        logger.info("PHASE 1.5: METADATA PROCESSOR - Translate Metadata (Schema-Safe)")
-        logger.info("="*60)
+        self._ui_header("Phase 1.5 - Metadata Processor", "Translate metadata with schema-safe preservation")
         
         # Check for potential sequels before running
         ignore_sequel = False
@@ -530,10 +724,7 @@ class PipelineController:
         Returns:
             True if successful, False otherwise
         """
-        logger.info("="*60)
-        logger.info("PHASE 1.6: MULTIMODAL PROCESSOR")
-        logger.info("  Analyzing illustrations with Gemini 3 Pro Vision")
-        logger.info("="*60)
+        self._ui_header("Phase 1.6 - Art Director (Multimodal)", "Gemini 3 Pro Vision -> visual_cache.json")
 
         # Verify manifest exists
         manifest = self.load_manifest(volume_id)
@@ -581,13 +772,11 @@ class PipelineController:
                 return False
 
             logger.info("")
-            logger.info("="*60)
-            logger.info("PHASE 1.6 COMPLETE")
+            logger.info("Phase 1.6 Summary:")
             logger.info(f"  Total illustrations: {stats.get('total', 0)}")
             logger.info(f"  Already cached:      {stats.get('cached', 0)}")
             logger.info(f"  Newly analyzed:      {stats.get('generated', 0)}")
             logger.info(f"  Safety blocked:      {stats.get('blocked', 0)}")
-            logger.info("="*60)
             
             if standalone:
                 logger.info("")
@@ -616,9 +805,10 @@ class PipelineController:
                    enable_continuity: bool = False, enable_gap_analysis: bool = False,
                    enable_multimodal: bool = False) -> bool:
         """Run Phase 2: Translator (Gemini MT)."""
-        logger.info("="*60)
-        logger.info("PHASE 2: TRANSLATOR - Gemini-Powered Translation")
-        logger.info("="*60)
+        self._ui_header(
+            "Phase 2 - Translator",
+            "Three-pillar context: RAG + Vector Search + Multimodal (when enabled)"
+        )
         
         # Verify manifest exists before proceeding
         manifest = self.load_manifest(volume_id)
@@ -628,6 +818,16 @@ class PipelineController:
             return False
         
         logger.info(f"✓ Loaded manifest for: {manifest.get('metadata', {}).get('title', volume_id)}")
+
+        manifest_chapters = manifest.get('chapters', [])
+        if not manifest_chapters:
+            manifest_chapters = manifest.get('structure', {}).get('chapters', [])
+
+        target_chapters = manifest_chapters
+        if chapters:
+            target_ids = set(chapters)
+            target_chapters = [c for c in manifest_chapters if c.get("id") in target_ids]
+        expected_total = len(target_chapters) if target_chapters else 1
         
         cmd = [
             sys.executable, "-m", "pipeline.translator.agent",
@@ -649,7 +849,7 @@ class PipelineController:
         if enable_multimodal:
             cmd.append("--enable-multimodal")
 
-        if self._run_command(cmd, "Phase 2 (Translator)"):
+        if self._run_phase2_command_with_progress(cmd, expected_total=expected_total):
             logger.info("✓ Phase 2 completed successfully")
             
             # Run CJK validation automatically after translation
@@ -685,9 +885,7 @@ class PipelineController:
         target_lang = get_target_language()
         lang_dir = target_lang.upper()
         
-        logger.info("="*60)
-        logger.info("PHASE 3: CRITICS - Gemini Agentic Review")
-        logger.info("="*60)
+        self._ui_header("Phase 3 - Critics", "Audit, fix, verify, and approve for build")
         logger.info("")
         logger.info("Phase 3 uses an AGENTIC WORKFLOW with Gemini CLI.")
         logger.info("Required Tool: AUDIT_AGENT.md (Agent Core Definition)")
@@ -739,9 +937,7 @@ class PipelineController:
     
     def run_phase4(self, volume_id: str, output_name: Optional[str] = None) -> bool:
         """Run Phase 4: Builder (EPUB Packaging)."""
-        logger.info("="*60)
-        logger.info("PHASE 4: BUILDER - EPUB Packaging")
-        logger.info("="*60)
+        self._ui_header("Phase 4 - Builder", "Package translated resources into EPUB output")
         
         cmd = [
             sys.executable, "-m", "pipeline.builder.agent",
@@ -795,142 +991,165 @@ class PipelineController:
             volume_id = self.generate_volume_id(epub_path)
             logger.info(f"Generated volume ID: {volume_id}")
 
-        logger.info("="*60)
-        logger.info("MT PUBLISHING PIPELINE - FULL RUN")
-        logger.info("="*60)
+        self._ui_header("Full Pipeline Run (v5.1)", "1 -> 1.5 -> 1.6 -> 2 -> 4")
         logger.info(f"Target Language: {language_name} ({target_lang.upper()})")
         logger.info(f"Source: {epub_path}")
         logger.info(f"Volume ID: {volume_id}")
-        logger.info("="*60)
         logger.info("")
-        
-        # Phase 1: Librarian
-        if not self.run_phase1(epub_path, volume_id):
-            return False
-        
-        logger.info("")
-        
-        # Phase 1.5: Metadata Processor
-        if not self.run_phase1_5(volume_id):
-            return False
-        
-        logger.info("")
-        
-        # Interactive pause after Phase 1.5 (only in verbose mode)
-        if self.verbose:
-            while True:
-                logger.info("="*60)
-                logger.info("METADATA EXTRACTION COMPLETE")
-                logger.info("="*60)
-                logger.info("")
-                print("OPTIONS:")
-                print("  [1] Proceed to Phase 2 - Translator")
-                print("  [2] Review Metadata (Title, Author, Characters, Terms)")
-                print("  [B] Back to previous menu")
-                print("  [Q] Quit Pipeline")
-                print("")
-                
-                choice = input("Select option: ").strip().lower()
-                
-                if choice == '1':
-                    logger.info("Proceeding to Phase 2...")
-                    break
-                elif choice == '2':
-                    print("")
-                    self.show_metadata(volume_id)
-                    print("")
+
+        phase_total = 4 if skip_multimodal else 5
+        phase_done = 0
+
+        with self.ui.phase_progress(phase_total, "Pipeline v5.1") as pipeline_tracker:
+            def _advance_pipeline(label: str) -> None:
+                nonlocal phase_done
+                phase_done += 1
+                pipeline_tracker.advance(label)
+                if not self.ui.rich_enabled:
+                    self.ui.render_status_bar("Pipeline Progress", phase_done, phase_total)
+                else:
+                    logger.info(f"  -> {label} complete ({phase_done}/{phase_total})")
+
+            # Phase 1: Librarian
+            if not self.run_phase1(epub_path, volume_id):
+                pipeline_tracker.fail("P1 Librarian")
+                return False
+            _advance_pipeline("P1 Librarian")
+
+            logger.info("")
+
+            # Phase 1.5: Metadata Processor
+            if not self.run_phase1_5(volume_id):
+                pipeline_tracker.fail("P1.5 Metadata")
+                return False
+            _advance_pipeline("P1.5 Metadata")
+
+            logger.info("")
+
+            # Interactive pause after Phase 1.5 (only in verbose mode)
+            if self.verbose:
+                while True:
+                    self._ui_header("Checkpoint: Metadata Complete", "Review metadata or continue to translation")
+                    logger.info("")
                     print("OPTIONS:")
                     print("  [1] Proceed to Phase 2 - Translator")
+                    print("  [2] Review Metadata (Title, Author, Characters, Terms)")
                     print("  [B] Back to previous menu")
+                    print("  [Q] Quit Pipeline")
                     print("")
-                    sub_choice = input("Select option: ").strip().lower()
-                    if sub_choice == '1':
+
+                    choice = input("Select option: ").strip().lower()
+
+                    if choice == '1':
                         logger.info("Proceeding to Phase 2...")
                         break
-                    elif sub_choice == 'b':
+                    elif choice == '2':
+                        print("")
+                        self.show_metadata(volume_id)
+                        print("")
+                        print("OPTIONS:")
+                        print("  [1] Proceed to Phase 2 - Translator")
+                        print("  [B] Back to previous menu")
+                        print("")
+                        sub_choice = input("Select option: ").strip().lower()
+                        if sub_choice == '1':
+                            logger.info("Proceeding to Phase 2...")
+                            break
+                        elif sub_choice == 'b':
+                            continue
+                        else:
+                            continue
+                    elif choice == 'b':
+                        continue
+                    elif choice == 'q':
+                        logger.info("Pipeline stopped by user.")
+                        return True
+                    else:
+                        print("Invalid selection. Try again.")
+                        continue
+            else:
+                # Minimal mode - auto-proceed
+                logger.info("✓ Metadata extraction complete")
+
+            logger.info("")
+
+            # Phase 1.6: Multimodal Processor (Visual Analysis)
+            multimodal_success = False
+            if not skip_multimodal:
+                multimodal_success = self.run_phase1_6(volume_id, standalone=False)
+                if not multimodal_success:
+                    logger.warning("⚠️  Phase 1.6 (Multimodal) failed or skipped")
+                    logger.warning("   Continuing without visual context...")
+                _advance_pipeline("P1.6 Art Director")
+                logger.info("")
+            else:
+                logger.info("ℹ️  Skipping Phase 1.6 (Multimodal) - --skip-multimodal flag set")
+                logger.info("")
+
+            # Phase 2: Translator (with multimodal if Phase 1.6 succeeded)
+            enable_multimodal = multimodal_success and not skip_multimodal
+            if enable_multimodal:
+                logger.info("✓ Visual context enabled for translation")
+
+            if not self.run_phase2(volume_id, enable_multimodal=enable_multimodal):
+                pipeline_tracker.fail("P2 Translator")
+                return False
+            _advance_pipeline("P2 Translator")
+
+            logger.info("")
+
+            # Phase 3: Manual/Agentic Workflow (Instructions only - verbose mode)
+            if self.verbose:
+                self.run_phase3_instructions(volume_id)
+
+            # Interactive menu (only in verbose mode)
+            if self.verbose:
+                while True:
+                    # Clear screen (ANSI)
+                    print("\033[H\033[J", end="")
+
+                    # Re-print Menu Header
+                    self._ui_header("Interactive Menu", "Phase 3 review complete; choose next action")
+                    logger.info(f"Volume ID: {volume_id}")
+                    logger.info("")
+
+                    # Options
+                    print("OPTIONS:")
+                    print("  [1] Proceed to Phase 4 - Builder (Packaging)")
+                    print("  [2] Return to Menu / Exit")
+
+                    # Toggle Status
+                    status_text = "Verbose (Full Details)" if self.verbose else "Minimal (Clean Output)"
+                    print(f"  [V] Toggle Logs: {status_text}")
+                    print("")
+
+                    choice = input("Select option: ").strip().lower()
+
+                    if choice == '1':
+                        print("")
+                        phase4_success = self.run_phase4(volume_id)
+                        if phase4_success:
+                            _advance_pipeline("P4 Builder")
+                        else:
+                            pipeline_tracker.fail("P4 Builder")
+                        return phase4_success
+                    elif choice == '2':
+                        return True
+                    elif choice == 'v':
+                        self.verbose = not self.verbose
+                        # Loop will restart and redraw menu with new status
                         continue
                     else:
-                        continue
-                elif choice == 'b':
-                    continue
-                elif choice == 'q':
-                    logger.info("Pipeline stopped by user.")
-                    return True
-                else:
-                    print("Invalid selection. Try again.")
-                    continue
-        else:
-            # Minimal mode - auto-proceed
-            logger.info("✓ Metadata extraction complete")
-        
-        logger.info("")
-        
-        # Phase 1.6: Multimodal Processor (Visual Analysis)
-        multimodal_success = False
-        if not skip_multimodal:
-            multimodal_success = self.run_phase1_6(volume_id, standalone=False)
-            if not multimodal_success:
-                logger.warning("⚠️  Phase 1.6 (Multimodal) failed or skipped")
-                logger.warning("   Continuing without visual context...")
-            logger.info("")
-        else:
-            logger.info("ℹ️  Skipping Phase 1.6 (Multimodal) - --skip-multimodal flag set")
-            logger.info("")
-        
-        # Phase 2: Translator (with multimodal if Phase 1.6 succeeded)
-        enable_multimodal = multimodal_success and not skip_multimodal
-        if enable_multimodal:
-            logger.info("✓ Visual context enabled for translation")
-        
-        if not self.run_phase2(volume_id, enable_multimodal=enable_multimodal):
-            return False
-        
-        logger.info("")
-        
-        # Phase 3: Manual/Agentic Workflow (Instructions only - verbose mode)
-        if self.verbose:
-            self.run_phase3_instructions(volume_id)
-        
-        # Interactive menu (only in verbose mode)
-        if self.verbose:
-            while True:
-                # Clear screen (ANSI)
-                print("\033[H\033[J", end="")
-                
-                # Re-print Menu Header
-                logger.info("="*60)
-                logger.info("MT PUBLISHING PIPELINE - INTERACTIVE MENU")
-                logger.info("="*60)
-                logger.info(f"Volume ID: {volume_id}")
+                        input("Invalid selection. Press Enter to try again...")
+            else:
+                # Minimal mode - auto-proceed to Phase 4
                 logger.info("")
-                
-                # Options
-                print("OPTIONS:")
-                print("  [1] Proceed to Phase 4 - Builder (Packaging)")
-                print("  [2] Return to Menu / Exit")
-                
-                # Toggle Status
-                status_text = "Verbose (Full Details)" if self.verbose else "Minimal (Clean Output)"
-                print(f"  [V] Toggle Logs: {status_text}")
-                print("")
-                
-                choice = input("Select option: ").strip().lower()
-                
-                if choice == '1':
-                    print("")
-                    return self.run_phase4(volume_id)
-                elif choice == '2':
-                    return True
-                elif choice == 'v':
-                    self.verbose = not self.verbose
-                    # Loop will restart and redraw menu with new status
-                    continue
+                phase4_success = self.run_phase4(volume_id)
+                if phase4_success:
+                    _advance_pipeline("P4 Builder")
                 else:
-                    input("Invalid selection. Press Enter to try again...")
-        else:
-            # Minimal mode - auto-proceed to Phase 4
-            logger.info("")
-            return self.run_phase4(volume_id)
+                    pipeline_tracker.fail("P4 Builder")
+                return phase4_success
     
     def show_metadata(self, volume_id: str) -> None:
         """Display metadata in clean, readable format."""
@@ -954,9 +1173,7 @@ class PipelineController:
         if not metadata_translated and target_lang == 'en':
             metadata_translated = manifest.get('metadata_en', {})
         
-        logger.info("="*60)
-        logger.info("METADATA REVIEW")
-        logger.info("="*60)
+        self._ui_header("Metadata Review", f"Volume: {volume_id}")
         logger.info("")
         logger.info("JAPANESE (Original):")
         logger.info(f"  Title:       {metadata.get('title', 'N/A')}")
@@ -1084,9 +1301,7 @@ class PipelineController:
         lang_config = get_language_config(target_lang)
         lang_name = lang_config.get('language_name', target_lang.upper())
         
-        logger.info("="*60)
-        logger.info(f"PIPELINE STATUS: {volume_id}")
-        logger.info("="*60)
+        self._ui_header("Pipeline Status", f"Volume: {volume_id}")
         
         # Metadata
         metadata = manifest.get('metadata', {})
@@ -1101,17 +1316,23 @@ class PipelineController:
         title_key = f'title_{target_lang}'
         author_key = f'author_{target_lang}'
         
-        logger.info(f"Title (JP):  {metadata.get('title', 'N/A')}")
-        logger.info(f"Title ({target_lang.upper()}):  {metadata_translated.get(title_key, 'N/A')}")
+        logger.info(f"Title (JP): {metadata.get('title', 'N/A')}")
+        logger.info(f"Title ({target_lang.upper()}): {metadata_translated.get(title_key, 'N/A')}")
         logger.info(f"Author (JP): {metadata.get('author', 'N/A')}")
         logger.info(f"Author ({target_lang.upper()}): {metadata_translated.get(author_key, 'N/A')}")
         logger.info("")
         
         # Pipeline state
         pipeline_state = manifest.get('pipeline_state', {})
-        logger.info("PHASE STATUS:")
-        logger.info(f"  Phase 1 (Librarian):    {pipeline_state.get('librarian', {}).get('status', 'not started')}")
-        logger.info(f"  Phase 1.5 (Metadata):   {pipeline_state.get('metadata_processor', {}).get('status', 'not started')}")
+        p1_raw = pipeline_state.get('librarian', {}).get('status', 'not started')
+        p15_raw = pipeline_state.get('metadata_processor', {}).get('status', 'not started')
+        p2_raw = pipeline_state.get('translator', {}).get('status', 'not started')
+        p3_raw = pipeline_state.get('critics', {}).get('status', 'manual review')
+        p4_raw = pipeline_state.get('builder', {}).get('status', 'not started')
+
+        logger.info("Phase Overview:")
+        logger.info(f"  P1   Librarian: {self._status_badge(p1_raw):<5} ({p1_raw})")
+        logger.info(f"  P1.5 Metadata:  {self._status_badge(p15_raw):<5} ({p15_raw})")
 
         # Phase 1.6 (Multimodal) - check for visual_cache.json
         volume_path = self.work_dir / volume_id
@@ -1122,15 +1343,26 @@ class PipelineController:
                 with open(visual_cache_path, 'r', encoding='utf-8') as _f:
                     cache_data = _json.load(_f)
                 cache_count = len(cache_data)
-                logger.info(f"  Phase 1.6 (Visual):     ✓ cached ({cache_count} illustration(s))")
+                p16_raw = f"cached ({cache_count})"
+                logger.info(f"  P1.6 Visual:    DONE  ({p16_raw})")
             except Exception:
-                logger.info(f"  Phase 1.6 (Visual):     ⚠ cache exists but unreadable")
+                p16_raw = "cache unreadable"
+                logger.info(f"  P1.6 Visual:    WARN  ({p16_raw})")
         else:
-            logger.info(f"  Phase 1.6 (Visual):     not run")
+            p16_raw = "not run"
+            logger.info(f"  P1.6 Visual:    TODO  ({p16_raw})")
 
-        logger.info(f"  Phase 2 (Translator):   {pipeline_state.get('translator', {}).get('status', 'not started')}")
-        logger.info(f"  Phase 3 (Critics):      {pipeline_state.get('critics', {}).get('status', 'manual review')}")
-        logger.info(f"  Phase 4 (Builder):      {pipeline_state.get('builder', {}).get('status', 'not started')}")
+        logger.info(f"  P2   Translator: {self._status_badge(p2_raw):<5} ({p2_raw})")
+        logger.info(f"  P3   Critics:    {self._status_badge(p3_raw):<5} ({p3_raw})")
+        logger.info(f"  P4   Builder:    {self._status_badge(p4_raw):<5} ({p4_raw})")
+
+        completed_phases = 0
+        completed_phases += int(self._status_badge(p1_raw) == "DONE")
+        completed_phases += int(self._status_badge(p15_raw) == "DONE")
+        completed_phases += int(p16_raw.startswith("cached"))
+        completed_phases += int(self._status_badge(p2_raw) == "DONE")
+        completed_phases += int(self._status_badge(p4_raw) == "DONE")
+        self.ui.render_status_bar("Phase Completion", completed_phases, 5)
         logger.info("")
         
         # Chapters
@@ -1150,7 +1382,16 @@ class PipelineController:
         logger.info(f"  Cover:         {assets.get('cover', 'N/A')}")
         logger.info(f"  Kuchi-e:       {len(assets.get('kuchie', []))} images")
         logger.info(f"  Illustrations: {len(assets.get('illustrations', []))} images")
-        logger.info("="*60)
+        logger.info("")
+
+        # Suggested next action
+        if p4_raw != "completed":
+            if p2_raw != "completed":
+                logger.info(f"Next: mtl.py phase2 {volume_id}")
+            elif p3_raw != "completed":
+                logger.info(f"Next: mtl.py phase3 {volume_id}")
+            else:
+                logger.info(f"Next: mtl.py phase4 {volume_id}")
     
     def run_cleanup(self, volume_id: str, dry_run: bool = False) -> bool:
         """
@@ -1163,9 +1404,7 @@ class PipelineController:
         Returns:
             True if successful, False otherwise
         """
-        logger.info("="*60)
-        logger.info("POST-TRANSLATION CLEANUP")
-        logger.info("="*60)
+        self._ui_header("Cleanup", "Normalize translated chapter title artifacts")
         
         try:
             # Import and run cleanup script
@@ -1204,9 +1443,7 @@ class PipelineController:
         Returns:
             True if successful, False otherwise
         """
-        logger.info("="*60)
-        logger.info("VIETNAMESE CJK LEAK CLEANER (Hard Substitution)")
-        logger.info("="*60)
+        self._ui_header("CJK Cleaner (VN)", "Hard-substitution pass for script leak cleanup")
         
         try:
             from pipeline.post_processor.vn_cjk_cleaner import VietnameseCJKCleaner, format_cleaner_report
@@ -1268,9 +1505,10 @@ class PipelineController:
         Returns:
             True if successful, False otherwise
         """
-        logger.info("="*60)
-        logger.info(f"SELF-HEALING ANTI-AI-ISM AGENT {'(DRY RUN)' if dry_run else ''}")
-        logger.info("="*60)
+        self._ui_header(
+            "Self-Healing Anti-AI-ism Agent",
+            f"3-layer detection + rewrite {'(dry run)' if dry_run else '(apply mode)'}"
+        )
         
         try:
             from modules.anti_ai_ism_agent import AntiAIismAgent
@@ -1347,9 +1585,7 @@ class PipelineController:
         volume_path = self.work_dir / volume_id
         cache_path = volume_path / "visual_cache.json"
 
-        logger.info("="*60)
-        logger.info(f"VISUAL CACHE INSPECTOR: {volume_id}")
-        logger.info("="*60)
+        self._ui_header("Visual Cache Inspector", f"Volume: {volume_id}")
 
         if not cache_path.exists():
             logger.info("")
@@ -1450,9 +1686,7 @@ class PipelineController:
         volume_path = self.work_dir / volume_id
         thoughts_dir = volume_path / "cache" / "thoughts"
 
-        logger.info("=" * 60)
-        logger.info("VISUAL THINKING LOG CONVERTER (JSON → Markdown)")
-        logger.info("=" * 60)
+        self._ui_header("Visual Thinking Converter", "Convert cache/thoughts JSON to markdown reports")
 
         if not thoughts_dir.exists():
             logger.error(f"No thought logs found at: {thoughts_dir}")
@@ -1568,28 +1802,83 @@ class PipelineController:
 
     def list_volumes(self) -> None:
         """List all volumes in WORK directory."""
-        volumes = [d for d in self.work_dir.iterdir() if d.is_dir()]
+        volumes = sorted(
+            [d for d in self.work_dir.iterdir() if d.is_dir()],
+            key=lambda d: d.stat().st_mtime,
+            reverse=True
+        )
         
         if not volumes:
             logger.info("No volumes found in WORK directory.")
             return
-        
-        logger.info("="*60)
-        logger.info(f"VOLUMES: {len(volumes)} found")
-        logger.info("="*60)
-        
-        for vol_dir in sorted(volumes):
+
+        rows = []
+        for vol_dir in volumes:
             volume_id = vol_dir.name
             manifest = self.load_manifest(volume_id)
-            
-            if manifest:
-                title = manifest.get('metadata_en', {}).get('title_en') or \
-                        manifest.get('metadata', {}).get('title', 'Unknown')
-                translator_status = manifest.get('pipeline_state', {}).get('translator', {}).get('status', 'N/A')
-                logger.info(f"  {volume_id}")
-                logger.info(f"    Title: {title}")
-                logger.info(f"    Status: {translator_status}")
-                logger.info("")
+            if not manifest:
+                continue
+
+            pipeline_state = manifest.get('pipeline_state', {})
+            p1 = self._status_badge(pipeline_state.get('librarian', {}).get('status', ''))
+            p15 = self._status_badge(pipeline_state.get('metadata_processor', {}).get('status', ''))
+            p16 = self._visual_phase_badge(volume_id)
+            p2 = self._status_badge(pipeline_state.get('translator', {}).get('status', ''))
+            p4 = self._status_badge(pipeline_state.get('builder', {}).get('status', ''))
+            lang = manifest.get('metadata', {}).get('target_language', 'n/a').upper()
+            title = manifest.get('metadata_en', {}).get('title_en') or manifest.get('metadata', {}).get('title', 'Unknown')
+            id_key = self._short_volume_id(volume_id)
+            title_short = title[:49] + "..." if len(title) > 52 else title
+            rows.append({
+                "p1": p1,
+                "p15": p15,
+                "p16": p16,
+                "p2": p2,
+                "p4": p4,
+                "lang": lang,
+                "id_key": id_key,
+                "title": title_short,
+            })
+
+        if self.ui.rich_enabled:
+            rich_rows = []
+            for row in rows:
+                stage_summary = " ".join([
+                    self.ui.format_compact_badge(row["p1"]),
+                    self.ui.format_compact_badge(row["p15"]),
+                    self.ui.format_compact_badge(row["p16"]),
+                    self.ui.format_compact_badge(row["p2"]),
+                    self.ui.format_compact_badge(row["p4"]),
+                ])
+                rich_rows.append([
+                    stage_summary,
+                    row["lang"],
+                    row["id_key"],
+                    row["title"],
+                ])
+            self.ui.render_table(
+                title=f"Workspace Volumes ({len(rows)})",
+                columns=[
+                    {"header": "Stages (P1/P1.5/P1.6/P2/P4)", "no_wrap": True},
+                    {"header": "Lang", "justify": "center", "style": "cyan"},
+                    {"header": "ID Key", "style": "cyan", "no_wrap": True},
+                    {"header": "Title", "no_wrap": True, "overflow": "ellipsis", "max_width": 56},
+                ],
+                rows=rich_rows,
+                caption="Tip: run `mtl.py status <id>` for detailed per-volume metrics.",
+            )
+            return
+
+        self._ui_header("Workspace Volumes", f"Total: {len(rows)}")
+        logger.info(" P1   P1.5  P1.6     P2    P4    Lang  ID Key         Title")
+        logger.info("-" * 102)
+        for row in rows:
+            logger.info(
+                f" {row['p1']:<4} {row['p15']:<5} {row['p16']:<8} {row['p2']:<5} {row['p4']:<5} "
+                f"{row['lang']:<5} {row['id_key']:<14} {row['title']}"
+            )
+        logger.info("-" * 102)
+        logger.info("Tip: run `mtl.py status <id>` for detailed per-volume metrics.")
     
     def inspect_metadata(self, volume_id: str, validate: bool = False) -> bool:
         """
@@ -1624,9 +1913,7 @@ class PipelineController:
         if not metadata and target_lang == 'en':
             metadata = manifest.get('metadata_en', {})
         
-        logger.info("="*60)
-        logger.info(f"METADATA SCHEMA INSPECTION: {volume_id}")
-        logger.info("="*60)
+        self._ui_header("Metadata Schema Inspection", f"Volume: {volume_id}")
         
         # Detect schema variant
         schema_variant = "Unknown"
@@ -1712,9 +1999,7 @@ class PipelineController:
         # If validate flag, show detailed field analysis
         if validate:
             logger.info("")
-            logger.info("="*60)
-            logger.info("DETAILED VALIDATION REPORT")
-            logger.info("="*60)
+            logger.info("Detailed Validation Report:")
             
             # Check chapter-level title_en
             chapters = manifest.get('chapters', [])
@@ -1751,7 +2036,7 @@ class PipelineController:
             else:
                 logger.info("  • Basic name mappings only")
         
-        logger.info("="*60)
+        logger.info("")
         return is_compatible
     
     def handle_config(self, toggle_pre_toc: bool = False, show: bool = False,
@@ -1819,15 +2104,12 @@ class PipelineController:
         if show_language:
             current_lang = get_target_language()
             lang_config = get_language_config(current_lang)
-            logger.info("="*60)
-            logger.info("CURRENT TARGET LANGUAGE")
-            logger.info("="*60)
+            self._ui_header("Current Target Language")
             logger.info(f"  Code: {current_lang}")
             logger.info(f"  Name: {lang_config.get('language_name', current_lang.upper())}")
             logger.info(f"  Master Prompt: {lang_config.get('master_prompt', 'N/A')}")
             logger.info(f"  Modules Dir: {lang_config.get('modules_dir', 'N/A')}")
             logger.info(f"  Output Suffix: {lang_config.get('output_suffix', 'N/A')}")
-            logger.info("="*60)
             return
 
         # Model switching
@@ -1898,9 +2180,7 @@ class PipelineController:
         
         # Show current settings
         if show or (not toggle_pre_toc and not toggle_multimodal and not model and temperature is None and top_p is None and top_k is None and not language):
-            logger.info("="*60)
-            logger.info("PIPELINE CONFIGURATION")
-            logger.info("="*60)
+            self._ui_header("Pipeline Configuration", "MTL Studio 5.1 runtime settings")
 
             # Target Language
             try:
@@ -2011,7 +2291,7 @@ class PipelineController:
                 logger.info("  Enable with: mtl.py config --toggle-multimodal")
                 logger.info("  Workflow: phase1.6 → phase2 --enable-multimodal")
 
-            logger.info("\n" + "="*60)
+            logger.info("")
             logger.info("Quick Commands:")
             logger.info("  --language en|vn             Switch target language")
             logger.info("  --show-language              Show current language details")
@@ -2022,7 +2302,7 @@ class PipelineController:
             logger.info("  --top-k 40                   Adjust top-k sampling")
             logger.info("  --toggle-pre-toc             Toggle pre-TOC detection")
             logger.info("  --toggle-multimodal          Toggle multimodal visual context")
-            logger.info("="*60)
+            logger.info("")
         
         # Toggle pre-TOC detection
         if toggle_pre_toc:
@@ -2053,208 +2333,23 @@ class PipelineController:
             with open(config_path, 'w', encoding='utf-8') as f:
                 yaml.dump(config, f, default_flow_style=False, allow_unicode=True, sort_keys=False)
             
-            logger.info("="*60)
-            logger.info("✓ CONFIGURATION UPDATED")
-            logger.info("="*60)
+            self._ui_header("Configuration Updated")
             for change in changes_made:
                 logger.info(f"  {change}")
-            logger.info("="*60)
             logger.info(f"Saved to: {config_path}")
             logger.info("\nChanges will apply to next translation run.")
 
 
 def main():
-    parser = argparse.ArgumentParser(
-        description="MT Publishing Pipeline - Unified Controller",
-        formatter_class=argparse.RawDescriptionHelpFormatter,
-        epilog="""
-Examples:
-  # Full pipeline with auto-generated ID
-  mtl.py run INPUT/novel_v1.epub
-  
-  # Full pipeline with custom ID
-  mtl.py run INPUT/novel_v1.epub --id novel_v1
-  
-  # Run individual phases
-  mtl.py phase1 INPUT/novel_v1.epub --id novel_v1
-  mtl.py phase2 novel_v1
-  mtl.py phase4 novel_v1
-  
-  # Multimodal workflow
-  mtl.py phase1.6 novel_v1                         # Pre-bake illustration analysis
-  mtl.py phase2 novel_v1 --enable-multimodal       # Translate with visual context
-  mtl.py cache-inspect novel_v1                    # Inspect cached analysis
-  mtl.py cache-inspect novel_v1 --detail           # Full analysis per illustration
-  mtl.py config --toggle-multimodal                # Toggle multimodal in config
+    from pipeline.cli.dispatcher import dispatch_extracted_command, resolve_volume_id_for_args
+    from pipeline.cli.parser import build_parser
 
-  # Check status
-  mtl.py status novel_v1
-  mtl.py list
-
-  # Metadata schema inspection
-  mtl.py metadata novel_v1              # Quick schema detection
-  mtl.py metadata novel_v1 --validate   # Full validation report
-
-Supported Metadata Schemas:
-  The translator auto-detects and transforms these schema variants:
-  - Enhanced v2.1:  characters, dialogue_patterns, translation_guidelines
-  - Legacy V2:      character_profiles, localization_notes
-  - V4 Nested:      character_names with nested {relationships, traits}
-        """
-    )
-    
-    # Valid parent parser for common arguments
-    parent_parser = argparse.ArgumentParser(add_help=False)
-    parent_parser.add_argument('--verbose', action='store_true', help='Show detailed logs')
-    
-    subparsers = parser.add_subparsers(dest='command', help='Command to run')
-    
-    # Run command (full pipeline)
-    run_parser = subparsers.add_parser('run', parents=[parent_parser], help='Run full pipeline (Phases 1, 1.5, 1.6, 2, 4)')
-    run_parser.add_argument('epub_path', type=str, help='Path to Japanese EPUB file')
-    run_parser.add_argument('--id', dest='volume_id', type=str, help='Custom volume ID (auto-generated if not provided)')
-    run_parser.add_argument('--skip-multimodal', action='store_true', 
-                            help='Skip Phase 1.6 (visual analysis) for faster processing')
-    
-    # Phase 0 (Deprecated - kept for backward compatibility)
-    phase0_parser = subparsers.add_parser('phase0', parents=[parent_parser],
-        help='[DEPRECATED] Use phase1.6 instead. Pre-compute visual analysis for illustrations')
-    phase0_parser.add_argument('volume_id', type=str, nargs='?', help='Volume ID (optional - will prompt if not provided)')
-
-    # Phase 1
-    phase1_parser = subparsers.add_parser('phase1', parents=[parent_parser], help='Run Phase 1: Librarian (EPUB Extraction)')
-    phase1_parser.add_argument('epub_path', type=str, help='Path to Japanese EPUB file')
-    phase1_parser.add_argument('--id', dest='volume_id', type=str, required=False, help='Custom volume ID (auto-generated if not provided)')
-    
-    # Phase 1.5
-    phase1_5_parser = subparsers.add_parser('phase1.5', parents=[parent_parser], 
-        help='Run Phase 1.5: Metadata Processor (translates title/author/chapters, preserves v3 schema)')
-    phase1_5_parser.add_argument('volume_id', type=str, nargs='?', help='Volume ID (optional - will prompt if not provided)')
-    
-    # Phase 1.6 (Multimodal Processor)
-    phase1_6_parser = subparsers.add_parser('phase1.6', parents=[parent_parser],
-        help='Run Phase 1.6: Multimodal Processor (visual analysis for illustrations)')
-    phase1_6_parser.add_argument('volume_id', type=str, nargs='?', help='Volume ID (optional - will prompt if not provided)')
-    
-    # Multimodal Translator (Phase 1.6 + Phase 2)
-    multimodal_parser = subparsers.add_parser('multimodal', parents=[parent_parser],
-        help='Run Multimodal Translator: Phase 1.6 (visual analysis) + Phase 2 (translation with visual context)')
-    multimodal_parser.add_argument('volume_id', type=str, nargs='?', help='Volume ID (optional - will prompt if not provided)')
-    multimodal_parser.add_argument('--chapters', nargs='+', help='Specific chapters to translate')
-    multimodal_parser.add_argument('--force', action='store_true', help='Re-translate completed chapters')
-    
-    # Phase 2
-    phase2_parser = subparsers.add_parser('phase2', parents=[parent_parser], help='Run Phase 2: Translator')
-    phase2_parser.add_argument('volume_id', type=str, nargs='?', help='Volume ID (optional - will prompt if not provided)')
-    phase2_parser.add_argument('--chapters', nargs='+', help='Specific chapters to translate')
-    phase2_parser.add_argument('--force', action='store_true', help='Re-translate completed chapters')
-    phase2_parser.add_argument('--enable-continuity', action='store_true', 
-                               help='[ALPHA] Enable schema extraction and continuity (experimental, unstable)')
-    phase2_parser.add_argument('--enable-gap-analysis', action='store_true',
-                               help='Enable semantic gap analysis (Week 2-3 integration) for improved translation quality')
-    phase2_parser.add_argument('--enable-multimodal', action='store_true',
-                               help='Enable multimodal visual context injection (requires Phase 1.6)')
-    
-    # Phase 3
-    phase3_parser = subparsers.add_parser('phase3', parents=[parent_parser], help='Show Phase 3 instructions (Manual/Agentic Workflow)')
-    phase3_parser.add_argument('volume_id', type=str, nargs='?', help='Volume ID (optional - will prompt if not provided)')
-    
-    # Phase 4
-    phase4_parser = subparsers.add_parser('phase4', parents=[parent_parser], help='Run Phase 4: Builder (EPUB Packaging)')
-    phase4_parser.add_argument('volume_id', type=str, nargs='?', help='Volume ID (optional - will prompt if not provided)')
-    phase4_parser.add_argument('--output', type=str, help='Custom output filename')
-    
-    # Cleanup
-    cleanup_parser = subparsers.add_parser('cleanup', parents=[parent_parser], help='Clean up translated chapter titles (remove wrong numbers, illustration markers)')
-    cleanup_parser.add_argument('volume_id', type=str, help='Volume ID')
-    cleanup_parser.add_argument('--dry-run', action='store_true', help='Preview changes without modifying files')
-    
-    # CJK Clean (Vietnamese post-processor)
-    cjk_clean_parser = subparsers.add_parser('cjk-clean', parents=[parent_parser], 
-        help='Run Vietnamese CJK hard substitution cleaner (少女→thiếu nữ, スタミナ→sức bền, etc.)')
-    cjk_clean_parser.add_argument('volume_id', type=str, help='Volume ID')
-    cjk_clean_parser.add_argument('--dry-run', action='store_true', help='Preview substitutions without modifying files')
-    
-    # Self-Healing Anti-AI-ism Agent
-    heal_parser = subparsers.add_parser('heal', parents=[parent_parser],
-        help='Run Self-Healing Anti-AI-ism Agent (3-layer detection + LLM auto-correction)')
-    heal_parser.add_argument('volume_id', type=str, help='Volume ID to heal')
-    heal_parser.add_argument('--dry-run', action='store_true', help='Scan only, don\'t modify files')
-    heal_parser.add_argument('--vn', action='store_true', help='Target Vietnamese (default: auto-detect)')
-    heal_parser.add_argument('--en', action='store_true', help='Target English (default: auto-detect)')
-    
-    # Cache Inspect (Multimodal)
-    cache_parser = subparsers.add_parser('cache-inspect', parents=[parent_parser],
-        help='Inspect visual analysis cache for a volume (multimodal)')
-    cache_parser.add_argument('volume_id', type=str, nargs='?', help='Volume ID (optional - will prompt if not provided)')
-    cache_parser.add_argument('--detail', action='store_true', help='Show full analysis per illustration')
-
-    # Visual Thinking (JSON → Markdown converter)
-    vt_parser = subparsers.add_parser('visual-thinking', parents=[parent_parser],
-        help='Convert Gemini 3 Pro visual thought logs (JSON) to markdown')
-    vt_parser.add_argument('volume_id', type=str, nargs='?', help='Volume ID (optional - will prompt if not provided)')
-    vt_parser.add_argument('--split', action='store_true',
-        help='Generate one markdown file per illustration instead of consolidated')
-    vt_parser.add_argument('--with-cache', action='store_true',
-        help="Include Art Director's Notes output from visual_cache.json")
-    vt_parser.add_argument('--filter', choices=['illust', 'kuchie', 'cover'],
-        help='Only convert a specific illustration type')
-    vt_parser.add_argument('--output-dir', type=str,
-        help='Custom output directory (default: THINKING/ inside volume)')
-
-    # Status
-    status_parser = subparsers.add_parser('status', parents=[parent_parser], help='Show pipeline status for a volume')
-    status_parser.add_argument('volume_id', type=str, help='Volume ID')
-    
-    # List
-    list_parser = subparsers.add_parser('list', parents=[parent_parser], help='List all volumes')
-    
-    # Config
-    config_parser = subparsers.add_parser('config', parents=[parent_parser], help='View or modify pipeline configuration')
-    config_parser.add_argument('--show', action='store_true', help='Show current configuration')
-    config_parser.add_argument('--toggle-pre-toc', action='store_true', help='Toggle pre-TOC content detection (rare opening hooks before prologue)')
-    config_parser.add_argument('--toggle-multimodal', action='store_true', help='Toggle multimodal visual context (experimental)')
-    # Language switching
-    config_parser.add_argument('--language', type=str, choices=['en', 'vn'], help='Switch target language (en=English, vn=Vietnamese)')
-    config_parser.add_argument('--show-language', action='store_true', help='Show current target language details')
-    # Model switching
-    config_parser.add_argument(
-        '--model',
-        type=str,
-        choices=[
-            'pro', 'flash', '2.5-pro', '2.5-flash',
-            'gemini-3-pro-preview', 'gemini-3-flash-preview',
-            'gemini-2.5-pro', 'gemini-2.5-flash'
-        ],
-        help='Switch translation model (aliases or full model IDs)'
-    )
-    # Advanced generation parameters
-    config_parser.add_argument('--temperature', type=float, help='Set temperature (0.0-2.0, default: 0.6)')
-    config_parser.add_argument('--top-p', type=float, help='Set top_p (0.0-1.0, default: 0.95)')
-    config_parser.add_argument('--top-k', type=int, help='Set top_k (1-100, default: 40)')
-    
-    # Metadata inspection
-    metadata_parser = subparsers.add_parser('metadata', parents=[parent_parser], 
-        help='Inspect metadata schema and validate translator compatibility')
-    metadata_parser.add_argument('volume_id', type=str, nargs='?', help='Volume ID (optional - will prompt if not provided)')
-    metadata_parser.add_argument('--validate', action='store_true', 
-        help='Run full validation with detailed compatibility report')
-    
-    # Schema command - advanced schema manipulation
-    schema_parser = subparsers.add_parser('schema', parents=[parent_parser],
-        help='Advanced schema manipulation (add/edit characters, keigo_switch, validation)')
-    schema_parser.add_argument('volume_id', type=str, nargs='?', help='Volume ID (optional - will prompt if not provided)')
-    schema_parser.add_argument('--action', '-a', 
-        choices=['show', 'validate', 'add-character', 'bulk-keigo', 'apply-keigo', 
-                 'generate-keigo', 'sync', 'init', 'export'],
-        default='show', help='Schema action to perform (default: show)')
-    schema_parser.add_argument('--name', '-n', help='Character name (for add-character)')
-    schema_parser.add_argument('--json', '-j', help='JSON file (for apply-keigo, import)')
-    schema_parser.add_argument('--output', '-o', help='Output file (for export, generate-keigo)')
-    
+    parser = build_parser()
     args = parser.parse_args()
     
     if not args.command:
+        logger.info("MTL Studio 5.1 CLI")
+        logger.info("Use one of: run | phase1 | phase1.5 | phase1.6 | phase2 | phase4 | list | status")
         parser.print_help()
         sys.exit(1)
     
@@ -2264,50 +2359,19 @@ Supported Metadata Schemas:
         logger.debug("Verbose mode enabled - showing debug logs")
     else:
         logging.getLogger().setLevel(logging.INFO)
+
+    ui_mode = getattr(args, "ui", "auto")
+    no_color = getattr(args, "no_color", False)
     
-    controller = PipelineController(verbose=args.verbose)
+    controller = PipelineController(verbose=args.verbose, ui_mode=ui_mode, no_color=no_color)
     
-    # Centralized Volume ID Resolution with Interactive Mode
-    # Phases 1.5, 1.6, 2, 3, 4 support interactive selection
-    phase_names = {
-        'phase0': 'Phase 0 - Deprecated Alias (use phase1.6)',
-        'phase1.5': 'Phase 1.5 - Metadata Translation (Schema-Safe)',
-        'phase1.6': 'Phase 1.6 - Multimodal Processor (Visual Analysis)',
-        'multimodal': 'Multimodal Translator (Phase 1.6 + Phase 2 with Visual Context)',
-        'phase2': 'Phase 2 - Translator',
-        'phase3': 'Phase 3 - Critics',
-        'phase4': 'Phase 4 - Builder',
-        'cache-inspect': 'Visual Cache Inspector (Multimodal)',
-        'metadata': 'Metadata Schema Inspection',
-        'schema': 'Schema Manipulator',
-        'heal': 'Self-Healing Anti-AI-ism Agent (3-Layer Detection + LLM Correction)',
-        'visual-thinking': 'Visual Thinking Log Converter (JSON → Markdown)'
-    }
-    
-    if hasattr(args, 'volume_id'):
-        # Commands that need volume_id
-        if args.command in phase_names:
-            # These phases support interactive selection
-            phase_name = phase_names[args.command]
-            allow_interactive = True
-            
-            if args.volume_id:
-                # User provided an ID - try to resolve it (with fallback to interactive)
-                resolved = controller.resolve_volume_id(args.volume_id, allow_interactive=True, phase_name=phase_name)
-            else:
-                # No ID provided - show interactive selection immediately
-                resolved = controller.interactive_volume_selection(phase_name=phase_name)
-            
-            if not resolved:
-                logger.error("No volume selected. Exiting.")
-                sys.exit(1)
-            
-            args.volume_id = resolved
-        elif args.volume_id:
-            # Other commands with volume_id (phase1, run, etc.) - standard resolution
-            resolved = controller.resolve_volume_id(args.volume_id, allow_interactive=False)
-            if resolved:
-                args.volume_id = resolved
+    resolve_volume_id_for_args(args, controller, logger)
+
+    # First-pass extracted commands for maintainability and testability.
+    # Unhandled commands fall through to the existing legacy dispatch below.
+    extracted_exit_code = dispatch_extracted_command(args, controller)
+    if extracted_exit_code is not None:
+        sys.exit(extracted_exit_code)
 
     # Execute command
     if args.command == 'run':
@@ -2327,9 +2391,10 @@ Supported Metadata Schemas:
     
     elif args.command == 'multimodal':
         # Run Phase 1.6 first, then Phase 2 with multimodal enabled
-        logger.info("="*70)
-        logger.info("MULTIMODAL TRANSLATOR: Phase 1.6 + Phase 2 (Visual Context)")
-        logger.info("="*70)
+        controller._ui_header(
+            "Multimodal Translator",
+            "Phase 1.6 (visual analysis) -> Phase 2 (translation with visual context)"
+        )
         logger.info("")
         logger.info("Step 1: Running Phase 1.6 (Visual Analysis)...")
         success_p16 = controller.run_phase1_6(args.volume_id, standalone=False)
@@ -2343,10 +2408,10 @@ Supported Metadata Schemas:
         chapters = getattr(args, 'chapters', None)
         force = getattr(args, 'force', False)
         
-        # Enable verbose mode for Phase 2 to show translation progress
-        if not args.verbose:
+        # Keep legacy verbose behavior in plain mode; rich mode has live progress.
+        if not args.verbose and not controller.ui.rich_enabled:
             logger.info("ℹ️  Running Phase 2 in verbose mode for detailed progress")
-            controller = PipelineController(verbose=True)
+            controller = PipelineController(verbose=True, ui_mode=ui_mode, no_color=no_color)
         
         success_p2 = controller.run_phase2(
             args.volume_id, chapters, force,
@@ -2357,9 +2422,7 @@ Supported Metadata Schemas:
         
         if success_p2:
             logger.info("")
-            logger.info("="*70)
-            logger.info("✓ MULTIMODAL TRANSLATION COMPLETE")
-            logger.info("="*70)
+            logger.info("Multimodal translation complete.")
         
         sys.exit(0 if success_p2 else 1)
 
@@ -2378,10 +2441,10 @@ Supported Metadata Schemas:
         sys.exit(0 if success else 1)
     
     elif args.command == 'phase2':
-        # Force verbose mode for standalone phase 2 to show detailed translation progress
-        if not args.verbose:
-            logger.info("ℹ️  Running Phase 2 in verbose mode (use mtl.py run for minimal output)")
-            controller = PipelineController(verbose=True)
+        # Keep legacy verbose behavior in plain mode; rich mode has live chapter bars.
+        if not args.verbose and not controller.ui.rich_enabled:
+            logger.info("ℹ️  Running Phase 2 in verbose mode (use `--ui rich` for modern progress)")
+            controller = PipelineController(verbose=True, ui_mode=ui_mode, no_color=no_color)
         enable_continuity = getattr(args, 'enable_continuity', False)
         enable_gap_analysis = getattr(args, 'enable_gap_analysis', False)
         enable_multimodal = getattr(args, 'enable_multimodal', False)
@@ -2424,33 +2487,6 @@ Supported Metadata Schemas:
             filter_type=filter_type, output_dir=output_dir
         )
         sys.exit(0 if success else 1)
-    
-    elif args.command == 'status':
-        controller.show_status(args.volume_id)
-        sys.exit(0)
-    
-    elif args.command == 'list':
-        controller.list_volumes()
-        sys.exit(0)
-    
-    elif args.command == 'config':
-        controller.handle_config(
-            toggle_pre_toc=args.toggle_pre_toc,
-            show=args.show,
-            model=args.model if hasattr(args, 'model') else None,
-            temperature=args.temperature if hasattr(args, 'temperature') else None,
-            top_p=args.top_p if hasattr(args, 'top_p') else None,
-            top_k=args.top_k if hasattr(args, 'top_k') else None,
-            language=args.language if hasattr(args, 'language') else None,
-            show_language=args.show_language if hasattr(args, 'show_language') else False,
-            toggle_multimodal=args.toggle_multimodal if hasattr(args, 'toggle_multimodal') else False
-        )
-        sys.exit(0)
-    
-    elif args.command == 'metadata':
-        validate = getattr(args, 'validate', False)
-        is_compatible = controller.inspect_metadata(args.volume_id, validate=validate)
-        sys.exit(0 if is_compatible else 1)
     
     elif args.command == 'schema':
         # Invoke schema manipulator agent

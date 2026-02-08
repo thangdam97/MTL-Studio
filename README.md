@@ -1590,6 +1590,29 @@ The detector is integrated through QC modules used in IDE terminals (VSCode/Wind
    - `python scripts/cjk_validator.py --scan-volume <volume_id>`
    - Continue to Phase 4 only when no blocking leaks remain.
 
+**VSCode/Windsurf one-click task** (`.vscode/tasks.json`):
+```json
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "MTL: CJK Scan+Fix+Verify (VN)",
+      "type": "shell",
+      "command": "cd ${workspaceFolder}/pipeline && python mtl.py cjk-clean ${input:volume_id} && python mtl.py heal ${input:volume_id} --vn && python scripts/cjk_validator.py --scan-volume ${input:volume_id}",
+      "group": "build",
+      "problemMatcher": []
+    }
+  ],
+  "inputs": [
+    {
+      "id": "volume_id",
+      "type": "promptString",
+      "description": "Volume ID (full or suffix)"
+    }
+  ]
+}
+```
+
 Implementation note: `cjk_cleaner_v2.py` and `multi_script_detector.py` both consume `ComprehensiveCJKDetector`, so IDE-side automation can operate on the same Unicode logic as pipeline QC.
 
 ### Automatic QC Features

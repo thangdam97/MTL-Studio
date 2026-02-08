@@ -44,6 +44,7 @@ Configuration:
   mtl.py config --model pro              # Switch to gemini-3-pro-preview
   mtl.py config --model flash            # Switch to gemini-3-flash-preview
   mtl.py config --model 2.5-pro          # Switch to gemini-2.5-pro
+  mtl.py config --model 2.5-flash        # Switch to gemini-2.5-flash
   mtl.py config --temperature 0.7        # Adjust creativity (0.0-2.0)
   mtl.py config --top-p 0.9              # Adjust nucleus sampling (0.0-1.0)
   mtl.py config --top-k 50               # Adjust top-k sampling (1-100)
@@ -689,7 +690,7 @@ class PipelineController:
         logger.info("="*60)
         logger.info("")
         logger.info("Phase 3 uses an AGENTIC WORKFLOW with Gemini CLI.")
-        logger.info("Required Tool: GEMINI.md (Agent Core Definition)")
+        logger.info("Required Tool: AUDIT_AGENT.md (Agent Core Definition)")
         logger.info("")
         logger.info("WORKFLOW:")
         logger.info("  0. CJK Character Validation (Automated)")
@@ -698,7 +699,7 @@ class PipelineController:
         logger.info("     → Auto-run after Phase 2, manual check recommended")
         logger.info("")
         logger.info("  1. Translation Audit (Module 1)")
-        logger.info(f"     → Command: gemini -s GEMINI.md 'Audit WORK/{volume_id}/{lang_dir}/CHAPTER_XX.md'")
+        logger.info(f"     → Command: gemini -s AUDIT_AGENT.md 'Audit WORK/{volume_id}/{lang_dir}/CHAPTER_XX.md'")
         logger.info("     → System analyzes Victorian patterns, contractions, and AI-isms.")
         logger.info("     → Output: Graded report with specific fix recommendations.")
         logger.info("")
@@ -707,7 +708,7 @@ class PipelineController:
         logger.info("     → Aim for Grade A/B (Production Ready).")
         logger.info("")
         logger.info("  3. Illustration Insertion (Module 2)")
-        logger.info("     → Command: gemini -s GEMINI.md 'Insert illustrations for target chapter...'")
+        logger.info("     → Command: gemini -s AUDIT_AGENT.md 'Insert illustrations for target chapter...'")
         logger.info("     → System performs semantic matching to place <img class=\"fit\"> tags.")
         logger.info("")
         logger.info("  4. Final Approval")
@@ -758,8 +759,8 @@ class PipelineController:
     def run_full_pipeline(self, epub_path: Path, volume_id: Optional[str] = None,
                           skip_multimodal: bool = False) -> bool:
         """
-        Run the complete pipeline (Phases 1, 1.5, 1.6, 2, then pause for 3).
-        
+        Run the complete pipeline (Phases 1, 1.5, 1.6, 2, and 4).
+
         Args:
             epub_path: Path to source EPUB file
             volume_id: Optional volume identifier (auto-generated if not provided)
@@ -1112,7 +1113,7 @@ class PipelineController:
         logger.info(f"  Phase 1 (Librarian):    {pipeline_state.get('librarian', {}).get('status', 'not started')}")
         logger.info(f"  Phase 1.5 (Metadata):   {pipeline_state.get('metadata_processor', {}).get('status', 'not started')}")
 
-        # Phase 0 (Multimodal) - check for visual_cache.json
+        # Phase 1.6 (Multimodal) - check for visual_cache.json
         volume_path = self.work_dir / volume_id
         visual_cache_path = volume_path / "visual_cache.json"
         if visual_cache_path.exists():
@@ -1121,11 +1122,11 @@ class PipelineController:
                 with open(visual_cache_path, 'r', encoding='utf-8') as _f:
                     cache_data = _json.load(_f)
                 cache_count = len(cache_data)
-                logger.info(f"  Phase 0 (Visual):       ✓ cached ({cache_count} illustration(s))")
+                logger.info(f"  Phase 1.6 (Visual):     ✓ cached ({cache_count} illustration(s))")
             except Exception:
-                logger.info(f"  Phase 0 (Visual):       ⚠ cache exists but unreadable")
+                logger.info(f"  Phase 1.6 (Visual):     ⚠ cache exists but unreadable")
         else:
-            logger.info(f"  Phase 0 (Visual):       not run (optional, experimental)")
+            logger.info(f"  Phase 1.6 (Visual):     not run")
 
         logger.info(f"  Phase 2 (Translator):   {pipeline_state.get('translator', {}).get('status', 'not started')}")
         logger.info(f"  Phase 3 (Critics):      {pipeline_state.get('critics', {}).get('status', 'manual review')}")
@@ -1355,7 +1356,7 @@ class PipelineController:
             logger.info("  ✗ No visual_cache.json found")
             logger.info("")
             logger.info("  To generate, run:")
-            logger.info(f"    mtl.py phase0 {volume_id}")
+            logger.info(f"    mtl.py phase1.6 {volume_id}")
             logger.info("="*60)
             return False
 
@@ -1834,7 +1835,12 @@ class PipelineController:
             model_map = {
                 'pro': 'gemini-3-pro-preview',
                 'flash': 'gemini-3-flash-preview',
-                '2.5-pro': 'gemini-2.5-pro'
+                '2.5-pro': 'gemini-2.5-pro',
+                '2.5-flash': 'gemini-2.5-flash',
+                'gemini-3-pro-preview': 'gemini-3-pro-preview',
+                'gemini-3-flash-preview': 'gemini-3-flash-preview',
+                'gemini-2.5-pro': 'gemini-2.5-pro',
+                'gemini-2.5-flash': 'gemini-2.5-flash'
             }
             
             if 'gemini' not in config:
@@ -2003,13 +2009,14 @@ class PipelineController:
                 logger.info(f"  Lookahead Buffer: {mm_lookahead.get('buffer_size', 'N/A')} segments")
             else:
                 logger.info("  Enable with: mtl.py config --toggle-multimodal")
-                logger.info("  Workflow: phase0 → phase2 --enable-multimodal")
+                logger.info("  Workflow: phase1.6 → phase2 --enable-multimodal")
 
             logger.info("\n" + "="*60)
             logger.info("Quick Commands:")
             logger.info("  --language en|vn             Switch target language")
             logger.info("  --show-language              Show current language details")
-            logger.info("  --model pro|flash|2.5-pro    Switch translation model")
+            logger.info("  --model pro|flash|2.5-pro|2.5-flash")
+            logger.info("                              Switch translation model")
             logger.info("  --temperature 0.6            Adjust creativity (0.0-2.0)")
             logger.info("  --top-p 0.95                 Adjust nucleus sampling")
             logger.info("  --top-k 40                   Adjust top-k sampling")
@@ -2039,7 +2046,7 @@ class PipelineController:
             status = "ENABLED" if new_value else "DISABLED"
             changes_made.append(f"Multimodal Visual Context: {status}")
             if new_value:
-                changes_made.append("  Workflow: phase0 <vol> → phase2 <vol> --enable-multimodal")
+                changes_made.append("  Workflow: phase1.6 <vol> → phase2 <vol> --enable-multimodal")
         
         # Save changes if any were made
         if changes_made:
@@ -2073,8 +2080,8 @@ Examples:
   mtl.py phase2 novel_v1
   mtl.py phase4 novel_v1
   
-  # Multimodal workflow (experimental)
-  mtl.py phase0 novel_v1                           # Pre-bake illustration analysis
+  # Multimodal workflow
+  mtl.py phase1.6 novel_v1                         # Pre-bake illustration analysis
   mtl.py phase2 novel_v1 --enable-multimodal       # Translate with visual context
   mtl.py cache-inspect novel_v1                    # Inspect cached analysis
   mtl.py cache-inspect novel_v1 --detail           # Full analysis per illustration
@@ -2103,7 +2110,7 @@ Supported Metadata Schemas:
     subparsers = parser.add_subparsers(dest='command', help='Command to run')
     
     # Run command (full pipeline)
-    run_parser = subparsers.add_parser('run', parents=[parent_parser], help='Run full pipeline (Phases 1, 1.5, 1.6, 2, then pause for 3)')
+    run_parser = subparsers.add_parser('run', parents=[parent_parser], help='Run full pipeline (Phases 1, 1.5, 1.6, 2, 4)')
     run_parser.add_argument('epub_path', type=str, help='Path to Japanese EPUB file')
     run_parser.add_argument('--id', dest='volume_id', type=str, help='Custom volume ID (auto-generated if not provided)')
     run_parser.add_argument('--skip-multimodal', action='store_true', 
@@ -2146,7 +2153,7 @@ Supported Metadata Schemas:
     phase2_parser.add_argument('--enable-gap-analysis', action='store_true',
                                help='Enable semantic gap analysis (Week 2-3 integration) for improved translation quality')
     phase2_parser.add_argument('--enable-multimodal', action='store_true',
-                               help='[EXPERIMENTAL] Enable multimodal visual context injection (requires Phase 0)')
+                               help='Enable multimodal visual context injection (requires Phase 1.6)')
     
     # Phase 3
     phase3_parser = subparsers.add_parser('phase3', parents=[parent_parser], help='Show Phase 3 instructions (Manual/Agentic Workflow)')
@@ -2211,7 +2218,16 @@ Supported Metadata Schemas:
     config_parser.add_argument('--language', type=str, choices=['en', 'vn'], help='Switch target language (en=English, vn=Vietnamese)')
     config_parser.add_argument('--show-language', action='store_true', help='Show current target language details')
     # Model switching
-    config_parser.add_argument('--model', type=str, choices=['pro', 'flash', '2.5-pro'], help='Switch translation model (pro=gemini-3-pro-preview, flash=gemini-3-flash-preview, 2.5-pro=gemini-2.5-pro)')
+    config_parser.add_argument(
+        '--model',
+        type=str,
+        choices=[
+            'pro', 'flash', '2.5-pro', '2.5-flash',
+            'gemini-3-pro-preview', 'gemini-3-flash-preview',
+            'gemini-2.5-pro', 'gemini-2.5-flash'
+        ],
+        help='Switch translation model (aliases or full model IDs)'
+    )
     # Advanced generation parameters
     config_parser.add_argument('--temperature', type=float, help='Set temperature (0.0-2.0, default: 0.6)')
     config_parser.add_argument('--top-p', type=float, help='Set top_p (0.0-1.0, default: 0.95)')
@@ -2254,7 +2270,7 @@ Supported Metadata Schemas:
     # Centralized Volume ID Resolution with Interactive Mode
     # Phases 1.5, 1.6, 2, 3, 4 support interactive selection
     phase_names = {
-        'phase0': 'Phase 0 - Visual Asset Processor (Deprecated)',
+        'phase0': 'Phase 0 - Deprecated Alias (use phase1.6)',
         'phase1.5': 'Phase 1.5 - Metadata Translation (Schema-Safe)',
         'phase1.6': 'Phase 1.6 - Multimodal Processor (Visual Analysis)',
         'multimodal': 'Multimodal Translator (Phase 1.6 + Phase 2 with Visual Context)',

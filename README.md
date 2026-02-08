@@ -20,7 +20,7 @@ Version 5.1 | Production Ready | February 2026
 2. [Gemini Embedding: Vector Search Engine](#-gemini-embedding-vector-search-engine)
     - [Why Vector Search? Traditional MT and CAT Tools Compared](#why-vector-search-traditional-mt-and-cat-tools-compared)
 3. [Gemini 3 Pro Vision: Illustration Multimodal Processor](#gemini-3-pro-vision-illustration-multimodal-processor)
-4. [What's New in V4.0](#whats-new-in-v40-previous-release)
+4. [What's New in V5.1](#whats-new-in-v51-current-release)
 5. [System Architecture](#system-architecture)
 6. [Pipeline Phases](#pipeline-phases)
 7. [Installation](#installation)
@@ -48,9 +48,9 @@ Version 5.1 | Production Ready | February 2026
 
 MTL Studio is a complete automated pipeline for translating Japanese Light Novel EPUBs to professional multi-language editions. The system leverages Google Gemini AI (2.5 Pro/Flash) with retrieval-augmented generation (RAG) to produce publication-quality translations with consistent character voices, proper typography, and accurate terminology.
 
-### V5.0: Three-Pillar Intelligence
+### V5.1: Three-Pillar Intelligence
 
-V5.0 (February 2026) introduces a **Three-Pillar Translation Architecture** that elevates machine translation from text-only analysis to true multimodal contextual understanding:
+V5.1 (February 2026) introduces a **Three-Pillar Translation Architecture** that elevates machine translation from text-only analysis to true multimodal contextual understanding:
 
 | Pillar | Technology | Role |
 |--------|-----------|------|
@@ -620,7 +620,7 @@ When the translator saves its THINKING log, it includes the Art Director's visua
 
 ---
 
-## What's New in V4.0 (Previous Release)
+## What's New in V5.1 (Current Release)
 
 ### Gap Moe Semantic Analysis
 - **Behavioral Transition Detection**: Automatically identifies character personality shifts (e.g., yandere gap moe: cute→scary)
@@ -1192,26 +1192,42 @@ python mtl.py run INPUT/novel_v1.epub --verbose
 
 ```bash
 # Full pipeline
-python mtl.py run INPUT/novel_v1.epub [--verbose] [--id custom_id]
+python mtl.py run INPUT/novel_v1.epub [--verbose] [--id custom_id] [--skip-multimodal]
 
 # Individual phases
 python mtl.py phase1 INPUT/novel_v1.epub [--id volume_id]
-python mtl.py phase2 volume_id [--chapters 1,2,3] [--force]
-python mtl.py phase4 volume_id
+python mtl.py phase1.5 [volume_id]
+python mtl.py phase1.6 [volume_id]
+python mtl.py phase2 [volume_id] [--chapters 1 2 3] [--force] [--enable-multimodal]
+python mtl.py phase3 [volume_id]
+python mtl.py phase4 [volume_id] [--output "Custom Title.epub"]
+
+# Multimodal helper
+python mtl.py multimodal [volume_id] [--chapters 1 2 3] [--force]
+
+# Quality tools
+python mtl.py cjk-clean volume_id [--dry-run]
+python mtl.py heal volume_id [--dry-run] [--en|--vn]
+python mtl.py cleanup volume_id [--dry-run]
+
+# Cache and thinking tools
+python mtl.py cache-inspect [volume_id] [--detail]
+python mtl.py visual-thinking [volume_id] [--split] [--with-cache]
 
 # Status and management
 python mtl.py status volume_id
 python mtl.py list
 
 # Metadata schema inspection
-python mtl.py metadata volume_id              # Quick schema detection
-python mtl.py metadata volume_id --validate   # Full validation report
+python mtl.py metadata [volume_id]            # Quick schema detection
+python mtl.py metadata [volume_id] --validate # Full validation report
+python mtl.py schema [volume_id] --action show
 
 # Configuration
 python mtl.py config --show
 python mtl.py config --language en    # Switch to English
 python mtl.py config --language vn    # Switch to Vietnamese
-python mtl.py config --model gemini-2.5-pro
+python mtl.py config --model 2.5-pro
 ```
 
 ### Command Details
@@ -1220,14 +1236,22 @@ python mtl.py config --model gemini-2.5-pro
 |---------|-------------|
 | `run` | Execute full pipeline from EPUB input |
 | `phase1` | Librarian: Extract EPUB to working directory |
+| `phase1.5` | Metadata Processor: Translate metadata and preserve schema continuity |
+| `phase1.6` | Art Director: Analyze illustrations and build `visual_cache.json` |
 | `phase2` | Translator: Translate chapters with Gemini |
+| `phase3` | Display critics workflow instructions for audit/review |
 | `phase4` | Builder: Package translated content to EPUB |
+| `multimodal` | Run `phase1.6` + `phase2 --enable-multimodal` in one command |
+| `cache-inspect` | Inspect multimodal cache status and per-image analysis metadata |
+| `visual-thinking` | Convert visual thought logs (`cache/thoughts/*.json`) to markdown |
 | `status` | Display volume processing status |
 | `list` | List all volumes in WORK directory |
 | `metadata` | Inspect metadata schema and validate translator compatibility |
+| `schema` | Advanced schema manipulation and validation actions |
 | `config` | View or modify pipeline configuration |
-| `cjk-clean` | Run CJK Cleaner v2 (multi-script artifact removal) |
+| `cjk-clean` | Run VN CJK hard substitution cleaner on translated files |
 | `heal` | Run Self-Healing Anti-AI-ism Agent (3-layer detection + auto-fix) |
+| `cleanup` | Clean translated chapter titles and illustration marker artifacts |
 
 ### Options
 
@@ -1343,8 +1367,9 @@ MTL Studio includes a comprehensive reverse-engineered pattern database for majo
 | **Hifumi Shobo** | 7 patterns | `p002_003.jpg` spreads, spine fallback TOC |
 | **Hobby Japan** | 3 patterns | Standard EPUB3 structure |
 | **Shueisha** | 6 patterns | `embed####_HD.jpg`, spine-based kuchie extraction |
+| **Kodansha** | 8+ patterns | Pre-TOC detection, `p###.jpg` remapping, kuchie handling |
 
-**Total Coverage**: 7 publishers, 65+ documented patterns, modular JSON-based system
+**Total Coverage**: 8 publishers, 65+ documented patterns, modular JSON-based system
 
 ### Pattern Categories
 
@@ -2376,6 +2401,13 @@ See LICENSE.txt for licensing information.
 
 ## Changelog
 
+### Version 5.1 (February 2026)
+- **Three-Pillar Translation Architecture**: Unified RAG + Vector Search + Multimodal Vision workflow
+- **Gemini Embedding Vector Search**: Semantic grammar matching pipeline with confidence-gated injection and auto-rebuild
+- **Phase 1.6 Multimodal Processor**: Gemini 3 Pro Vision Art Director's Notes with hash-based visual cache invalidation
+- **Self-Healing Quality Pipeline**: Integrated CJK cleaning + Anti-AI-ism healing for post-translation stabilization
+- **CLI Expansion**: `phase1.6`, `multimodal`, `cache-inspect`, `visual-thinking`, and richer schema tooling
+
 ### Version 4.0 LTS (February 2026)
 - **Gap Moe Semantic Analysis**: Automatic detection and preservation of character behavioral transitions (cute→scary, cold→warm)
   - Possessive language markers (21+ patterns)
@@ -2454,4 +2486,4 @@ See LICENSE.txt for licensing information.
 
 ---
 
-Version 3.0 LTS | January 2026
+Version 5.1 | February 2026

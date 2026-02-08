@@ -1,7 +1,7 @@
 {
-    "version": "2.0",
-    "description": "RAG Database for Vietnamese Grammar Restructuring — Natural JP→VN Translation Patterns (Extended via 148-EPUB corpus + 98 VN chapter analysis)",
-    "last_updated": "2026-02-07",
+    "version": "2.2",
+    "description": "RAG Database for Vietnamese Grammar Restructuring — Natural JP→VN Translation Patterns (Extended via 148-EPUB corpus + 98 VN chapter analysis + 7 transcreation patterns + romantic relationship pronouns)",
+    "last_updated": "2026-02-08",
     "metadata": {
         "corpus_stats": {
             "jp_epubs_scanned": 148,
@@ -18,6 +18,67 @@
         "collection_name": "vietnamese_grammar_patterns"
     },
     "pattern_categories": {
+        "romantic_relationship_pronouns": {
+            "description": "CRITICAL: Vietnamese pronoun system encodes relationship status. Dating couples MUST use anh/em in direct address to signal romantic bond.",
+            "patterns": [
+                {
+                    "id": "vn_dating_couple_pronouns_strict",
+                    "japanese_structure": "僕/俺 (boy) ↔ 君 (girl) in romantic relationships",
+                    "japanese_indicators": [
+                        "恋人同士",
+                        "カップル",
+                        "彼氏",
+                        "彼女"
+                    ],
+                    "vietnamese_pattern": "MANDATORY: anh (male) ↔ em (female) — FORBIDDEN: cậu/mày/bạn/mình in direct address",
+                    "examples": [
+                        {
+                            "jp": "海、どうしたの？",
+                            "literal": "Umi, cậu sao vậy? [WRONG - treating girlfriend as friend]",
+                            "natural": "Umi, em sao vậy? [CORRECT]",
+                            "source": "1a87_VN_corpus"
+                        },
+                        {
+                            "jp": "真樹、ありがとう",
+                            "literal": "Maki, cảm ơn cậu [WRONG - treating boyfriend as friend]",
+                            "natural": "Maki, em cảm ơn anh [CORRECT]",
+                            "source": "1a87_VN_corpus"
+                        },
+                        {
+                            "jp": "一緒に行こうか",
+                            "literal": "Mình đi cùng nhau nhé? [WRONG in dialogue]",
+                            "natural": "Đi cùng anh nhé? (male to female) / Đi cùng em nhé? (female to male) [CORRECT]",
+                            "source": "1a87_VN_corpus"
+                        },
+                        {
+                            "jp": "二人で",
+                            "literal": "Hai người mình [AMBIGUOUS]",
+                            "natural": "Bọn mình / Hai đứa mình [CORRECT - collective reference, not direct address]",
+                            "source": "1a87_VN_corpus"
+                        }
+                    ],
+                    "usage_rules": [
+                        "DIRECT ADDRESS (boy→girl): Use 'em' for 'you', 'anh' for 'I'",
+                        "DIRECT ADDRESS (girl→boy): Use 'anh' for 'you', 'em' for 'I'",
+                        "COLLECTIVE REFERENCE: 'bọn mình/hai đứa mình' (us two) is CORRECT and natural",
+                        "INTERNAL THOUGHTS: 'mình' (self) is CORRECT for first-person introspection",
+                        "FORBIDDEN: Never use cậu/mày/bạn/tớ between romantic partners in direct speech",
+                        "EXCEPTION: 'bạn gái' (girlfriend) and 'bạn trai' (boyfriend) as NOUNS are correct"
+                    ],
+                    "priority": "critical",
+                    "corpus_frequency": 8920
+                }
+            ],
+            "negative_vectors": {
+                "description": "DO NOT apply romantic pronouns in these contexts",
+                "texts": [
+                    "Friends of same age using cậu/tớ between each other - this is correct casual speech",
+                    "Internal monologue using mình for self-reference - this is correct first-person",
+                    "Collective reference 'bọn mình' or 'hai đứa mình' meaning 'us two' - this is correct",
+                    "Nouns 'bạn gái' (girlfriend) or 'bạn trai' (boyfriend) - these are correct vocabulary"
+                ]
+            }
+        },
         "contrastive_comparison": {
             "description": "Contrasting two subjects or situations — Vietnamese uses 'nhưng/mà/còn' structures, not 'tuy nhiên' every time",
             "patterns": [
@@ -1258,6 +1319,264 @@
                     ],
                     "priority": "high",
                     "corpus_frequency": 1540
+                },
+                {
+                    "id": "vn_mattaku_exasperation",
+                    "japanese_structure": "まったく / 全く",
+                    "japanese_indicators": [
+                        "まったく",
+                        "全く",
+                        "まったくもう",
+                        "まったくだ"
+                    ],
+                    "vietnamese_pattern": "Thật là / Hết chịu nổi / Trời ơi / Hoàn toàn",
+                    "examples": [
+                        {
+                            "jp": "まったく、しょうがないな",
+                            "literal": "Hoàn toàn không còn cách nào",
+                            "natural": "Hết chịu nổi / Trời ơi, không biết làm sao với cậu nữa."
+                        },
+                        {
+                            "jp": "まったく知らない",
+                            "literal": "Hoàn toàn không biết",
+                            "natural": "Chẳng biết gì cả / Không hề biết."
+                        },
+                        {
+                            "jp": "まったくだ。君の言う通りだ",
+                            "literal": "Hoàn toàn. Bạn nói đúng",
+                            "natural": "Đúng quá! / Chính xác! / Đúng y như cậu nói."
+                        },
+                        {
+                            "jp": "まったくもう！",
+                            "literal": "Hoàn toàn rồi!",
+                            "natural": "Thật là! / Ối trời! / Không chịu nổi!"
+                        }
+                    ],
+                    "usage_rules": [
+                        "Exasperation (affectionate): 'hết chịu nổi', 'trời ơi', 'thật là'",
+                        "Complete negation: 'hoàn toàn không', 'chẳng...gì cả', 'không hề'",
+                        "Strong agreement: 'đúng quá', 'chính xác', 'đúng y'",
+                        "Standalone frustration: 'ối trời', 'không chịu nổi'",
+                        "AVOID: 'một cách hoàn toàn' (too formal)"
+                    ],
+                    "priority": "critical",
+                    "corpus_frequency": 920
+                },
+                {
+                    "id": "vn_zettai_absolute",
+                    "japanese_structure": "絶対 / ぜったい",
+                    "japanese_indicators": [
+                        "絶対",
+                        "ぜったい",
+                        "絶対に"
+                    ],
+                    "vietnamese_pattern": "Nhất định / Chắc chắn / Tuyệt đối / Hẳn là",
+                    "examples": [
+                        {
+                            "jp": "絶対に負けない",
+                            "literal": "Tuyệt đối không thua",
+                            "natural": "Nhất định không thua / Không thua đâu."
+                        },
+                        {
+                            "jp": "絶対に許さない",
+                            "literal": "Tuyệt đối không tha",
+                            "natural": "Nhất định không tha."
+                        },
+                        {
+                            "jp": "絶対可愛い",
+                            "literal": "Tuyệt đối đáng yêu",
+                            "natural": "Chắc chắn dễ thương / Hẳn là dễ thương lắm."
+                        },
+                        {
+                            "jp": "絶対行く",
+                            "literal": "Tuyệt đối đi",
+                            "natural": "Nhất định sẽ đi / Đi chứ."
+                        }
+                    ],
+                    "usage_rules": [
+                        "Strong determination: 'nhất định', 'nhất định sẽ'",
+                        "Certainty/conviction: 'chắc chắn', 'hẳn là'",
+                        "Absolute prohibition: 'tuyệt đối không', 'đừng có mà'",
+                        "Emphatic promise: 'nhất định', 'chắc chắn rồi'",
+                        "Can add 'đâu' for reassurance: 'Không sao đâu'"
+                    ],
+                    "priority": "critical",
+                    "corpus_frequency": 1340
+                },
+                {
+                    "id": "vn_sekkaku_special_effort",
+                    "japanese_structure": "せっかく / 折角",
+                    "japanese_indicators": [
+                        "せっかく",
+                        "折角"
+                    ],
+                    "vietnamese_pattern": "Đã...rồi mà / Mà...đến nơi rồi / Được...thế này",
+                    "examples": [
+                        {
+                            "jp": "せっかく来たのに",
+                            "literal": "Đã đến mà",
+                            "natural": "Đã đến tận đây rồi mà / Đã tốn công đến rồi."
+                        },
+                        {
+                            "jp": "せっかくだから食べよう",
+                            "literal": "Vì hiếm có nên ăn thôi",
+                            "natural": "Được thế này thì ăn thôi / Đã có rồi thì ăn nha."
+                        },
+                        {
+                            "jp": "せっかく作ったのに",
+                            "literal": "Đã làm mà",
+                            "natural": "Công làm rồi mà / Đã tốn công làm rồi."
+                        }
+                    ],
+                    "usage_rules": [
+                        "Wasted effort: 'đã...rồi mà', 'tốn công...rồi'",
+                        "Take advantage: 'được...thế này', 'đã...rồi thì'",
+                        "Disappointment: 'công...mất', 'mà...uổng'",
+                        "Focus on the effort/opportunity being special",
+                        "AVOID: 'hiếm có' (misses the effort nuance)"
+                    ],
+                    "priority": "high",
+                    "corpus_frequency": 680
+                },
+                {
+                    "id": "vn_wazawaza_deliberately",
+                    "japanese_structure": "わざわざ",
+                    "japanese_indicators": [
+                        "わざわざ"
+                    ],
+                    "vietnamese_pattern": "Cố tình / Còn đặc biệt / Công đến",
+                    "examples": [
+                        {
+                            "jp": "わざわざ来てくれたの？",
+                            "literal": "Cố tình đến cho tôi à?",
+                            "natural": "Cậu công đến tận đây à? / Cậu đặc biệt đến à?"
+                        },
+                        {
+                            "jp": "わざわざ言わなくても",
+                            "literal": "Cố tình nói cũng không cần",
+                            "natural": "Không cần phải nói ra / Đâu cần nói."
+                        },
+                        {
+                            "jp": "わざわざありがとう",
+                            "literal": "Cố tình cảm ơn",
+                            "natural": "Cảm ơn cậu đã công đến / Cảm ơn cậu nhiều."
+                        }
+                    ],
+                    "usage_rules": [
+                        "Appreciation: 'công đến', 'đặc biệt...cho'",
+                        "Unnecessary effort: 'đâu cần', 'không cần phải'",
+                        "Deliberate action: 'cố ý', 'cố tình' (negative tone)",
+                        "Context determines if grateful or annoyed",
+                        "Emphasize the extra effort involved"
+                    ],
+                    "priority": "high",
+                    "corpus_frequency": 540
+                },
+                {
+                    "id": "vn_kekkyoku_in_the_end",
+                    "japanese_structure": "結局 / けっきょく",
+                    "japanese_indicators": [
+                        "結局",
+                        "けっきょく"
+                    ],
+                    "vietnamese_pattern": "Cuối cùng thì / Rốt cuộc / Xét cho cùng",
+                    "examples": [
+                        {
+                            "jp": "結局どうなったの？",
+                            "literal": "Kết quả thế nào?",
+                            "natural": "Cuối cùng thế nào? / Rốt cuộc ra sao?"
+                        },
+                        {
+                            "jp": "結局やらなかった",
+                            "literal": "Kết cục không làm",
+                            "natural": "Cuối cùng thì không làm / Rốt cuộc không làm."
+                        },
+                        {
+                            "jp": "結局そういうことか",
+                            "literal": "Kết quả là thế à",
+                            "natural": "Cuối cùng là vậy à / Ra là thế."
+                        }
+                    ],
+                    "usage_rules": [
+                        "'cuối cùng thì' — after all that happened",
+                        "'rốt cuộc' — emphasizing final outcome",
+                        "'ra là' — dawning realization of truth",
+                        "'xét cho cùng' — when all is considered",
+                        "Shows resolution after uncertainty"
+                    ],
+                    "priority": "high",
+                    "corpus_frequency": 780
+                },
+                {
+                    "id": "vn_toriaezu_for_now",
+                    "japanese_structure": "とりあえず",
+                    "japanese_indicators": [
+                        "とりあえず"
+                    ],
+                    "vietnamese_pattern": "Tạm thời / Trước hết / Trước mắt",
+                    "examples": [
+                        {
+                            "jp": "とりあえずビール",
+                            "literal": "Tạm thời bia",
+                            "natural": "Bia đã / Trước hết là bia."
+                        },
+                        {
+                            "jp": "とりあえず休もう",
+                            "literal": "Tạm thời nghỉ thôi",
+                            "natural": "Nghỉ đã / Trước hết nghỉ đã."
+                        },
+                        {
+                            "jp": "とりあえず連絡した",
+                            "literal": "Tạm thời liên lạc rồi",
+                            "natural": "Đã liên lạc trước rồi / Liên lạc sơ rồi."
+                        }
+                    ],
+                    "usage_rules": [
+                        "'[verb] đã' — do this first (casual)",
+                        "'trước hết' — first priority",
+                        "'tạm thời' — temporary measure",
+                        "'trước mắt' — immediate concern",
+                        "Often best with 'đã': 'ăn đã', 'nói đã'"
+                    ],
+                    "priority": "high",
+                    "corpus_frequency": 620
+                },
+                {
+                    "id": "vn_shikata_nai_helpless",
+                    "japanese_structure": "仕方ない / しょうがない / しかたない",
+                    "japanese_indicators": [
+                        "仕方ない",
+                        "しょうがない",
+                        "しかたない",
+                        "仕方がない"
+                    ],
+                    "vietnamese_pattern": "Không còn cách nào / Thôi vậy / Chịu thôi",
+                    "examples": [
+                        {
+                            "jp": "仕方ないな",
+                            "literal": "Không có cách",
+                            "natural": "Không còn cách nào / Thôi chịu."
+                        },
+                        {
+                            "jp": "しょうがないでしょ",
+                            "literal": "Không có cách đúng không",
+                            "natural": "Chịu thôi / Biết làm sao được."
+                        },
+                        {
+                            "jp": "まあ仕方ない",
+                            "literal": "Chà không có cách",
+                            "natural": "Thôi được rồi / Thôi vậy / Kệ đi."
+                        }
+                    ],
+                    "usage_rules": [
+                        "Resignation: 'thôi vậy', 'chịu thôi', 'kệ đi'",
+                        "Acceptance: 'không còn cách nào', 'biết làm sao'",
+                        "Reluctant ok: 'thôi được', 'chấp nhận vậy'",
+                        "Can add sigh effect: 'Haiz, thôi vậy'",
+                        "Shows helpless acceptance of situation"
+                    ],
+                    "priority": "critical",
+                    "corpus_frequency": 1120
                 }
             ],
             "negative_vectors": {

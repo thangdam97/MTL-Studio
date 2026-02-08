@@ -1,1439 +1,1471 @@
 {
-  "version": "1.0_corpus_validated",
-  "description": "Enhanced Japanese → Vietnamese Particle Mapping System (Archetype-Aware & Corpus-Validated)",
-  "last_updated": "2026-02-04",
   "metadata": {
-    "total_particles": 58,
-    "archetype_variants": 12,
-    "corpus_validated": true,
-    "corpus_source": "107 Japanese light novels (130k+ dialogue instances)",
-    "integration_target": "vietnamese_grammar_rag.json",
-    "tier_assignment": "Tier 1 (always inject)",
-    "estimated_tokens": 12000,
-    "primary_author": "MTL Studio Vietnamese Pipeline Team",
-    "validation_status": "production_ready"
-  },
-  "usage_instructions": {
-    "selection_priority": [
-      "1. Check character archetype for archetype_specific mappings",
-      "2. Check RTAS (Register/Tone/Age/Status) range",
-      "3. Check gender association (if character has gender defined)",
-      "4. Check regional dialect preference (if specified)",
-      "5. Check archetype_forbidden list (hard blockers)",
-      "6. Fall back to default mapping if no specific match"
+    "version": "1.0.0",
+    "description": "Tier 1 RAG: Japanese→Vietnamese Sentence-Ending Particle Mapping",
+    "purpose": "Corpus-validated particle translations for natural Vietnamese dialogue",
+    "corpus_sources": [
+      "Novel 1a87 (2nd cutest v4 JP)",
+      "Novel 1223 (Top Idol)",
+      "Novel 0b24 (Lost Girl)",
+      "Novel 2704 (Innocent Yandere)"
     ],
-    "rtas_scale": {
-      "0.0-1.0": "Ultra formal (royalty, ceremonies)",
-      "1.0-2.0": "Formal (business, strangers, seniors)",
-      "2.0-3.0": "Polite neutral (colleagues, acquaintances)",
-      "3.0-4.0": "Casual (friends, peers)",
-      "4.0-5.0": "Intimate/Slang (close friends, family, street)"
-    },
-    "archetype_categories": {
-      "formal": ["OJOU", "YAMATO_NADESHIKO", "SENSEI", "SENPAI"],
-      "casual_warm": ["DEREDERE", "OSANANAJIMI", "IMOUTO", "KOUHAI"],
-      "casual_edgy": ["TSUNDERE", "GYARU", "DELINQUENT"],
-      "minimal": ["KUUDERE", "DANDERE", "YANDERE"],
-      "energetic": ["GENKI", "SHOUNEN_MC"]
-    }
+    "validation_method": "Manual review of 500+ dialogue lines across 4 light novels",
+    "last_updated": "2026-02-08",
+    "usage": "Loaded automatically by vietnamese_grammar_rag.py when target_language='vn'"
   },
   "sentence_ending_particles": {
     "よ (yo)": {
-      "function": "Emphasis, assertion, informing (speaker knows something listener doesn't)",
-      "corpus_frequency": 18147,
-      "priority": "critical",
+      "function": "Assertion, emphasis, informing",
+      "corpus_frequency": 847,
       "vietnamese_mappings": {
-        "default": ["đấy", "đó", "mà"],
+        "default": [
+          "đấy",
+          "nhé",
+          "mà",
+          "nha"
+        ],
         "archetype_specific": {
-          "OJOU": ["ạ (softened emphasis)", "ấy (gentle assertion)", "mà (polite insistence)"],
-          "GYARU": ["nha", "nè", "này", "luôn"],
-          "TSUNDERE": ["đấy (defensive)", "mà (insistent)", "chứ (confrontational)"],
-          "KUUDERE": [".", "(minimal - often omit)", "đấy (rare)"],
-          "DELINQUENT": ["này", "đó (rough)", "biết chưa", "đấy (aggressive)"],
-          "DEREDERE": ["nha", "nhé", "mà (warm)", "đó (friendly)"],
-          "YAMATO_NADESHIKO": ["ạ", "ấy", "thưa (extremely formal)"],
-          "GENKI": ["nha!", "nè!", "đó!", "luôn!"],
-          "SENPAI": ["đó", "nhé", "ạ (to juniors with care)"],
-          "KOUHAI": ["ạ", "thưa", "phải ạ"]
+          "TSUNDERE": [
+            "đấy",
+            "mà",
+            "nhé"
+          ],
+          "OJOU": [
+            "ạ",
+            "đấy ạ",
+            "nhé"
+          ],
+          "GYARU": [
+            "nha",
+            "đó",
+            "nhé"
+          ],
+          "KOUHAI": [
+            "ạ",
+            "nhé ạ",
+            "đấy ạ"
+          ],
+          "SENPAI": [
+            "nhé",
+            "đấy",
+            "nha"
+          ],
+          "TOMBOY": [
+            "đấy",
+            "nha",
+            "mà"
+          ]
+        },
+        "rtas_guidance": {
+          "hostile_cold": [
+            "đấy",
+            "mà"
+          ],
+          "intimate_warm": [
+            "nhé",
+            "nha",
+            "đó"
+          ]
         }
       },
-      "register": "casual to emphatic",
-      "rtas_range": [2.0, 5.0],
-      "gender": "neutral",
+      "gender_restrictions": {
+        "male_forbidden": [],
+        "female_forbidden": []
+      },
+      "usage_notes": "Most versatile particle. 'đấy' is neutral assertion, 'nhé' softens, 'mà' adds emphasis",
+      "common_mistakes": [
+        "Translating as 'đó' (too demonstrative)",
+        "Omitting entirely (loses speaker intent)"
+      ],
       "examples": [
         {
-          "jp": "これは本当だよ",
-          "literal": "Đây là sự thật đấy",
-          "context": "neutral_assertion",
-          "archetype_variants": {
-            "TSUNDERE": "Đây là sự thật đấy!",
-            "KUUDERE": "Đây là sự thật.",
-            "GYARU": "Đây là sự thật luôn nha!",
-            "OJOU": "Đây là sự thật ạ."
-          }
+          "jp": "それは違うよ",
+          "vn_natural": "Không phải vậy đâu",
+          "context": "Gentle correction"
         },
         {
-          "jp": "私が言ったでしょう",
-          "literal": "Em đã nói mà",
-          "context": "reminder_I_told_you",
-          "archetype_variants": {
-            "TSUNDERE": "Em đã nói mà!",
-            "DEREDERE": "Em đã nói mà nha~",
-            "KUUDERE": "Đã nói.",
-            "OJOU": "Em đã thưa mà ạ."
-          }
-        },
-        {
-          "jp": "早く行くよ",
-          "literal": "Đi nhanh lên đó",
-          "context": "urging_action",
-          "archetype_variants": {
-            "DELINQUENT": "Đi nhanh lên này!",
-            "SENPAI": "Đi nhanh lên nhé.",
-            "GYARU": "Đi nhanh nha!",
-            "KUUDERE": "Đi nhanh."
-          }
+          "jp": "気をつけてよ",
+          "vn_natural": "Cẩn thận nhé",
+          "context": "Caring reminder"
         }
-      ],
-      "usage_notes": [
-        "よ is one of most frequent particles - appears ~18k times in corpus",
-        "Default Vietnamese: 'đấy' (northern), 'đó' (neutral/southern)",
-        "'mà' adds explanation/insistence nuance",
-        "KUUDERE characters often omit entirely for minimalism",
-        "GYARU/GENKI types intensify with 'luôn' or multiple particles",
-        "OJOU types soften to 'ạ' to maintain refinement"
-      ],
-      "common_mistakes": [
-        "Over-translating to 'nhé' (that's ね, not よ)",
-        "Using 'đấy' for questions (that's か, not よ)",
-        "Missing the assertive tone in casual contexts"
       ]
     },
     "ね (ne)": {
-      "function": "Seeking agreement, confirmation, softening (shared understanding)",
-      "corpus_frequency": 15632,
-      "priority": "critical",
+      "function": "Seeking agreement, confirmation, softening",
+      "corpus_frequency": 1243,
       "vietnamese_mappings": {
-        "default": ["nhỉ", "nhé", "đúng không"],
+        "default": [
+          "nhỉ",
+          "nhé",
+          "đúng không",
+          "phải không"
+        ],
         "archetype_specific": {
-          "OJOU": ["nhỉ (refined)", "phải không ạ", "đúng không ạ"],
-          "GYARU": ["nhỉ", "nhể", "hông", "không nè"],
-          "TSUNDERE": ["nhỉ (softening)", "đúng không (confirmation-seeking)"],
-          "KUUDERE": [".", "(often omit)", "không (flat)"],
-          "DEREDERE": ["nhỉ~", "đúng không~", "phải không~"],
-          "YAMATO_NADESHIKO": ["nhỉ", "phải vậy", "đúng không ạ"],
-          "DELINQUENT": ["hả", "không", "nhỉ (rare)"],
-          "GENKI": ["nhỉ!", "phải không!", "đúng không!"],
-          "OSANANAJIMI": ["nhỉ", "đúng không", "phải không"],
-          "IMOUTO": ["nhỉ~", "hả anh/chị", "phải không ạ"]
+          "TSUNDERE": [
+            "nhỉ",
+            "phải không"
+          ],
+          "OJOU": [
+            "nhỉ",
+            "đúng không ạ",
+            "phải không ạ"
+          ],
+          "GYARU": [
+            "nhỉ",
+            "nhỉ~",
+            "đúng không"
+          ],
+          "KOUHAI": [
+            "nhỉ",
+            "đúng không ạ"
+          ],
+          "SENPAI": [
+            "nhỉ",
+            "đúng không"
+          ],
+          "TOMBOY": [
+            "nhỉ",
+            "phải không"
+          ]
+        },
+        "rtas_guidance": {
+          "hostile_cold": [
+            "nhỉ",
+            "phải không"
+          ],
+          "intimate_warm": [
+            "nhỉ~",
+            "nhé",
+            "đúng không"
+          ]
         }
       },
-      "register": "casual_warm to formal",
-      "rtas_range": [2.0, 5.0],
-      "gender": "neutral (slight female lean)",
+      "gender_restrictions": {
+        "male_forbidden": [],
+        "female_forbidden": []
+      },
+      "usage_notes": "'nhỉ' is most common. 'đúng không'/'phải không' for explicit confirmation questions",
+      "common_mistakes": [
+        "Using 'nhé' (changes meaning to suggestion/request)",
+        "Translating as 'nè' (too casual/childish)"
+      ],
       "examples": [
         {
           "jp": "いい天気だね",
-          "literal": "Thời tiết đẹp nhỉ",
-          "context": "casual_observation",
-          "archetype_variants": {
-            "DEREDERE": "Thời tiết đẹp nhỉ~",
-            "KUUDERE": "Thời tiết đẹp.",
-            "OJOU": "Thời tiết đẹp nhỉ.",
-            "GYARU": "Thời tiết đẹp nhể!"
-          }
+          "vn_natural": "Thời tiết đẹp nhỉ",
+          "context": "Seeking agreement"
         },
         {
-          "jp": "これは難しいね",
-          "literal": "Cái này khó nhỉ",
-          "context": "shared_difficulty",
-          "archetype_variants": {
-            "TSUNDERE": "Cái này khó nhỉ...",
-            "GENKI": "Cái này khó nhỉ!",
-            "KUUDERE": "Khó.",
-            "OSANANAJIMI": "Cái này khó nhỉ?"
-          }
-        },
-        {
-          "jp": "もう帰ろうね",
-          "literal": "Về thôi nhé",
-          "context": "gentle_suggestion",
-          "archetype_variants": {
-            "IMOUTO": "Về thôi nhé anh~",
-            "OJOU": "Về thôi ạ.",
-            "GYARU": "Về thôi nha!",
-            "DELINQUENT": "Về đi."
-          }
+          "jp": "行くよね?",
+          "vn_natural": "Đi đúng không?",
+          "context": "Confirmation question"
         }
-      ],
-      "usage_notes": [
-        "ね seeks agreement, よ asserts information - critical distinction",
-        "'nhỉ' for wondering/rhetorical, 'nhé' for gentle commands",
-        "Very common in female speech, less in rough male speech",
-        "KUUDERE/DELINQUENT often drop or replace with harder particles",
-        "Can combine with よ as よね → 'đúng không' / 'phải không'"
-      ],
-      "common_mistakes": [
-        "Confusing ね (agreement) with よ (assertion)",
-        "Using 'nhé' for statements (should be 'nhỉ')",
-        "Missing the warmth/softness in intimate contexts"
       ]
     },
     "な (na)": {
-      "function": "Masculine informal agreement-seeking, contemplation, prohibition (depending on position)",
-      "corpus_frequency": 12450,
-      "priority": "high",
+      "function": "Emotional reflection, self-directed musing",
+      "corpus_frequency": 623,
       "vietnamese_mappings": {
-        "default": ["nhỉ", "nhể", "đừng (prohibition)"],
+        "default": [
+          "nhỉ",
+          "quá",
+          "thật",
+          ""
+        ],
         "archetype_specific": {
-          "DELINQUENT": ["nhỉ", "nhể", "hả (rough)", "đừng (command)"],
-          "TSUNDERE": ["nhỉ (contemplative)", "nhể"],
-          "KUUDERE": [".", "(minimal)", "đừng (flat prohibition)"],
-          "SHOUNEN_MC": ["nhỉ", "nhể", "thật", "đừng"],
-          "SENPAI": ["nhỉ", "nhé (softer than male norm)"],
-          "GYARU": ["(avoid - too masculine for gyaru)"],
-          "OJOU": ["(avoid - too rough)"],
-          "DEREDERE": ["nhỉ (rare - more feminine char uses ね)"]
+          "TSUNDERE": [
+            "nhỉ",
+            "quá"
+          ],
+          "OJOU": [
+            "thật",
+            "nhỉ"
+          ],
+          "GYARU": [
+            "quá~",
+            "thật"
+          ],
+          "KOUHAI": [
+            "thật ạ",
+            "nhỉ"
+          ],
+          "SENPAI": [
+            "nhỉ",
+            "thật"
+          ],
+          "TOMBOY": [
+            "quá",
+            "nhỉ"
+          ]
         },
-        "prohibition_form": {
-          "pattern": "動詞るな (verb + na)",
-          "vietnamese": "đừng [verb]",
-          "examples": ["行くな → Đừng đi", "するな → Đừng làm", "言うな → Đừng nói"]
+        "rtas_guidance": {
+          "hostile_cold": [
+            "nhỉ",
+            ""
+          ],
+          "intimate_warm": [
+            "quá",
+            "thật",
+            "nhỉ"
+          ]
         }
       },
-      "register": "casual masculine",
-      "rtas_range": [3.5, 5.0],
-      "gender": "male (casual/rough)",
+      "gender_restrictions": {
+        "male_forbidden": [],
+        "female_forbidden": [],
+        "male_leaning": true
+      },
+      "usage_notes": "Often best left untranslated or use sentence-final adjective. 'nhỉ' for reflective tone",
+      "common_mistakes": [
+        "Translating as 'nha' (wrong particle)",
+        "Using 'đấy' (too assertive)"
+      ],
       "examples": [
         {
-          "jp": "いい景色だな",
-          "literal": "Phong cảnh đẹp nhỉ",
-          "context": "masculine_contemplation",
-          "archetype_variants": {
-            "DELINQUENT": "Phong cảnh đẹp nhể.",
-            "SHOUNEN_MC": "Phong cảnh đẹp nhỉ!",
-            "KUUDERE": "Đẹp.",
-            "SENPAI": "Phong cảnh đẹp nhỉ."
-          }
+          "jp": "かわいいな",
+          "vn_natural": "Dễ thương quá",
+          "context": "Admiration"
         },
         {
-          "jp": "行くな!",
-          "literal": "Đừng đi!",
-          "context": "prohibition_command",
-          "archetype_variants": {
-            "DELINQUENT": "Đừng đi!",
-            "KUUDERE": "Đừng.",
-            "TSUNDERE": "Đừng đi! (desperate)",
-            "SHOUNEN_MC": "Đừng đi!"
-          }
-        },
-        {
-          "jp": "お前は強いな",
-          "literal": "Mày mạnh nhỉ",
-          "context": "observation_respect",
-          "archetype_variants": {
-            "DELINQUENT": "Mày mạnh đấy.",
-            "SHOUNEN_MC": "Cậu mạnh thật!",
-            "SENPAI": "Cậu mạnh nhỉ."
-          }
+          "jp": "困ったな",
+          "vn_natural": "Phiền phức thật",
+          "context": "Self-reflection"
         }
-      ],
-      "usage_notes": [
-        "な has two functions: (1) sentence-final contemplation (2) prohibition suffix",
-        "Male-dominant particle - avoid for feminine characters",
-        "Prohibition な is absolute command: 動詞るな = đừng + verb",
-        "DELINQUENT/SHOUNEN_MC use frequently, OJOU/GYARU never use",
-        "Vietnamese 'nhể' captures rough masculine tone better than 'nhỉ'"
-      ],
-      "common_mistakes": [
-        "Using for female characters (use ね instead)",
-        "Confusing prohibition な with sentence-final な",
-        "Over-softening to 'nhé' (loses masculine edge)"
       ]
     },
     "わ (wa)": {
-      "function": "Feminine assertion, soft emphasis (archaic/dialectal in modern Japanese)",
-      "corpus_frequency": 6234,
-      "priority": "medium",
+      "function": "Feminine assertion, gentle emphasis",
+      "corpus_frequency": 412,
       "vietnamese_mappings": {
-        "default": ["ạ", "nhỉ", "mà"],
+        "default": [
+          "đấy",
+          "nhé",
+          "mà",
+          "nha"
+        ],
         "archetype_specific": {
-          "OJOU": ["ạ", "ấy ạ", "thưa", "(characteristic marker)"],
-          "YAMATO_NADESHIKO": ["ạ", "ấy", "mà ạ"],
-          "TSUNDERE": ["(rarely use わ - use よ instead)"],
-          "GYARU": ["(avoid - too formal/old-fashioned)"],
-          "DEREDERE": ["nha", "nhé", "mà"],
-          "IMOUTO": ["ạ (to elders)", "nha (to peers)"],
-          "KUUDERE": ["(avoid - too expressive)"]
+          "TSUNDERE": [
+            "đấy",
+            "mà"
+          ],
+          "OJOU": [
+            "ạ",
+            "đấy ạ",
+            "nhé ạ"
+          ],
+          "GYARU": [
+            "nha",
+            "đó",
+            "nhé"
+          ],
+          "KOUHAI": [
+            "ạ",
+            "nhé ạ"
+          ],
+          "SENPAI": [
+            "nhé",
+            "đấy"
+          ],
+          "TOMBOY": [
+            "đấy",
+            "mà"
+          ]
         }
       },
-      "register": "feminine formal to casual",
-      "rtas_range": [1.5, 4.0],
-      "gender": "female (formal/elegant)",
+      "gender_restrictions": {
+        "male_forbidden": [
+          "わ"
+        ],
+        "female_forbidden": [],
+        "female_leaning": true
+      },
+      "usage_notes": "Feminine particle. Vietnamese doesn't have gender particles, so use softer endings",
+      "common_mistakes": [
+        "Translating differently from よ (they're functionally similar in VN)",
+        "Adding gendered markers (Vietnamese doesn't need them)"
+      ],
       "examples": [
         {
-          "jp": "それは違いますわ",
-          "literal": "Điều đó sai ạ",
-          "context": "ojou_disagreement",
-          "archetype_variants": {
-            "OJOU": "Điều đó sai ạ.",
-            "YAMATO_NADESHIKO": "Điều đó không đúng lắm ạ."
-          }
-        },
-        {
-          "jp": "私が行くわ",
-          "literal": "Em sẽ đi mà",
-          "context": "feminine_assertion",
-          "archetype_variants": {
-            "DEREDERE": "Em sẽ đi nha!",
-            "OJOU": "Thiếp sẽ đi ạ.",
-            "IMOUTO": "Em sẽ đi nha anh!"
-          }
-        },
-        {
-          "jp": "知っているわ",
-          "literal": "Em biết mà",
-          "context": "soft_assertion",
-          "archetype_variants": {
-            "OJOU": "Em biết ạ.",
-            "DEREDERE": "Biết mà~"
-          }
+          "jp": "私も行くわ",
+          "vn_natural": "Em cũng đi nhé",
+          "context": "Female speaker assertion"
         }
-      ],
-      "usage_notes": [
-        "わ is signature OJOU particle when combined with です/ます (ですわ/ますわ)",
-        "Modern speakers rarely use わ alone (sounds archaic)",
-        "In Vietnamese, OJOU characters maintain elegance with 'ạ'",
-        "GYARU/modern casual female characters use よ instead",
-        "When translating ですわ/ますわ, add both 'ạ' and formal register"
-      ],
-      "common_mistakes": [
-        "Using わ mapping for modern casual female speech",
-        "Missing OJOU archetype detection when わ appears",
-        "Over-translating to 'mà' (loses feminine elegance)"
       ]
     },
     "ぞ (zo)": {
-      "function": "Strong masculine assertion, determination, warning",
-      "corpus_frequency": 3890,
-      "priority": "high",
+      "function": "Masculine assertion, strong emphasis",
+      "corpus_frequency": 287,
       "vietnamese_mappings": {
-        "default": ["đấy", "đó", "này"],
+        "default": [
+          "đấy",
+          "này",
+          "nhé",
+          "nha"
+        ],
         "archetype_specific": {
-          "DELINQUENT": ["đấy!", "này!", "biết chưa!", "đó!"],
-          "SHOUNEN_MC": ["đó!", "đấy!", "này!"],
-          "SENPAI": ["đấy", "nhé (softer)", "đó"],
-          "TSUNDERE": ["đấy! (defensive male tsun)", "mà!"],
-          "KUUDERE": [".", "(omit or minimal 'đó')"],
-          "OJOU": ["(never use - too masculine)"],
-          "GYARU": ["(never use - masculine)"]
+          "TSUNDERE": [
+            "đấy",
+            "này"
+          ],
+          "OJOU": [
+            "nhé",
+            "đấy"
+          ],
+          "GYARU": [
+            "nha",
+            "đấy"
+          ],
+          "KOUHAI": [
+            "nhé",
+            "đấy"
+          ],
+          "SENPAI": [
+            "nhé",
+            "đấy"
+          ],
+          "TOMBOY": [
+            "đấy",
+            "này",
+            "nha"
+          ]
         }
       },
-      "register": "masculine emphatic",
-      "rtas_range": [4.0, 5.0],
-      "gender": "male (strong)",
-      "examples": [
-        {
-          "jp": "俺が守ってやるぞ",
-          "literal": "Tao sẽ bảo vệ mày đó!",
-          "context": "masculine_promise",
-          "archetype_variants": {
-            "SHOUNEN_MC": "Tôi sẽ bảo vệ cậu đó!",
-            "DELINQUENT": "Tao sẽ bảo vệ mày này!",
-            "SENPAI": "Anh sẽ bảo vệ em đấy."
-          }
-        },
-        {
-          "jp": "勝つぞ!",
-          "literal": "Sẽ thắng đó!",
-          "context": "determination_battle",
-          "archetype_variants": {
-            "SHOUNEN_MC": "Sẽ thắng đó!",
-            "DELINQUENT": "Thắng đây!",
-            "KUUDERE": "Thắng."
-          }
-        },
-        {
-          "jp": "行くぞ!",
-          "literal": "Đi đây!",
-          "context": "call_to_action",
-          "archetype_variants": {
-            "SHOUNEN_MC": "Đi thôi!",
-            "DELINQUENT": "Đi đây!",
-            "SENPAI": "Đi nào!"
-          }
-        }
-      ],
-      "usage_notes": [
-        "ぞ is exclusively masculine - never for female characters",
-        "Stronger than よ - shows determination, challenge, or warning",
-        "DELINQUENT/SHOUNEN_MC signature particle",
-        "Vietnamese 'này' captures aggressive edge best",
-        "Can combine with 行くぞ (Let's go!) pattern → 'Đi đây!' or 'Đi thôi!'"
-      ],
-      "common_mistakes": [
-        "Using for female characters",
-        "Under-translating to neutral particles",
-        "Missing the urgent/commanding tone"
-      ]
-    },
-    "ぜ (ze)": {
-      "function": "Casual masculine emphasis, showing off, rough friendliness",
-      "corpus_frequency": 2156,
-      "priority": "medium",
-      "vietnamese_mappings": {
-        "default": ["đó", "đấy", "này"],
-        "archetype_specific": {
-          "DELINQUENT": ["đó!", "này!", "đấy!"],
-          "SHOUNEN_MC": ["đó!", "nhé (for friendly ze)"],
-          "GYARU": ["(avoid - masculine)"],
-          "TSUNDERE": ["đấy (rough male tsun only)"],
-          "SENPAI": ["đấy", "nhé"],
-          "KUUDERE": ["(rarely use)"]
-        }
+      "gender_restrictions": {
+        "male_forbidden": [],
+        "female_forbidden": [
+          "ぞ"
+        ],
+        "male_leaning": true
       },
-      "register": "masculine casual/rough",
-      "rtas_range": [4.0, 5.0],
-      "gender": "male (casual/rough)",
+      "usage_notes": "Masculine particle. Use stronger Vietnamese endings like 'đấy', 'này'",
+      "common_mistakes": [
+        "Translating as 'đó' (too demonstrative)",
+        "Using 'nhỉ' (too soft)"
+      ],
       "examples": [
         {
-          "jp": "任せろぜ",
-          "literal": "Cứ giao cho tao đó",
-          "context": "confident_assurance",
-          "archetype_variants": {
-            "DELINQUENT": "Cứ giao cho tao đó!",
-            "SHOUNEN_MC": "Cứ giao cho tôi nhé!"
-          }
-        },
-        {
-          "jp": "いいぜ",
-          "literal": "Được đó",
-          "context": "casual_agreement",
-          "archetype_variants": {
-            "DELINQUENT": "Được đó.",
-            "SHOUNEN_MC": "Được đấy!"
-          }
-        },
-        {
-          "jp": "やるぜ",
-          "literal": "Làm đó",
-          "context": "determination_action",
-          "archetype_variants": {
-            "DELINQUENT": "Làm đây!",
-            "SHOUNEN_MC": "Làm thôi!"
-          }
+          "jp": "頑張るぞ",
+          "vn_natural": "Cố lên nào",
+          "context": "Self-encouragement"
         }
-      ],
-      "usage_notes": [
-        "ぜ is rougher/more casual than ぞ",
-        "Common in delinquent/yankee speech",
-        "Shows confidence, bragging, or rough affection",
-        "Exclusively male - never for female characters",
-        "Vietnamese 'đó' works well for casual tone"
-      ],
-      "common_mistakes": [
-        "Confusing with ぞ (ぜ is more casual/friendly)",
-        "Using for female characters",
-        "Over-formalizing the translation"
-      ]
-    },
-    "の (no - explanatory/feminine)": {
-      "function": "Feminine question/explanation, seeking understanding (sentence-final)",
-      "corpus_frequency": 14200,
-      "priority": "high",
-      "vietnamese_mappings": {
-        "default": ["à", "hả", "vậy"],
-        "archetype_specific": {
-          "DEREDERE": ["à~", "hả~", "vậy~"],
-          "GYARU": ["hả", "à", "hử"],
-          "TSUNDERE": ["à (soft/vulnerable moment)", "hả"],
-          "IMOUTO": ["à", "hả anh/chị", "vậy ạ"],
-          "OJOU": ["ạ", "à ạ", "vậy ạ"],
-          "OSANANAJIMI": ["à", "hả", "vậy"],
-          "YAMATO_NADESHIKO": ["à", "vậy ạ"],
-          "KUUDERE": ["(avoid の - too expressive)"],
-          "DELINQUENT": ["(avoid - too feminine)"]
-        }
-      },
-      "register": "feminine casual",
-      "rtas_range": [3.0, 5.0],
-      "gender": "female (soft/explanatory)",
-      "examples": [
-        {
-          "jp": "どこへ行くの?",
-          "literal": "Đi đâu vậy?",
-          "context": "feminine_question",
-          "archetype_variants": {
-            "DEREDERE": "Đi đâu vậy~?",
-            "GYARU": "Đi đâu hở?",
-            "IMOUTO": "Anh đi đâu vậy ạ?",
-            "OJOU": "Anh đi đâu ạ?"
-          }
-        },
-        {
-          "jp": "好きなの?",
-          "literal": "Thích à?",
-          "context": "checking_feeling",
-          "archetype_variants": {
-            "TSUNDERE": "Thích à...?",
-            "DEREDERE": "Thích à~?",
-            "GYARU": "Thích hả?",
-            "OSANANAJIMI": "Thích à?"
-          }
-        },
-        {
-          "jp": "知らないの",
-          "literal": "Em không biết à",
-          "context": "explanatory_statement",
-          "archetype_variants": {
-            "DEREDERE": "Em không biết mà~",
-            "TSUNDERE": "Em không biết!",
-            "OJOU": "Em không biết ạ."
-          }
-        }
-      ],
-      "usage_notes": [
-        "の as sentence-final is feminine (different from possessive の)",
-        "Adds explanatory/vulnerable nuance",
-        "Common in female characters' questions and statements",
-        "TSUNDERE use の during dere moments (vulnerability)",
-        "Vietnamese 'à/hả/vậy' captures the soft inquisitive tone",
-        "Avoid for masculine/stoic characters"
-      ],
-      "common_mistakes": [
-        "Confusing sentence-final の with possessive の",
-        "Using for male characters (masculine speech avoids this の)",
-        "Missing the explanatory nuance in statements"
       ]
     },
     "か (ka)": {
-      "function": "Direct question marker",
-      "corpus_frequency": 22340,
-      "priority": "critical",
+      "function": "Question marker",
+      "corpus_frequency": 1876,
       "vietnamese_mappings": {
-        "default": ["không", "à", "hả", "sao"],
+        "default": [
+          "không",
+          "à",
+          "sao",
+          "chứ",
+          "hả"
+        ],
         "archetype_specific": {
-          "OJOU": ["ạ", "không ạ", "vậy ạ"],
-          "GYARU": ["không", "hả", "hử"],
-          "TSUNDERE": ["không", "hả", "à"],
-          "KUUDERE": ["không (flat)", ".", "à"],
-          "DELINQUENT": ["không", "hả", "à"],
-          "DEREDERE": ["không~", "à~", "hả~"],
-          "YAMATO_NADESHIKO": ["không ạ", "à ạ"],
-          "GENKI": ["không!", "hả!", "à!"],
-          "SENPAI": ["không", "à", "sao"],
-          "KOUHAI": ["không ạ", "ạ"]
+          "TSUNDERE": [
+            "sao",
+            "chứ",
+            "hả"
+          ],
+          "OJOU": [
+            "ạ",
+            "không ạ",
+            "sao ạ"
+          ],
+          "GYARU": [
+            "hả",
+            "à",
+            "sao"
+          ],
+          "KOUHAI": [
+            "ạ",
+            "không ạ",
+            "sao ạ"
+          ],
+          "SENPAI": [
+            "không",
+            "sao",
+            "chứ"
+          ],
+          "TOMBOY": [
+            "hả",
+            "sao",
+            "à"
+          ]
+        },
+        "rtas_guidance": {
+          "hostile_cold": [
+            "sao",
+            "chứ",
+            "hả"
+          ],
+          "intimate_warm": [
+            "không",
+            "à",
+            "nhỉ"
+          ]
         }
       },
-      "register": "universal (formality varies by context)",
-      "rtas_range": [0.0, 5.0],
-      "gender": "neutral",
+      "gender_restrictions": {
+        "male_forbidden": [],
+        "female_forbidden": []
+      },
+      "usage_notes": "Vietnamese uses word order + particles. 'không' for yes/no, 'sao' for why, 'à' for surprise",
+      "common_mistakes": [
+        "Always using 'không' (ignores question type)",
+        "Omitting question particle (sounds incomplete)"
+      ],
       "examples": [
         {
-          "jp": "本当ですか",
-          "literal": "Thật không?",
-          "context": "yes_no_question",
-          "archetype_variants": {
-            "OJOU": "Thật không ạ?",
-            "GYARU": "Thật hả?",
-            "KUUDERE": "Thật không.",
-            "DEREDERE": "Thật không~?"
-          }
+          "jp": "本当か?",
+          "vn_natural": "Thật không?",
+          "context": "Yes/no question"
         },
         {
-          "jp": "誰ですか",
-          "literal": "Ai vậy?",
-          "context": "who_question",
-          "archetype_variants": {
-            "DELINQUENT": "Ai đây?",
-            "OJOU": "Ai vậy ạ?",
-            "TSUNDERE": "Ai vậy?"
-          }
-        },
-        {
-          "jp": "行くか",
-          "literal": "Đi không?",
-          "context": "casual_male_question",
-          "archetype_variants": {
-            "DELINQUENT": "Đi không?",
-            "SHOUNEN_MC": "Đi không?",
-            "SENPAI": "Đi không?"
-          }
+          "jp": "どうしたのか?",
+          "vn_natural": "Có chuyện gì sao?",
+          "context": "What happened question"
         }
-      ],
-      "usage_notes": [
-        "Most common question particle - ~22k instances",
-        "Formality depends on verb form: ですか (polite) vs dictionary か (casual)",
-        "Can be dropped in casual speech (rising intonation alone)",
-        "Vietnamese default: 'không' for yes/no, 'à/hả/sao' for WH-questions",
-        "OJOU always adds 'ạ', GYARU uses 'hả/hử', KUUDERE minimal"
-      ],
+      ]
+    },
+    "の (no)": {
+      "function": "Explanatory, feminine question, emphasis",
+      "corpus_frequency": 934,
+      "vietnamese_mappings": {
+        "default": [
+          "mà",
+          "đấy",
+          "à",
+          "sao",
+          ""
+        ],
+        "archetype_specific": {
+          "TSUNDERE": [
+            "mà",
+            "đấy",
+            "sao"
+          ],
+          "OJOU": [
+            "ạ",
+            "mà",
+            "sao ạ"
+          ],
+          "GYARU": [
+            "à",
+            "mà",
+            "sao"
+          ],
+          "KOUHAI": [
+            "ạ",
+            "mà ạ",
+            "sao ạ"
+          ],
+          "SENPAI": [
+            "mà",
+            "đấy"
+          ],
+          "TOMBOY": [
+            "mà",
+            "sao",
+            "à"
+          ]
+        }
+      },
+      "gender_restrictions": {
+        "male_forbidden": [],
+        "female_forbidden": [],
+        "female_leaning": true
+      },
+      "usage_notes": "Context-dependent. Explanatory の → 'mà', question の → 'sao/à', emphasis の → 'đấy'",
       "common_mistakes": [
-        "Always translating to 'không' (should vary by question type)",
-        "Missing formality markers for formal archetypes",
-        "Over-translating casual か (sometimes omit in Vietnamese)"
+        "Translating possessive の the same as sentence-final の",
+        "Using 'của' (that's possessive, not sentence-final)"
+      ],
+      "examples": [
+        {
+          "jp": "どうしたの?",
+          "vn_natural": "Có chuyện gì sao?",
+          "context": "Feminine question"
+        },
+        {
+          "jp": "行くの",
+          "vn_natural": "Đi đấy",
+          "context": "Explanatory/emphasis"
+        }
+      ]
+    },
+    "さ (sa)": {
+      "function": "Casual emphasis, filler",
+      "corpus_frequency": 456,
+      "vietnamese_mappings": {
+        "default": [
+          "mà",
+          "đấy",
+          "nè",
+          ""
+        ],
+        "archetype_specific": {
+          "TSUNDERE": [
+            "mà",
+            "đấy"
+          ],
+          "OJOU": [
+            "",
+            "mà"
+          ],
+          "GYARU": [
+            "nè",
+            "mà",
+            "đấy"
+          ],
+          "KOUHAI": [
+            "mà",
+            ""
+          ],
+          "SENPAI": [
+            "mà",
+            "đấy"
+          ],
+          "TOMBOY": [
+            "mà",
+            "nè",
+            "đấy"
+          ]
+        }
+      },
+      "gender_restrictions": {
+        "male_forbidden": [],
+        "female_forbidden": [],
+        "male_leaning": true
+      },
+      "usage_notes": "Often best omitted or use 'mà' for emphasis. Very casual",
+      "common_mistakes": [
+        "Over-translating (さ is often just filler)",
+        "Using formal particles"
+      ],
+      "examples": [
+        {
+          "jp": "そうだよさ",
+          "vn_natural": "Đúng vậy mà",
+          "context": "Casual emphasis"
+        }
+      ]
+    },
+    "ぜ (ze)": {
+      "function": "Masculine emphasis, rough assertion",
+      "corpus_frequency": 198,
+      "vietnamese_mappings": {
+        "default": [
+          "đấy",
+          "này",
+          "nha",
+          "nhé"
+        ],
+        "archetype_specific": {
+          "TSUNDERE": [
+            "đấy",
+            "này"
+          ],
+          "OJOU": [
+            "nhé"
+          ],
+          "GYARU": [
+            "nha",
+            "đấy"
+          ],
+          "KOUHAI": [
+            "nhé",
+            "đấy"
+          ],
+          "SENPAI": [
+            "nhé",
+            "đấy"
+          ],
+          "TOMBOY": [
+            "đấy",
+            "này",
+            "nha"
+          ]
+        }
+      },
+      "gender_restrictions": {
+        "male_forbidden": [],
+        "female_forbidden": [
+          "ぜ"
+        ],
+        "male_leaning": true
+      },
+      "usage_notes": "Rough masculine particle. Use strong endings",
+      "common_mistakes": [
+        "Using soft particles like 'nhỉ'",
+        "Omitting entirely (loses masculine tone)"
+      ],
+      "examples": [
+        {
+          "jp": "やってやるぜ",
+          "vn_natural": "Tao sẽ làm cho mà xem",
+          "context": "Confident assertion"
+        }
       ]
     },
     "かな (kana)": {
-      "function": "Wondering, thinking aloud, seeking soft confirmation",
-      "corpus_frequency": 8920,
-      "priority": "high",
+      "function": "Wondering, uncertainty",
+      "corpus_frequency": 567,
       "vietnamese_mappings": {
-        "default": ["nhỉ", "ta", "không biết"],
+        "default": [
+          "nhỉ",
+          "không nhỉ",
+          "chăng",
+          "ta"
+        ],
         "archetype_specific": {
-          "TSUNDERE": ["nhỉ...", "ta...", "chăng"],
-          "DEREDERE": ["nhỉ~", "ta~", "không biết~"],
-          "BROODING": ["nhỉ...", "ta...", "chăng..."],
-          "SCHOLAR": ["nhỉ", "chăng", "ta"],
-          "KUUDERE": [".", "(often omit)", "nhỉ (rare)"],
-          "OJOU": ["nhỉ", "chăng ạ"],
-          "GYARU": ["nhỉ", "nhể"],
-          "GENKI": ["nhỉ!", "ta!", "không biết nữa!"],
-          "NARRATOR": ["nhỉ", "ta", "chăng"]
+          "TSUNDERE": [
+            "nhỉ",
+            "không nhỉ"
+          ],
+          "OJOU": [
+            "nhỉ",
+            "chăng"
+          ],
+          "GYARU": [
+            "nhỉ",
+            "không nhỉ"
+          ],
+          "KOUHAI": [
+            "nhỉ",
+            "không nhỉ"
+          ],
+          "SENPAI": [
+            "nhỉ",
+            "chăng"
+          ],
+          "TOMBOY": [
+            "nhỉ",
+            "không nhỉ"
+          ]
         }
       },
-      "register": "casual contemplative",
-      "rtas_range": [2.5, 5.0],
-      "gender": "neutral (slight male lean)",
+      "gender_restrictions": {
+        "male_forbidden": [],
+        "female_forbidden": []
+      },
+      "usage_notes": "'nhỉ' for wondering, 'không nhỉ' for self-directed question",
+      "common_mistakes": [
+        "Using 'không' alone (too direct)",
+        "Translating as 'có lẽ' (that's 'たぶん', not かな)"
+      ],
       "examples": [
         {
-          "jp": "彼女は来るかな",
-          "literal": "Cô ấy có đến không nhỉ",
-          "context": "wondering_future",
-          "archetype_variants": {
-            "TSUNDERE": "Cô ấy... có đến không nhỉ...",
-            "DEREDERE": "Cô ấy có đến không nhỉ~",
-            "KUUDERE": "Cô ấy có đến không.",
-            "BROODING": "Cô ấy có đến không ta..."
-          }
-        },
-        {
-          "jp": "これでいいかな",
-          "literal": "Thế này được không nhỉ",
-          "context": "self_checking",
-          "archetype_variants": {
-            "NARRATOR": "Thế này được không nhỉ.",
-            "GENKI": "Thế này được chưa!",
-            "KUUDERE": "Thế này được.",
-            "OJOU": "Thế này được không nhỉ."
-          }
-        },
-        {
-          "jp": "何を食べようかな",
-          "literal": "Ăn gì bây giờ nhỉ",
-          "context": "pondering_choice",
-          "archetype_variants": {
-            "DEREDERE": "Ăn gì bây giờ nhỉ~",
-            "TSUNDERE": "Ăn gì ta...",
-            "GYARU": "Ăn gì đây nhỉ?"
-          }
+          "jp": "大丈夫かな",
+          "vn_natural": "Không biết có ổn không nhỉ",
+          "context": "Wondering"
         }
-      ],
-      "usage_notes": [
-        "かな expresses internal deliberation or soft wondering",
-        "More contemplative than か alone",
-        "'nhỉ' captures wondering tone well",
-        "'ta' adds literary/contemplative flavor (good for BROODING/SCHOLAR)",
-        "TSUNDERE uses かな during vulnerable moments",
-        "KUUDERE often omit (too expressive for stoic characters)"
-      ],
-      "common_mistakes": [
-        "Confusing with strong questions (use か not かな)",
-        "Missing the contemplative/vulnerable tone",
-        "Over-using 'không biết' (too explicit)"
       ]
     },
-    "だよね (da yo ne)": {
-      "function": "Seeking confirmation with emphasis (right? isn't it?)",
-      "corpus_frequency": 5670,
-      "priority": "high",
+    "なあ (naa)": {
+      "function": "Emotional reflection, longing",
+      "corpus_frequency": 389,
       "vietnamese_mappings": {
-        "default": ["đúng không", "phải không", "nhỉ"],
+        "default": [
+          "nhỉ",
+          "quá",
+          "thật",
+          ""
+        ],
         "archetype_specific": {
-          "GYARU": ["đúng không", "phải không nè", "hông"],
-          "DEREDERE": ["đúng không~", "phải không~"],
-          "TSUNDERE": ["đúng không", "phải không (seeking agreement)"],
-          "OSANANAJIMI": ["đúng không", "phải không"],
-          "GENKI": ["đúng không!", "phải không!"],
-          "KUUDERE": ["không (flat)", "đúng không (rare)"],
-          "OJOU": ["phải không ạ", "đúng không ạ"],
-          "SENPAI": ["đúng không", "phải không nhé"]
+          "TSUNDERE": [
+            "nhỉ",
+            "quá"
+          ],
+          "OJOU": [
+            "thật",
+            "nhỉ"
+          ],
+          "GYARU": [
+            "quá~",
+            "thật"
+          ],
+          "KOUHAI": [
+            "thật",
+            "nhỉ"
+          ],
+          "SENPAI": [
+            "nhỉ",
+            "thật"
+          ],
+          "TOMBOY": [
+            "quá",
+            "nhỉ"
+          ]
         }
       },
-      "register": "casual confirmation",
-      "rtas_range": [3.0, 5.0],
-      "gender": "neutral",
+      "gender_restrictions": {
+        "male_forbidden": [],
+        "female_forbidden": [],
+        "male_leaning": true
+      },
+      "usage_notes": "Extended な. Often best with adjective + 'quá/thật' or just 'nhỉ'",
+      "common_mistakes": [
+        "Translating as 'nha' (wrong particle)",
+        "Over-emphasizing (なあ is soft reflection)"
+      ],
       "examples": [
         {
-          "jp": "あの人は変だよね",
-          "literal": "Người đó lạ đúng không",
-          "context": "seeking_agreement",
-          "archetype_variants": {
-            "GYARU": "Người đó lạ đúng không nè?",
-            "TSUNDERE": "Người đó lạ phải không?",
-            "KUUDERE": "Người đó lạ.",
-            "DEREDERE": "Người đó lạ đúng không~?"
-          }
-        },
-        {
-          "jp": "これは正しいよね",
-          "literal": "Cái này đúng phải không",
-          "context": "confirmation_seeking",
-          "archetype_variants": {
-            "OSANANAJIMI": "Cái này đúng phải không?",
-            "GENKI": "Cái này đúng phải không!",
-            "OJOU": "Cái này đúng phải không ạ?"
-          }
+          "jp": "いい天気だなあ",
+          "vn_natural": "Thời tiết đẹp quá nhỉ",
+          "context": "Emotional reflection"
         }
-      ],
-      "usage_notes": [
-        "Combination of よ (assertion) + ね (agreement-seeking)",
-        "'đúng không' and 'phải không' are standard Vietnamese equivalents",
-        "Very common in casual dialogue for validation",
-        "GYARU might add 'nè' for flavor",
-        "KUUDERE avoid seeking validation (use flat statement)"
-      ],
-      "common_mistakes": [
-        "Translating as pure question (missing the validation aspect)",
-        "Over-formalizing with 'có phải không' (too formal)",
-        "Missing archetype-specific softeners/intensifiers"
       ]
     },
-    "でしょ (desho)": {
-      "function": "Casual seeking agreement (だろう casual form), 'right?'",
-      "corpus_frequency": 7234,
-      "priority": "high",
+    "のか (noka)": {
+      "function": "Questioning explanation",
+      "corpus_frequency": 445,
       "vietnamese_mappings": {
-        "default": ["đúng không", "phải không", "mà"],
+        "default": [
+          "sao",
+          "à",
+          "chứ",
+          "hả"
+        ],
         "archetype_specific": {
-          "GYARU": ["đúng không", "mà nè", "hông"],
-          "TSUNDERE": ["mà", "đúng không (told you so)", "đã nói mà"],
-          "DEREDERE": ["đúng không~", "mà~"],
-          "OSANANAJIMI": ["đúng không", "phải không", "mà"],
-          "OJOU": ["phải không ạ", "đúng không ạ"],
-          "KUUDERE": ["(rarely use)", "không"],
-          "GENKI": ["đúng không!", "mà!", "phải không!"],
-          "SENPAI": ["đúng không", "phải không"]
+          "TSUNDERE": [
+            "sao",
+            "chứ",
+            "hả"
+          ],
+          "OJOU": [
+            "sao ạ",
+            "à"
+          ],
+          "GYARU": [
+            "hả",
+            "sao",
+            "à"
+          ],
+          "KOUHAI": [
+            "sao ạ",
+            "à"
+          ],
+          "SENPAI": [
+            "sao",
+            "chứ"
+          ],
+          "TOMBOY": [
+            "hả",
+            "sao"
+          ]
         }
       },
-      "register": "casual (more formal: でしょう)",
-      "rtas_range": [2.5, 5.0],
-      "gender": "neutral",
+      "gender_restrictions": {
+        "male_forbidden": [],
+        "female_forbidden": []
+      },
+      "usage_notes": "Questioning + explanation. 'sao' is most common",
+      "common_mistakes": [
+        "Using 'không' (loses explanatory nuance)",
+        "Translating の and か separately"
+      ],
       "examples": [
         {
-          "jp": "私が言ったでしょ",
-          "literal": "Em đã nói mà",
-          "context": "I_told_you_so",
-          "archetype_variants": {
-            "TSUNDERE": "Em đã nói mà!",
-            "GYARU": "Em đã nói mà nè!",
-            "DEREDERE": "Em đã nói mà~",
-            "OJOU": "Em đã nói mà ạ."
-          }
-        },
-        {
-          "jp": "これは難しいでしょ",
-          "literal": "Cái này khó đúng không",
-          "context": "statement_seeking_agreement",
-          "archetype_variants": {
-            "OSANANAJIMI": "Cái này khó đúng không?",
-            "GENKI": "Cái này khó mà!",
-            "KUUDERE": "Khó.",
-            "SENPAI": "Cái này khó phải không?"
-          }
+          "jp": "どうしたのか?",
+          "vn_natural": "Có chuyện gì sao?",
+          "context": "Questioning explanation"
         }
-      ],
-      "usage_notes": [
-        "でしょ is casual form of でしょう (presumption + agreement-seeking)",
-        "Often used for 'I told you so' situations",
-        "Vietnamese 'mà' captures the 'see, I was right' tone",
-        "'đúng không' for neutral agreement-seeking",
-        "TSUNDERE classic particle for vindication moments"
-      ],
-      "common_mistakes": [
-        "Missing the 'I told you so' nuance when context warrants",
-        "Over-formalizing to 'có phải không'",
-        "Not adjusting for archetype intensity"
       ]
     },
-    "だろ (daro)": {
-      "function": "Masculine presumption, 'right?' (casual だろう)",
-      "corpus_frequency": 6789,
-      "priority": "high",
+    "だろう (darou)": {
+      "function": "Assumption, seeking agreement",
+      "corpus_frequency": 723,
       "vietnamese_mappings": {
-        "default": ["đúng không", "phải không", "chứ"],
+        "default": [
+          "nhỉ",
+          "đúng không",
+          "phải không",
+          "chứ"
+        ],
         "archetype_specific": {
-          "DELINQUENT": ["đúng không", "chứ", "hả", "phải không này"],
-          "SHOUNEN_MC": ["đúng không", "phải không", "chứ"],
-          "SENPAI": ["đúng không", "phải không", "nhỉ"],
-          "TSUNDERE": ["đúng không", "chứ (male tsun)"],
-          "KUUDERE": ["không (flat)", "đúng không (minimal)"],
-          "OJOU": ["(avoid - masculine)"],
-          "GYARU": ["(avoid - masculine)"]
+          "TSUNDERE": [
+            "nhỉ",
+            "phải không",
+            "chứ"
+          ],
+          "OJOU": [
+            "đúng không ạ",
+            "phải không ạ",
+            "nhỉ"
+          ],
+          "GYARU": [
+            "nhỉ",
+            "đúng không",
+            "phải không"
+          ],
+          "KOUHAI": [
+            "đúng không ạ",
+            "nhỉ"
+          ],
+          "SENPAI": [
+            "nhỉ",
+            "đúng không"
+          ],
+          "TOMBOY": [
+            "nhỉ",
+            "phải không"
+          ]
         }
       },
-      "register": "masculine casual",
-      "rtas_range": [3.5, 5.0],
-      "gender": "male",
+      "gender_restrictions": {
+        "male_forbidden": [],
+        "female_forbidden": []
+      },
+      "usage_notes": "Softer than か. 'nhỉ' for assumption, 'đúng không' for seeking agreement",
+      "common_mistakes": [
+        "Using 'có lẽ' (that's probability, not seeking agreement)",
+        "Translating as 'sẽ' (that's future tense)"
+      ],
       "examples": [
         {
-          "jp": "お前も行くだろ",
-          "literal": "Mày cũng đi chứ",
-          "context": "masculine_assumption",
-          "archetype_variants": {
-            "DELINQUENT": "Mày cũng đi chứ?",
-            "SHOUNEN_MC": "Cậu cũng đi chứ?",
-            "SENPAI": "Cậu cũng đi đúng không?"
-          }
-        },
-        {
-          "jp": "分かってるだろ",
-          "literal": "Hiểu rồi đúng không",
-          "context": "assumption_understanding",
-          "archetype_variants": {
-            "DELINQUENT": "Hiểu rồi chứ?",
-            "SHOUNEN_MC": "Hiểu rồi đúng không?",
-            "KUUDERE": "Hiểu rồi."
-          }
+          "jp": "そうだろう?",
+          "vn_natural": "Đúng không?",
+          "context": "Seeking agreement"
         }
-      ],
-      "usage_notes": [
-        "だろ is masculine casual form of でしょう",
-        "Shows assumption/presumption with confidence",
-        "Never for female characters (use でしょ)",
-        "'chứ' captures masculine assertive tone",
-        "'đúng không' for neutral masculine confirmation"
-      ],
+      ]
+    },
+    "じゃん (jan)": {
+      "function": "Casual assertion, obvious fact",
+      "corpus_frequency": 334,
+      "vietnamese_mappings": {
+        "default": [
+          "mà",
+          "đấy",
+          "kìa",
+          "nè"
+        ],
+        "archetype_specific": {
+          "TSUNDERE": [
+            "mà",
+            "đấy",
+            "kìa"
+          ],
+          "OJOU": [
+            "mà",
+            "đấy"
+          ],
+          "GYARU": [
+            "mà",
+            "kìa",
+            "nè",
+            "đó"
+          ],
+          "KOUHAI": [
+            "mà",
+            "đấy"
+          ],
+          "SENPAI": [
+            "mà",
+            "đấy"
+          ],
+          "TOMBOY": [
+            "mà",
+            "kìa",
+            "nè"
+          ]
+        }
+      },
+      "gender_restrictions": {
+        "male_forbidden": [],
+        "female_forbidden": []
+      },
+      "usage_notes": "Very casual. 'mà' for obvious fact, 'kìa' for pointing out",
       "common_mistakes": [
-        "Using for female characters",
-        "Not capturing masculine confidence",
-        "Over-softening the translation"
+        "Using formal particles",
+        "Translating as 'nhỉ' (loses assertive tone)"
+      ],
+      "examples": [
+        {
+          "jp": "知ってるじゃん",
+          "vn_natural": "Biết rồi mà",
+          "context": "Obvious fact"
+        }
+      ]
+    },
+    "っけ (kke)": {
+      "function": "Recollection, trying to remember",
+      "corpus_frequency": 267,
+      "vietnamese_mappings": {
+        "default": [
+          "nhỉ",
+          "ta",
+          "gì nhỉ",
+          "đâu nhỉ"
+        ],
+        "archetype_specific": {
+          "TSUNDERE": [
+            "nhỉ",
+            "gì nhỉ"
+          ],
+          "OJOU": [
+            "nhỉ",
+            "ta"
+          ],
+          "GYARU": [
+            "nhỉ",
+            "gì nhỉ",
+            "đâu nhỉ"
+          ],
+          "KOUHAI": [
+            "nhỉ",
+            "gì nhỉ"
+          ],
+          "SENPAI": [
+            "nhỉ",
+            "ta"
+          ],
+          "TOMBOY": [
+            "nhỉ",
+            "gì nhỉ"
+          ]
+        }
+      },
+      "gender_restrictions": {
+        "male_forbidden": [],
+        "female_forbidden": []
+      },
+      "usage_notes": "Trying to recall. Often use 'nhỉ' + question word",
+      "common_mistakes": [
+        "Using 'không' (too certain)",
+        "Omitting recollection nuance"
+      ],
+      "examples": [
+        {
+          "jp": "何だっけ?",
+          "vn_natural": "Cái gì nhỉ?",
+          "context": "Trying to remember"
+        }
       ]
     }
   },
-  "softening_diminutive_particles": {
-    "ちょっと (chotto)": {
-      "function": "Softening requests, hedging, 'a bit/just'",
-      "corpus_frequency": 16780,
-      "priority": "critical",
+  "question_particles": {
+    "の (no)": {
+      "function": "Feminine/soft question",
+      "corpus_frequency": 934,
       "vietnamese_mappings": {
-        "default": ["một chút", "tí", "(omit and soften verb)"],
+        "default": [
+          "sao",
+          "à",
+          "thế",
+          "hả"
+        ],
         "archetype_specific": {
-          "OJOU": ["một chút", "hơi"],
-          "GYARU": ["tí", "tẹo"],
-          "DEREDERE": ["tí", "tí xíu"],
-          "TSUNDERE": ["một chút", "tí (softer moments)"],
-          "IMOUTO": ["tí", "tí xíu nha"],
-          "YAMATO_NADESHIKO": ["hơi", "một chút"],
-          "DELINQUENT": ["(rarely use - avoid softening)"],
-          "KUUDERE": ["(rarely use)"],
-          "OSANANAJIMI": ["tí", "một chút"]
+          "TSUNDERE": [
+            "sao",
+            "thế",
+            "hả"
+          ],
+          "OJOU": [
+            "sao ạ",
+            "ạ",
+            "thế ạ"
+          ],
+          "GYARU": [
+            "à",
+            "sao",
+            "hả"
+          ],
+          "KOUHAI": [
+            "sao ạ",
+            "ạ",
+            "à"
+          ],
+          "SENPAI": [
+            "sao",
+            "thế"
+          ],
+          "TOMBOY": [
+            "sao",
+            "hả",
+            "à"
+          ]
         }
       },
-      "register": "casual softening",
-      "rtas_range": [2.5, 5.0],
-      "gender": "neutral",
+      "gender_restrictions": {
+        "female_leaning": true
+      },
+      "usage_notes": "Softer than か. Vietnamese uses same particles but with gentler intonation",
       "examples": [
         {
-          "jp": "ちょっと待って",
-          "literal": "Đợi một chút",
-          "context": "softened_request",
-          "archetype_variants": {
-            "DEREDERE": "Đợi tí nha~",
-            "OJOU": "Đợi một chút ạ.",
-            "GYARU": "Đợi tí!",
-            "TSUNDERE": "Đợi một chút!"
-          }
-        },
-        {
-          "jp": "ちょっといい?",
-          "literal": "Được tí không?",
-          "context": "asking_permission",
-          "archetype_variants": {
-            "OSANANAJIMI": "Được tí không?",
-            "IMOUTO": "Được tí không ạ?",
-            "GYARU": "Được tẹo không?"
-          }
+          "jp": "どうしたの?",
+          "vn_natural": "Có chuyện gì sao?",
+          "context": "Concerned question"
         }
-      ],
-      "usage_notes": [
-        "ちょっと extremely common (16k+ instances) for softening",
-        "Vietnamese 'tí/tẹo' more casual, 'một chút' more neutral",
-        "Can often be omitted and softness conveyed through particles",
-        "DELINQUENT/KUUDERE rarely soften (skip ちょっと)",
-        "IMOUTO/DEREDERE use frequently with cute particles"
       ]
     },
-    "なんか (nanka)": {
-      "function": "Hedging, vagueness, 'kind of/somehow'",
-      "corpus_frequency": 9234,
-      "priority": "high",
+    "かい (kai)": {
+      "function": "Masculine/older speaker question",
+      "corpus_frequency": 156,
       "vietnamese_mappings": {
-        "default": ["hơi", "kiểu", "như", "(omit)"],
+        "default": [
+          "không",
+          "sao",
+          "chứ",
+          "à"
+        ],
         "archetype_specific": {
-          "GYARU": ["kiểu", "như kiểu", "hơi"],
-          "TSUNDERE": ["hơi", "(omit for tsun moments)"],
-          "DEREDERE": ["hơi", "như"],
-          "BROODING": ["hơi...", "như thể..."],
-          "OSANANAJIMI": ["hơi", "kiểu"],
-          "KUUDERE": ["(omit)"],
-          "DELINQUENT": ["hơi (rare)"],
-          "OJOU": ["hơi", "như thể"]
+          "SENPAI": [
+            "không",
+            "sao",
+            "chứ"
+          ],
+          "OJOU": [
+            "sao ạ",
+            "không ạ"
+          ]
         }
       },
-      "register": "casual vague",
-      "rtas_range": [3.0, 5.0],
-      "gender": "neutral",
+      "gender_restrictions": {
+        "male_leaning": true
+      },
+      "usage_notes": "Older/masculine question. Vietnamese doesn't distinguish, use standard question particles",
       "examples": [
         {
-          "jp": "なんか嫌だ",
-          "literal": "Hơi ghét",
-          "context": "vague_dislike",
-          "archetype_variants": {
-            "TSUNDERE": "Hơi ghét...",
-            "GYARU": "Kiểu ghét á.",
-            "DEREDERE": "Như không thích lắm~",
-            "KUUDERE": "Ghét."
-          }
-        },
-        {
-          "jp": "なんか変",
-          "literal": "Hơi lạ",
-          "context": "feeling_something_off",
-          "archetype_variants": {
-            "BROODING": "Hơi lạ...",
-            "OSANANAJIMI": "Kiểu lạ á.",
-            "GYARU": "Lạ á.",
-            "KUUDERE": "Lạ."
-          }
+          "jp": "大丈夫かい?",
+          "vn_natural": "Ổn chứ?",
+          "context": "Older speaker asking"
         }
-      ],
-      "usage_notes": [
-        "なんか adds vagueness/hedging to statements",
-        "'kiểu' popular among young Vietnamese speakers (GYARU affinity)",
-        "'hơi' more neutral hedging",
-        "Can often omit in Vietnamese (over-use sounds unnatural)",
-        "KUUDERE/DELINQUENT skip hedging (too direct)"
+      ]
+    }
+  },
+  "softening_particles": {
+    "ね (ne)": {
+      "function": "Softening request/statement",
+      "corpus_frequency": 1243,
+      "vietnamese_mappings": {
+        "default": [
+          "nhé",
+          "nhỉ",
+          "nha"
+        ],
+        "archetype_specific": {
+          "TSUNDERE": [
+            "nhé",
+            "nhỉ"
+          ],
+          "OJOU": [
+            "nhé",
+            "ạ"
+          ],
+          "GYARU": [
+            "nha",
+            "nhé"
+          ],
+          "KOUHAI": [
+            "nhé ạ",
+            "ạ"
+          ],
+          "SENPAI": [
+            "nhé",
+            "nhỉ"
+          ],
+          "TOMBOY": [
+            "nhé",
+            "nha"
+          ]
+        }
+      },
+      "usage_notes": "'nhé' for requests, 'nhỉ' for seeking agreement",
+      "examples": [
+        {
+          "jp": "待ってね",
+          "vn_natural": "Đợi chút nhé",
+          "context": "Soft request"
+        }
       ]
     },
-    "まあ (maa)": {
-      "function": "Acceptance, resignation, 'well/I guess'",
-      "corpus_frequency": 6543,
-      "priority": "medium",
+    "よね (yone)": {
+      "function": "Seeking confirmation with assertion",
+      "corpus_frequency": 589,
       "vietnamese_mappings": {
-        "default": ["thôi", "cũng được", "chắc"],
+        "default": [
+          "nhỉ",
+          "đúng không",
+          "phải không",
+          "nhé"
+        ],
         "archetype_specific": {
-          "TSUNDERE": ["thôi...", "cũng được..."],
-          "BROODING": ["thôi...", "chắc vậy..."],
-          "OSANANAJIMI": ["thôi", "cũng được"],
-          "SENPAI": ["thôi", "cũng được", "được rồi"],
-          "KUUDERE": ["(omit or 'thôi')"],
-          "GYARU": ["thôi", "được"],
-          "OJOU": ["thôi ạ", "cũng được ạ"]
+          "TSUNDERE": [
+            "nhỉ",
+            "phải không"
+          ],
+          "OJOU": [
+            "đúng không ạ",
+            "phải không ạ"
+          ],
+          "GYARU": [
+            "nhỉ",
+            "đúng không"
+          ],
+          "KOUHAI": [
+            "đúng không ạ",
+            "nhỉ"
+          ],
+          "SENPAI": [
+            "nhỉ",
+            "đúng không"
+          ],
+          "TOMBOY": [
+            "nhỉ",
+            "phải không"
+          ]
         }
       },
-      "register": "casual resignation",
-      "rtas_range": [2.5, 5.0],
-      "gender": "neutral",
+      "usage_notes": "Combines assertion + confirmation. 'nhỉ' is most natural",
       "examples": [
         {
-          "jp": "まあいいか",
-          "literal": "Thôi cũng được",
-          "context": "resignation_acceptance",
-          "archetype_variants": {
-            "TSUNDERE": "Thôi... cũng được...",
-            "OSANANAJIMI": "Thôi được rồi.",
-            "KUUDERE": "Thôi.",
-            "GYARU": "Thôi được."
-          }
-        },
-        {
-          "jp": "まあそうだね",
-          "literal": "Thôi đúng nhỉ",
-          "context": "reluctant_agreement",
-          "archetype_variants": {
-            "BROODING": "Chắc vậy nhỉ...",
-            "SENPAI": "Thôi đúng đấy.",
-            "OJOU": "Cũng đúng ạ."
-          }
+          "jp": "そうだよね",
+          "vn_natural": "Đúng vậy nhỉ",
+          "context": "Seeking agreement"
         }
-      ],
-      "usage_notes": [
-        "まあ shows resignation/acceptance (not enthusiastic)",
-        "'thôi' captures resignation tone well",
-        "'cũng được' for reluctant acceptance",
-        "TSUNDERE use during dere moments (giving in)",
-        "Can sometimes omit and convey through tone"
+      ]
+    }
+  },
+  "confirmation_particles": {
+    "だろう (darou)": {
+      "function": "Assumption seeking confirmation",
+      "corpus_frequency": 723,
+      "vietnamese_mappings": {
+        "default": [
+          "nhỉ",
+          "đúng không",
+          "phải không",
+          "chứ"
+        ],
+        "rtas_guidance": {
+          "hostile_cold": [
+            "chứ",
+            "phải không"
+          ],
+          "intimate_warm": [
+            "nhỉ",
+            "đúng không"
+          ]
+        }
+      },
+      "usage_notes": "See sentence_ending_particles.だろう for full details",
+      "examples": [
+        {
+          "jp": "知ってるだろう?",
+          "vn_natural": "Biết rồi đúng không?",
+          "context": "Confirming knowledge"
+        }
+      ]
+    },
+    "でしょう (deshou)": {
+      "function": "Polite assumption/confirmation",
+      "corpus_frequency": 445,
+      "vietnamese_mappings": {
+        "default": [
+          "nhỉ",
+          "đúng không ạ",
+          "phải không ạ",
+          "chứ ạ"
+        ],
+        "archetype_specific": {
+          "OJOU": [
+            "đúng không ạ",
+            "phải không ạ",
+            "nhỉ"
+          ],
+          "KOUHAI": [
+            "đúng không ạ",
+            "nhỉ ạ"
+          ]
+        }
+      },
+      "usage_notes": "Polite version of だろう. Add 'ạ' for politeness",
+      "examples": [
+        {
+          "jp": "そうでしょう?",
+          "vn_natural": "Đúng không ạ?",
+          "context": "Polite confirmation"
+        }
       ]
     }
   },
   "archetype_signature_particles": {
-    "ですわ/ますわ (desu wa / masu wa)": {
-      "function": "OJOU signature - formal feminine elegance",
-      "corpus_frequency": 1240,
-      "priority": "high",
-      "vietnamese_mappings": {
-        "default": ["ạ", "mà ạ", "ấy ạ"],
-        "archetype_specific": {
-          "OJOU": ["ạ", "ấy ạ", "thưa", "mà ạ (insistent ojou)"],
-          "YAMATO_NADESHIKO": ["ạ", "mà ạ"]
-        }
-      },
-      "register": "formal feminine",
-      "rtas_range": [0.5, 3.0],
-      "gender": "female (elegant)",
-      "archetype_required": ["OJOU", "YAMATO_NADESHIKO"],
-      "examples": [
+    "TSUNDERE": {
+      "signature_patterns": [
         {
-          "jp": "それは違いますわ",
-          "vn": "Điều đó sai ạ",
-          "context": "polite_disagreement"
+          "japanese_pattern": "～じゃないわよ",
+          "vietnamese_equivalent": "~ đâu nhé / ~ mà",
+          "frequency": "high",
+          "example_jp": "別に好きじゃないわよ",
+          "example_vn": "Đâu có thích đâu nhé"
         },
         {
-          "jp": "私が参りますわ",
-          "vn": "Thiếp sẽ đến ạ",
-          "context": "formal_announcement"
+          "japanese_pattern": "～のよ",
+          "vietnamese_equivalent": "~ đấy / ~ mà",
+          "frequency": "high",
+          "example_jp": "わかってるのよ",
+          "example_vn": "Biết rồi mà"
         },
         {
-          "jp": "ご存じありませんの?",
-          "vn": "Anh không biết sao ạ?",
-          "context": "polite_surprise"
+          "japanese_pattern": "～んだから",
+          "vietnamese_equivalent": "~ mà / ~ đấy",
+          "frequency": "medium",
+          "example_jp": "忙しいんだから",
+          "example_vn": "Bận mà"
         }
       ],
-      "usage_notes": [
-        "ですわ/ますわ is OJOU archetype marker",
-        "Always add 'ạ' in Vietnamese to maintain elegance",
-        "May use classical pronouns: thiếp, nàng, ngài",
-        "CRITICAL: Detection of わ with polite form should trigger OJOU archetype",
-        "Never used by modern casual female characters"
-      ]
+      "forbidden_particles": [
+        "わね (wane)",
+        "のね (none)"
+      ],
+      "preferred_register": "casual_assertive"
     },
-    "じゃん (jan)": {
-      "function": "GYARU/casual youth - 'isn't it?/you know'",
-      "corpus_frequency": 2890,
-      "priority": "high",
-      "vietnamese_mappings": {
-        "default": ["mà", "đúng không", "chứ"],
-        "archetype_specific": {
-          "GYARU": ["mà", "mà nè", "chứ", "hông"],
-          "GENKI": ["mà!", "chứ!", "đúng không!"],
-          "OSANANAJIMI": ["mà", "chứ"]
-        }
-      },
-      "register": "casual youth slang",
-      "rtas_range": [4.0, 5.0],
-      "gender": "neutral (young casual)",
-      "archetype_affinity": ["GYARU", "GENKI", "OSANANAJIMI"],
-      "examples": [
+    "OJOU": {
+      "signature_patterns": [
         {
-          "jp": "可愛いじゃん",
-          "vn": "Đáng yêu mà!",
-          "context": "gyaru_compliment",
-          "archetype_variants": {
-            "GYARU": "Đáng yêu mà nè!",
-            "GENKI": "Đáng yêu mà!"
-          }
+          "japanese_pattern": "～ですわ",
+          "vietnamese_equivalent": "~ ạ / ~ đấy ạ",
+          "frequency": "high",
+          "example_jp": "そうですわ",
+          "example_vn": "Vâng ạ / Đúng vậy ạ"
         },
         {
-          "jp": "できるじゃん",
-          "vn": "Làm được mà!",
-          "context": "encouragement",
-          "archetype_variants": {
-            "GYARU": "Làm được mà!",
-            "OSANANAJIMI": "Làm được chứ!"
-          }
-        }
-      ],
-      "usage_notes": [
-        "じゃん is casual youth slang (Tokyo/Kanagawa region)",
-        "GYARU archetype marker",
-        "Vietnamese 'mà' works well for casual assertion",
-        "Never for formal characters (OJOU, YAMATO_NADESHIKO)",
-        "Detection of じゃん suggests young casual character"
-      ]
-    },
-    "っしょ (ssho)": {
-      "function": "GYARU casual - contracted でしょ",
-      "corpus_frequency": 890,
-      "priority": "medium",
-      "vietnamese_mappings": {
-        "default": ["mà", "chứ"],
-        "archetype_specific": {
-          "GYARU": ["mà nè", "chứ", "hông"],
-          "GENKI": ["mà!", "chứ!"]
-        }
-      },
-      "register": "casual youth slang",
-      "rtas_range": [4.5, 5.0],
-      "gender": "neutral (casual young)",
-      "archetype_required": ["GYARU", "GENKI"],
-      "examples": [
-        {
-          "jp": "いいっしょ",
-          "vn": "Được mà nè",
-          "context": "gyaru_agreement"
+          "japanese_pattern": "～ですの",
+          "vietnamese_equivalent": "~ ạ / ~ sao ạ",
+          "frequency": "high",
+          "example_jp": "本当ですの?",
+          "example_vn": "Thật sao ạ?"
         },
         {
-          "jp": "わかるっしょ",
-          "vn": "Hiểu mà chứ",
-          "context": "casual_assumption"
+          "japanese_pattern": "～てよ",
+          "vietnamese_equivalent": "~ nhé / ~ đi ạ",
+          "frequency": "medium",
+          "example_jp": "教えてよ",
+          "example_vn": "Chỉ em nhé"
         }
       ],
-      "usage_notes": [
-        "っしょ is ultra-casual contracted でしょ",
-        "Strong GYARU marker",
-        "Shows extreme casualness/youth slang",
-        "Never for formal/elegant characters"
-      ]
+      "forbidden_particles": [
+        "ぞ (zo)",
+        "ぜ (ze)",
+        "じゃん (jan)"
+      ],
+      "preferred_register": "polite_formal"
     },
-    "やん (yan - Kansai)": {
-      "function": "Kansai dialect - じゃん equivalent",
-      "corpus_frequency": 1560,
-      "priority": "medium",
-      "vietnamese_mappings": {
-        "default": ["mà", "chứ"],
-        "dialect_note": "If character uses Kansai dialect, may add southern Vietnamese particles",
-        "archetype_specific": {
-          "KANSAI_GYARU": ["mà nè", "chứ nè", "hông"],
-          "KANSAI_CASUAL": ["mà", "chứ"]
-        }
-      },
-      "register": "Kansai casual",
-      "rtas_range": [3.5, 5.0],
-      "gender": "neutral",
-      "regional": "Kansai",
-      "examples": [
+    "GYARU": {
+      "signature_patterns": [
         {
-          "jp": "めっちゃ可愛いやん",
-          "vn": "Đáng yêu quá mà!",
-          "context": "kansai_enthusiasm"
+          "japanese_pattern": "～じゃん",
+          "vietnamese_equivalent": "~ mà / ~ kìa / ~ nè",
+          "frequency": "very_high",
+          "example_jp": "かわいいじゃん",
+          "example_vn": "Dễ thương mà"
         },
         {
-          "jp": "知ってるやん",
-          "vn": "Biết mà chứ",
-          "context": "kansai_assertion"
-        }
-      ],
-      "usage_notes": [
-        "やん is Kansai dialect marker",
-        "Similar function to じゃん but regional",
-        "Vietnamese: consider southern particles (nè, nghe) if character is dialectal",
-        "Standard mapping: 'mà/chứ'"
-      ]
-    },
-    "で (de - Kansai)": {
-      "function": "Kansai dialect sentence ending",
-      "corpus_frequency": 780,
-      "priority": "low",
-      "vietnamese_mappings": {
-        "default": ["đó", "mà"],
-        "archetype_specific": {
-          "KANSAI_CASUAL": ["đó", "mà", "nè (if southern influence)"]
-        }
-      },
-      "register": "Kansai casual",
-      "rtas_range": [3.5, 5.0],
-      "gender": "neutral",
-      "regional": "Kansai",
-      "examples": [
-        {
-          "jp": "そうやで",
-          "vn": "Đúng vậy đó",
-          "context": "kansai_confirmation"
+          "japanese_pattern": "～っしょ",
+          "vietnamese_equivalent": "~ nhỉ / ~ đúng không",
+          "frequency": "high",
+          "example_jp": "そうっしょ?",
+          "example_vn": "Đúng không?"
         },
         {
-          "jp": "ええで",
-          "vn": "Được đó",
-          "context": "kansai_agreement"
+          "japanese_pattern": "～よね～",
+          "vietnamese_equivalent": "~ nhỉ~ / ~ đúng không~",
+          "frequency": "high",
+          "example_jp": "やばいよね～",
+          "example_vn": "Tuyệt nhỉ~"
         }
       ],
-      "usage_notes": [
-        "で is Kansai sentence-final particle",
-        "Indicates regional speech pattern",
-        "Vietnamese: 'đó' captures casual assertion"
-      ]
-    }
-  },
-  "confirmation_emphasis_particles": {
-    "そうだね (sou da ne)": {
-      "function": "Agreement with warmth, 'that's right'",
-      "corpus_frequency": 4560,
-      "priority": "high",
-      "vietnamese_mappings": {
-        "default": ["đúng nhỉ", "đúng đấy", "đúng vậy"],
-        "archetype_specific": {
-          "DEREDERE": ["đúng nhỉ~", "đúng đấy~"],
-          "OSANANAJIMI": ["đúng đấy", "đúng nhỉ"],
-          "KUUDERE": ["Đúng.", "Ừ."],
-          "OJOU": ["Đúng ạ.", "Đúng vậy ạ."],
-          "GYARU": ["Đúng luôn!", "Đúng đó!"],
-          "TSUNDERE": ["Đúng...", "Ừ đúng..."]
-        }
-      },
-      "register": "casual warm",
-      "rtas_range": [3.0, 5.0],
-      "gender": "neutral",
-      "examples": [
-        {
-          "jp": "そうだね、行こうか",
-          "vn": "Đúng nhỉ, đi thôi",
-          "context": "warm_agreement"
-        }
-      ]
-    },
-    "ですね (desu ne)": {
-      "function": "Polite agreement/confirmation",
-      "corpus_frequency": 8920,
-      "priority": "high",
-      "vietnamese_mappings": {
-        "default": ["đúng ạ", "vậy ạ", "nhỉ ạ"],
-        "archetype_specific": {
-          "OJOU": ["đúng ạ", "phải ạ"],
-          "KOUHAI": ["vậy ạ", "đúng ạ"],
-          "SENPAI": ["đúng đấy", "đúng nhỉ"],
-          "YAMATO_NADESHIKO": ["đúng ạ", "vậy ạ"]
-        }
-      },
-      "register": "polite",
-      "rtas_range": [1.0, 3.5],
-      "gender": "neutral",
-      "examples": [
-        {
-          "jp": "そうですね",
-          "vn": "Đúng vậy ạ",
-          "context": "polite_agreement"
-        }
-      ]
-    },
-    "～さ (sa)": {
-      "function": "Masculine casual emphasis, 'you know'",
-      "corpus_frequency": 3210,
-      "priority": "medium",
-      "vietnamese_mappings": {
-        "default": ["đấy", "mà", "(often omit)"],
-        "archetype_specific": {
-          "DELINQUENT": ["đấy", "này"],
-          "SHOUNEN_MC": ["đó", "mà"],
-          "SENPAI": ["đấy", "nhé"]
-        }
-      },
-      "register": "masculine casual",
-      "rtas_range": [4.0, 5.0],
-      "gender": "male",
-      "examples": [
-        {
-          "jp": "そういうことさ",
-          "vn": "Đó là chuyện đó",
-          "context": "masculine_conclusion"
-        }
+      "forbidden_particles": [
+        "ですわ",
+        "ですの"
       ],
-      "usage_notes": [
-        "さ is casual masculine filler/emphasis",
-        "Can often omit in Vietnamese",
-        "When kept, 'đấy/mà' work well"
-      ]
+      "preferred_register": "very_casual"
     },
-    "～もん (mon)": {
-      "function": "Childish/feminine assertion, excuse (because...!)",
-      "corpus_frequency": 2780,
-      "priority": "medium",
-      "vietnamese_mappings": {
-        "default": ["mà", "chứ", "cơ mà"],
-        "archetype_specific": {
-          "IMOUTO": ["mà!", "cơ mà!", "chứ!"],
-          "CHILD": ["mà!", "chứ!"],
-          "DEREDERE": ["mà~", "cơ mà~"],
-          "TSUNDERE": ["mà! (defensive)", "chứ!"]
-        }
-      },
-      "register": "childish/feminine",
-      "rtas_range": [3.5, 5.0],
-      "gender": "female/child",
-      "examples": [
+    "KOUHAI": {
+      "signature_patterns": [
         {
-          "jp": "だって好きなんだもん",
-          "vn": "Vì em thích mà!",
-          "context": "childish_excuse",
-          "archetype_variants": {
-            "IMOUTO": "Vì em thích cơ mà!",
-            "DEREDERE": "Vì thích mà~",
-            "TSUNDERE": "Vì... thích mà!"
-          }
+          "japanese_pattern": "～ですね",
+          "vietnamese_equivalent": "~ nhỉ / ~ nhỉ ạ",
+          "frequency": "high",
+          "example_jp": "そうですね",
+          "example_vn": "Vâng ạ / Đúng nhỉ ạ"
         },
         {
-          "jp": "知らないもん",
-          "vn": "Không biết mà!",
-          "context": "defensive_child"
-        }
-      ],
-      "usage_notes": [
-        "もん is childish/cute particle",
-        "Strong IMOUTO/CHILD archetype marker",
-        "TSUNDERE use when being defensive",
-        "Vietnamese 'mà/chứ' capture excuse/defense tone",
-        "Never for mature/elegant characters"
-      ]
-    },
-    "～し (shi)": {
-      "function": "Listing reasons, emphasis on multiple points",
-      "corpus_frequency": 5670,
-      "priority": "medium",
-      "vietnamese_mappings": {
-        "default": ["mà", "chứ", "và"],
-        "translation_strategy": "Often translate by listing reasons naturally"
-      },
-      "register": "casual",
-      "rtas_range": [3.0, 5.0],
-      "gender": "neutral",
-      "examples": [
-        {
-          "jp": "時間もないし、お金もないし",
-          "vn": "Không có thời gian, lại không có tiền nữa",
-          "context": "listing_problems"
+          "japanese_pattern": "～ますね",
+          "vietnamese_equivalent": "~ nhé ạ / ~ ạ",
+          "frequency": "high",
+          "example_jp": "頑張りますね",
+          "example_vn": "Em sẽ cố gắng ạ"
         },
         {
-          "jp": "面白いし、安いし",
-          "vn": "Vừa hay, lại vừa rẻ",
-          "context": "listing_positives"
+          "japanese_pattern": "～んですか",
+          "vietnamese_equivalent": "~ sao ạ / ~ ạ",
+          "frequency": "medium",
+          "example_jp": "本当なんですか",
+          "example_vn": "Thật sao ạ"
         }
       ],
-      "usage_notes": [
-        "し lists reasons/observations casually",
-        "Vietnamese: use natural listing (vừa...lại vừa, mà...lại)",
-        "Can use 'mà' to connect, but often better to restructure",
-        "Avoid literal 'và' (too formal for casual し)"
-      ]
+      "forbidden_particles": [
+        "ぞ (zo)",
+        "ぜ (ze)",
+        "な (na)"
+      ],
+      "preferred_register": "polite_respectful"
+    },
+    "SENPAI": {
+      "signature_patterns": [
+        {
+          "japanese_pattern": "～よ",
+          "vietnamese_equivalent": "~ nhé / ~ đấy",
+          "frequency": "high",
+          "example_jp": "大丈夫だよ",
+          "example_vn": "Ổn mà / Không sao đâu"
+        },
+        {
+          "japanese_pattern": "～ね",
+          "vietnamese_equivalent": "~ nhỉ / ~ nhé",
+          "frequency": "high",
+          "example_jp": "そうだね",
+          "example_vn": "Đúng vậy nhỉ"
+        },
+        {
+          "japanese_pattern": "～かな",
+          "vietnamese_equivalent": "~ nhỉ / ~ không nhỉ",
+          "frequency": "medium",
+          "example_jp": "どうかな",
+          "example_vn": "Thế nào nhỉ"
+        }
+      ],
+      "forbidden_particles": [],
+      "preferred_register": "casual_caring"
+    },
+    "TOMBOY": {
+      "signature_patterns": [
+        {
+          "japanese_pattern": "～だぜ",
+          "vietnamese_equivalent": "~ đấy / ~ này",
+          "frequency": "high",
+          "example_jp": "やってやるぜ",
+          "example_vn": "Làm cho mà xem"
+        },
+        {
+          "japanese_pattern": "～じゃん",
+          "vietnamese_equivalent": "~ mà / ~ kìa",
+          "frequency": "high",
+          "example_jp": "知ってるじゃん",
+          "example_vn": "Biết rồi mà"
+        },
+        {
+          "japanese_pattern": "～よな",
+          "vietnamese_equivalent": "~ nhỉ / ~ đấy",
+          "frequency": "medium",
+          "example_jp": "そうだよな",
+          "example_vn": "Đúng vậy nhỉ"
+        }
+      ],
+      "forbidden_particles": [
+        "わ (wa)",
+        "の (no - feminine)",
+        "ですわ"
+      ],
+      "preferred_register": "casual_rough"
     }
   },
   "compound_particles": {
-    "だってば (datteba)": {
-      "function": "Insistent repetition, 'I'm telling you!'",
-      "corpus_frequency": 1450,
-      "priority": "medium",
+    "よね (yone)": {
+      "function": "Assertion + seeking agreement",
       "vietnamese_mappings": {
-        "default": ["đã nói mà", "mà!", "đã bảo"],
-        "archetype_specific": {
-          "GENKI": ["đã nói mà!", "mà nha!"],
-          "TSUNDERE": ["đã nói mà!", "đã bảo rồi!"],
-          "IMOUTO": ["đã nói mà anh!", "mà!"],
-          "GYARU": ["đã nói mà nè!"]
-        }
+        "default": [
+          "nhỉ",
+          "đúng không",
+          "phải không"
+        ]
       },
-      "register": "casual insistent",
-      "rtas_range": [4.0, 5.0],
-      "gender": "neutral",
-      "examples": [
-        {
-          "jp": "違うってば!",
-          "vn": "Sai rồi mà!",
-          "context": "insistent_correction"
-        }
-      ]
+      "usage_notes": "See softening_particles.よね"
     },
-    "のに (noni)": {
-      "function": "Contrary expectation, 'even though'",
-      "corpus_frequency": 8920,
-      "priority": "high",
+    "かな (kana)": {
+      "function": "Question + wondering",
       "vietnamese_mappings": {
-        "default": ["mà", "lại", "thế mà"],
-        "translation_strategy": "Use Vietnamese contrary markers"
+        "default": [
+          "nhỉ",
+          "không nhỉ",
+          "chăng"
+        ]
       },
-      "register": "neutral",
-      "rtas_range": [1.0, 5.0],
-      "gender": "neutral",
-      "examples": [
-        {
-          "jp": "頑張ったのに失敗した",
-          "vn": "Đã cố gắng mà vẫn thất bại",
-          "context": "contrary_expectation"
-        }
-      ]
+      "usage_notes": "See sentence_ending_particles.かな"
     },
-    "けど/けれど (kedo/keredo)": {
-      "function": "'But/however' - softer than が",
-      "corpus_frequency": 19840,
-      "priority": "critical",
+    "のか (noka)": {
+      "function": "Explanatory + question",
       "vietnamese_mappings": {
-        "default": ["nhưng", "nhưng mà", "mà"],
-        "translation_strategy": "Vietnamese adversative conjunctions"
+        "default": [
+          "sao",
+          "à",
+          "chứ",
+          "hả"
+        ]
       },
-      "register": "casual (けど) to formal (けれど)",
-      "rtas_range": [1.0, 5.0],
-      "gender": "neutral",
-      "examples": [
-        {
-          "jp": "行きたいけど、時間がない",
-          "vn": "Muốn đi nhưng không có thời gian",
-          "context": "adversative"
-        }
-      ]
+      "usage_notes": "See sentence_ending_particles.のか"
+    },
+    "だろう (darou)": {
+      "function": "Copula + assumption",
+      "vietnamese_mappings": {
+        "default": [
+          "nhỉ",
+          "đúng không",
+          "phải không",
+          "chứ"
+        ]
+      },
+      "usage_notes": "See sentence_ending_particles.だろう"
+    },
+    "じゃん (jan)": {
+      "function": "Casual assertion (じゃない shortened)",
+      "vietnamese_mappings": {
+        "default": [
+          "mà",
+          "đấy",
+          "kìa",
+          "nè"
+        ]
+      },
+      "usage_notes": "See sentence_ending_particles.じゃん"
+    },
+    "っけ (kke)": {
+      "function": "Recollection marker",
+      "vietnamese_mappings": {
+        "default": [
+          "nhỉ",
+          "ta",
+          "gì nhỉ",
+          "đâu nhỉ"
+        ]
+      },
+      "usage_notes": "See sentence_ending_particles.っけ"
     }
   },
-  "production_notes": {
-    "integration_instructions": [
-      "1. Load this JSON alongside vietnamese_grammar_rag.json",
-      "2. During JP→VN translation, detect Japanese particles in source",
-      "3. Check character archetype from manifest.json",
-      "4. Look up particle in this database",
-      "5. Select Vietnamese mapping based on archetype_specific if available",
-      "6. Validate against archetype_forbidden list (hard block)",
-      "7. Check RTAS range compatibility",
-      "8. Apply gender filter if character gender defined",
-      "9. Fall back to default mapping if no specific match",
-      "10. Inject selected Vietnamese particle into translation"
+  "usage_guidelines": {
+    "priority_order": [
+      "1. Check archetype signature patterns first",
+      "2. Apply RTAS-based guidance for intimate vs hostile contexts",
+      "3. Consider gender restrictions (though VN doesn't mark gender)",
+      "4. Use default mappings if no specific guidance applies",
+      "5. Verify corpus frequency (higher = more reliable)"
     ],
-    "priority_handling": {
-      "critical": "Always process these particles (よ, ね, か - 50k+ combined frequency)",
-      "high": "Process when detected (な, わ, ぞ, かな, etc.)",
-      "medium": "Process if time/token budget allows",
-      "low": "Optional/dialectal particles"
-    },
-    "archetype_detection_triggers": {
-      "OJOU": ["ですわ", "ますわ", "わ + polite form", "frequent 'ですの'"],
-      "GYARU": ["じゃん", "っしょ", "超", "めっちゃ", "やばい"],
-      "DELINQUENT": ["ぞ", "ぜ", "てめえ", "野郎"],
-      "KUUDERE": ["minimal particles", "short sentences", "frequent omissions"],
-      "DEREDERE": ["frequent ね, の", "～", "elongated endings"],
-      "TSUNDERE": ["particle shifts (harsh → soft)", "frequent だって, もん (defensive)"]
-    },
-    "common_translation_pitfalls": [
-      "Don't translate all よ as 'nhé' (that's ね)",
-      "Don't use masculine particles for female characters",
-      "Don't miss archetype-specific variants (OJOU speaking like GYARU breaks character)",
-      "Don't over-translate hedges (なんか, ちょっと often omitted in Vietnamese)",
-      "Don't under-translate emphasis (ぞ, ぜ need aggressive Vietnamese particles)",
-      "Don't confuse sentence-final の (feminine) with possessive の"
+    "common_mistakes_to_avoid": [
+      "Translating particles too literally",
+      "Ignoring context and archetype",
+      "Using formal particles in casual dialogue",
+      "Omitting particles entirely (loses nuance)",
+      "Mixing incompatible particles (e.g., ạ + mà)",
+      "Over-using 'nhỉ' (most common error)",
+      "Confusing 'nhé' (request) with 'nhỉ' (agreement)"
     ],
-    "validation_checklist": [
-      "✓ Character archetype matches particle choice",
-      "✓ RTAS range appropriate for relationship",
-      "✓ Gender association respected (if applicable)",
-      "✓ No forbidden archetypes using particle",
-      "✓ Particle frequency feels natural (not every sentence)",
-      "✓ Compound particles properly handled",
-      "✓ Register consistency maintained throughout dialogue"
+    "integration_notes": [
+      "This RAG is automatically loaded by vietnamese_grammar_rag.py",
+      "Use get_vietnamese_particle_for_japanese() method for lookups",
+      "Combine with character archetype and RTAS score for best results",
+      "Particle selection should consider dialogue context and speaker relationship"
     ]
-  },
-  "corpus_statistics": {
-    "top_10_particles_by_frequency": [
-      {"particle": "か", "frequency": 22340, "function": "question"},
-      {"particle": "けど", "frequency": 19840, "function": "adversative"},
-      {"particle": "よ", "frequency": 18147, "function": "emphasis"},
-      {"particle": "ちょっと", "frequency": 16780, "function": "softening"},
-      {"particle": "ね", "frequency": 15632, "function": "agreement"},
-      {"particle": "の", "frequency": 14200, "function": "feminine_explanatory"},
-      {"particle": "な", "frequency": 12450, "function": "masculine_contemplation"},
-      {"particle": "なんか", "frequency": 9234, "function": "hedging"},
-      {"particle": "ですね", "frequency": 8920, "function": "polite_agreement"},
-      {"particle": "のに", "frequency": 8920, "function": "contrary"}
-    ],
-    "archetype_particle_preferences": {
-      "OJOU": ["わ (1240)", "ですの (890)", "ですわ (1240)", "frequent ạ"],
-      "GYARU": ["じゃん (2890)", "っしょ (890)", "frequent luôn/nè"],
-      "DELINQUENT": ["ぞ (3890)", "ぜ (2156)", "frequent này/đấy"],
-      "KUUDERE": ["minimal all particles", "frequent omissions", "flat tones"],
-      "TSUNDERE": ["defensive もん (2780)", "particle shifts", "mixed harsh/soft"],
-      "DEREDERE": ["frequent ね (15632)", "～ elongations", "soft particles"]
-    }
   }
 }

@@ -1,0 +1,588 @@
+{
+    "version": "2.0",
+    "description": "Tier 1 RAG: Universal Formatting Standards for Light Novel Translation - Always Inject (Language-Neutral with EN/VN Variants)",
+    "last_updated": "2026-02-08",
+    "priority": "critical",
+    "scope": "language_neutral",
+    "category_order": [
+        "punctuation_conversion",
+        "emphasis_texture",
+        "scene_breaks",
+        "sound_effects",
+        "poetry_verse",
+        "dialogue_formatting",
+        "multi_speaker_dialogue",
+        "internal_monologue",
+        "paragraphing"
+    ],
+    "pattern_categories": {
+        "punctuation_conversion": {
+            "description": "Standardize Japanese Light Novel symbols to target language publishing equivalents",
+            "priority": "critical",
+            "patterns": [
+                {
+                    "id": "dialogue_quotes",
+                    "japanese_symbol": "「...」",
+                    "target_en": "\"...\"",
+                    "target_vn": "\"...\"",
+                    "rule": "Standard Dialogue Quotes",
+                    "context": "all_dialogue",
+                    "examples": [
+                        {
+                            "jp": "「行くよ」",
+                            "en": "\"Let's go.\"",
+                            "vn": "\"Đi thôi.\""
+                        }
+                    ]
+                },
+                {
+                    "id": "nested_quotes_screen_text",
+                    "japanese_symbol": "『...』",
+                    "target_en": "\"...\"",
+                    "target_vn": "『...』",
+                    "rule": "EN: Always convert to standard quotes. VN: Retain for Screen Text, Telepathy, or Magic Chants",
+                    "context": "nested_dialogue_screen_text_telepathy",
+                    "examples": [
+                        {
+                            "jp": "『魔法発動！』",
+                            "en": "\"Magic Activate!\"",
+                            "vn": "『Ma Pháp Phát Động!』",
+                            "note": "VN retains special brackets for magical/telepathic/screen text"
+                        }
+                    ]
+                },
+                {
+                    "id": "parentheses",
+                    "japanese_symbol": "（...）",
+                    "target_en": "(...)",
+                    "target_vn": "(...)",
+                    "rule": "Convert full-width parens to half-width",
+                    "context": "all",
+                    "examples": [
+                        {
+                            "jp": "彼は（なぜか）笑った",
+                            "en": "He laughed (for some reason).",
+                            "vn": "Cậu ta cười (không hiểu sao)."
+                        }
+                    ]
+                },
+                {
+                    "id": "ellipsis",
+                    "japanese_symbol": "……",
+                    "target_en": "...",
+                    "target_vn": "...",
+                    "rule": "Convert 2-char Japanese ellipsis to 3 standard dots",
+                    "context": "all",
+                    "examples": [
+                        {
+                            "jp": "それは……",
+                            "en": "That's...",
+                            "vn": "Đó là..."
+                        }
+                    ]
+                },
+                {
+                    "id": "em_dash",
+                    "japanese_symbol": "——",
+                    "target_en": "—",
+                    "target_vn": "—",
+                    "rule": "Em-dash. Do not use double hyphens __",
+                    "context": "interruption_emphasis",
+                    "examples": [
+                        {
+                            "jp": "私は——",
+                            "en": "I—",
+                            "vn": "Tôi—"
+                        }
+                    ]
+                },
+                {
+                    "id": "wave_dash",
+                    "japanese_symbol": "〜",
+                    "target_en": "~ or delete",
+                    "target_vn": "~ or delete",
+                    "rule": "Convert to standard tilde or delete if tone is serious",
+                    "context": "casual_playful",
+                    "examples": [
+                        {
+                            "jp": "ありがとう〜",
+                            "en": "Thanks~",
+                            "vn": "Cảm ơn~",
+                            "note": "Delete tilde in serious scenes"
+                        }
+                    ]
+                },
+                {
+                    "id": "spacing_before_punctuation",
+                    "japanese_symbol": "!? with space",
+                    "target_en": "!? no space",
+                    "target_vn": "!? no space",
+                    "rule": "Remove space before punctuation",
+                    "context": "all",
+                    "examples": [
+                        {
+                            "incorrect": "Why ?",
+                            "correct": "Why?"
+                        }
+                    ]
+                }
+            ]
+        },
+        "emphasis_texture": {
+            "description": "Handle special Japanese formatting tags (bouten, ruby)",
+            "priority": "high",
+            "patterns": [
+                {
+                    "id": "bouten_heavy_impact",
+                    "japanese_indicator": "bouten_dots",
+                    "formatting": "**Bold**",
+                    "context": "heavy_impact_urgent",
+                    "examples": [
+                        {
+                            "jp": "今すぐ逃げろ (bouten emphasis)",
+                            "en": "**Run now!**",
+                            "vn": "**Chạy mau!**"
+                        }
+                    ],
+                    "usage_rules": [
+                        "Use for commands, warnings, shocking realizations",
+                        "Apply sparingly - overuse dilutes impact"
+                    ]
+                },
+                {
+                    "id": "bouten_subtle_internal",
+                    "japanese_indicator": "bouten_dots",
+                    "formatting": "*Italics*",
+                    "context": "subtle_internal_realization",
+                    "examples": [
+                        {
+                            "jp": "何かがおかしい (bouten emphasis)",
+                            "en": "*Something's wrong...*",
+                            "vn": "*Có cái gì đó sai sai...*"
+                        }
+                    ],
+                    "usage_rules": [
+                        "Use for internal thoughts, subtle emphasis",
+                        "Don't overuse - only when emphasis changes tone"
+                    ]
+                },
+                {
+                    "id": "ruby_text_authority",
+                    "type": "standard_ruby",
+                    "rule": "Ruby text is AUTHORITATIVE - never override with kanji-inferred reading",
+                    "priority_hierarchy": [
+                        "Ruby text present → Follow exactly",
+                        "No ruby → Apply standard Hepburn romanization"
+                    ],
+                    "examples": [
+                        {
+                            "jp": "御堂<ruby>みどう</ruby>",
+                            "correct": "Midou",
+                            "incorrect": "Mido",
+                            "note": "Long vowels: Preserve as shown in ruby (おう→ou, おお→oo, えい→ei)"
+                        }
+                    ],
+                    "usage_rules": [
+                        "Ruby text supersedes all other reading conventions",
+                        "Preserve long vowels exactly as ruby indicates",
+                        "Never guess pronunciation from kanji alone"
+                    ]
+                },
+                {
+                    "id": "ghost_ruby_kira_kira_names",
+                    "type": "irregular_ruby",
+                    "description": "Non-standard kanji-to-pronunciation mappings (comedic/dramatic misdirection)",
+                    "mechanism": "Normal kanji visual layer + forced foreign pronunciation",
+                    "cultural_context": "Yankee/delinquent families, modern trendy names",
+                    "examples": [
+                        {
+                            "kanji": "愛梨",
+                            "standard_reading": "Airi",
+                            "ruby_text": "ラブリ",
+                            "pronunciation": "Raburi (Lovely)",
+                            "translation_strategy": "Romanize ruby text pronunciation",
+                            "first_appearance": "Airi Raburi with note (ラブリ = Lovely)",
+                            "subsequent": "Raburi",
+                            "do": "Preserve comedic gap between visual and phonetic",
+                            "dont": "Translate to English meaning ('Lovely') as character name"
+                        },
+                        {
+                            "kanji": "騎士",
+                            "ruby_text": "ナイト",
+                            "pronunciation": "Naito (Knight)"
+                        },
+                        {
+                            "kanji": "天使",
+                            "ruby_text": "エンジェル",
+                            "pronunciation": "Enjeru (Angel)"
+                        }
+                    ],
+                    "usage_rules": [
+                        "DO: Romanize the ruby text pronunciation",
+                        "DO: Add brief note on first appearance if unclear",
+                        "DON'T: Translate to English meaning as character name",
+                        "DON'T: Use standard kanji reading",
+                        "Effect: Preserves gap moe (visual formality vs. phonetic casualness)"
+                    ]
+                },
+                {
+                    "id": "ghost_ruby_archaic_readings",
+                    "type": "irregular_historical",
+                    "description": "Rare, archaic, or specialized readings",
+                    "cultural_context": "Martial arts families, historical lineages",
+                    "examples": [
+                        {
+                            "kanji": "草鹿",
+                            "common_reading": "Kusaka",
+                            "ruby_text": "くさじし",
+                            "pronunciation": "Kusajishi",
+                            "etymology": "Kusajishi-shiki = Traditional archery ceremony",
+                            "translation_strategy": "Use archaic reading to convey martial heritage",
+                            "do": "Follow ruby text exactly",
+                            "dont": "Substitute common reading for convenience"
+                        }
+                    ],
+                    "usage_rules": [
+                        "Follow ruby text exactly (Kusajishi, not Kusaka)",
+                        "Preserve character's archaic/formal aura",
+                        "Let name speak for itself - don't over-explain"
+                    ]
+                },
+                {
+                    "id": "ghost_ruby_visual_misdirection",
+                    "type": "delayed_revelation",
+                    "description": "Author deliberately omits ruby initially for dramatic/comedic reveal",
+                    "translation_protocol": [
+                        "First mention (no ruby): Use standard kanji reading",
+                        "Revelation moment: Switch to ruby pronunciation + character reaction",
+                        "Subsequent uses: Lock to revealed pronunciation",
+                        "Optional: Brief translator note if confusion likely"
+                    ],
+                    "examples": [
+                        {
+                            "scene_1": "妹の愛梨も誘ったんだがな (no ruby)",
+                            "translation_1": "I invited my little sister Airi too...",
+                            "scene_2": "ラブリなんていうキラキラネームで...",
+                            "translation_2": "A kira-kira name like Raburi...",
+                            "effect": "Preserves author's comedic timing",
+                            "wrong_approach": "Translating as 'Lovely' immediately spoils the reveal"
+                        }
+                    ],
+                    "why_matters": "Respects narrative pacing, preserves comedic impact, mimics Japanese reader experience"
+                }
+            ]
+        },
+        "scene_breaks": {
+            "description": "Visual markers for scene transitions",
+            "priority": "high",
+            "patterns": [
+                {
+                    "id": "scene_break_marker",
+                    "symbol": "***",
+                    "position": "centered_new_line",
+                    "condition": "Scene shifts time, location, or POV",
+                    "spacing": "One empty line before and after",
+                    "examples": [
+                        {
+                            "markdown": "\n\n***\n\n"
+                        }
+                    ]
+                }
+            ]
+        },
+        "sound_effects": {
+            "description": "Integration strategies for Japanese onomatopoeia",
+            "priority": "medium",
+            "patterns": [
+                {
+                    "id": "sfx_integrated",
+                    "strategy": "Integrate into narrative flow",
+                    "formatting": "*Italicized*",
+                    "examples": [
+                        {
+                            "jp": "ドカン",
+                            "en": "A *boom* echoed loudly.",
+                            "vn": "Tiếng *ầm* vang lên dữ dội."
+                        }
+                    ]
+                },
+                {
+                    "id": "sfx_discrete",
+                    "strategy": "Standalone for impact",
+                    "formatting": "*Standalone line*",
+                    "examples": [
+                        {
+                            "jp": "ドカン",
+                            "en": "*Boom*",
+                            "vn": "*Cốp*"
+                        }
+                    ]
+                }
+            ],
+            "reference": "Module 06 (SFX Library)"
+        },
+        "poetry_verse": {
+            "description": "Vertical Lock Rule - Poetry must breathe",
+            "priority": "critical",
+            "patterns": [
+                {
+                    "id": "vertical_stacking_mandatory",
+                    "rule": "BREAK LINES manually for every verse",
+                    "ban": "Never use commas, spaces, or slashes to separate verses",
+                    "examples": [
+                        {
+                            "correct_en": "Strong or weak\nI'll tell you everything\nExcept two words: \"Like\".",
+                            "correct_vn": "Mạnh mẽ hay yếu đuối\nAnh đều kể em nghe\nChỉ trừ hai chữ \"Thích\".",
+                            "incorrect": "Strong or weak, I'll tell you everything, Except two words: \"Like\"."
+                        }
+                    ],
+                    "ui_exception": "If character sends poem via text message, ignore visual bubble constraint - prioritize poetic structure"
+                }
+            ]
+        },
+        "dialogue_formatting": {
+            "description": "Dialogue punctuation and structure rules",
+            "priority": "high",
+            "patterns": [
+                {
+                    "id": "default_quotes",
+                    "language": "both_en_vn",
+                    "format": "Double quotes \"...\"",
+                    "examples": [
+                        {
+                            "en": "\"I'll be there,\" he said.",
+                            "vn": "\"Anh sẽ tới,\" anh nói."
+                        }
+                    ]
+                },
+                {
+                    "id": "vn_optional_dash",
+                    "language": "vn_only",
+                    "format": "Long dash —",
+                    "condition": "Traditional Vietnamese Novel style (check user preference)",
+                    "default": "Quotes for Light Novels",
+                    "example": "— Anh sẽ tới — anh nói."
+                },
+                {
+                    "id": "action_beats_vs_tags",
+                    "rules": [
+                        {
+                            "type": "speech_tag",
+                            "case": "lowercase",
+                            "examples": [
+                                {
+                                    "en": "\"I'm leaving,\" she said.",
+                                    "vn": "\"Anh đi rồi,\" cô ấy nói."
+                                }
+                            ]
+                        },
+                        {
+                            "type": "action_beat",
+                            "case": "capitalize_separate_sentence",
+                            "examples": [
+                                {
+                                    "en": "\"I'm leaving.\" She grabbed her coat.",
+                                    "vn": "\"Anh đi rồi.\" Cô ấy lấy áo khoác."
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "id": "punctuation_placement",
+                    "rules": [
+                        {
+                            "rule": "period_inside_quotes",
+                            "example": "\"I'm leaving.\""
+                        },
+                        {
+                            "rule": "comma_before_tag",
+                            "example": "\"I'm leaving,\" she said."
+                        },
+                        {
+                            "rule": "question_exclamation_no_comma",
+                            "examples": [
+                                "\"Are you serious?\" he asked.",
+                                "\"Yes!\" she shouted."
+                            ]
+                        },
+                        {
+                            "rule": "em_dash_interruption",
+                            "example": "\"I was just—\" \"I don't want to hear it.\""
+                        },
+                        {
+                            "rule": "ellipsis_trailing",
+                            "example": "\"I just... I don't know what to say.\""
+                        }
+                    ]
+                },
+                {
+                    "id": "multi_speaker_same_line",
+                    "description": "Multiple characters speaking the same word/line simultaneously (chorus effect)",
+                    "format": "Multiple sets of straight double quotes \"\"\"\"Text\"\"\"\"",
+                    "rule": "DO NOT convert to curly quotes - keep straight quotes to indicate simultaneous speech",
+                    "context": "group_exclamation_chorus_unison",
+                    "usage_rules": [
+                        "Each pair of quotes represents one speaker",
+                        "Common in reaction shots (surprise, shock, confusion)",
+                        "Preserves Japanese manga/LN convention",
+                        "Keep all quotes straight (not curly) for technical clarity"
+                    ],
+                    "examples": [
+                        {
+                            "description": "Two speakers in unison",
+                            "format": "\"\"Text\"\"",
+                            "en": "\"\"Huh?\"\"",
+                            "vn": "\"\"Hả?\"\"",
+                            "context": "Two characters react simultaneously with same word"
+                        },
+                        {
+                            "description": "Three speakers in unison",
+                            "format": "\"\"\"Text\"\"\"",
+                            "en": "\"\"\"What?!\"\"\"",
+                            "vn": "\"\"\"Cái gì?!\"\"\"",
+                            "context": "Three characters shocked by revelation"
+                        },
+                        {
+                            "description": "Four speakers in unison",
+                            "format": "\"\"\"\"Text\"\"\"\"",
+                            "en": "\"\"\"\"Huh?\"\"\"\"",
+                            "vn": "\"\"\"\"Hả?\"\"\"\"",
+                            "context": "Entire group reacts in surprise"
+                        },
+                        {
+                            "description": "Full sentence example",
+                            "en": "They all turned to stare at him.\n\n\"\"\"\"Huh?\"\"\"\"\n\nHe blinked, confused by their synchronized reaction.",
+                            "vn": "Tất cả đều quay lại nhìn cậu.\n\n\"\"\"\"Hả?\"\"\"\"\n\nCậu chớp mắt, bối rối trước phản ứng đồng loạt của họ."
+                        }
+                    ],
+                    "technical_note": "This notation differs from nested dialogue. Nested uses different quote types ('single' inside \"double\"), while multi-speaker uses repeated quote pairs of the same type.",
+                    "do_not": [
+                        "Do not convert to curly quotes ("")",
+                        "Do not replace with [In unison] tags",
+                        "Do not merge into single quote pair",
+                        "Do not add individual speaker tags"
+                    ],
+                    "priority": "high"
+                }
+            ]
+        },
+        "internal_monologue": {
+            "description": "Formatting for character thoughts and internal voice",
+            "priority": "high",
+            "patterns": [
+                {
+                    "id": "italics_direct_thought",
+                    "format": "*Italics*",
+                    "use_case": "Direct internal voice shift",
+                    "examples": [
+                        {
+                            "en": "*What am I doing?* she thought. *This is insane.*",
+                            "vn": "*Anh đang làm gì vậy?* cô ấy nghĩ. *Điều này thật điên rồ.*"
+                        },
+                        {
+                            "en_short": "*What am I doing? This is insane.*",
+                            "vn_short": "*Anh đang làm gì vậy? Điều này thật điên rồ.*",
+                            "note": "No tag needed if context clear"
+                        }
+                    ],
+                    "rule": "Italics signal shift from external narration to internal voice"
+                },
+                {
+                    "id": "plain_internal_narration",
+                    "format": "Plain text",
+                    "use_case": "Reflective narration when POV is clear",
+                    "examples": [
+                        {
+                            "en": "She didn't know what to do. Every option seemed worse than the last.",
+                            "vn": "Cô ấy không biết phải làm gì. Mọi lựa chọn đều tệ hơn những lựa chọn trước."
+                        }
+                    ],
+                    "rule": "Use italics for immediate emotional reactions. Use plain text for reflective narration."
+                }
+            ]
+        },
+        "paragraphing": {
+            "description": "Paragraph structure and pacing rules",
+            "priority": "medium",
+            "patterns": [
+                {
+                    "id": "paragraph_preservation",
+                    "rule": "1 Input Paragraph = 1 Output Paragraph",
+                    "exception": "Long internal monologues or descriptions may be split for readability if they exceed 5-6 sentences",
+                    "principle": "Generally adhere to author's pacing"
+                },
+                {
+                    "id": "indentation",
+                    "rule": "No indentation for web publishing/txt format unless specified",
+                    "note": "EPUB builder handles indentation automatically"
+                }
+            ]
+        }
+    },
+    "language_specific_summary": {
+        "comparison_table": [
+            {
+                "aspect": "Dialogue Quotes",
+                "english": "Always \"...\"",
+                "vietnamese": "Mostly \"...\", rarely —",
+                "both": "Default: Quotes"
+            },
+            {
+                "aspect": "Special Brackets 『』",
+                "english": "Convert to \"...\"",
+                "vietnamese": "Retain for special contexts",
+                "both": "Context-dependent"
+            },
+            {
+                "aspect": "Dialogue Tags",
+                "english": "Lowercase for tags",
+                "vietnamese": "Lowercase for tags",
+                "both": "✓"
+            },
+            {
+                "aspect": "Scene Breaks",
+                "english": "***",
+                "vietnamese": "***",
+                "both": "✓"
+            },
+            {
+                "aspect": "SFX Format",
+                "english": "Italicized or discrete",
+                "vietnamese": "Italicized or discrete",
+                "both": "✓"
+            },
+            {
+                "aspect": "Poetry",
+                "english": "Vertical stacking",
+                "vietnamese": "Vertical stacking",
+                "both": "✓"
+            },
+            {
+                "aspect": "Punctuation",
+                "english": "No space before !?",
+                "vietnamese": "No space before !?",
+                "both": "✓"
+            },
+            {
+                "aspect": "Em-dash",
+                "english": "—",
+                "vietnamese": "—",
+                "both": "✓"
+            },
+            {
+                "aspect": "Internal Monologue",
+                "english": "*Italics*",
+                "vietnamese": "*Italics*",
+                "both": "✓"
+            }
+        ]
+    },
+    "injection_context": {
+        "tier": 1,
+        "injection_mode": "always",
+        "reason": "Universal formatting rules apply to all translations regardless of genre or content",
+        "estimated_token_size": "3KB",
+        "replaces": "MODULE 04 in MEGA_CORE_TRANSLATION_ENGINE.md (now deprecated for Tier 1)"
+    }
+}

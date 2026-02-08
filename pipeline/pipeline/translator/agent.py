@@ -22,7 +22,7 @@ from pipeline.translator.context_manager import ContextManager
 from pipeline.translator.chapter_processor import ChapterProcessor, TranslationResult
 from pipeline.translator.continuity_manager import detect_and_offer_continuity, ContinuityPackManager
 from pipeline.translator.per_chapter_workflow import PerChapterWorkflow
-from pipeline.config import get_target_language, get_language_config
+from pipeline.config import get_target_language, get_language_config, PIPELINE_ROOT
 from pipeline.post_processor.format_normalizer import FormatNormalizer
 from pipeline.post_processor.cjk_cleaner import CJKArtifactCleaner, format_results_report
 from modules.gap_integration import GapIntegrationEngine
@@ -253,14 +253,13 @@ class TranslatorAgent:
         if self.target_language in ['en', 'vn', 'vi']:
             try:
                 from modules.anti_ai_ism_agent import AntiAIismAgent
-                from pipeline.config import get_gemini_config
                 
-                # Get API key from config
+                # Get API key from config (using already imported get_gemini_config)
                 gemini_config = get_gemini_config()
                 api_key = gemini_config.get('api_key', os.getenv('GEMINI_API_KEY'))
                 
-                # Get config directory from prompt_loader
-                config_dir = self.prompt_loader.config_dir
+                # Get config directory from PIPELINE_ROOT
+                config_dir = PIPELINE_ROOT / 'config'
                 
                 # Initialize agent with auto_heal=True for automatic corrections
                 anti_ai_ism_agent = AntiAIismAgent(

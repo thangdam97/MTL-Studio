@@ -284,7 +284,7 @@ class AntiAIismAgent:
         if GEMINI_AVAILABLE and api_key and auto_heal:
             try:
                 self.llm_client = genai.Client(api_key=api_key)
-                self._flash_model = "gemini-2.5-flash-preview-05-20"
+                self._flash_model = "gemini-2.5-flash"
                 logger.info(f"[HEAL] Layer 3 + Self-Healing: Gemini Flash active ({self._flash_model})")
             except Exception as e:
                 logger.warning(f"[HEAL] Layer 3 init failed: {e}. LLM correction disabled.")

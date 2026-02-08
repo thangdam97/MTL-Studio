@@ -1,7 +1,186 @@
 {
-    "version": "2.0",
-    "description": "RTAS algorithm config. Derived from 79 volumes (437 personality traits, 97 relationship types, 313 keigo registers).",
+    "version": "3.0",
+    "description": "RTAS algorithm config. Derived from 79 volumes + 200 JP files scan.",
     "baseline": 3.0,
+    "japanese_source_patterns": {
+        "_description": "Detect RTAS from raw Japanese text patterns (pronouns, endings, honorifics)",
+        "first_person_pronouns": {
+            "ore": {
+                "gender": "male",
+                "formality": "casual",
+                "rtas_shift": 0.3
+            },
+            "boku": {
+                "gender": "male",
+                "formality": "neutral",
+                "rtas_shift": 0.1
+            },
+            "watashi": {
+                "gender": "neutral",
+                "formality": "polite",
+                "rtas_shift": -0.2
+            },
+            "atashi": {
+                "gender": "female",
+                "formality": "casual",
+                "rtas_shift": 0.4
+            },
+            "watakushi": {
+                "gender": "neutral",
+                "formality": "very_formal",
+                "rtas_shift": -0.8
+            },
+            "ware": {
+                "gender": "male",
+                "formality": "archaic",
+                "rtas_shift": -1.0
+            },
+            "sessha": {
+                "gender": "male",
+                "formality": "samurai",
+                "rtas_shift": -1.2
+            }
+        },
+        "sentence_endings": {
+            "da": {
+                "formality": "casual",
+                "gender": "neutral",
+                "rtas_shift": 0.2
+            },
+            "desu": {
+                "formality": "polite",
+                "gender": "neutral",
+                "rtas_shift": -0.3
+            },
+            "masu": {
+                "formality": "polite",
+                "gender": "neutral",
+                "rtas_shift": -0.3
+            },
+            "dayo": {
+                "formality": "casual",
+                "gender": "neutral",
+                "rtas_shift": 0.4,
+                "emphasis": true
+            },
+            "dane": {
+                "formality": "casual",
+                "gender": "neutral",
+                "rtas_shift": 0.3
+            },
+            "dana": {
+                "formality": "casual",
+                "gender": "male",
+                "rtas_shift": 0.3
+            },
+            "daze": {
+                "formality": "rough",
+                "gender": "male",
+                "rtas_shift": 0.5
+            },
+            "dawa": {
+                "formality": "casual",
+                "gender": "female",
+                "rtas_shift": 0.3
+            },
+            "kashira": {
+                "formality": "casual",
+                "gender": "female",
+                "rtas_shift": 0.2
+            },
+            "noyo": {
+                "formality": "casual",
+                "gender": "female",
+                "rtas_shift": 0.3,
+                "assertive": true
+            },
+            "wane": {
+                "formality": "casual",
+                "gender": "female",
+                "rtas_shift": 0.2
+            },
+            "desuno": {
+                "formality": "ojou",
+                "gender": "female",
+                "rtas_shift": -0.5,
+                "archetype": "ojou-sama"
+            },
+            "desuwa": {
+                "formality": "ojou",
+                "gender": "female",
+                "rtas_shift": -0.5,
+                "archetype": "ojou-sama"
+            },
+            "gozaimasu": {
+                "formality": "very_polite",
+                "gender": "neutral",
+                "rtas_shift": -0.8
+            },
+            "degozaru": {
+                "formality": "samurai",
+                "gender": "male",
+                "rtas_shift": -1.0
+            }
+        },
+        "honorific_usage": {
+            "san": {
+                "formality": "polite",
+                "relationship": "neutral",
+                "rtas_indicator": 2.5
+            },
+            "kun": {
+                "formality": "casual",
+                "relationship": "friendly_male",
+                "rtas_indicator": 3.5
+            },
+            "chan": {
+                "formality": "casual",
+                "relationship": "affectionate",
+                "rtas_indicator": 4.0
+            },
+            "sama": {
+                "formality": "very_polite",
+                "relationship": "respectful",
+                "rtas_indicator": 2.0
+            },
+            "dono": {
+                "formality": "archaic",
+                "relationship": "formal",
+                "rtas_indicator": 1.8
+            },
+            "sensei": {
+                "formality": "respectful",
+                "relationship": "teacher",
+                "rtas_indicator": 2.5
+            },
+            "senpai": {
+                "formality": "respectful",
+                "relationship": "senior",
+                "rtas_indicator": 2.8
+            },
+            "kouhai": {
+                "formality": "casual",
+                "relationship": "junior",
+                "rtas_indicator": 3.5
+            }
+        },
+        "pronoun_detection_regex": {
+            "ore": "俺|オレ",
+            "boku": "僕|ボク",
+            "watashi": "私|ワタシ",
+            "atashi": "あたし|アタシ",
+            "watakushi": "わたくし",
+            "ware": "我"
+        },
+        "ending_detection_regex": {
+            "desu_masu": "です[。！？]|ます[。！？]",
+            "da_casual": "だ[。！？]|だよ[。！？]|だね[。！？]",
+            "masculine": "だな[。！？]|だぜ[。！？]",
+            "feminine": "だわ[。！？]|かしら[。！？]|のよ[。！？]|わね[。！？]",
+            "ojou": "ですの[。！？]|ですわ[。！？]",
+            "very_polite": "ございます|でござる"
+        }
+    },
     "relationship_patterns": {
         "protagonist|self|pov_character": {
             "baseline_override": null,

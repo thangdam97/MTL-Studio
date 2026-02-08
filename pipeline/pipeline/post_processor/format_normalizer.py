@@ -271,6 +271,59 @@ class FormatNormalizer:
         
         return results
     
+
+    def deduplicate_headers(self, file_path: Path) -> int:
+        """Remove consecutive duplicate H1 headers from a markdown file.
+
+        Returns the number of duplicate headers removed.
+        """
+        if not file_path.exists() or file_path.suffix != '.md':
+            return 0
+
+        try:
+            with open(file_path, 'r', encoding='utf-8') as f:
+                lines = f.readlines()
+
+            removed = 0
+            cleaned: list[str] = []
+            prev_header = None
+
+            for line in lines:
+                stripped = line.strip()
+                if stripped.startswith("# ") and not stripped.startswith("## "):
+                    if stripped == prev_header:
+                        removed += 1
+                        continue
+                    prev_header = stripped
+                else:
+                    if stripped:  # non-blank, non-header resets tracking
+                        prev_header = None
+
+                cleaned.append(line)
+
+            if removed > 0:
+                with open(file_path, 'w', encoding='utf-8') as f:
+                    f.writelines(cleaned)
+
+            return removed
+
+        except Exception as e:
+            print(f"     [WARNING] deduplicate_headers error on {file_path.name}: {e}")
+            return 0
+
+    def deduplicate_headers_in_directory(self, directory: Path, pattern: str = "CHAPTER_*.md") -> int:
+        """Remove duplicate H1 headers across all matching files. Returns total removed."""
+        if not directory.exists():
+            return 0
+
+        total = 0
+        for file_path in sorted(directory.glob(pattern)):
+            count = self.deduplicate_headers(file_path)
+            if count > 0:
+                print(f"     \u2713 {file_path.name}: removed {count} duplicate H1 header(s)")
+                total += count
+        return total
+
     def get_summary(self) -> str:
         """Get human-readable summary of last operation."""
         if self.stats['files_processed'] == 0:

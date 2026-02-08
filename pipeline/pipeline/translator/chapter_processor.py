@@ -98,7 +98,7 @@ class ChapterProcessor:
         translation_config = get_translation_config()
         massive_cfg = translation_config.get("massive_chapter", {})
         self.smart_chunking_enabled = bool(massive_cfg.get("enable_smart_chunking", True))
-        self.chunk_threshold_chars = int(massive_cfg.get("chunk_threshold_chars", 50000))
+        self.chunk_threshold_chars = int(massive_cfg.get("chunk_threshold_chars", 60000))
         self.chunk_threshold_bytes = int(massive_cfg.get("chunk_threshold_bytes", 120000))
         self.target_chunk_chars = int(massive_cfg.get("target_chunk_chars", 45000))
 
@@ -918,6 +918,15 @@ This document contains the internal reasoning process that Gemini used while tra
                 validation_warnings.append(
                     f"Truncation validator detected {critical_count} critical issue(s)"
                 )
+                if truncation_report.should_block():
+                    para_count = len(truncation_report.paragraph_end_truncations)
+                    logger.error(
+                        f"[TRUNCATION] BLOCKING: {para_count} paragraph-end truncation(s) "
+                        f"detected in {chapter_id} — manual review required"
+                    )
+                    validation_warnings.append(
+                        f"BLOCKING: {para_count} paragraph-end truncation(s) require review"
+                    )
             elif truncation_report.has_any():
                 validation_warnings.append(
                     f"Truncation validator detected {len(truncation_report.all_issues)} potential issue(s)"
@@ -925,14 +934,22 @@ This document contains the internal reasoning process that Gemini used while tra
 
             if self.glossary_lock and self.glossary_lock.is_locked():
                 chapter_text = output_path.read_text(encoding="utf-8")
-                glossary_report = self.glossary_lock.validate_output(chapter_text)
-                if glossary_report.has_critical():
-                    logger.error(
-                        f"[GLOSSARY] {len(glossary_report.critical)} variant(s) detected in {chapter_id}"
-                    )
+                fixed_text, fix_count = self.glossary_lock.auto_fix_output(chapter_text)
+                if fix_count > 0:
+                    output_path.write_text(fixed_text, encoding="utf-8")
+                    logger.info(f"[GLOSSARY] Auto-fixed {fix_count} name variant(s) in {chapter_id}")
                     validation_warnings.append(
-                        f"Glossary lock detected {len(glossary_report.critical)} name variant(s)"
+                        f"Glossary lock auto-fixed {fix_count} name variant(s)"
                     )
+                else:
+                    glossary_report = self.glossary_lock.validate_output(chapter_text)
+                    if glossary_report.has_critical():
+                        logger.error(
+                            f"[GLOSSARY] {len(glossary_report.critical)} unfixable variant(s) in {chapter_id}"
+                        )
+                        validation_warnings.append(
+                            f"Glossary lock detected {len(glossary_report.critical)} unfixable name variant(s)"
+                        )
             
             return TranslationResult(
                 success=True,
@@ -1049,21 +1066,39 @@ This document contains the internal reasoning process that Gemini used while tra
 
             if merge_result.truncation_issues:
                 critical = [i for i in merge_result.truncation_issues if i.severity == "CRITICAL"]
+                para_end = [i for i in merge_result.truncation_issues if getattr(i, 'followed_by_blank', False)]
                 if critical:
                     validation_warnings.append(
                         f"Truncation validator detected {len(critical)} critical issue(s) in merged output"
                     )
+                    if para_end or len(critical) >= 3:
+                        logger.error(
+                            f"[TRUNCATION] BLOCKING: {len(para_end)} paragraph-end truncation(s) "
+                            f"in merged {chapter_id} — manual review required"
+                        )
+                        validation_warnings.append(
+                            f"BLOCKING: paragraph-end truncation(s) require review"
+                        )
                 else:
                     validation_warnings.append(
                         f"Truncation validator detected {len(merge_result.truncation_issues)} potential issue(s)"
                     )
 
             if self.glossary_lock and self.glossary_lock.is_locked():
-                glossary_report = self.glossary_lock.validate_output(merged_content)
-                if glossary_report.has_critical():
+                fixed_content, fix_count = self.glossary_lock.auto_fix_output(merged_content)
+                if fix_count > 0:
+                    output_path.write_text(fixed_content, encoding="utf-8")
+                    merged_content = fixed_content
+                    logger.info(f"[GLOSSARY] Auto-fixed {fix_count} name variant(s) in merged {chapter_id}")
                     validation_warnings.append(
-                        f"Glossary lock detected {len(glossary_report.critical)} name variant(s)"
+                        f"Glossary lock auto-fixed {fix_count} name variant(s)"
                     )
+                else:
+                    glossary_report = self.glossary_lock.validate_output(merged_content)
+                    if glossary_report.has_critical():
+                        validation_warnings.append(
+                            f"Glossary lock detected {len(glossary_report.critical)} unfixable name variant(s)"
+                        )
 
             return TranslationResult(
                 success=True,

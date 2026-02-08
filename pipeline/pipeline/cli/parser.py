@@ -105,7 +105,7 @@ Metadata Schema Auto-Transform:
     phase1_5_parser = subparsers.add_parser(
         'phase1.5',
         parents=[parent_parser],
-        help='Run Phase 1.5: Metadata Processor (translates title/author/chapters, preserves v3 schema)'
+        help='Run Phase 1.5: Metadata Processor (schema autoupdate + title/author/chapter translation)'
     )
     phase1_5_parser.add_argument('volume_id', type=str, nargs='?', help='Volume ID (optional - will prompt if not provided)')
 

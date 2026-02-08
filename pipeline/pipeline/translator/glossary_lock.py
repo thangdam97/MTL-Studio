@@ -174,6 +174,29 @@ class GlossaryLock:
     def _normalize(name: str) -> str:
         return re.sub(r"[^a-z]", "", name.lower())
 
+
+    def auto_fix_output(self, text: str) -> tuple[str, int]:
+        """Replace detected name variants with canonical forms.
+
+        Returns (fixed_text, replacement_count).
+        """
+        if not self.locked_names:
+            return text, 0
+
+        report = self.validate_output(text)
+        if not report.has_any():
+            return text, 0
+
+        fixed = text
+        total_replacements = 0
+        for issue in report.issues:
+            # Word-boundary replacement: variant -> expected
+            pattern = re.compile(r"\b" + re.escape(issue.variant) + r"\b")
+            fixed, count = pattern.subn(issue.expected, fixed)
+            total_replacements += count
+
+        return fixed, total_replacements
+
     def get_locked_names(self) -> Dict[str, str]:
         return dict(self.locked_names)
 

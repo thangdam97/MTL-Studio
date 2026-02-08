@@ -53,7 +53,7 @@ gemini:
   model: gemini-2.5-pro
   fallback_model: gemini-2.5-flash
   generation:
-    temperature: 1
+    temperature: 1.0
     top_p: 0.95
     top_k: 40
     max_output_tokens: 65535
@@ -132,6 +132,11 @@ translation:
   context:
     lookback_chapters: 2
     enforce_name_consistency: true
+  massive_chapter:
+    enable_smart_chunking: true
+    chunk_threshold_chars: 60000
+    chunk_threshold_bytes: 120000
+    enable_volume_cache: true
 critics:
   qc_rubric: prompts/qc_rubric.md
   auto_fix:

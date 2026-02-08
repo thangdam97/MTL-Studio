@@ -1,9 +1,10 @@
 # FANTASY TRANSLATION MODULE (FFXVI Method)
 
-**Version:** 1.0
-**Date:** 2026-01-13
+**Version:** 2.0
+**Date:** 2026-02-08
 **Purpose:** Fantasy-specific translation framework for light novels with Western medieval/fantasy settings
-**Based On:** Final Fantasy XVI English localization principles (Michael-Christopher Koji Fox method)
+**Based On:** Final Fantasy XVI English localization (Michael-Christopher Koji Fox method)
+**Hardened By:** 25d9 audit (Lord Marksman and Vanadis Vol 1) — 89.0/100, Grade A-
 **Genre:** Fantasy romance, isekai, noble academy, sword & sorcery
 
 ---
@@ -18,13 +19,21 @@
 6. [Japanese Interjection Adaptation](#japanese-interjection-adaptation)
 7. [World-Building Terminology](#world-building-terminology)
 8. [Anti-Victorian Guardrails](#anti-victorian-guardrails)
+9. [Name Consistency Protocol](#name-consistency-protocol) *(V2.0)*
+10. [POV Consistency Enforcement](#pov-consistency) *(V2.0)*
+11. [Cultural Term Preservation](#cultural-term-preservation) *(V2.0)*
+12. [Battle Choreography](#battle-choreography) *(V2.0)*
+13. [Multi-Volume Continuity](#multi-volume-continuity) *(V2.0)*
+14. [Chunk Boundary Awareness](#chunk-boundary-awareness) *(V2.0)*
 
 ---
 
 <a name="core-philosophy"></a>
 ## 1. Core Philosophy: Modern Fantasy Register
 
-**Definition:** Modern fantasy register is **refined but accessible** - it sounds timeless without being archaic, elegant without being stuffy.
+> **25d9 VALIDATION:** This philosophy scored 82/100 prose quality and 8.8/10 voice differentiation across 15 chapters. The three pillars WORK — no changes needed at the philosophy level.
+
+**Definition:** Modern fantasy register is **refined but accessible** — it sounds timeless without being archaic, elegant without being stuffy.
 
 **The FFXVI Principle:**
 > "Characters should sound like people from a fantasy world, not actors performing Shakespeare."
@@ -49,8 +58,6 @@
 **Japanese source:** ですます調 (desu-masu formal ending)
 **Bad translation:** Translate formality → Victorian grammar
 **FFXVI approach:** Translate formality → CHARACTER PERSONALITY
-
-**Example:**
 
 | Character Type | Japanese | ❌ Victorian | ✅ FFXVI Style |
 |---------------|----------|--------------|----------------|
@@ -121,22 +128,15 @@
 
 **Characteristics:**
 - ✅ Contractions allowed: "don't," "can't," "won't"
-- ✅ Title + name: "Lady Tetra," "Commander Clive"
+- ✅ Title + name: "Lady Elen," "Count Tigrevurmud"
 - ✅ Polite vocabulary without stiffness
 - ❌ No Victorian inversions: NOT "can you not," NOT "I shall"
 
-**Example - Servant to Noble:**
+**Example — Servant to Noble:**
 ```
-"Lady Tetra, I don't think that's wise."
+"Lady Elen, I don't think that's wise."
 "My lady, I've finished the preparations."
 "I'm honored to serve you."
-```
-
-**NOT:**
-```
-"Lady Tetra, I do not believe that to be wise." ❌
-"My lady, the preparations have been completed." ❌
-"It is an honor to be in your service." ❌
 ```
 
 ---
@@ -145,7 +145,7 @@
 
 **When to use:**
 - Fellow knights
-- Academy classmates
+- Battlefield comrades (Tigre and Rurick)
 - Close servants/nobles with bond
 
 **Characteristics:**
@@ -166,7 +166,7 @@
 #### Tier 4: INTIMATE (RTAS 4.5-5.0, lovers, family)
 
 **When to use:**
-- Romantic partners
+- Romantic partners (Tigre and Elen)
 - Siblings
 - Parent-child
 
@@ -176,18 +176,11 @@
 - Pet names acceptable
 - Shortest sentence forms
 
-**Example - Romantic:**
+**Example — Romantic:**
 ```
 "I love you."
 "Don't leave me."
 "You're everything to me."
-```
-
-**NOT:**
-```
-"I harbor feelings of deep affection for you." ❌
-"I would be greatly saddened by your departure." ❌
-"You hold great significance in my life." ❌
 ```
 
 ---
@@ -195,7 +188,7 @@
 <a name="character-archetypes-fantasy"></a>
 ## 3. Character Archetypes (Fantasy)
 
-### New Archetypes for Fantasy Settings
+### Archetypes for Fantasy Settings
 
 These replace/augment modern archetypes when `WORLD_SETTING = FANTASY`:
 
@@ -203,49 +196,28 @@ These replace/augment modern archetypes when `WORLD_SETTING = FANTASY`:
 
 #### ARCHETYPE: LOYAL_SERVANT
 
-**Profile:**
-- Devoted attendant to nobility
-- Warm formality, not robotic
-- Uses contractions naturally
-- Shows personality within duty
+**Profile:** Devoted attendant to nobility. Warm formality, not robotic. Uses contractions naturally. Shows personality within duty.
 
-**Vocabulary:**
-- "My lady/lord"
-- "Of course"
-- "I'll handle it"
-- "As you wish"
-
-**Rhythm:** Legato (L) - flowing, composed
+**Vocabulary:** "My lady/lord" · "Of course" · "I'll handle it" · "As you wish"
+**Rhythm:** Legato (L) — flowing, composed
 
 **Example Voice:**
 ```
-"Lady Tetra, I've brought your tea."
+"Lady Elen, I've brought your tea."
 "I don't mind at all, my lady."
 "You're overworking yourself again."
 ```
 
-**AVOID:**
-- "If you will excuse me" ❌
-- "I am humbled" ❌
-- "That is quite admirable" ❌
+**AVOID:** "If you will excuse me" ❌ · "I am humbled" ❌ · "That is quite admirable" ❌
 
 ---
 
 #### ARCHETYPE: TSUNDERE_PRINCESS
 
-**Profile:**
-- Noble with defensive pride
-- Sharp tongue with soft heart
-- Uses contractions when flustered
-- Maintains dignity while showing emotion
+**Profile:** Noble with defensive pride. Sharp tongue, soft heart. Uses contractions when flustered. Maintains dignity while showing emotion.
 
-**Vocabulary:**
-- "Hmph"
-- "Honestly"
-- "Don't misunderstand"
-- "It's not like..."
-
-**Rhythm:** Staccato (S) - clipped, defensive
+**Vocabulary:** "Hmph" · "Honestly" · "Don't misunderstand" · "It's not like..."
+**Rhythm:** Staccato (S) — clipped, defensive
 
 **Example Voice:**
 ```
@@ -254,28 +226,16 @@ These replace/augment modern archetypes when `WORLD_SETTING = FANTASY`:
 "Don't get the wrong idea."
 ```
 
-**AVOID:**
-- "Can you not see..." ❌
-- "I am not particularly concerned..." ❌
-- Victorian sentence inversions ❌
+**AVOID:** "Can you not see..." ❌ · "I am not particularly concerned..." ❌ · Victorian inversions ❌
 
 ---
 
 #### ARCHETYPE: STOIC_KNIGHT
 
-**Profile:**
-- Battle-hardened warrior
-- Minimal words, maximum impact
-- Direct speech, no flowery language
-- Protective instinct
+**Profile:** Battle-hardened warrior. Minimal words, maximum impact. Direct speech, no flowery language. Protective instinct.
 
-**Vocabulary:**
-- "Understood"
-- "Leave it to me"
-- "Stay behind me"
-- "I won't let them"
-
-**Rhythm:** Tenuto (T) - weighted, deliberate
+**Vocabulary:** "Understood" · "Leave it to me" · "Stay behind me" · "I won't let them"
+**Rhythm:** Tenuto (T) — weighted, deliberate
 
 **Example Voice:**
 ```
@@ -284,28 +244,18 @@ These replace/augment modern archetypes when `WORLD_SETTING = FANTASY`:
 "They won't touch you."
 ```
 
-**AVOID:**
-- "I shall ensure your safety" ❌
-- "You need not concern yourself" ❌
-- Over-explanation ❌
+**AVOID:** "I shall ensure your safety" ❌ · "You need not concern yourself" ❌ · Over-explanation ❌
 
 ---
 
 #### ARCHETYPE: FRONTIER_NOBLE
 
-**Profile:**
-- Practical noble from border regions
-- Direct communication style
-- Elegant but not pretentious
-- Action-oriented
+> **25d9 MATCH:** Tigrevurmud Vorn — Count of Alsace, practical archer-noble from the borderlands
 
-**Vocabulary:**
-- "Indeed"
-- "Naturally"
-- "Let's move"
-- "I'll handle this"
+**Profile:** Practical noble from border regions. Direct communication style. Elegant but not pretentious. Action-oriented.
 
-**Rhythm:** Tenuto (T) - firm, confident
+**Vocabulary:** "Indeed" · "Naturally" · "Let's move" · "I'll handle this"
+**Rhythm:** Tenuto (T) — firm, confident
 
 **Example Voice:**
 ```
@@ -318,19 +268,10 @@ These replace/augment modern archetypes when `WORLD_SETTING = FANTASY`:
 
 #### ARCHETYPE: COURT_NOBLE
 
-**Profile:**
-- High society, politically savvy
-- Formal but not stiff
-- Elegant phrasing
-- Uses contractions in private
+**Profile:** High society, politically savvy. Formal but not stiff. Elegant phrasing. Uses contractions in private.
 
-**Vocabulary:**
-- "Indeed"
-- "Quite"
-- "I dare say"
-- "Naturally"
-
-**Rhythm:** Legato (L) - flowing, refined
+**Vocabulary:** "Indeed" · "Quite" · "I dare say" · "Naturally"
+**Rhythm:** Legato (L) — flowing, refined
 
 **Example Voice (PUBLIC):**
 ```
@@ -348,14 +289,37 @@ These replace/augment modern archetypes when `WORLD_SETTING = FANTASY`:
 
 ---
 
+#### ARCHETYPE: WAR_MAIDEN *(V2.0)*
+
+> **25d9 MATCH:** Eleonora Viltaria (Elen) — Vanadis war princess wielding Arifar
+
+**Profile:** Female warrior of noble rank. Commands armies. Fierce in battle, warm in private. Alternates between authority and vulnerability.
+
+**Vocabulary:** "Stand your ground" · "Follow me" · "Not bad" · "Don't hold back"
+**Rhythm:** Tenuto→Legato shift (battle→private)
+
+**Example Voice (BATTLE):**
+```
+"Don't fall behind!"
+"I'll cut through them."
+"You call that a challenge?"
+```
+
+**Example Voice (PRIVATE):**
+```
+"You're the first person who's made me feel this way."
+"I'm not as strong as you think."
+"Stay with me."
+```
+
+---
+
 <a name="contraction-rules-fantasy-override"></a>
 ## 4. Contraction Rules (Fantasy Override)
 
 ### THE GOLDEN RULE: CONTRACTIONS ARE ALWAYS ALLOWED IN FANTASY
 
 **Rationale:** FFXVI proves that nobles, servants, and royalty can use contractions without losing elegance. Formality comes from **vocabulary and tone**, not grammar rigidity.
-
----
 
 ### Contraction Usage by RTAS
 
@@ -366,8 +330,6 @@ These replace/augment modern archetypes when `WORLD_SETTING = FANTASY`:
 | 2.5-4.0 (Familiar) | 95% (full contractions) | "You're overthinking this" ✅ |
 | 4.0-5.0 (Intimate) | 100% (always contract) | "I'm here" ✅ |
 
----
-
 ### Common Contractions (Fantasy-Approved)
 
 | Full Form | Contracted | Fantasy-Appropriate Context |
@@ -376,28 +338,19 @@ These replace/augment modern archetypes when `WORLD_SETTING = FANTASY`:
 | I will | I'll | ALL contexts |
 | I would | I'd | ALL contexts |
 | You are | You're | ALL contexts |
-| You will | You'll | ALL contexts |
-| He/She is | He's/She's | ALL contexts |
 | Do not | Don't | ALL contexts |
 | Cannot | Can't | ALL contexts |
 | Will not | Won't | ALL contexts |
-| Should not | Shouldn't | ALL contexts |
 | I have | I've | ALL contexts |
 | That is | That's | ALL contexts |
-
----
 
 ### Exception: Emphasis
 
 **Rule:** Use full form for EMPHASIS, not formality.
 
-**Example:**
 ```
 "I will NOT allow this." ✅ (emphasis on refusal)
 "I won't allow this." ✅ (normal statement)
-
-"I do NOT trust him." ✅ (emphasis on distrust)
-"I don't trust him." ✅ (normal statement)
 ```
 
 ---
@@ -415,56 +368,23 @@ These replace/augment modern archetypes when `WORLD_SETTING = FANTASY`:
 | 陛下 (heika) | Your Majesty | Royalty (king/queen) |
 | 閣下 (kakka) | Your Grace | Dukes, high nobles |
 | 先生 (sensei) | Master/Instructor [Name] | Teachers, mentors |
-
----
+| 伯爵 (hakushaku) | Count [Name] | Counts (e.g., Count Tigrevurmud) |
 
 ### Title Usage Rules
 
-#### Rule 1: CONSISTENT TITLE FORMAT
+**Rule 1: CONSISTENT TITLE FORMAT**
+- Format: Title + First Name (Western style)
+- ✅ "Lady Elen" · "Count Tigrevurmud" · "Sir Rurick"
+- ❌ "Elen-sama" (breaks immersion in Western fantasy)
 
-**Format:** Title + First Name (Western style)
-- ✅ "Lady Tetra"
-- ✅ "Lord Clive"
-- ✅ "Sir Leon"
-- ❌ "Tetra-sama" (breaks immersion in Western fantasy)
+**Rule 2: TITLE DROPPING AT HIGH RTAS**
+- RTAS < 3.0: Always use title → "Lady Elen, I've finished."
+- RTAS 3.0-4.0: Optional title → "Elen, I've finished."
+- RTAS > 4.5: First name only → "Elen, I love you."
 
----
-
-#### Rule 2: TITLE DROPPING AT HIGH RTAS
-
-**RTAS < 3.0:** Always use title
-```
-"Lady Tetra, I've finished."
-```
-
-**RTAS 3.0-4.0:** Optional title (signals growing closeness)
-```
-"Tetra, I've finished." (after bond forms)
-```
-
-**RTAS > 4.5:** First name only (intimate)
-```
-"Tetra, I love you."
-```
-
----
-
-#### Rule 3: SERVANTS CAN USE INFORMAL TITLES IN PRIVATE
-
-**PUBLIC:** "Lady Tetra"
-**PRIVATE (after bonding):** "My lady" or even "Tetra" (if RTAS > 3.5)
-
-**Example - Leon to Tetra:**
-```
-PUBLIC (RTAS 2.0):
-"Lady Tetra, the preparations are complete."
-
-PRIVATE (RTAS 3.5):
-"Tetra, you're overworking yourself."
-
-INTIMATE (RTAS 4.5):
-"Tetra... I can't lose you."
-```
+**Rule 3: SERVANTS CAN USE INFORMAL TITLES IN PRIVATE**
+- PUBLIC: "Lady Elen"
+- PRIVATE (after bonding): "My lady" or even "Elen" (if RTAS > 3.5)
 
 ---
 
@@ -472,14 +392,6 @@ INTIMATE (RTAS 4.5):
 ## 6. Japanese Interjection Adaptation
 
 ### THE RULE: NO DIRECT JAPANESE IN WESTERN FANTASY
-
-**Problem:** Translating え (e), あ (a), うん (un) directly as "Eh?", "Ah!", "Nn" breaks immersion.
-
-**Solution:** Adapt to English interjections that fit fantasy settings.
-
----
-
-### Interjection Conversion Table
 
 | Japanese | ❌ Anime Dub | ✅ Fantasy English | Context |
 |----------|-------------|-------------------|---------|
@@ -494,205 +406,316 @@ INTIMATE (RTAS 4.5):
 
 ---
 
-### Examples in Context
-
-**BAD (Anime dub style):**
-```
-"Eh? You're serious?"
-"Ara, how unexpected."
-"Nn, I see."
-```
-
-**GOOD (Fantasy adaptation):**
-```
-"What? You're serious?"
-"Oh? How unexpected."
-"Mm, I see."
-```
-
----
-
 <a name="world-building-terminology"></a>
 ## 7. World-Building Terminology
 
 ### Handling Fantasy-Specific Terms
 
-#### Rule 1: PRIORITIZE ENGLISH EQUIVALENTS
+**Rule 1: PRIORITIZE ENGLISH EQUIVALENTS**
 
-**Japanese term → English equivalent (if one exists)**
+| Japanese Concept | English Equivalent |
+|-----------------|-------------------|
+| 学園 (gakuen) | Academy |
+| 騎士団 (kishidan) | Knight Order / Knighthood |
+| 魔法学院 (mahou gakuin) | School of Magic / Arcane Academy |
+| 冒険者ギルド | Adventurer's Guild |
 
-| Japanese Concept | English Equivalent | Example |
-|-----------------|-------------------|---------|
-| 学園 (gakuen) | Academy | Wisteria Academy ✅ |
-| 騎士団 (kishidan) | Knight Order / Knighthood | The Royal Knights ✅ |
-| 魔法学院 (mahou gakuin) | School of Magic / Arcane Academy | Academy of Sorcery ✅ |
-| 冒険者ギルド | Adventurer's Guild | Guild of Adventurers ✅ |
+**Rule 2: KEEP UNIQUE PROPER NOUNS** — Character names, place names, weapon names from manifest stay romanized.
 
----
+**Rule 3: CONSISTENCY** — Once you establish a term, STICK TO IT. Never alternate between different translations of the same concept.
 
-#### Rule 2: KEEP UNIQUE PROPER NOUNS
-
-**When the term is a UNIQUE name (not a generic concept), keep it:**
-
-| Term Type | Example | Handling |
-|-----------|---------|----------|
-| Character names | テトラ → Tetra | Keep romanized |
-| Place names | ウィステリア → Wisteria | Keep romanized |
-| Spell names | フレアストーム → Flare Storm | Translate |
-| Monster names | ドラゴン → Dragon | Use English if equivalent exists |
-| Unique items | エクスカリバー → Excalibur | Use established English name |
-
----
-
-#### Rule 3: CONSISTENCY IN WORLD-BUILDING
-
-**Once you establish a term, STICK TO IT.**
-
-**Example - Magic Ranks:**
-```
-見習い魔法使い → Apprentice Mage ✅
-Then consistently use: Apprentice → Adept → Master → Archmage
-```
-
-**NOT:**
-```
-Apprentice Mage → Intermediate Sorcerer → Expert Wizard ❌ (inconsistent)
-```
+> **25d9 Example:** "Zhcted" must always be "Zhcted" — never "Zcted" or "Zchted". "Vanadis" never becomes "War Maiden" mid-text once established.
 
 ---
 
 <a name="anti-victorian-guardrails"></a>
 ## 8. Anti-Victorian Guardrails
 
-### What Makes Translation "Victorian" (And How to Avoid It)
+> **25d9 VALIDATION:** Zero catastrophic Victorian leaks across 15 chapters. These guardrails work.
 
----
+### Victorian Red Flags — Detection & Fix
 
-### Victorian Red Flag #1: "I Shall" / "You Shall"
+| # | Victorian Flag | ❌ Example | ✅ Fix |
+|---|---------------|-----------|--------|
+| 1 | "I shall" / "You shall" | "I shall return presently." | "I'll return shortly." |
+| 2 | "Can you not" / "Do you not" | "Can you not see I am occupied?" | "Can't you see I'm busy?" |
+| 3 | "If you will excuse me" | "If you will excuse me, I shall take my leave." | "Excuse me, I'll take my leave." |
+| 4 | "I am humbled" | "I am humbled by your praise." | "I'm honored." / "Thank you." |
+| 5 | "That is quite [adj]" | "That is quite admirable." | "That's impressive." |
+| 6 | Passive voice overuse | "The preparations have been completed." | "We're ready." |
 
-**Victorian:**
-```
-"I shall return presently."
-"You shall have your answer."
-```
-
-**Fantasy (FFXVI-style):**
-```
-"I'll return shortly."
-"You'll have your answer."
-```
-
-**Rule:** "Shall" is ONLY acceptable in:
+**"Shall" is ONLY acceptable in:**
 - Royal decrees: "You shall be knighted."
 - Formal oaths: "I shall serve faithfully."
 - Emphasis/threat: "You shall regret this."
 
----
-
-### Victorian Red Flag #2: "Can You Not" / "Do You Not"
-
-**Victorian:**
-```
-"Can you not see I am occupied?"
-"Do you not understand?"
-```
-
-**Fantasy (FFXVI-style):**
-```
-"Can't you see I'm busy?"
-"Don't you understand?"
-```
-
 **Rule:** NEVER use negative inversion. Use contractions with normal word order.
-
----
-
-### Victorian Red Flag #3: "If You Will Excuse Me"
-
-**Victorian:**
-```
-"If you will excuse me, I shall take my leave."
-```
-
-**Fantasy (FFXVI-style):**
-```
-"Excuse me, I'll take my leave."
-```
-
-**Rule:** Simplify politeness phrases. Remove unnecessary conditionals.
-
----
-
-### Victorian Red Flag #4: "I Am Humbled"
-
-**Victorian:**
-```
-"I am humbled by your praise."
-```
-
-**Fantasy (FFXVI-style):**
-```
-"I'm honored." / "Thank you."
-```
-
-**Rule:** Use direct gratitude, not performative humility.
-
----
-
-### Victorian Red Flag #5: "That Is Quite [Adjective]"
-
-**Victorian:**
-```
-"That is quite admirable."
-"That is quite impressive."
-```
-
-**Fantasy (FFXVI-style):**
-```
-"That's impressive."
-"Well done."
-```
-
-**Rule:** "Quite" is British formal, not fantasy formal. Use direct adjectives.
-
----
-
-### Victorian Red Flag #6: Passive Voice Overuse
-
-**Victorian:**
-```
-"The preparations have been completed."
-"Your request will be attended to."
-```
-
-**Fantasy (FFXVI-style):**
-```
-"We're ready."
-"I'll handle your request."
-```
-
 **Rule:** Use active voice. Make characters AGENTS, not observers.
 
 ---
 
-## Summary: The FFXVI Method
+---
 
-### Three Commandments
+# V2.0 ADDITIONS — Post-25d9 Audit Hardening
 
-1. **CONTRACTIONS ARE ELEGANT**
-   - Don't avoid them
-   - They make dialogue sound natural
-   - Formality comes from vocabulary, not grammar
+> The following sections were added after the 25d9 volume audit (Lord Marksman and Vanadis). They address the specific vulnerability classes that the FFXVI Method V1.0 did not cover.
 
-2. **PERSONALITY OVER PROTOCOL**
-   - Character voice > rigid formality rules
-   - A tsundere princess can say "Can't you see?"
-   - A loyal servant can say "I'm honored"
+---
 
-3. **EMOTIONAL DIRECTNESS**
-   - Express feelings directly
-   - No safety wrappers ("I find myself experiencing...")
-   - Strong verbs, clear emotions
+<a name="name-consistency-protocol"></a>
+## 9. Name Consistency Protocol *(V2.0)*
+
+> **25d9 LESSON:** 477 name variants were detected across 15 chapters. Ambiguous JP romanizations (ティグルヴルムド → Tigrevurmud/Tigrevrumud/Tigruvrmud) compound exponentially: N ambiguous names × M chapters = N×M drift vectors.
+
+### The Canonical Name Rule
+
+**ONCE A NAME IS ESTABLISHED IN THE MANIFEST, IT IS IMMUTABLE.**
+
+The pipeline's `manifest.json` contains a `character_names` mapping. Every name variant MUST resolve to the canonical form before output.
+
+### Common Drift Patterns in Fantasy
+
+| Drift Type | Example | Prevention |
+|-----------|---------|------------|
+| Vowel swap | Elen → Ellen, Mila → Mira | Lock exact spelling from Ch01 |
+| Consonant cluster | Tigrevurmud → Tigrevrumud | Copy-paste from manifest |
+| Prefix/suffix | Silvfrau → Silver Frauen | Treat as atomic proper noun |
+| Romanization variant | Zhcted → Zcted, Zchted | Glossary lock enforcement |
+| Nickname inconsistency | Tigre → Tiger, Tigr | Lock nickname too |
+
+### Rules
+
+1. **Chapter 1 establishes canon.** All names from the manifest MUST appear correctly in Ch01. The pipeline validates this.
+2. **Cross-chapter inheritance.** Each chapter receives the canonical name list in its prompt context. Never re-romanize from Japanese.
+3. **Compound names are atomic.** "Tigrevurmud Vorn" is ONE unit — never split or re-romanize parts independently.
+4. **Nicknames are separate entries.** "Tigre" (nickname) and "Tigrevurmud" (full name) are both locked independently.
+5. **Place names follow the same rules.** "Olmütz," "Alsace," "Zhcted" — all immutable once established.
+
+### Auto-Fix Behavior
+
+The glossary lock module will automatically replace detected variants with canonical forms post-translation. The translator should still aim for correct output — auto-fix is a safety net, not a crutch.
+
+---
+
+<a name="pov-consistency"></a>
+## 10. POV Consistency Enforcement *(V2.0)*
+
+> **25d9 LESSON:** Chapter 02 contained a dream sequence where the translator shifted from third-person to first-person narration, likely triggered by 俺 (ore = "I") in the Japanese source appearing in a subjective passage. This required a full chapter rewrite.
+
+### The POV Declaration Rule
+
+**Each volume declares a narrative POV in metadata. Honor it absolutely.**
+
+Most fantasy light novels use **third-person limited** narration. The Japanese source may contain first-person markers (俺, 僕, 私) in:
+- **Dialogue** — expected, always allowed
+- **Internal monologue** — render as third-person thought
+- **Dream sequences** — keep third-person, use "he felt" not "I felt"
+
+### Third-Person Enforcement Patterns
+
+| Japanese Pattern | ❌ First-Person Leak | ✅ Third-Person Correct |
+|-----------------|---------------------|------------------------|
+| 俺は思った | "I thought..." | "He thought..." / "Tigre thought..." |
+| 彼女の顔を見て、俺は | "Looking at her face, I..." | "Looking at her face, he..." |
+| 「これは...」と俺は呟いた | "I murmured, 'This is...'" | "He murmured, 'This is...'" |
+| 俺の心臓が跳ねた | "My heart leaped." | "His heart leaped." |
+
+### Dream Sequence & Flashback Protocol
+
+Dream sequences and flashbacks are the highest-risk zones for POV leaks because the source prose becomes more subjective.
+
+**Rules:**
+1. Maintain third-person even inside dreams
+2. Use "he/she" pronouns, never "I/my/me" in narration
+3. Mark dream transitions clearly: *italics* or scene break + "In the dream..."
+4. Internal monologue inside dreams: use *italics* for thought, still third-person:
+   - ✅ *He couldn't lose her. Not again.*
+   - ❌ *I couldn't lose her. Not again.*
+
+### Internal Monologue Convention
+
+For third-person volumes, internal thoughts should be rendered as:
+- **Indirect thought (preferred):** He wondered if she was safe.
+- **Italicized direct thought (acceptable):** *Is she safe?* he wondered.
+- **NEVER:** I wondered if she was safe. *(first-person leak)*
+
+---
+
+<a name="cultural-term-preservation"></a>
+## 11. Cultural Term Preservation *(V2.0)*
+
+> **25d9 LESSON:** The volume features a pseudo-European setting with cultural artifacts that should NOT be over-translated. The FFXVI Method V1.0 had no guidance on when to preserve cultural flavor vs. naturalize.
+
+### The Cultural Color Rule
+
+**When the source uses a culturally-specific term that adds world-building flavor, PRESERVE it — even if an English equivalent exists.**
+
+### Preservation Categories
+
+#### Category 1: FOOD & DRINK — Always Preserve Local Flavor
+
+| Source Term | ❌ Over-Naturalized | ✅ Preserved |
+|------------|--------------------|--------------| 
+| chai (チャイ) | "tea" | "chai" |
+| vino (ヴィーノ) | "wine" | "vino" |
+| mead (ミード) | "honey wine" | "mead" |
+| stew (シチュー) | "meat dish" | "stew" |
+
+**Why:** These terms add cultural texture to the world. A character ordering "chai" feels like a different world than one ordering "tea."
+
+#### Category 2: MILITARY TERMS — Use Established Fantasy English
+
+| Source | Translation | Notes |
+|--------|------------|-------|
+| 戦姫 (Vanadis title) | "War Maiden" or "Vanadis" | Use the canonical term from manifest |
+| 竜具 (dragonic tool) | Name from manifest (e.g., "Arifar") | Keep proper name |
+| 騎兵 | "cavalry" | Standard military English |
+| 弓兵 | "archer" | Standard military English |
+
+#### Category 3: EXCLAMATIONS & OATHS — Adapt to Setting
+
+| Source | ❌ Modern | ✅ Fantasy-Appropriate |
+|--------|----------|----------------------|
+| くそ (kuso) | "Shit!" | "Damn!" or "Blast!" |
+| 神よ (kami yo) | "Oh God!" | "Gods!" or "By the gods!" |
+| なんてこった | "No way!" | "What in the—" or "Impossible!" |
+
+**Rule:** Match the exclamation to the world's religiosity and setting. Polytheistic worlds use "gods" (plural).
+
+---
+
+<a name="battle-choreography"></a>
+## 12. Battle Choreography *(V2.0)*
+
+> **25d9 VALIDATION:** The battle scenes in Ch04-06 and Ch09-12 were the literary high points (rated 9.2/10 by auditor). This section codifies what worked.
+
+### The Clarity Rule
+
+**Battle scenes must be physically clear. The reader should always know:**
+1. WHERE each character is positioned
+2. WHAT weapon they're using
+3. HOW the action flows spatially
+
+### Weapon Terminology Consistency
+
+| Weapon | ✅ Consistent Term | ❌ Inconsistent Variants |
+|--------|-------------------|------------------------|
+| Tigre's bow | "bow" (+ "arrow" when drawing) | "longbow" / "shortbow" / alternating |
+| Elen's Arifar | "Arifar" (named blade) | "her sword" / "the dragonic weapon" / "blade" — only on first reference |
+| Mila's Lavias | "Lavias" (named spear) | same rule — name after introduction |
+
+**Rule:** Name weapons using their proper names from the manifest after first introduction. A brief descriptor on first appearance is fine ("Arifar, the Silver Flash"), then use just the name.
+
+### Battle Prose Guidelines
+
+**DO:**
+- Use strong, active verbs: "slashed," "parried," "lunged," "deflected"
+- Keep sentences short during high-action moments
+- Use spatial language: "closed the distance," "flanked," "retreated"
+- Show physical consequences: "the impact jarred his arm"
+
+**DON'T:**
+- Use passive voice in combat: ❌ "The sword was swung"
+- Over-narrate internal thoughts during fast action
+- Use identical sentence structure for consecutive actions
+- Describe the same action twice with different words
+
+### Rhythm in Battle
+
+Battle scenes should alternate between:
+
+| Phase | Sentence Style | Example |
+|-------|---------------|---------|
+| Action burst | Short, punchy (5-10 words) | "Elen swung Arifar. The blade sang." |
+| Tactical pause | Medium, analytical (15-25 words) | "Tigre nocked an arrow, gauging the distance to the enemy commander." |
+| Aftermath | Longer, reflective (20-35 words) | "The battlefield fell silent. Around them, the snow had turned red, and the bitter smell of iron hung in the air." |
+
+---
+
+<a name="multi-volume-continuity"></a>
+## 13. Multi-Volume Continuity *(V2.0)*
+
+> **25d9 LESSON:** This volume had a dual-act structure (Act I: Ch01-06, Act II: Ch07-15) that functionally behaves like two volumes. Glossary drift was worst at the act boundary.
+
+### Cross-Act Glossary Inheritance
+
+**Rule:** When a volume has multiple acts, arcs, or parts:
+1. The canonical name list from Act I carries forward to Act II
+2. New characters introduced in Act II are added to the glossary, not substituted
+3. The `lookback_chapters` setting must span the act boundary (minimum: last 2 chapters of previous act)
+
+### Character Relationship Evolution
+
+Characters' relationships evolve across a volume. The register (RTAS) should shift accordingly:
+
+| Phase | Tigre↔Elen RTAS | Speech Pattern |
+|-------|-----------------|----------------|
+| Ch01-02 (meeting) | 2.0 (strangers) | "Lady Eleonora" / formal |
+| Ch03-06 (alliance) | 3.0 (comrades) | "Elen" / familiar |
+| Ch07-12 (deepening) | 4.0 (trust) | First name, emotional openness |
+| Ch13-15 (resolution) | 4.5 (intimate) | Vulnerable, direct |
+
+**Rule:** RTAS shifts must be gradual and consistent. Never jump from 2.0 to 4.5 in a single chapter. Track the trajectory.
+
+### Lookback Context Window
+
+The pipeline provides previous chapter context to maintain continuity. Use it to:
+1. Match the exact name spellings from recent chapters
+2. Continue any unresolved emotional arcs
+3. Maintain consistent terminology for world-building terms
+4. Preserve the current RTAS level for each character pair
+
+---
+
+<a name="chunk-boundary-awareness"></a>
+## 14. Chunk Boundary Awareness *(V2.0)*
+
+> **25d9 LESSON:** 250+ truncated sentences were found at chunk boundaries where the LLM hit its output token limit mid-paragraph. This was the #1 quality issue by volume.
+
+### The Completion Rule
+
+**EVERY paragraph must end with terminal punctuation (. ! ? " …)**
+
+If you are approaching your output token limit:
+1. **FINISH the current sentence** — never truncate mid-word or mid-clause
+2. **End at a paragraph boundary** — not mid-paragraph
+3. **Prefer ending at a scene break** (◆ or * * *) if one is nearby
+
+### Truncation Signatures to Avoid
+
+| Signature | Example | Severity |
+|-----------|---------|----------|
+| Mid-word cut | "Tigre drew his bow and" | CRITICAL |
+| Trailing hyphen | "The army marched through the-" | CRITICAL |
+| Dangling conjunction | "She turned to him and" | CRITICAL |
+| Missing period at paragraph end | "The night was cold" (no period, blank line follows) | HIGH |
+| Comma-terminated paragraph | "The soldiers retreated," (blank line follows) | HIGH |
+
+### What the Pipeline Does
+
+The truncation validator will flag these patterns and may block the chapter if CRITICAL issues are found at paragraph boundaries. The translator's job is to **prevent** them by:
+1. Monitoring output length
+2. Finding a natural stopping point before the limit
+3. Completing the thought even if it means a slightly shorter chunk
+
+---
+
+## Summary: The FFXVI Method V2.0
+
+### Original Three Commandments (V1.0 — Proven)
+
+1. **CONTRACTIONS ARE ELEGANT** — Formality comes from vocabulary, not grammar
+2. **PERSONALITY OVER PROTOCOL** — Character voice > rigid formality rules
+3. **EMOTIONAL DIRECTNESS** — Express feelings directly, no safety wrappers
+
+### New Six Commandments (V2.0 — Hardened)
+
+4. **NAMES ARE IMMUTABLE** — Once the manifest locks a name, it never changes
+5. **POV IS SACRED** — Third-person volumes stay third-person, even in dreams
+6. **CULTURAL COLOR ENRICHES** — Preserve chai/vino/mead, don't flatten to "tea/wine/drink"
+7. **BATTLES MUST BE CLEAR** — Physical choreography > purple prose
+8. **CONTINUITY IS CUMULATIVE** — Each chapter inherits from all before it
+9. **COMPLETE EVERY SENTENCE** — Never truncate, especially at chunk boundaries
 
 ---
 
@@ -707,7 +730,6 @@ Apprentice Mage → Intermediate Sorcerer → Expert Wizard ❌ (inconsistent)
 | "I am humbled." | "I'm honored." / "Thank you." |
 | "That is quite admirable." | "That's impressive." |
 | "The preparations have been completed." | "We're ready." |
-| "I assure you, I am entirely serious." | "I'm serious." / "I mean it." |
 
 ---
 
@@ -715,26 +737,19 @@ Apprentice Mage → Intermediate Sorcerer → Expert Wizard ❌ (inconsistent)
 
 ### Module Priority When `WORLD_SETTING = FANTASY`
 
-1. **THIS MODULE (FANTASY_TRANSLATION_MODULE)** - Overrides base rules
-2. **Module 08 (Anti-Translationese)** - Still applies fully
-3. **Module 02 (Boldness)** - Still applies, with fantasy vocabulary
-4. **Module 05 (Register)** - OVERRIDDEN by fantasy register rules
-5. **Module 03 (Rhythm)** - Still applies (Legato/Staccato/Tenuto)
+1. **THIS MODULE (FANTASY_TRANSLATION_MODULE V2.0)** — Overrides base rules
+2. **Module 08 (Anti-Translationese)** — Still applies fully
+3. **Module 02 (Boldness)** — Still applies, with fantasy vocabulary
+4. **Module 05 (Register)** — OVERRIDDEN by fantasy register rules
+5. **Module 03 (Rhythm)** — Still applies (Legato/Staccato/Tenuto)
 
 ### Key Overrides
 
-**Register Module Override:**
-- Contractions allowed at ALL RTAS levels
-- Formality through vocabulary, not grammar
-
-**Archetype System Override:**
-- Use LOYAL_SERVANT instead of generic formal voice
-- Use TSUNDERE_PRINCESS instead of OJOU (for fantasy nobles)
-
-**Honorifics Override:**
-- Japanese honorifics → English titles
-- "Ojou-sama" → "Lady [Name]"
-- "Eh?" → "Hm?" / "What?"
+- **Register Module:** Contractions at ALL RTAS levels; formality via vocabulary
+- **Archetype System:** Use LOYAL_SERVANT, TSUNDERE_PRINCESS, WAR_MAIDEN, FRONTIER_NOBLE
+- **Honorifics:** Japanese → English titles (never "-sama" in Western fantasy)
+- **Name Enforcement:** Glossary lock auto-corrects variants post-translation
+- **POV Enforcement:** Validator flags first-person leaks in third-person volumes
 
 ---
 
@@ -747,3 +762,7 @@ GENRE = WESTERN_FANTASY | ISEKAI | NOBLE_ACADEMY | SWORD_AND_SORCERY
 ```
 
 When active, it OVERRIDES modern-Japan-specific rules from the base translation engine.
+
+---
+
+*V2.0 hardened by 25d9 audit: Lord Marksman and Vanadis Vol 1 — 89.0/100, Grade A-*

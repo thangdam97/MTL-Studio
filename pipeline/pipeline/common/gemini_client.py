@@ -263,7 +263,8 @@ class GeminiClient:
         model: str = None,
         cached_content: str = None,
         force_new_session: bool = False,
-        generation_config: Dict[str, Any] = None
+        generation_config: Dict[str, Any] = None,
+        tools: Optional[List[Any]] = None,
     ) -> GeminiResponse:
         """
         Generate content with retry logic, rate limiting, and optional context caching.
@@ -278,6 +279,7 @@ class GeminiClient:
             cached_content: External cached content name (from schema cache)
             force_new_session: If True, ignores internal cache and starts fresh (for Amnesia Protocol)
             generation_config: Dict with temperature, top_p, top_k overrides
+            tools: Optional Gemini tools (e.g., Google Search grounding)
         """
         target_model = model or self.model
         
@@ -339,7 +341,7 @@ class GeminiClient:
             if cached_content_name:
                 # Use cached content (system_instruction is in the cache)
                 cache_source = "external" if cached_content else "internal"
-                config = types.GenerateContentConfig(
+                config_kwargs = dict(
                     temperature=temperature,
                     top_p=top_p,
                     top_k=top_k,
@@ -348,6 +350,9 @@ class GeminiClient:
                     safety_settings=safety_settings,
                     automatic_function_calling=None  # Disable AFC to prevent loops
                 )
+                if tools:
+                    config_kwargs["tools"] = tools
+                config = types.GenerateContentConfig(**config_kwargs)
                 
                 # Add thinking config if enabled (works with cached content too)
                 thinking_config = self._get_thinking_config()
@@ -358,7 +363,7 @@ class GeminiClient:
                 logger.debug(f"Using {cache_source} cached system instruction: {cached_content_name}")
             else:
                 # Standard mode (no caching or fallback)
-                config = types.GenerateContentConfig(
+                config_kwargs = dict(
                     temperature=temperature,
                     top_p=top_p,
                     top_k=top_k,
@@ -367,6 +372,9 @@ class GeminiClient:
                     safety_settings=safety_settings,
                     automatic_function_calling=None  # Disable AFC to prevent loops
                 )
+                if tools:
+                    config_kwargs["tools"] = tools
+                config = types.GenerateContentConfig(**config_kwargs)
                 
                 # Add thinking config if enabled
                 thinking_config = self._get_thinking_config()

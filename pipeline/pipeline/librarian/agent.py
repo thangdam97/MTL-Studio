@@ -380,7 +380,8 @@ class LibrarianAgent:
                 source_dir,
                 spine,
                 converter,
-                publisher_name
+                publisher_name,
+                volume_acts=volume_acts
             )
         else:
             # Use standard TOC-based chapter detection
@@ -848,7 +849,8 @@ class LibrarianAgent:
         output_dir: Path,
         spine: Spine,
         converter: XHTMLToMarkdownConverter,
-        publisher: str = None
+        publisher: str = None,
+        volume_acts: Optional[List[Dict[str, Any]]] = None
     ) -> List[ConvertedChapter]:
         """
         Convert XHTML chapters to markdown using spine order when TOC is minimal/broken.
@@ -888,17 +890,38 @@ class LibrarianAgent:
         # Skip patterns for non-content files
         skip_patterns = ['cover', 'toc', 'nav', 'titlepage', 'caution', 'colophon', '998', '999']
 
+        # In multi-act books, keep act>=2 frontmatter image pages inline with
+        # the FIRST chapter of that act (not the previous chapter).
+        act_boundary_files = set()
+        if volume_acts:
+            for act in volume_acts:
+                act_num = act.get('act_number', 1)
+                if act_num < 2:
+                    continue
+                boundary_indices = act.get('tobira_spine_indices', []) + act.get('kuchie_spine_indices', [])
+                for idx in boundary_indices:
+                    if 0 <= idx < len(spine.items):
+                        boundary_file = spine.items[idx].href.split('/')[-1] if '/' in spine.items[idx].href else spine.items[idx].href
+                        act_boundary_files.add(boundary_file)
+
         # Group files into chapters based on content scanning
         chapter_groups = []  # List of (title, [files])
         current_title = None
         current_files = []
         chapter_counter = 0
+        pending_next_chapter_files = []  # Deferred act-boundary pages
 
         for filename in spine_order:
             lower_name = filename.lower()
 
             # Skip navigation/special files
             if any(skip in lower_name for skip in skip_patterns):
+                continue
+
+            # Multi-act boundary images (e.g., act tobira + fmatter) should be
+            # attached to the next chapter, not to the previous one.
+            if filename in act_boundary_files:
+                pending_next_chapter_files.append(filename)
                 continue
 
             xhtml_path = self._find_xhtml_file(content_dir, filename)
@@ -934,14 +957,16 @@ class LibrarianAgent:
 
                 # Start new chapter with detected title
                 current_title = detected_title
-                current_files = [filename]
+                current_files = pending_next_chapter_files + [filename]
+                pending_next_chapter_files = []
                 chapter_counter += 1
             elif current_title is None:
                 # First content file without explicit title - use fallback
                 chapter_counter += 1
                 fallback_title = content_config.fallback_chapter_title.format(n=chapter_counter)
                 current_title = fallback_title
-                current_files = [filename]
+                current_files = pending_next_chapter_files + [filename]
+                pending_next_chapter_files = []
             else:
                 # Continue current chapter
                 current_files.append(filename)
@@ -2075,11 +2100,12 @@ class LibrarianAgent:
         volume_acts: List[Dict[str, Any]]
     ) -> List[Dict[str, Any]]:
         """
-        Extract kuchie for each act in a multi-act EPUB.
+        Extract normalized frontmatter kuchie for ACT 1 only in a multi-act EPUB.
         
-        For each act, scans both tobira (title) and fmatter (kuchie) spine items
-        for image content. This ensures Act 2+ kuchie are properly captured
-        instead of being misclassified as inline illustrations.
+        Rationale:
+        - Act 1 kuchie should remain regular frontmatter color plates.
+        - Act 2+ tobira/fmatter images should stay inline in chapter flow to avoid
+          duplicate insertion later in Builder (seen in dual-volume 25d9).
         
         Args:
             spine: Parsed spine with reading order
@@ -2087,7 +2113,7 @@ class LibrarianAgent:
             volume_acts: Act boundary metadata from _detect_volume_acts
             
         Returns:
-            List of kuchie dicts with act tags:
+            List of Act 1 kuchie dicts with act tags:
             [{"file": "kuchie-001.jpg", ..., "act": 1}, ...]
         """
         from lxml import etree
@@ -2096,6 +2122,8 @@ class LibrarianAgent:
         
         for act in volume_acts:
             act_num = act['act_number']
+            if act_num != 1:
+                continue
             # Scan both tobira pages (may contain title card images) and fmatter pages
             scan_indices = act['tobira_spine_indices'] + act['kuchie_spine_indices']
             

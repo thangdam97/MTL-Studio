@@ -3,7 +3,7 @@ MT Publishing Pipeline - Machine Translation for Light Novels
 
 A multi-stage pipeline for translating Japanese light novels to English:
 1. Librarian - EPUB extraction, metadata parsing, content cataloging
-1.5. Metadata Processor - Translate titles, author names, chapter titles
+1.5. Metadata Processor - Schema autoupdate + metadata translation
 2. Translator - Gemini-powered translation with RAG knowledge base
 3. Critics - Manual/Agentic audit workflow (Claude Code + IDE Agent)
 4. Builder - EPUB assembly and professional packaging

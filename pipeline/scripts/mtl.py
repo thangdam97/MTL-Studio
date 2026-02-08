@@ -5,7 +5,7 @@ Multi-language Japanese EPUB translation pipeline (EN/VN supported)
 
 Phases:
   1. Librarian      - Extract Japanese EPUB to markdown
-  1.5 Metadata      - Translate titles and author names  
+  1.5 Metadata      - Schema autoupdate + title/author/chapter translation
   1.6 Multimodal    - Pre-bake illustration analysis (Gemini 3 Pro Vision)
   2. Translator     - Gemini-powered translation with RAG + visual context
   3. Critics        - Manual/Agentic quality review (Gemini CLI + IDE Agent)
@@ -64,6 +64,7 @@ Metadata Schemas (Auto-Detected):
   Use 'mtl.py metadata <volume_id> --validate' to check schema compatibility.
 
 Phase 1.5 (Metadata Processor):
+  - Auto-updates metadata_en schema via Gemini (Schema Agent autoupdate)
   - Translates: title, author, chapter titles, character names
   - PRESERVES: v3 enhanced schema (character_profiles, localization_notes, keigo_switch)
   - Safe to re-run on volumes with existing schema configurations
@@ -199,7 +200,7 @@ class PipelineController:
             cache_status = "RUN" if cache_enabled else "TODO"
             smart_chunking_enabled = bool(massive_cfg.get("enable_smart_chunking", True))
             chunk_status = "RUN" if smart_chunking_enabled else "TODO"
-            chunk_threshold_chars = int(massive_cfg.get("chunk_threshold_chars", 50000))
+            chunk_threshold_chars = int(massive_cfg.get("chunk_threshold_chars", 60000))
             chunk_threshold_bytes = int(massive_cfg.get("chunk_threshold_bytes", 120000))
             if multimodal_active:
                 multimodal_status = "RUN"
@@ -714,13 +715,16 @@ class PipelineController:
         return False
     
     def run_phase1_5(self, volume_id: str) -> bool:
-        """Run Phase 1.5: Metadata Processor (Title/Author/Chapter Translation).
+        """Run Phase 1.5: Metadata Processor (Schema autoupdate + metadata translation).
         
-        Translates metadata fields while PRESERVING v3 enhanced schema:
+        Runs schema autoupdate then translates metadata fields while PRESERVING v3 enhanced schema:
         - Updates: title_en, author_en, chapter titles, character_names
         - Preserves: character_profiles, localization_notes, keigo_switch configs
         """
-        self._ui_header("Phase 1.5 - Metadata Processor", "Translate metadata with schema-safe preservation")
+        self._ui_header(
+            "Phase 1.5 - Metadata Processor",
+            "Schema autoupdate + metadata translation with schema-safe preservation",
+        )
         
         # Check for potential sequels before running
         ignore_sequel = False
@@ -2404,7 +2408,7 @@ class PipelineController:
             smart_chunking_enabled = massive_cfg.get('enable_smart_chunking', True)
             smart_chunking_status = "✓ ENABLED" if smart_chunking_enabled else "✗ DISABLED"
             logger.info(f"\nSmart Chunking (Massive Chapters): {smart_chunking_status}")
-            logger.info(f"  Threshold chars: {massive_cfg.get('chunk_threshold_chars', 50000)}")
+            logger.info(f"  Threshold chars: {massive_cfg.get('chunk_threshold_chars', 60000)}")
             logger.info(f"  Threshold bytes: {massive_cfg.get('chunk_threshold_bytes', 120000)}")
             logger.info(f"  Target chunk chars: {massive_cfg.get('target_chunk_chars', 45000)}")
             if not smart_chunking_enabled:

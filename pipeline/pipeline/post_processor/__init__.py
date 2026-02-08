@@ -8,6 +8,7 @@ that may leak through translation into any target language output.
 from .format_normalizer import FormatNormalizer
 from .vn_cjk_cleaner import VietnameseCJKCleaner, format_cleaner_report
 from .truncation_validator import TruncationValidator, TruncationIssue, TruncationReport
+from .pov_validator import POVValidator, POVIssue, POVReport
 
 # Keep package import resilient when legacy cjk_cleaner.py is absent.
 try:
@@ -23,4 +24,7 @@ __all__ = [
     'TruncationValidator',
     'TruncationIssue',
     'TruncationReport',
+    'POVValidator',
+    'POVIssue',
+    'POVReport',
 ]

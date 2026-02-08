@@ -28,8 +28,9 @@ import datetime
 from pathlib import Path
 from typing import Dict, List, Optional, Any
 from pipeline.common.gemini_client import GeminiClient
+from pipeline.metadata_processor.schema_autoupdate import SchemaAutoUpdater
 from pipeline.config import (
-    get_config_section, PROMPTS_DIR, get_target_language, get_language_config
+    PROMPTS_DIR, get_target_language, get_language_config
 )
 
 logging.basicConfig(
@@ -344,6 +345,86 @@ class MetadataProcessor:
 
         # Language-specific metadata key suffix
         self.metadata_key = f"metadata_{self.target_language}"  # e.g., metadata_en, metadata_vn
+
+    def _run_schema_autoupdate(self) -> None:
+        """
+        Phase 1.5 pre-step:
+        Auto-fill metadata_en schema fields before title/chapter translation.
+
+        This replaces the manual IDE-agent manifest schema filling workflow.
+        """
+        logger.info("🤖 Running Schema Agent autoupdate (manifest schema enrichment)...")
+        updater = None
+        try:
+            updater = SchemaAutoUpdater(self.work_dir)
+            result = updater.apply(self.manifest)
+            with open(self.manifest_path, 'w', encoding='utf-8') as f:
+                json.dump(self.manifest, f, indent=2, ensure_ascii=False)
+
+            updated_keys = ", ".join(result.get("updated_keys", [])) or "none"
+            logger.info(
+                f"✓ Schema Agent autoupdate merged into manifest "
+                f"(keys: {updated_keys}, output_tokens: {result.get('output_tokens', 0)})"
+            )
+        except Exception as e:
+            logger.warning(f"Schema Agent autoupdate failed, continuing with existing schema: {e}")
+            try:
+                if updater:
+                    updater.mark_failed(self.manifest, e)
+                else:
+                    self.manifest.setdefault("pipeline_state", {})["schema_agent"] = {
+                        "status": "failed",
+                        "timestamp": datetime.datetime.now().isoformat(),
+                        "model": "gemini-2.5-flash",
+                        "temperature": 0.5,
+                        "max_output_tokens": 32768,
+                        "error": str(e)[:500],
+                    }
+                with open(self.manifest_path, 'w', encoding='utf-8') as f:
+                    json.dump(self.manifest, f, indent=2, ensure_ascii=False)
+            except Exception:
+                # Best-effort status write only.
+                pass
+
+    def _apply_official_localization_overrides(self, metadata_translated: Dict[str, Any]) -> Dict[str, Any]:
+        """
+        Prefer official localized metadata discovered by schema autoupdate.
+
+        Applies only when schema step marked official data as usable.
+        """
+        metadata_en = self.manifest.get("metadata_en", {})
+        official = metadata_en.get("official_localization", {})
+        if not isinstance(official, dict) or not official:
+            return metadata_translated
+
+        should_use = official.get("should_use_official")
+        confidence = str(official.get("confidence", "")).lower()
+        if should_use is False:
+            return metadata_translated
+        if should_use is None and confidence not in {"high", "medium"}:
+            return metadata_translated
+
+        mapping = {
+            "volume_title_en": "title_en",
+            "author_en": "author_en",
+            "publisher_en": "publisher_en",
+            "series_title_en": "series_en",
+        }
+        overridden = []
+        for source_key, target_key in mapping.items():
+            value = official.get(source_key)
+            if isinstance(value, str) and value.strip():
+                metadata_translated[target_key] = value.strip()
+                overridden.append(target_key)
+
+        if overridden:
+            logger.info(
+                "🌐 Applied official localization metadata overrides: %s (confidence=%s)",
+                ", ".join(overridden),
+                confidence or "unknown",
+            )
+
+        return metadata_translated
     
     def _update_manifest_preserve_schema(
         self,
@@ -1183,6 +1264,10 @@ class MetadataProcessor:
                     chapter_titles,
                     ruby_names
                 )
+
+        # New flow:
+        # Librarian Extraction -> Schema Agent autoupdate -> Title/Chapter translation -> Phase 2
+        self._run_schema_autoupdate()
             
         inheritance_context = ""
         if parent_data:
@@ -1259,6 +1344,9 @@ class MetadataProcessor:
                 content = content[3:-3].strip()
 
             metadata_translated = json.loads(content)
+
+            # Prefer official localization metadata from schema autoupdate when available.
+            metadata_translated = self._apply_official_localization_overrides(metadata_translated)
 
             # Add character names and glossary to metadata
             if name_registry:

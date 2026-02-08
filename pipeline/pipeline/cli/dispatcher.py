@@ -7,7 +7,7 @@ from pipeline.cli.commands.basic_commands import HANDLERS
 
 PHASE_NAMES = {
     'phase0': 'Phase 0 - Deprecated Alias (use phase1.6)',
-    'phase1.5': 'Phase 1.5 - Metadata Translation (Schema-Safe)',
+    'phase1.5': 'Phase 1.5 - Schema Autoupdate + Metadata Translation',
     'phase1.6': 'Phase 1.6 - Multimodal Processor (Visual Analysis)',
     'multimodal': 'Multimodal Translator (Phase 1.6 + Phase 2 with Visual Context)',
     'phase2': 'Phase 2 - Translator',
@@ -65,4 +65,3 @@ def dispatch_extracted_command(args: Any, controller: Any) -> Optional[int]:
 
     result = handler(args, controller)
     return result.exit_code
-

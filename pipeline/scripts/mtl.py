@@ -1041,6 +1041,7 @@ class PipelineController:
             return {"ready": False, "reason": "missing_state", "cached": 0, "expected": 0}
 
         status = str(rich_state.get("status", "not run")).lower()
+        used_external_cache = bool(rich_state.get("used_external_cache", False))
         cache_stats = rich_state.get("cache_stats", {})
         if not isinstance(cache_stats, dict):
             cache_stats = {}
@@ -1056,6 +1057,13 @@ class PipelineController:
             return {
                 "ready": False,
                 "reason": f"status_{status or 'unknown'}",
+                "cached": cached,
+                "expected": expected_total,
+            }
+        if not used_external_cache:
+            return {
+                "ready": False,
+                "reason": "external_cache_not_used",
                 "cached": cached,
                 "expected": expected_total,
             }

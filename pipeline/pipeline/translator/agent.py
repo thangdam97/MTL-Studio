@@ -8,8 +8,8 @@ import json
 import logging
 import argparse
 import sys
-import os
 import time
+import re
 from pathlib import Path
 from datetime import datetime
 from typing import Dict, List, Optional, Any
@@ -84,6 +84,9 @@ if not CJK_CLEANER_AVAILABLE:
     logger.warning("Legacy cjk_cleaner module not found; CJK artifact detection will be skipped.")
 
 class TranslatorAgent:
+    _CHAPTER_ID_PATTERN = re.compile(r"chapter[_\-](\d+)", re.IGNORECASE)
+    _EN_CHAPTER_NUM_PATTERN = re.compile(r"\bchapter\s+(\d+)\b", re.IGNORECASE)
+
     def __init__(self, work_dir: Path, target_language: str = None, enable_continuity: bool = False,
                  enable_gap_analysis: bool = False, enable_multimodal: bool = False):
         """
@@ -337,39 +340,12 @@ class TranslatorAgent:
         else:
             self.gap_analyzer = None
 
-        # Initialize Self-Healing Anti-AI-ism Agent (always enabled for EN/VN)
+        # Stability mode: force-disable automatic self-healing Anti-AI-ism in Translator.
+        # Manual pass is still available via `mtl.py heal`.
         if self.target_language in ['en', 'vn', 'vi']:
-            try:
-                from modules.anti_ai_ism_agent import AntiAIismAgent
-                
-                # Get API key from config (using already imported get_gemini_config)
-                gemini_config = get_gemini_config()
-                api_key = gemini_config.get('api_key', os.getenv('GEMINI_API_KEY'))
-                
-                # Get config directory from PIPELINE_ROOT
-                config_dir = PIPELINE_ROOT / 'config'
-                
-                # Initialize agent with auto_heal=True for automatic corrections
-                anti_ai_ism_agent = AntiAIismAgent(
-                    config_dir=config_dir,
-                    persist_directory=work_dir / "chroma_anti_ai_ism",
-                    auto_heal=True,  # Enable automatic corrections
-                    dry_run=False,
-                    target_language=self.target_language,
-                    gemini_api_key=api_key,
-                    use_vector=True  # Enable Layer 2 (vector Bad Prose DB)
-                )
-                
-                # Enable anti-AI-ism in processor
-                self.processor.enable_anti_ai_ism = True
-                self.processor._anti_ai_ism_agent = anti_ai_ism_agent
-                logger.info("✓ Self-Healing Anti-AI-ism Agent initialized and connected to processor")
-                logger.info("  3-layer detection + auto-correction enabled (runs after CJK cleaning)")
-            except Exception as e:
-                logger.warning(f"Failed to initialize anti-AI-ism agent: {e}")
-                logger.warning("Continuing without self-healing (run 'mtl.py heal' manually after translation)")
-                self.processor.enable_anti_ai_ism = False
-                self.processor._anti_ai_ism_agent = None
+            self.processor.enable_anti_ai_ism = False
+            self.processor._anti_ai_ism_agent = None
+            logger.info("Self-healing Anti-AI-ism agent is force-disabled in codebase for translator runs.")
 
         # Translation Log
         self.log_path = work_dir / "translation_log.json"
@@ -755,6 +731,81 @@ class TranslatorAgent:
     def _save_log(self):
         with open(self.log_path, 'w', encoding='utf-8') as f:
             json.dump(self.translation_log, f, indent=2, ensure_ascii=False)
+
+    def _canonical_title_from_chapter_id(self, chapter_id: str) -> Optional[str]:
+        """Derive stable title from chapter_id (chapter_01 -> Chapter 1)."""
+        match = self._CHAPTER_ID_PATTERN.search(str(chapter_id or ""))
+        if not match:
+            return None
+        try:
+            number = int(match.group(1))
+        except Exception:
+            return None
+        return f"Chapter {number}"
+
+    def _extract_english_chapter_number(self, title: str) -> Optional[int]:
+        """Extract Arabic chapter number from EN-style titles like 'Chapter 4 (Part 1)'."""
+        if not title:
+            return None
+        match = self._EN_CHAPTER_NUM_PATTERN.search(title)
+        if not match:
+            return None
+        try:
+            return int(match.group(1))
+        except Exception:
+            return None
+
+    def _resolve_prompt_titles(self, chapters: List[Dict[str, Any]]) -> Dict[str, Optional[str]]:
+        """
+        Resolve chapter titles for prompt/output usage.
+
+        Ambiguous generic titles (duplicates, mismatched chapter numbers) are normalized to
+        canonical titles derived from chapter_id.
+        """
+        title_key = f"title_{self.target_language}"
+        raw_by_id: Dict[str, Optional[str]] = {}
+        normalized_counter: Dict[str, int] = {}
+
+        for chapter in chapters:
+            chapter_id = chapter.get("id", "")
+            raw = chapter.get(title_key) or chapter.get("title_en")
+            raw = raw.strip() if isinstance(raw, str) else None
+            raw_by_id[chapter_id] = raw
+            if raw:
+                norm = re.sub(r"\s+", " ", raw).strip().lower()
+                normalized_counter[norm] = normalized_counter.get(norm, 0) + 1
+
+        resolved: Dict[str, Optional[str]] = {}
+        for chapter in chapters:
+            chapter_id = chapter.get("id", "")
+            raw = raw_by_id.get(chapter_id)
+            canonical = self._canonical_title_from_chapter_id(chapter_id)
+
+            if not raw:
+                resolved[chapter_id] = canonical
+                continue
+
+            norm = re.sub(r"\s+", " ", raw).strip().lower()
+            duplicate = normalized_counter.get(norm, 0) > 1
+            title_num = self._extract_english_chapter_number(raw)
+            canonical_num = self._extract_english_chapter_number(canonical or "")
+            mismatch = (
+                title_num is not None
+                and canonical_num is not None
+                and title_num != canonical_num
+            )
+
+            if canonical and (duplicate or mismatch):
+                reason = "duplicate title" if duplicate else "title/chapter_id mismatch"
+                logger.warning(
+                    f"[TITLE] Normalizing ambiguous title for {chapter_id}: "
+                    f"'{raw}' -> '{canonical}' ({reason})"
+                )
+                resolved[chapter_id] = canonical
+            else:
+                resolved[chapter_id] = raw
+
+        return resolved
     
     def _prewarm_cache(self):
         """Pre-warm context cache with system instruction before translation starts."""
@@ -813,7 +864,13 @@ class TranslatorAgent:
 
             try:
                 jp_text = source_path.read_text(encoding="utf-8")
-                chapter_blocks.append(f"<CHAPTER id='{chapter_id}'>\n{jp_text}\n</CHAPTER>")
+                canonical_title = self._canonical_title_from_chapter_id(chapter_id) or chapter_id
+                chapter_blocks.append(
+                    f"<CHAPTER id='{chapter_id}' canonical_title='{canonical_title}' source_file='{jp_file}'>\n"
+                    f"<!-- TARGET_CHAPTER: {chapter_id} | {canonical_title} -->\n"
+                    f"{jp_text}\n"
+                    f"</CHAPTER>"
+                )
                 cached_chapter_ids.append(chapter_id)
             except Exception as e:
                 missing_chapter_ids.append(chapter_id)
@@ -925,6 +982,7 @@ class TranslatorAgent:
             
         total = len(target_chapters)
         logger.info(f"Targeting {total} chapters")
+        resolved_titles = self._resolve_prompt_titles(target_chapters)
 
         # Update pipeline state
         if "translator" not in self.manifest["pipeline_state"]:
@@ -995,7 +1053,7 @@ class TranslatorAgent:
 
             # Get translated title from manifest (language-specific or fallback to EN)
             title_key = f"title_{self.target_language}"
-            translated_title = chapter.get(title_key) or chapter.get("title_en")
+            translated_title = resolved_titles.get(chapter_id)
 
             logger.info(f"Translating [{i+1}/{total}] {chapter_id} to {self.language_name}...")
 

@@ -493,25 +493,30 @@ class PublisherProfileManager:
             except re.error:
                 pass
 
-        # Add default patterns if none specified
-        if not patterns:
-            default_patterns = [
-                r'^第[一二三四五六七八九十百千]+章',  # Japanese chapter (kanji numbers)
-                r'^第\d+章',  # Japanese chapter (arabic numbers)
-                r'^Chapter\s*\d+',  # English chapter
-                r'^プロローグ',  # Prologue (JP)
-                r'^エピローグ',  # Epilogue (JP)
-                r'^幕間',  # Interlude (JP)
-                r'^あとがき',  # Afterword (JP)
-                r'^Prologue',
-                r'^Epilogue',
-                r'^Interlude',
-            ]
-            for p in default_patterns:
-                try:
-                    patterns.append(re.compile(p, re.IGNORECASE))
-                except re.error:
-                    pass
+        # Always include baseline markers. Some EPUBs expose only coarse chapter-level
+        # TOC entries while actual story units are episode markers like 第X話.
+        baseline_patterns = [
+            r'^第[一二三四五六七八九十百千]+章',  # Japanese chapter (kanji numbers)
+            r'^第\d+章',  # Japanese chapter (arabic numbers)
+            r'^第[一二三四五六七八九十百千]+話',  # Japanese episode (kanji numbers)
+            r'^第\d+話',  # Japanese episode (arabic numbers)
+            r'^Chapter\s*\d+',  # English chapter
+            r'^プロローグ',  # Prologue (JP)
+            r'^エピローグ',  # Epilogue (JP)
+            r'^幕間',  # Interlude (JP)
+            r'^あとがき',  # Afterword (JP)
+            r'^Prologue',
+            r'^Epilogue',
+            r'^Interlude',
+        ]
+        configured = set(config.chapter_title_patterns or [])
+        for p in baseline_patterns:
+            if p in configured:
+                continue
+            try:
+                patterns.append(re.compile(p, re.IGNORECASE))
+            except re.error:
+                pass
 
         return patterns
 

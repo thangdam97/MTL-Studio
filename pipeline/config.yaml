@@ -98,6 +98,7 @@ kimi:
     cache_ttl_hours: 168
 translation:
   enable_multimodal: true
+  enable_self_healing_anti_ai_ism: false
   quality:
     contraction_rate_min: 0.95
     contraction_rate_gold: 0.99
@@ -133,7 +134,7 @@ translation:
     lookback_chapters: 2
     enforce_name_consistency: true
   massive_chapter:
-    enable_smart_chunking: true
+    enable_smart_chunking: false
     chunk_threshold_chars: 60000
     chunk_threshold_bytes: 120000
     enable_volume_cache: true

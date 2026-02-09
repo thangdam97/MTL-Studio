@@ -2268,6 +2268,7 @@ class PromptLoader:
         self,
         source_text: str,
         chapter_title: str,
+        chapter_id: Optional[str] = None,
         previous_context: Optional[str] = None,
         name_registry: Optional[Dict[str, str]] = None
     ) -> str:
@@ -2277,6 +2278,7 @@ class PromptLoader:
         Args:
             source_text: Japanese source text to translate.
             chapter_title: Title of the chapter.
+            chapter_id: Stable chapter identifier (e.g., chapter_01).
             previous_context: Context from previous chapters.
             name_registry: Character name mappings (JP -> Target Language).
 
@@ -2305,6 +2307,10 @@ class PromptLoader:
             parts.append("")
 
         # Source text
+        if chapter_id:
+            parts.append("<!-- TARGET CHAPTER -->")
+            parts.append(f"ID: {chapter_id}")
+            parts.append("")
         parts.append("<!-- SOURCE TEXT TO TRANSLATE -->")
         parts.append(f"# {chapter_title}")
         parts.append("")

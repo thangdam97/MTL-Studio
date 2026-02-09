@@ -97,7 +97,11 @@ class ChapterProcessor:
         # Massive chapter handling
         translation_config = get_translation_config()
         massive_cfg = translation_config.get("massive_chapter", {})
-        self.smart_chunking_enabled = bool(massive_cfg.get("enable_smart_chunking", True))
+        configured_chunking = bool(massive_cfg.get("enable_smart_chunking", False))
+        # Stability mode: force-disable smart chunking in codebase and run full chapter in one pass.
+        self.smart_chunking_enabled = False
+        if configured_chunking:
+            logger.info("[CHUNK] Smart chunking configured ON but force-disabled in codebase for this runtime.")
         self.chunk_threshold_chars = int(massive_cfg.get("chunk_threshold_chars", 60000))
         self.chunk_threshold_bytes = int(massive_cfg.get("chunk_threshold_bytes", 120000))
         self.target_chunk_chars = int(massive_cfg.get("target_chunk_chars", 45000))
@@ -1214,6 +1218,7 @@ This document contains the internal reasoning process that Gemini used while tra
         base_prompt = self.prompt_loader.build_translation_prompt(
             source_text=source_text,
             chapter_title=chapter_title or chapter_id,
+            chapter_id=chapter_id,
             previous_context=context_str if context_str else None,
             name_registry=self.character_names if self.character_names else None
         )

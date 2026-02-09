@@ -1036,7 +1036,7 @@ The bible system was designed, implemented, and validated against **Lord Marksma
 | **Title (Romaji)** | Madan no Ou to Vanadis |
 | **Author** | Tsukasa Kawaguchi (川口士) |
 | **Illustrator** | Yoshi☆wo (よし☆ヲ) |
-| **Publisher** | Media Factory (MF Bunko J) |
+| **Publisher** | Media Factory (MF Bunko J) & Shueisha Dash x Bunko (Remake Version 2022) |
 | **Volumes** | 18 (main series, 2011–2017) |
 | **Anime Adaptation** | 2014, 13 episodes (Satelight) |
 | **Genre** | Medieval European Fantasy, Military, Romance |

@@ -1058,12 +1058,11 @@ The bible system was designed, implemented, and validated against **Lord Marksma
 | **Cultural Terms** | 7 (Vanadis, Dragonic Tool, war titles) |
 | **Mythology** | 3 (Zirnitra, Tir Na Fal, Baba Yaga) |
 
-#### Registered Volumes
+#### Registered Volumes (Will continue to grow)
 
 | Volume ID | Title | Index |
 |-----------|-------|-------|
 | `25d9` | 魔弾の王と戦姫 第1章―出逢い― | 1 |
-| `15c4` | 第2章―銀の流星― | 2 |
 | `0721` | 魔弾の王と戦姫 第2章―銀の流星― | 2 |
 
 #### Why This Series

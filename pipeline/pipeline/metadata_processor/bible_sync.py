@@ -29,6 +29,7 @@ Usage in MetadataProcessor.process_metadata():
 
 from __future__ import annotations
 
+import datetime
 import json
 import logging
 import re
@@ -55,6 +56,9 @@ class BiblePullResult:
 
     # Context block for injection into Gemini prompt
     context_block: str = ""
+
+    # Pull-override log: manifest terms that override bible terms
+    overrides: List[str] = field(default_factory=list)
 
     # Stats
     characters_inherited: int = 0
@@ -199,6 +203,15 @@ class BibleSyncAgent:
         # Bible as base, manifest values override (manifest may have
         # volume-specific new characters that aren't in bible yet)
         merged_names = dict(result.known_characters)  # bible base
+
+        # Log individual pull overrides where manifest disagrees with bible
+        for jp, manifest_en in existing_names.items():
+            bible_en = result.known_characters.get(jp)
+            if bible_en and bible_en.lower() != manifest_en.lower():
+                result.overrides.append(
+                    f"  {jp}: bible='{bible_en}' → manifest='{manifest_en}' (manifest kept)"
+                )
+
         merged_names.update(existing_names)             # manifest overrides
         metadata_en['character_names'] = merged_names
         manifest['metadata_en'] = metadata_en
@@ -207,6 +220,11 @@ class BibleSyncAgent:
         if injected > 0:
             logger.info(f"   Injected {injected} bible character names "
                         f"into manifest (total: {len(merged_names)})")
+
+        if result.overrides:
+            logger.warning(f"⚠️  {len(result.overrides)} pull override(s) (manifest kept over bible):")
+            for o in result.overrides:
+                logger.warning(o)
 
         logger.info(f"   {result.summary()}")
         return result
@@ -434,6 +452,87 @@ class BibleSyncAgent:
                 enrichments['notes'] = traits
 
         return enrichments
+
+    # ── Continuity Diff Report ───────────────────────────────────
+
+    def generate_continuity_report(
+        self,
+        manifest: dict,
+        pull_result: Optional[BiblePullResult] = None,
+        push_result: Optional[BiblePushResult] = None,
+    ) -> Path:
+        """Generate a continuity_diff_report.json artifact for this run.
+
+        Captures: new terms, conflicts, overrides, rejected pushes,
+        and per-run KPIs (name drift, glossary violations, sync status).
+
+        Args:
+            manifest: The processed manifest dict.
+            pull_result: Result from pull(), if available.
+            push_result: Result from push(), if available.
+
+        Returns:
+            Path to the written report file.
+        """
+        report: Dict[str, Any] = {
+            "report_type": "continuity_diff",
+            "timestamp": datetime.datetime.now().isoformat(),
+            "volume_id": manifest.get("volume_id", ""),
+            "series_id": self.series_id or "",
+            "bible_resolved": self.bible is not None,
+        }
+
+        # ── Pull KPIs ────────────────────────────────────────────
+        if pull_result:
+            report["pull"] = {
+                "characters_inherited": pull_result.characters_inherited,
+                "geography_inherited": pull_result.geography_inherited,
+                "weapons_inherited": pull_result.weapons_inherited,
+                "other_inherited": pull_result.other_inherited,
+                "total_inherited": pull_result.total_inherited,
+                "overrides": pull_result.overrides,
+                "override_count": len(pull_result.overrides),
+            }
+        else:
+            report["pull"] = {"status": "skipped"}
+
+        # ── Push KPIs ────────────────────────────────────────────
+        if push_result:
+            report["push"] = {
+                "characters_added": push_result.characters_added,
+                "characters_enriched": push_result.characters_enriched,
+                "characters_skipped": push_result.characters_skipped,
+                "conflicts": push_result.conflicts,
+                "conflict_count": len(push_result.conflicts),
+                "volume_registered": push_result.volume_registered,
+                "total_changes": push_result.total_changes,
+            }
+        else:
+            report["push"] = {"status": "skipped"}
+
+        # ── Name Drift Detection ─────────────────────────────────
+        drift_count = (
+            len(getattr(pull_result, "overrides", []))
+            + len(getattr(push_result, "conflicts", []))
+        )
+        report["kpis"] = {
+            "name_drift_events": drift_count,
+            "pull_overrides": len(getattr(pull_result, "overrides", [])),
+            "push_conflicts": len(getattr(push_result, "conflicts", [])),
+            "bible_sync_success": self.bible is not None,
+            "total_inherited": getattr(pull_result, "total_inherited", 0),
+            "total_pushed": getattr(push_result, "total_changes", 0),
+        }
+
+        # ── Write report ─────────────────────────────────────────
+        report_path = self.work_dir / "continuity_diff_report.json"
+        with open(report_path, "w", encoding="utf-8") as f:
+            json.dump(report, f, indent=2, ensure_ascii=False)
+
+        logger.info(f"📋 Continuity diff report: {report_path.name} "
+                     f"(drift={drift_count}, inherited={report['kpis']['total_inherited']}, "
+                     f"pushed={report['kpis']['total_pushed']})")
+        return report_path
 
     # ── Manual Sync (CLI) ────────────────────────────────────────
 

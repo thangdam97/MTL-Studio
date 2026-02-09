@@ -932,6 +932,23 @@ class PromptLoader:
         elapsed = time.time() - start_time
         logger.info(f"Final System Instruction Size: {final_size_kb:.1f}KB ({injected_count} modules injected) - built in {elapsed:.2f}s")
 
+        # ── Token Budget Gate ────────────────────────────────────
+        # Gemini 2.5 Pro context window is 1M tokens (~2.5MB text).
+        # System instruction should stay well under 400KB to leave room
+        # for the JP source text + visual notes + thinking tokens.
+        WARN_THRESHOLD_KB = 300
+        HARD_CAP_KB = 500
+        if final_size_kb > HARD_CAP_KB:
+            logger.error(
+                f"🚨 SYSTEM INSTRUCTION EXCEEDS HARD CAP: {final_size_kb:.1f}KB > {HARD_CAP_KB}KB. "
+                f"Risk of context overflow. Review bible block size, RAG modules, and glossary."
+            )
+        elif final_size_kb > WARN_THRESHOLD_KB:
+            logger.warning(
+                f"⚠ System instruction is large: {final_size_kb:.1f}KB > {WARN_THRESHOLD_KB}KB threshold. "
+                f"Consider pruning lower-priority RAG modules or glossary terms."
+            )
+
         # Confirm anti-AI-ism modules are active
         if anti_ai_ism_injected:
             logger.info(f"✓ Anti-AI-ism enforcement active: {', '.join(anti_ai_ism_injected)}")

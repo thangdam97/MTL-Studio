@@ -94,6 +94,13 @@ class SchemaAutoUpdater:
 
         patch = self._sanitize_patch(patch)
         manifest["metadata_en"] = self._deep_merge_dict(metadata_en, patch)
+
+        # ── Provenance extraction ────────────────────────────────
+        # Capture official_localization.sources from the LLM response
+        # so we have a pipeline-level record of WHERE each canonical
+        # term came from, independent of LLM compliance.
+        provenance = self._extract_provenance(patch)
+
         self._mark_pipeline_state(
             manifest=manifest,
             status="completed",
@@ -101,6 +108,7 @@ class SchemaAutoUpdater:
             output_tokens=response.output_tokens,
             online_search_used=bool(tools),
             localized_series_name=search_hint.get("localized_series_name"),
+            provenance=provenance,
         )
         return {
             "status": "completed",
@@ -359,6 +367,57 @@ class SchemaAutoUpdater:
                 merged[key] = patch_value
         return merged
 
+    def _extract_provenance(self, patch: Dict[str, Any]) -> Dict[str, Any]:
+        """Extract provenance metadata from the schema patch.
+
+        Captures official_localization.sources and per-field attribution
+        so we have a pipeline-level audit trail of WHERE each canonical
+        value came from (publisher site, anime DB, wiki, etc.).
+        """
+        provenance: Dict[str, Any] = {
+            "has_official_localization": False,
+            "confidence": None,
+            "sources": [],
+            "field_origins": {},
+        }
+
+        official = patch.get("official_localization", {})
+        if not isinstance(official, dict):
+            return provenance
+
+        provenance["has_official_localization"] = official.get(
+            "should_use_official", False
+        )
+        provenance["confidence"] = official.get("confidence")
+
+        sources = official.get("sources", [])
+        if isinstance(sources, list):
+            provenance["sources"] = [
+                {"title": s.get("title", ""), "url": s.get("url", "")}
+                for s in sources
+                if isinstance(s, dict)
+            ]
+
+        # Map which top-level fields the LLM populated
+        for key in ["series_title_en", "volume_title_en", "author_en", "publisher_en"]:
+            val = official.get(key)
+            if val and isinstance(val, str) and val.strip():
+                provenance["field_origins"][key] = {
+                    "value": val,
+                    "source": "official_localization",
+                    "confidence": provenance["confidence"],
+                }
+
+        if provenance["sources"]:
+            logger.info(
+                f"\u2713 Provenance captured: {len(provenance['sources'])} source(s), "
+                f"confidence={provenance['confidence']}"
+            )
+        else:
+            logger.info("\u26a0 No grounding sources returned by LLM — provenance not available")
+
+        return provenance
+
     def _mark_pipeline_state(
         self,
         manifest: Dict[str, Any],
@@ -368,6 +427,7 @@ class SchemaAutoUpdater:
         error: str | None = None,
         online_search_used: bool = False,
         localized_series_name: str | None = None,
+        provenance: Dict[str, Any] | None = None,
     ) -> None:
         pipeline_state = manifest.setdefault("pipeline_state", {})
         schema_state: Dict[str, Any] = {
@@ -386,4 +446,6 @@ class SchemaAutoUpdater:
             schema_state["output_tokens"] = output_tokens
         if error:
             schema_state["error"] = error
+        if provenance:
+            schema_state["provenance"] = provenance
         pipeline_state["schema_agent"] = schema_state

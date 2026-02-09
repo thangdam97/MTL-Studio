@@ -1443,6 +1443,15 @@ class MetadataProcessor:
                 try:
                     push_result = bible_sync.push(self.manifest)
                     logger.info(f"📖 Bible PUSH complete: {push_result.summary()}")
+                    # Generate continuity diff report artifact
+                    try:
+                        bible_sync.generate_continuity_report(
+                            self.manifest,
+                            pull_result=bible_pull,
+                            push_result=push_result,
+                        )
+                    except Exception as report_err:
+                        logger.warning(f"Continuity report generation failed: {report_err}")
                 except Exception as e:
                     logger.warning(f"Bible sync (push) failed: {e}")
 

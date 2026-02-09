@@ -89,6 +89,9 @@ class PromptLoader:
         self._glossary = None  # Glossary terms from manifest
         self._semantic_metadata = None  # Full semantic metadata (Enhanced v2.1: dialogue patterns, scenes, emotional states)
         self._style_guide = None  # Style guide for Vietnamese translation (experimental)
+        self._bible_prompt = None  # Series Bible categorized prompt block
+        self._bible_world_directive = None  # World setting one-liner for top-of-prompt
+        self._bible_glossary_keys = set()  # JP keys covered by bible (for glossary dedup)
         
         # Style guide paths (experimental - Vietnamese only for now)
         self.style_guides_dir = PIPELINE_ROOT / 'style_guides'
@@ -133,6 +136,25 @@ class PromptLoader:
         pattern_count = len(semantic_metadata.get('dialogue_patterns', {}))
         scene_count = len(semantic_metadata.get('scene_contexts', {}))
         logger.info(f"Semantic metadata set: {char_count} characters, {pattern_count} dialogue patterns, {scene_count} scenes")
+
+    def set_bible_prompt(self, bible_prompt: str, world_directive: str = "",
+                         bible_glossary_keys: set = None):
+        """Set series bible prompt block for injection into system instruction.
+
+        Args:
+            bible_prompt: Full categorized bible block (CHARACTERS, GEOGRAPHY, etc.)
+            world_directive: One-line world setting directive for top-of-prompt injection
+            bible_glossary_keys: Set of JP keys covered by bible (deduplicates glossary)
+        """
+        self._bible_prompt = bible_prompt
+        self._bible_world_directive = world_directive or None
+        self._bible_glossary_keys = bible_glossary_keys or set()
+        parts = [f"Bible prompt set ({len(bible_prompt)} chars)"]
+        if world_directive:
+            parts.append(f"world directive ({len(world_directive)} chars)")
+        if bible_glossary_keys:
+            parts.append(f"{len(bible_glossary_keys)} dedup keys")
+        logger.info(" | ".join(parts))
     
     def load_style_guide(self, genres: Union[List[str], str, None] = None, publisher: str = None) -> Optional[Dict[str, Any]]:
         """
@@ -922,14 +944,42 @@ class PromptLoader:
         # instead of just JP→EN name mappings
         # The legacy _character_names dict is no longer used or logged
         
+        # ── Phase E: World Setting Directive (TOP-LEVEL RULE) ─────────
+        # Injected near the top of the final prompt so the LLM treats it as a
+        # binding translation directive for honorifics and name order.
+        if self._bible_world_directive:
+            final_prompt = f"<!-- WORLD SETTING DIRECTIVE -->\n{self._bible_world_directive}\n\n{final_prompt}"
+            logger.info(f"✓ Injected world setting directive at TOP of system instruction")
+
+        # ── Phase E: Series Bible Block (BEFORE glossary) ────────────
+        if self._bible_prompt:
+            final_prompt += f"\n\n{self._bible_prompt}"
+            logger.info(f"✓ Injected Series Bible block ({len(self._bible_prompt)} chars)")
+
         # Inject glossary into cached system instruction (if available)
+        # Phase E: Deduplicate — skip terms already covered by bible block
         if self._glossary:
-            glossary_text = "\n\n<!-- GLOSSARY (CACHED) -->\n"
-            glossary_text += "Use these established term translations consistently throughout ALL chapters:\n"
-            for jp, en in self._glossary.items():
-                glossary_text += f"  {jp} = {en}\n"
-            final_prompt += glossary_text
-            logger.info(f"✓ Injected {len(self._glossary)} glossary terms into cached system instruction")
+            if self._bible_glossary_keys:
+                # Only emit volume-specific overrides not in bible
+                volume_only = {jp: en for jp, en in self._glossary.items()
+                               if jp not in self._bible_glossary_keys}
+                if volume_only:
+                    glossary_text = "\n\n<!-- GLOSSARY — Volume-Specific Overrides (CACHED) -->\n"
+                    glossary_text += "Volume-specific terms (supplement the Series Bible above):\n"
+                    for jp, en in volume_only.items():
+                        glossary_text += f"  {jp} = {en}\n"
+                    final_prompt += glossary_text
+                    logger.info(f"✓ Injected {len(volume_only)} volume-specific glossary terms "
+                                f"(deduplicated {len(self._glossary) - len(volume_only)} bible terms)")
+                else:
+                    logger.info(f"✓ Glossary fully covered by Series Bible ({len(self._glossary)} terms deduplicated)")
+            else:
+                glossary_text = "\n\n<!-- GLOSSARY (CACHED) -->\n"
+                glossary_text += "Use these established term translations consistently throughout ALL chapters:\n"
+                for jp, en in self._glossary.items():
+                    glossary_text += f"  {jp} = {en}\n"
+                final_prompt += glossary_text
+                logger.info(f"✓ Injected {len(self._glossary)} glossary terms into cached system instruction")
         
         # Inject semantic metadata into system instruction (Enhanced v2.1)
         if self._semantic_metadata:
@@ -981,26 +1031,91 @@ class PromptLoader:
                 name_display = char.get('name_kanji') or char.get('name_en', 'Unknown')
                 name_target = char.get('name_vn') or char.get('name_en', 'Unknown')
                 
+                # Include nickname in display if available
+                nickname = char.get('nickname', '')
+                if nickname:
+                    name_target = f"{name_target} ({nickname})"
+                
                 lines.append(f"【{name_display} → {name_target}】")
                 lines.append(f"  Role: {char.get('role', 'N/A')}")
                 lines.append(f"  Gender: {char.get('gender', 'N/A')}, Age: {char.get('age', 'N/A')}")
+                
+                # Origin
+                origin = char.get('origin', '')
+                if origin:
+                    lines.append(f"  Origin: {origin}")
                 
                 # Pronouns (handle both dict and string formats)
                 pronouns = char.get('pronouns', {})
                 if pronouns:
                     if isinstance(pronouns, dict):
-                        lines.append(f"  Pronouns:")
-                        for key, val in pronouns.items():
-                            lines.append(f"    {key}: {val}")
+                        pron_parts = [f"{k}: {v}" for k, v in pronouns.items()]
+                        lines.append(f"  Pronouns: {', '.join(pron_parts)}")
                     else:
                         lines.append(f"  Pronouns: {pronouns}")
                 
-                # Relationships
+                # Keigo Switch / Register Shifts (PHASE 0 — PREVIOUSLY INVISIBLE)
+                keigo = char.get('keigo_switch', {})
+                if keigo and isinstance(keigo, dict):
+                    speaking_to = keigo.get('speaking_to', {})
+                    if speaking_to:
+                        lines.append(f"  Register Shifts:")
+                        contraction_data = char.get('contraction_rate', {})
+                        contraction_speaking = contraction_data.get('speaking_to', {}) if isinstance(contraction_data, dict) else {}
+                        for target, register in list(speaking_to.items())[:10]:
+                            cr_info = ""
+                            if target in contraction_speaking:
+                                cr_info = f" (contraction: {contraction_speaking[target]})"
+                            lines.append(f"    → {target}: {register}{cr_info}")
+                    # Narration/internal thoughts register
+                    narration = keigo.get('narration', '')
+                    thoughts = keigo.get('internal_thoughts', '')
+                    if narration or thoughts:
+                        extras = []
+                        if narration:
+                            extras.append(f"narration={narration}")
+                        if thoughts:
+                            extras.append(f"thoughts={thoughts}")
+                        lines.append(f"  Base Register: {', '.join(extras)}")
+                
+                # Contraction Rate baseline (if keigo not shown, show standalone)
+                contraction = char.get('contraction_rate', {})
+                if contraction and isinstance(contraction, dict) and not keigo:
+                    baseline = contraction.get('baseline', '')
+                    if baseline:
+                        lines.append(f"  Contraction Rate: {baseline}")
+                    cr_speaking = contraction.get('speaking_to', {})
+                    if cr_speaking:
+                        lines.append(f"  Per-Target Contraction:")
+                        for target, rate in list(cr_speaking.items())[:8]:
+                            lines.append(f"    → {target}: {rate}")
+                
+                # How Character Refers To Others (PHASE 0 — PREVIOUSLY INVISIBLE)
+                refers = char.get('how_refers_to_others', {})
+                if refers and isinstance(refers, dict):
+                    lines.append(f"  Refers To Others:")
+                    for jp_target, ref_pattern in list(refers.items())[:10]:
+                        lines.append(f"    → {ref_pattern}")
+                
+                # RTAS Relationships (PHASE 0 — PREVIOUSLY INVISIBLE)
                 relationships = char.get('relationships', {})
-                if relationships:
-                    lines.append(f"  Relationships:")
-                    for other_char, desc in relationships.items():
-                        lines.append(f"    → {other_char}: {desc}")
+                if relationships and isinstance(relationships, dict):
+                    # Check for structured RTAS format (not legacy {'context': ...})
+                    if 'context' not in relationships:
+                        lines.append(f"  Key Relationships:")
+                        for target, rel_data in list(relationships.items())[:8]:
+                            if isinstance(rel_data, dict):
+                                rtype = rel_data.get('type', '')
+                                score = rel_data.get('rtas_score', '')
+                                rnotes = rel_data.get('notes', '')
+                                score_str = f" ({score})" if score else ""
+                                notes_str = f" — {rnotes}" if rnotes else ""
+                                lines.append(f"    → {target}: {rtype}{score_str}{notes_str}")
+                            else:
+                                lines.append(f"    → {target}: {rel_data}")
+                    else:
+                        # Legacy format
+                        lines.append(f"  Relationships: {relationships.get('context', '')}")
                 
                 # Notes (includes transformed personality/appearance from legacy)
                 if 'notes' in char:

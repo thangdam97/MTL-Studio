@@ -3,6 +3,10 @@
 from typing import Any, Optional
 
 from pipeline.cli.commands.basic_commands import HANDLERS
+from pipeline.cli.commands.bible_commands import handle_bible
+
+# Register bible command handler
+HANDLERS['bible'] = handle_bible
 
 
 PHASE_NAMES = {

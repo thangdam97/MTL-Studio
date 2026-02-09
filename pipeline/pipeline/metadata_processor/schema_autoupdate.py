@@ -67,13 +67,16 @@ class SchemaAutoUpdater:
         search_hint = self._detect_localized_series_hint(metadata)
         prompt = self._build_prompt(manifest, search_hint)
         system_instruction = self._build_system_instruction()
-        tools = None
+        # Always enable Google Search grounding — prioritize existing
+        # media (anime/manga/publisher) canon over heuristic inference.
+        tools = [types.Tool(google_search=types.GoogleSearch())]
         if search_hint.get("use_online_search"):
-            tools = [types.Tool(google_search=types.GoogleSearch())]
             logger.info(
-                "Localized series hint detected (%s). Enabling online search grounding for official metadata.",
+                "Localized series hint detected (%s). Online search grounding active.",
                 search_hint.get("localized_series_name", ""),
             )
+        else:
+            logger.info("Online search grounding active (always-on for media canon lookup).")
 
         response = self.client.generate(
             prompt=prompt,
@@ -138,8 +141,18 @@ class SchemaAutoUpdater:
             "  }\n"
             "}\n"
             "Do not write translation fields such as title_en, author_en, chapter title_en, or character_names.\n"
-            "Respect existing chapter ids and character profile keys when patching.\n"
-            "Directive: when a localized series name is detected, perform online search and prioritize official localization metadata."
+            "Respect existing chapter ids and character profile keys when patching.\n\n"
+            "GROUNDING DIRECTIVE (ALWAYS ACTIVE):\n"
+            "- ALWAYS use Google Search to ground your metadata enrichment.\n"
+            "- PRIORITIZE existing media canon: look up the series on anime databases (MyAnimeList, AniList),\n"
+            "  manga databases (MangaUpdates, AniDB), publisher pages (Yen Press, Seven Seas, J-Novel Club),\n"
+            "  and wiki pages (Fandom, Wikipedia) for official English names, character spellings, and terminology.\n"
+            "- Official localization data from licensed publishers ALWAYS overrides heuristic romanization or inference.\n"
+            "- For character names: prefer the official English release spelling over Hepburn or phonetic guesses.\n"
+            "- For setting/place names: prefer canon from anime subtitles or official manga translations.\n"
+            "- If no official localization exists, fall back to established fan-translation consensus before heuristic methods.\n"
+            "- Populate official_localization block with sources and confidence when official data is found.\n"
+            "- Set official_localization.should_use_official=true when confidence is medium or high."
         )
         if not self.schema_spec_path.exists():
             return base
@@ -187,15 +200,22 @@ class SchemaAutoUpdater:
             "- Output valid JSON only.\n\n"
             f"INPUT:\n{json.dumps(payload, ensure_ascii=False, indent=2)}"
         )
-        if search_hint.get("use_online_search"):
-            query = search_hint.get("search_query", "")
-            prompt += (
-                "\n\nOfficial localization directive:\n"
-                f"- Execute web search for this query: {query}\n"
-                "- Prefer publisher listing, official English license pages, and major distributor pages.\n"
-                "- Populate metadata_en_patch.official_localization from official sources.\n"
-                "- Set should_use_official=true when confidence is medium/high.\n"
-            )
+        # Always append search grounding block — use detected hint or build from metadata
+        query = search_hint.get("search_query", "")
+        if not query:
+            title = metadata.get("title", "")
+            author = metadata.get("author", "")
+            query = f"{title} {author} light novel official English".strip()
+        prompt += (
+            "\n\nGrounding & media canon lookup (ALWAYS ACTIVE):\n"
+            f"- Search query: {query}\n"
+            "- Also search: <series_name> anime, <series_name> manga, <series_name> light novel English\n"
+            "- Prefer publisher listings (Yen Press, Seven Seas, J-Novel Club), official license pages,\n"
+            "  anime/manga databases (MAL, AniList, MangaUpdates), and wiki sources.\n"
+            "- Adopt official character name spellings, place names, and terminology from existing media canon.\n"
+            "- Populate metadata_en_patch.official_localization from official sources.\n"
+            "- Set should_use_official=true when confidence is medium/high.\n"
+        )
         return prompt
 
     def _detect_localized_series_hint(self, metadata: Dict[str, Any]) -> Dict[str, Any]:

@@ -63,11 +63,28 @@ class GlossaryLock:
         "Queen",
     }
 
-    def __init__(self, work_dir: Path, target_language: str = "en"):
+    def __init__(self, work_dir: Path, target_language: str = "en",
+                 bible_glossary: Optional[Dict[str, str]] = None):
         self.work_dir = work_dir
         self.target_language = target_language.lower()
         self.manifest_path = work_dir / "manifest.json"
         self.locked_names = self._load_from_manifest()
+
+        # Merge bible glossary (bible terms are supplementary;
+        # manifest names take precedence on collision)
+        if bible_glossary:
+            merged_count = 0
+            for jp, en in bible_glossary.items():
+                if jp not in self.locked_names:
+                    self.locked_names[jp] = en
+                    merged_count += 1
+            if merged_count:
+                import logging
+                logging.getLogger(__name__).info(
+                    f"GlossaryLock: merged {merged_count} bible terms "
+                    f"(total: {len(self.locked_names)})"
+                )
+
         self._canonical_names = {self._normalize(name): name for name in self.locked_names.values()}
         self._locked = True
 

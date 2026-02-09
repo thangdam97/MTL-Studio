@@ -20,27 +20,31 @@ Version 5.1 | Production Ready | February 2026
 2. [Gemini Embedding: Vector Search Engine](#-gemini-embedding-vector-search-engine)
     - [Why Vector Search? Traditional MT and CAT Tools Compared](#why-vector-search-traditional-mt-and-cat-tools-compared)
 3. [Gemini 3 Pro Vision: Illustration Multimodal Processor](#gemini-3-pro-vision-illustration-multimodal-processor)
-4. [What's New in V5.1](#whats-new-in-v51-current-release)
-5. [System Architecture](#system-architecture)
-6. [Pipeline Phases](#pipeline-phases)
-7. [Installation](#installation)
-8. [Quick Start](#quick-start)
-9. [CLI Reference](#cli-reference)
-10. [Configuration](#configuration)
-11. [Publisher Profiles System](#publisher-profiles-system)
-12. [File Structure](#file-structure)
-13. [RAG Modules](#rag-modules)
-14. [Quality Control](#quality-control)
+4. [Bible & Lore Manager: Series-Level Canonical Metadata](#-bible--lore-manager-series-level-canonical-metadata)
+    - [Architecture: BibleController + SeriesBible](#architecture-biblecontroller--seriesbible)
+    - [Bible Auto-Sync in Phase 1.5](#bible-auto-sync-in-phase-15)
+    - [World Setting Directive System](#world-setting-directive-system)
+5. [What's New in V5.1](#whats-new-in-v51-current-release)
+6. [System Architecture](#system-architecture)
+7. [Pipeline Phases](#pipeline-phases)
+8. [Installation](#installation)
+9. [Quick Start](#quick-start)
+10. [CLI Reference](#cli-reference)
+11. [Configuration](#configuration)
+12. [Publisher Profiles System](#publisher-profiles-system)
+13. [File Structure](#file-structure)
+14. [RAG Modules](#rag-modules)
+15. [Quality Control](#quality-control)
     - [Self-Healing Anti-AI-ism Agent](#self-healing-anti-ai-ism-agent)
     - [Streamlined Post-Processing Pipeline](#streamlined-post-processing-pipeline)
-15. [Illustration System](#illustration-system)
-16. [Versus Official Publishing](#versus-official-publishing)
-17. [Troubleshooting](#troubleshooting)
-18. [API Reference](#api-reference)
+16. [Illustration System](#illustration-system)
+17. [Versus Official Publishing](#versus-official-publishing)
+18. [Troubleshooting](#troubleshooting)
+19. [API Reference](#api-reference)
     - [Manifest Schema](#manifest-schema)
     - [Name Registry Schema](#name-registry-schema)
     - [Semantic Metadata Schema](#semantic-metadata-schema)
-19. [Performance Statistics](#performance-statistics)
+20. [Performance Statistics](#performance-statistics)
 
 ---
 
@@ -85,10 +89,13 @@ V5.1 (February 2026) introduces a **Three-Pillar Translation Architecture** that
 
 #### 4) Metadata, Continuity, and Schema Safety
 
-- **Schema auto-transform compatibility**: Enhanced v2.1, Legacy V2, and V4 nested metadata normalize into translator-compatible internal structures.
-- **Schema Agent auto-update (in-pipeline)**: After Librarian extraction, MTL Studio calls Gemini (`gemini-2.5-flash`, `temperature=0.5`, default `top_p/top_k`, `max_output_tokens=32768`) to enrich schema and merge updates into manifest metadata.
-- **Phase 1.5 safe metadata processing**: Translates title/author/chapter fields while preserving deeper semantic configuration assets and schema-agent enrichments.
-- **Sequel-aware continuity**: Character names, glossary, and series conventions can be inherited for cross-volume consistency.
+- **LN Bible & Lore Manager**: Series-level canonical metadata store (`pipeline/bibles/`) manages characters, geography, weapons, cultural terms, mythology, and organizations across all volumes of a series. One truth per series — eliminates cross-volume naming drift.
+- **Bible Auto-Sync (Phase 1.5)**: Two-way sync during metadata processing — PULL inherits 130+ canonical terms from the bible before ruby translation; PUSH exports newly discovered terms back to the bible after processing. Fully automatic, non-fatal on failure.
+- **World Setting Directives**: Per-series honorific policy (localize/retain), name order (given-family/family-given), and per-character exceptions injected at the TOP of the system instruction.
+- **Schema Agent auto-update with Google Search grounding**: After Librarian extraction, Gemini 2.5 Flash enriches schema metadata with always-on Google Search — prioritizing existing anime/manga/publisher canon over heuristic inference.
+- **Phase 1.5 safe metadata processing**: Translates title/author/chapter fields while preserving deeper semantic configuration assets, schema-agent enrichments, and bible canonical terms.
+- **Sequel-aware continuity**: Character names, glossary, and series conventions inherited from both bible (canonical source) and predecessor volumes (fallback).
+- **Bible CLI tooling**: `mtl bible` provides 9 subcommands for managing bibles: `list`, `show`, `validate`, `import`, `link`, `unlink`, `orphans`, `prompt`, `sync`.
 - **Schema operations CLI**: `mtl.py metadata` and `mtl.py schema` provide compatibility checks, validation, and controlled metadata manipulation.
 
 #### 5) Quality Control and Self-Healing Stack
@@ -440,17 +447,33 @@ The system splits visual understanding from translation into two specialized pha
 
 ```
 ┌─────────────────────────────────────────────────────────────────────┐
+│  Phase 1 — "Librarian" (caches entire LN)                          │
+│                                                                     │
+│  OUTPUT: manifest.json with:                                       │
+│    • character_profiles (ruby-extracted names + kanji)              │
+│    • name_registry.json (JP → EN character mappings)               │
+│    • bible_id → links to series bible (130+ canonical terms)       │
+│                                                                     │
+│  ★ Character names are KNOWN before any illustration is analyzed   │
+└──────────────────────────────┬──────────────────────────────────────┘
+                               │
+          manifest.json + bibles/*.json
+                               │
+┌──────────────────────────────▼──────────────────────────────────────┐
 │  Phase 1.6 — "Art Director" (runs ONCE per volume)                 │
 │  Model: Gemini 3 Pro Vision + ThinkingConfig(HIGH)                 │
 │                                                                     │
 │  INPUT:  _assets/illustrations/*.jpg  (raw images)                 │
+│          + CHARACTER NAME REFERENCE from manifest/bible             │
 │  OUTPUT: visual_cache.json            (structured analysis)        │
 │                                                                     │
 │  For each illustration:                                            │
-│    1. Send image + analysis prompt to Gemini 3 Pro Vision          │
-│    2. Model reasons about composition, emotion, character actions   │
-│    3. Output: JSON with narrative_directives + spoiler_prevention   │
-│    4. Cache with hash-based invalidation (prompt + image + model)  │
+│    1. Build prompt with canon character names from manifest + bible │
+│    2. Send image + name-enriched prompt to Gemini 3 Pro Vision     │
+│    3. Model identifies characters BY NAME (not generic description)│
+│    4. Output: JSON with narrative_directives + spoiler_prevention   │
+│    5. Post-process: CanonNameEnforcer cleans any remaining generics│
+│    6. Cache with hash-based invalidation (prompt + image + model)  │
 └──────────────────────────────┬──────────────────────────────────────┘
                                │
                     visual_cache.json (persistent)
@@ -466,10 +489,13 @@ The system splits visual understanding from translation into two specialized pha
 │    4. Gemini 2.5 Pro translates with visual-informed vocabulary    │
 │                                                                     │
 │  Result: Prose calibrated to match illustration mood & action      │
+│  Characters referenced by canon name — zero ambiguity              │
 └─────────────────────────────────────────────────────────────────────┘
 ```
 
-**Key insight**: Gemini 2.5 Pro never sees the image. It receives a structured JSON interpretation from Gemini 3 Pro Vision, formatted as stylistic guidance. This decouples the expensive vision analysis (run once) from the translation (run per chapter, potentially multiple times for retranslation).
+**Key insight**: Because Phase 1 (Librarian) caches the entire LN and extracts character names into `manifest.json` before any illustration analysis begins, Phase 1.6 can inject canon character names directly into the Gemini 3 Pro Vision prompt. The vision model identifies "Tigre" and "Elen" instead of "the male protagonist" and "the silver-haired girl" — eliminating name ambiguity before it reaches the Translator.
+
+Gemini 2.5 Pro never sees the image. It receives a structured JSON interpretation from Gemini 3 Pro Vision, formatted as stylistic guidance with canon names already resolved. This decouples the expensive vision analysis (run once) from the translation (run per chapter, potentially multiple times for retranslation).
 
 ### What the Visual Cache Contains
 
@@ -550,11 +576,49 @@ The Canon Event Fidelity directive ensures the translator uses illustrations as 
 
 ### Canon Name Enforcement
 
-The visual cache integrates with the Librarian's ruby text extraction to enforce consistent character names:
+Since Phase 1 (Librarian) caches the entire LN and extracts all character names into `manifest.json` before Phase 1.6 runs, the Art Director has **full access to the canon character roster** from the start. When a series bible is linked, 130+ canonical terms (names, locations, weapons) are also available.
 
-1. **Phase 1.6**: Gemini 3 Pro Vision may describe characters generically ("the tall male character")
-2. **Post-processing**: `CanonNameEnforcer` replaces generic descriptions with canon names from `manifest.json` character_profiles
-3. **Injection**: Art Director's Notes arrive at the Translator with correct names (e.g., "Souta" not "the male protagonist")
+The system uses a **two-layer** approach — pre-injection into the vision prompt, and post-processing cleanup:
+
+#### Layer 1: Pre-Injection (Vision Prompt Enrichment)
+
+Before sending each illustration to Gemini 3 Pro Vision, the `asset_processor` builds a name-enriched prompt that includes a `CHARACTER NAME REFERENCE` block from `manifest.json` character profiles + bible canonical names:
+
+```
+=== CHARACTER NAME REFERENCE (from manifest + bible) ===
+ティグルヴルムド＝ヴォルン → Tigrevurmud Vorn (Tigre)
+  Role: protagonist | Male, 16 | Brune/Alsace
+エレオノーラ＝ヴィルターリア → Eleonora Viltaria (Elen)
+  Role: heroine | Female | Zhcted/Leitmeritz
+リュドミラ＝ルリエ → Ludmila Lourie (Mila)
+  Role: ally | Female | Zhcted/Olmutz
+...
+=== END CHARACTER REFERENCE ===
+```
+
+With this context, Gemini 3 Pro Vision can identify characters **by name** in its output:
+- ❌ Before: *"A medium shot centering on **the female character's** upper body"*
+- ✅ After: *"A medium shot centering on **Elen's** upper body, her silver hair catching the light"*
+
+This eliminates the fundamental limitation of a name-blind vision prompt — the model no longer produces generic descriptions that downstream string-replacement cannot fix.
+
+#### Layer 2: Post-Processing (CanonNameEnforcer)
+
+After Gemini 3 Pro Vision returns its analysis, `CanonNameEnforcer` (`prompt_injector.py`) runs a cleanup pass:
+
+1. **JP → EN replacement**: Any Japanese kanji names that the vision model OCR'd from the image are replaced with their canonical English equivalents
+2. **Nickname normalization**: Full names are supplemented with nicknames where appropriate ("Tigrevurmud Vorn" → "Tigre")
+3. **Recursive enforcement**: Walks the entire visual cache dict structure, enforcing names in every string field
+
+This two-layer approach ensures Art Director's Notes arrive at the Translator with **zero name ambiguity** — every character reference uses the exact same names that appear in the bible glossary, the manifest character profiles, and the translation system prompt.
+
+#### Kuchie (Color Plate) Special Handling
+
+Color plates (kuchie) often have character names overlaid as printed text. `KuchieVisualizer` runs a dedicated OCR pipeline that:
+1. Extracts printed names from the color plate via Gemini 3 Pro Vision OCR prompt
+2. Cross-references extracted names against manifest canon (exact kanji match → partial → reading/furigana)
+3. Produces `KuchieCharacter` entries with `canon_name` and `ruby_match_confidence`
+4. Injects validated canon names back into the visual cache for the corresponding illustrations
 
 ### Cache Invalidation
 
@@ -601,12 +665,12 @@ When the translator saves its THINKING log, it includes the Art Director's visua
 
 | File | Purpose |
 |------|---------|
-| `modules/multimodal/asset_processor.py` | Phase 1.6 orchestrator — analyzes all illustrations with Gemini 3 Pro Vision |
-| `modules/multimodal/cache_manager.py` | Loads, saves, and queries `visual_cache.json` with hash-based invalidation |
-| `modules/multimodal/prompt_injector.py` | Formats cached analysis as Art Director's Notes for translation prompts |
+| `modules/multimodal/asset_processor.py` | Phase 1.6 orchestrator — analyzes all illustrations with Gemini 3 Pro Vision; loads manifest + bible for name-enriched prompts |
+| `modules/multimodal/cache_manager.py` | Loads, saves, and queries `visual_cache.json` with hash-based invalidation; provides `get_character_profiles()` and `get_canon_name()` helpers |
+| `modules/multimodal/prompt_injector.py` | `CanonNameEnforcer` class for post-processing + `build_chapter_visual_guidance()` for translation prompt formatting |
 | `modules/multimodal/segment_classifier.py` | Extracts `[ILLUSTRATION: ...]` markers from chapter source text |
 | `modules/multimodal/integrity_checker.py` | Pre-flight validation: JP tags ↔ asset files ↔ manifest mapping |
-| `modules/multimodal/kuchie_visualizer.py` | Canon name injection and color plate visualization |
+| `modules/multimodal/kuchie_visualizer.py` | Kuchie OCR → canon name cross-reference + color plate visualization |
 | `modules/multimodal/thought_logger.py` | Captures Gemini 3 Pro Vision's ThinkingConfig reasoning |
 
 ### Validated Results
@@ -653,6 +717,369 @@ When the translator saves its THINKING log, it includes the Art Director's visua
 
 ---
 
+## 📖 Bible & Lore Manager: Series-Level Canonical Metadata
+
+### The Problem
+
+MTL Studio's translation pipeline had **no series-level canonical metadata store**. Each volume reinvented character names, place names, and terminology from scratch via per-manifest `metadata_en.character_names` — a flat `Dict[str, str]`.
+
+This caused:
+
+| Incident | Impact |
+|----------|--------|
+| **"Zxtat" incident** | ザクスタン (Sachstein) was never locked → model invented "Zxtat" in Vol 2 Chapter 2. Vol 1 had 4 different spellings across 15 chapters. |
+| **Cross-volume drift** | 68 volumes in WORK/, at least 15 multi-volume series with NO shared glossary. |
+| **Character profile data loss** | Rich RTAS data (keigo switches, contraction rates, relationship scores) curated in `character_profiles` was silently dropped by the transform layer — the LLM never saw it. |
+| **Dead continuity system** | `continuity_manager.py` (429 lines) was fully disabled — `detect_and_offer_continuity()` always returned `None`. |
+
+### The Solution: LN Bible System
+
+A universal controller managing per-series canonical JSON files at `pipeline/bibles/`. Each volume's manifest declares `bible_id` → the translator loads the bible → 130+ terms injected into the system prompt automatically. **All volumes in a series share one truth.**
+
+### Architecture: BibleController + SeriesBible
+
+```
+pipeline/
+├── bibles/
+│   ├── index.json                          ← Registry: series → bible mapping
+│   ├── madan_no_ou_to_vanadis.json         ← Per-series canonical data (136 entries)
+│   └── ...                                 ← One JSON per series
+└── pipeline/
+    └── translator/
+        ├── series_bible.py                  ← SeriesBible + BibleController (985 lines)
+        ├── glossary_lock.py                 ← MODIFIED: accepts bible_glossary
+        ├── agent.py                         ← MODIFIED: loads bible before glossary
+        └── continuity_manager.py            ← DEPRECATED: replaced by bible system
+```
+
+**`BibleController`** — The universal orchestrator:
+
+```python
+class BibleController:
+    """Universal controller for all series bibles."""
+
+    # === Resolution ===
+    def load(manifest, work_dir) -> Optional[SeriesBible]
+    def detect_series(manifest) -> Optional[str]
+
+    # === CRUD ===
+    def create_bible(series_id, series_title, match_patterns) -> SeriesBible
+    def get_bible(series_id) -> SeriesBible
+    def list_bibles() -> List[dict]
+
+    # === Volume Management ===
+    def link_volume(volume_id, series_id)
+    def unlink_volume(volume_id)
+    def auto_link_all(work_dir) -> dict
+
+    # === Term Management ===
+    def import_from_volume(volume_id, work_dir)
+
+    # === Integrity ===
+    def validate_all() -> dict
+    def find_orphan_volumes(work_dir) -> List[str]
+```
+
+**`SeriesBible`** — Per-series data + flat glossary generation:
+
+```python
+class SeriesBible:
+    """Single series' canonical metadata."""
+
+    def flat_glossary() -> Dict[str, str]       # All categories → JP: EN dict
+    def characters_glossary() -> Dict[str, str]  # Characters only
+    def get_character_profiles() -> Dict          # Full RTAS/keigo/contraction data
+    def get_translation_rules() -> Dict           # Series-specific style rules
+    def format_for_prompt() -> str                # Categorized prompt block
+    def add_entry(category, jp_key, data)         # Add canonical term
+    def register_volume(volume_id, title, index)  # Link volume
+```
+
+### Bible Resolution Flow
+
+When a volume enters the translation pipeline, `BibleController` resolves the correct bible through a 4-step fallback:
+
+```
+TranslatorAgent.__init__(work_dir)
+    │
+    ├── 1. manifest.bible_id              → Direct lookup (fastest)
+    ├── 2. volume_id in index.volumes[]   → Reverse lookup (previously linked)
+    ├── 3. metadata.series vs patterns    → Pattern match
+    └── 4. metadata.title vs patterns     → Fuzzy match (last resort)
+    │
+    ▼
+IF bible found:
+    bible.flat_glossary()  → 130+ terms (characters, geography, weapons, orgs, etc.)
+    manifest.character_names → volume-specific overrides
+    merged = {**bible_terms, **volume_terms}   ← volume wins on conflict
+    │
+    ├── GlossaryLock(merged)          ← enhanced glossary enforcement
+    ├── prompt_loader.set_glossary()  ← categorized bible block in system prompt
+    └── bible.get_character_profiles() → enrich semantic metadata
+ELSE:
+    └── Existing behavior: manifest-only glossary (backward compatible)
+```
+
+### Bible Schema V1.0
+
+Each bible file follows a comprehensive categorized structure:
+
+```json
+{
+  "bible_version": "1.0",
+  "series_id": "madan_no_ou_to_vanadis",
+  "series_title": {
+    "ja": "魔弾の王と戦姫",
+    "en": "Lord Marksman and Vanadis",
+    "romaji": "Madan no Ou to Vanadis"
+  },
+  "volumes_registered": [
+    {"volume_id": "25d9", "title": "第1章―出逢い―", "index": 1},
+    {"volume_id": "15c4", "title": "第2章―銀の流星―", "index": 2}
+  ],
+
+  "characters": {
+    "ティグルヴルムド＝ヴォルン": {
+      "canonical_en": "Tigrevurmud Vorn",
+      "short_name": "Tigre",
+      "aliases_jp": ["ティグル", "ティグレ"],
+      "introduced_in": 1,
+      "category": "protagonist",
+      "affiliation": "Brune / Alsace"
+    }
+  },
+  "geography": { "countries": {}, "regions": {}, "cities": {} },
+  "weapons_artifacts": { "dragonic_tools": {}, "legendary_weapons": {} },
+  "organizations": {},
+  "cultural_terms": {},
+  "mythology": {},
+
+  "world_setting": {
+    "type": "fantasy",
+    "honorifics": { "mode": "localize", "policy": "..." },
+    "name_order": { "default": "given_family", "policy": "..." },
+    "exceptions": []
+  },
+  "translation_rules": {}
+}
+```
+
+**Categories available** (all flattened into glossary):
+
+| Category | Content | Example |
+|----------|---------|---------|
+| `characters` | Protagonist, allies, antagonists, supporting cast | ティグル → Tigre |
+| `geography.countries` | Nations and kingdoms | ザクスタン → Sachstein |
+| `geography.regions` | Territories and provinces | アルサス → Alsace |
+| `geography.cities` | Named locations | リュテティア → Lutetia |
+| `weapons_artifacts` | Named weapons, dragonic tools | アリファール → Arifar |
+| `organizations` | Knight orders, factions | ナヴァール騎士団 → Navarre Knights |
+| `cultural_terms` | Titles, ranks, concepts | 戦姫 → Vanadis |
+| `mythology` | Deities, legends | ジルニトラ → Zirnitra |
+
+### World Setting Directive System
+
+The `world_setting` block governs the **default honorific and name-order policy** for every volume in the series. Per-character exceptions override the global rule without breaking it.
+
+| Setting Type | `honorifics.mode` | `name_order.default` | Example |
+|---|---|---|---|
+| `fantasy` | `localize` — Drop JP honorifics, use English equivalents (Lord, Lady, Sir) | `given_family` — Western first-name order | Madan no Ou |
+| `modern_japan` | `retain` — Keep -san, -kun, -chan, -sama, -sensei, -senpai | `family_given` — Japanese surname-first | Otonari Asobi |
+| `historical_japan` | `retain` — Keep honorifics + period-specific titles (殿→-dono) | `family_given` | — |
+| `isekai` | `localize` — Drop honorifics in fantasy world; may retain for JP protagonist | `given_family` (fantasy), `family_given` (Japan flashbacks) | — |
+| `mixed` | Per-character override via `exceptions` array | Per-character override | — |
+
+**Exception handling** — Foreign characters in a Japanese setting:
+
+```json
+"exceptions": [
+  {
+    "character_jp": "シャルロット",
+    "character_en": "Charlotte",
+    "reason": "Foreign exchange student (French)",
+    "honorifics_override": "retain",
+    "name_order_override": "given_family",
+    "notes": "Others attach -san/-chan to her given name"
+  }
+]
+```
+
+> The world directive is injected at the **TOP** of the system instruction as a one-line binding rule before any other context:
+> `[World: Medieval European Fantasy] | Honorifics: DROP all JP → English equivalents | Names: given_family`
+
+### Prompt Injection Order
+
+The bible system integrates with the existing prompt architecture in a specific layered order:
+
+```
+1. <!-- WORLD SETTING DIRECTIVE -->        ← TOP (binding one-line rule)
+   [World: Medieval European Fantasy] | Honorifics: DROP all JP → ...
+
+2. [Master Prompt + RAG Modules]           ← Existing system instruction
+
+3. <!-- SERIES BIBLE: ... (CACHED) -->     ← Categorized (3,630 chars for Madan)
+   === WORLD SETTING ===
+   === CHARACTERS ===                      73+ character entries
+   === GEOGRAPHY ===                       26 location entries
+   === WEAPONS/ARTIFACTS ===               9 entries
+   === ORGANIZATIONS ===                   3 entries
+   === CULTURAL TERMS ===                  7 entries
+   === MYTHOLOGY ===                       3 entries
+
+4. <!-- GLOSSARY — Volume-Specific -->     ← Only non-bible terms (deduplicated)
+
+5. <!-- SEMANTIC METADATA -->              ← Character profiles with full RTAS data
+```
+
+The glossary deduplication layer eliminates terms already present in the bible block, preventing redundant injection (e.g., 118 terms removed when Madan bible is active).
+
+### Bible Auto-Sync in Phase 1.5
+
+The bible stays current automatically through **two-way sync** during Phase 1.5 metadata processing:
+
+```
+Phase 1.5 Flow (with Bible Sync):
+┌──────────────────────────────────────────────────────────────┐
+│ _run_schema_autoupdate()   ← Gemini enriches metadata        │
+│                                                              │
+│ ★ BIBLE PULL ★                                               │
+│   Load bible → inject 133 canonical terms                    │
+│   Pre-populate name_registry for ruby skip list              │
+│   Build context block for Gemini prompt                      │
+│                                                              │
+│ _batch_translate_ruby()    ← Skip known bible names          │
+│ Gemini title/chapter translation (with bible context)        │
+│ _update_manifest_preserve_schema()                           │
+│ Final manifest write                                         │
+│                                                              │
+│ ★ BIBLE PUSH ★                                               │
+│   Compare manifest vs bible                                  │
+│   Push newly discovered characters → bible                   │
+│   Enrich existing characters ← profiles                      │
+│   Register volume in bible                                   │
+│   Save bible + update index                                  │
+└──────────────────────────────────────────────────────────────┘
+```
+
+| Direction | What Happens | Safety |
+|-----------|-------------|--------|
+| **PULL** (Bible → Manifest) | 133 canonical terms inherited; ruby translation skips known names; bible context injected into Gemini prompt | Additive only — manifest can still override |
+| **PUSH** (Manifest → Bible) | New characters added; existing characters enriched with profile data (nickname, keigo, affiliation); volume registered | Bible wins on conflicts; never overwrites existing canonical entries |
+
+**All sync operations are non-fatal** — wrapped in try/except so failures log warnings but never block the pipeline.
+
+### Bible CLI Commands
+
+```bash
+# List all registered bibles
+mtl bible list
+
+# Show bible details (entries, categories, stats)
+mtl bible show madan_no_ou_to_vanadis
+
+# Validate bible integrity (cross-reference checks)
+mtl bible validate madan_no_ou_to_vanadis
+
+# Import terms from a volume's manifest into a bible
+mtl bible import 15c4
+
+# Link a volume to a bible (auto-detect or explicit)
+mtl bible link 15c4
+mtl bible link 15c4 --bible madan_no_ou_to_vanadis
+
+# Unlink a volume from its bible
+mtl bible unlink 15c4
+
+# Find volumes not linked to any bible
+mtl bible orphans
+
+# Preview the prompt block that would be injected
+mtl bible prompt madan_no_ou_to_vanadis
+
+# Sync bible with a volume (pull + push or directional)
+mtl bible sync 15c4
+mtl bible sync 15c4 --direction pull
+mtl bible sync 15c4 --direction push
+```
+
+### Module Architecture
+
+| File | Lines | Role |
+|------|-------|------|
+| `series_bible.py` | 985 | `SeriesBible` + `BibleController` — core engine |
+| `bible_commands.py` | ~500 | 9 CLI handlers for `mtl bible` subcommands |
+| `bible_sync.py` | ~340 | Two-way sync engine (PULL/PUSH) for Phase 1.5 |
+| `bibles/index.json` | — | Registry: series → bible file mapping |
+| `bibles/*.json` | — | Per-series canonical data (Madan: 136 entries) |
+
+### Implementation Summary
+
+| Metric | Value |
+|--------|-------|
+| **Phases implemented** | 7 (Phase 0 → E + Auto-Sync) |
+| **New code** | ~1,825 lines (series_bible + bible_commands + bible_sync) |
+| **Modified files** | 5 (agent.py, prompt_loader.py, glossary_lock.py, parser.py, dispatcher.py) |
+| **Automated checks** | 93 passed (56 + 16 + 13 + 8) |
+| **Madan prototype** | 136 entries (88 chars, 26 geo, 9 weapons, 3 orgs, 7 cultural, 3 mythology) |
+| **Backward compatible** | ✅ Volumes without `bible_id` see zero behavioral change |
+
+### Reference Series: Lord Marksman and Vanadis (魔弾の王と戦姫)
+
+The bible system was designed, implemented, and validated against **Lord Marksman and Vanadis** — a medieval European fantasy light novel series with a rich cast, geopolitical world-building, and named weapons/artifacts that make it an ideal stress test for cross-volume canonical metadata.
+
+#### Series Credit
+
+| Field | Value |
+|-------|-------|
+| **Title (Japanese)** | 魔弾の王と戦姫 |
+| **Title (English)** | Lord Marksman and Vanadis |
+| **Title (Romaji)** | Madan no Ou to Vanadis |
+| **Author** | Tsukasa Kawaguchi (川口士) |
+| **Illustrator** | Yoshi☆wo (よし☆ヲ) |
+| **Publisher** | Media Factory (MF Bunko J) |
+| **Volumes** | 18 (main series, 2011–2017) |
+| **Anime Adaptation** | 2014, 13 episodes (Satelight) |
+| **Genre** | Medieval European Fantasy, Military, Romance |
+
+#### Bible Profile
+
+| Metric | Value |
+|--------|-------|
+| **Bible ID** | `madan_no_ou_to_vanadis` |
+| **Bible Version** | 1.0 |
+| **World Setting** | `fantasy` — Medieval European Fantasy |
+| **Honorific Policy** | `localize` — Drop all JP honorifics, use English equivalents (Lord, Lady, Sir, Your Majesty) |
+| **Name Order** | `given_family` — Western first-name order for all characters |
+| **Total Entries** | 136 |
+| **Characters** | 88 (protagonist, 7 Vanadis, allies, antagonists, supporting cast) |
+| **Geography** | 26 (5 countries, 10 regions, 11 cities) |
+| **Weapons/Artifacts** | 9 (7 Dragonic Tools + legendary weapons) |
+| **Organizations** | 3 (knight orders, factions) |
+| **Cultural Terms** | 7 (Vanadis, Dragonic Tool, war titles) |
+| **Mythology** | 3 (Zirnitra, Tir Na Fal, Baba Yaga) |
+
+#### Registered Volumes
+
+| Volume ID | Title | Index |
+|-----------|-------|-------|
+| `25d9` | 魔弾の王と戦姫 第1章―出逢い― | 1 |
+| `15c4` | 第2章―銀の流星― | 2 |
+| `0721` | 魔弾の王と戦姫 第2章―銀の流星― | 2 |
+
+#### Why This Series
+
+Lord Marksman and Vanadis was chosen as the reference series because it exercises every category in the bible schema:
+
+- **Characters**: 88 entries spanning protagonist (Tigre), 7 Vanadis war maidens (Elen, Mila, Sasha, Liza, Olga, Valentina, Fine), royal families, knights, and antagonists — with complex relationship networks (RTAS scores, keigo switches, contraction rates).
+- **Geography**: A fully mapped two-kingdom world (Brune/Zhcted) with provinces, territories, capital cities, and border regions — each with canonical English spellings that must remain consistent across all volumes.
+- **Weapons/Artifacts**: The 7 Dragonic Tools are named-and-typed artifacts central to the plot (Arifar/Wind, Lavias/Ice, Bargren/Fire, etc.) — any spelling drift immediately breaks narrative coherence.
+- **Cultural Terms**: Domain-specific vocabulary (戦姫→Vanadis, 竜具→Dragonic Tool) that must be translated identically everywhere.
+- **World Setting**: A pure `fantasy` world with no Japanese cultural elements — the `localize` honorific policy and `given_family` name order exercise the full directive system without exception handling.
+
+> This series was the source of the **"Zxtat" incident** — the naming disaster that motivated the entire bible system. ザクスタン (Sachstein) appeared as 4 different spellings in Vol 1 and was hallucinated as "Zxtat" in Vol 2 Chapter 2. With the bible active, all 136 terms are locked from the first chapter of every volume.
+
+---
+
 ## What's New in V5.1 (Current Release)
 
 This section uses the same capability taxonomy as **Core Capabilities** so the release deltas are easy to map to operational behavior.
@@ -678,10 +1105,15 @@ This section uses the same capability taxonomy as **Core Capabilities** so the r
 
 ### 4) Metadata, Continuity, and Schema Safety
 
+- **LN Bible & Lore Manager**: Series-level canonical metadata store at `pipeline/bibles/` — 136+ entries per series covering characters, geography, weapons, organizations, cultural terms, and mythology. Eliminates cross-volume naming drift ("Zxtat" incident).
+- **Bible Auto-Sync (Phase 1.5)**: Two-way sync — PULL inherits 133 canonical terms before translation; PUSH exports newly discovered terms back to bible after processing. Fully automatic, non-fatal on failure.
+- **World Setting Directive**: Per-series honorific policy (localize/retain), name order, and per-character exceptions injected at TOP of system instruction.
+- **Schema Agent with Google Search grounding**: Always-on Google Search in Gemini 2.5 Flash — prioritizes existing anime/manga/publisher canon (MAL, AniList, official publisher data) over heuristic inference.
 - **Schema v3.6 enrichment**: Metadata now includes `gap_moe_markers`, `dual_voice_analysis`, and `transcreation_notes`.
-- **Schema Agent v3.6 auto-run in Phase 1.5**: Flow is now `Librarian Extraction -> Schema Agent autoupdate merge -> Title/Chapter title translation -> Phase 2`.
+- **Schema Agent v3.6 auto-run in Phase 1.5**: Flow is now `Librarian → Schema Agent autoupdate → Bible PULL → Title/Chapter translation → Bible PUSH → Phase 2`.
 - **Official localization preference**: When a series has an established localized title, schema auto-update prioritizes official localization metadata over literal fallback naming.
-- **Continuity-focused validation**: Name consistency, sequel inheritance safety, and schema integrity checks are emphasized earlier in the pipeline.
+- **Bible CLI tooling**: `mtl bible` provides 9 subcommands for managing bibles: `list`, `show`, `validate`, `import`, `link`, `unlink`, `orphans`, `prompt`, `sync`.
+- **Continuity-focused validation**: Name consistency via bible glossary lock, sequel inheritance safety, and schema integrity checks are enforced earlier in the pipeline.
 
 ### 5) Quality Control and Self-Healing Stack
 
@@ -738,25 +1170,31 @@ This section uses the same capability taxonomy as **Core Capabilities** so the r
 └─────────┘                 └─────────┘                 └─────────┘
     │                             │                             ▲
     ▼                             ▼                             │
-┌─────────────┐            ┌─────────────┐                      │
-│  LIBRARIAN  │───────────►│ METADATA +  │                      │
-│   (Python)  │            │ SCHEMA AGENT│                      │
-└──────┬──────┘            └──────┬──────┘                      │
-       │                          │                             │
-       ▼                          ▼                             │
-┌─────────────────┐        ┌────────────────────────────────────────────────────┐
-│  ART DIRECTOR   │        │                    TRANSLATOR                      │
-│ Gemini 3 Pro    │        │                  Gemini 2.5 Pro                    │
-│   Vision        │        │                                                    │
-│ → visual_cache  │───────►│  RAG + Vector Search + (optional) Visual Context  │
+┌─────────────┐            ┌─────────────┐  ┌──────────────┐   │
+│  LIBRARIAN  │───────────►│ METADATA +  │◄─│  BIBLES/     │   │
+│   (Python)  │            │ SCHEMA AGENT│  │ index.json   │   │
+└──────┬──────┘            │             │  │ *.json       │   │
+       │                   │ ★ PULL ★    │  │ (136+ terms) │   │
+       │                   │ bible→mfst  │  └──────┬───────┘   │
+       │                   │ ★ PUSH ★    │─────────┘           │
+       │                   │ mfst→bible  │                     │
+       ▼                   └──────┬──────┘                     │
+┌─────────────────┐               │                            │
+│  ART DIRECTOR   │               ▼                            │
+│ Gemini 3 Pro    │        ┌────────────────────────────────────────────────────┐
+│   Vision        │        │                    TRANSLATOR                      │
+│ → visual_cache  │───────►│                  Gemini 2.5 Pro                    │
 │   .json         │        │                                                    │
-└─────────────────┘        │  NEW RELIABILITY LAYER                             │
+└─────────────────┘        │  Bible World Directive (TOP) + Categorized Glossary│
+                           │  RAG + Vector Search + (optional) Visual Context   │
+                           │                                                    │
+                           │  RELIABILITY LAYER                                 │
                            │  • Volume Cache (full JP volume cached once)       │
                            │  • Smart Chunking for massive chapters              │
                            │  • Resumable chunk JSONs (temp/chunks/*.json)      │
                            │  • Chunk Merge + boundary dedupe                    │
                            │  • Truncation Validator                             │
-                           │  • Manifest Glossary Lock                           │
+                           │  • Bible + Manifest Glossary Lock                   │
                            └──────────────────────────┬─────────────────────────┘
                                                       │
                                                       ▼
@@ -796,9 +1234,19 @@ LIBRARIAN completes   → manifest.json (librarian.status = "completed")
 SCHEMA AGENT AUTO-UPDATE
  (Phase 1.5 pre-step) → Gemini 2.5 Flash enriches schema metadata
                       → merges manifest-level chapter/localization guidance
+                      → Google Search grounding (always-on, media canon priority)
+
+BIBLE SYNC — PULL     → BibleController.load(manifest) resolves series bible
+ (Phase 1.5)          → 133 canonical terms inherited (characters, geography, etc.)
+                      → name_registry pre-populated (ruby translation skip list)
+                      → Bible context block injected into Gemini prompt
 
 METADATA PROCESSOR    → manifest.json (metadata_processor.status = "completed")
                       → metadata_en.json created/updated
+
+BIBLE SYNC — PUSH     → New characters pushed to bible (add only, never overwrite)
+ (Phase 1.5 post)     → Existing characters enriched (nickname, keigo, affiliation)
+                      → Volume registered in bible + index updated
 
 ART DIRECTOR          → Gemini 3 Pro Vision analyzes all illustrations
  (Phase 1.6)          → visual_cache.json created (hash-based invalidation)
@@ -810,6 +1258,9 @@ VECTOR SEARCH INIT    → EnglishPatternStore auto-rebuilds if empty
                       → Embedding model: gemini-embedding-001 (3072D)
 
 TRANSLATOR reads      → checks librarian.status == "completed"
+                      → Bible world directive injected at TOP of system prompt
+                      → Categorized bible block injected BEFORE glossary
+                      → Glossary deduplicated (bible terms removed from flat glossary)
                       → Grammar Pattern Detector scans JP source (70+ regex)
                       → Vector Search injects high-confidence matches (≥0.78)
                       → Art Director's Notes injected for illustrated chapters
@@ -865,20 +1316,23 @@ WORK/[volume_id]/
 
 ### Phase 1.5: Metadata Processor
 
-**Purpose**: Translate and localize book metadata
+**Purpose**: Translate and localize book metadata + Bible auto-sync
 
 **Responsibilities**:
-- Run Schema Agent auto-update first (Gemini 2.5 Flash API call) and merge enriched schema metadata into manifest
+- Run Schema Agent auto-update first (Gemini 2.5 Flash with always-on Google Search grounding) and merge enriched schema metadata into manifest
+- **Bible PULL**: Resolve series bible → inject 133 canonical terms into manifest, pre-populate ruby skip list, build Gemini context block
 - Translate main title with creative localization
 - Romanize author/illustrator names (Standard Hepburn)
-- Batch translate character names from ruby text
+- Batch translate character names from ruby text (skipping bible-known names)
 - Translate all chapter titles from TOC
 - Detect sequels and inherit terminology
 - Prioritize official localized series naming when available
+- **Bible PUSH**: Compare final manifest vs bible → push new characters, enrich existing entries, register volume
 
 **Output**:
 - `metadata_en.json` - Localized metadata configuration
-- Updated `manifest.json` with English titles + merged schema-agent enrichments
+- Updated `manifest.json` with English titles + merged schema-agent enrichments + bible terms
+- Updated `bibles/*.json` - New terms pushed back to series bible (if linked)
 
 ### Phase 1.6: Art Director (Multimodal)
 
@@ -1278,6 +1732,17 @@ python mtl.py metadata [volume_id]            # Quick schema detection
 python mtl.py metadata [volume_id] --validate # Full validation report
 python mtl.py schema [volume_id] --action show
 
+# Bible & Lore Manager
+python mtl.py bible list                              # List all registered bibles
+python mtl.py bible show <bible_id>                    # Show entries, categories, stats
+python mtl.py bible validate <bible_id>                # Cross-reference integrity check
+python mtl.py bible import <volume_id>                 # Import terms from manifest
+python mtl.py bible link <volume_id> [--bible <id>]    # Link volume to bible
+python mtl.py bible unlink <volume_id>                 # Unlink volume from bible
+python mtl.py bible orphans                            # Find unlinked volumes
+python mtl.py bible prompt <bible_id>                  # Preview prompt injection block
+python mtl.py bible sync <volume_id> [--direction pull|push]  # Two-way sync
+
 # Configuration
 python mtl.py config --show
 python mtl.py config --language en    # Switch to English
@@ -1293,7 +1758,7 @@ python mtl.py config --toggle-multimodal
 |---------|-------------|
 | `run` | Execute full pipeline from EPUB input |
 | `phase1` | Librarian: Extract EPUB to working directory |
-| `phase1.5` | Metadata Processor: Translate metadata and preserve schema continuity |
+| `phase1.5` | Metadata Processor: Translate metadata, bible auto-sync (PULL/PUSH), and preserve schema continuity |
 | `phase1.6` | Art Director: Analyze illustrations and build `visual_cache.json` |
 | `phase2` | Translator: Translate chapters with Gemini |
 | `phase3` | Display critics workflow instructions for audit/review |
@@ -1309,6 +1774,15 @@ python mtl.py config --toggle-multimodal
 | `cjk-clean` | Run VN CJK hard substitution cleaner on translated files |
 | `heal` | Run Self-Healing Anti-AI-ism Agent (3-layer detection + auto-fix) |
 | `cleanup` | Clean translated chapter titles and illustration marker artifacts |
+| `bible list` | List all registered series bibles with entry counts |
+| `bible show` | Display bible entries grouped by category |
+| `bible validate` | Run cross-reference integrity checks on a bible |
+| `bible import` | Import terms from a volume's manifest into its linked bible |
+| `bible link` | Link a volume to a bible (auto-detect or explicit `--bible <id>`) |
+| `bible unlink` | Remove a volume's bible association |
+| `bible orphans` | Find all volumes in WORK/ not linked to any bible |
+| `bible prompt` | Preview the categorized prompt block that would be injected |
+| `bible sync` | Run two-way sync (PULL + PUSH) between a volume and its bible |
 
 ### Options
 

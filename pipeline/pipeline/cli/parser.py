@@ -263,4 +263,49 @@ Metadata Schema Auto-Transform:
     schema_parser.add_argument('--json', '-j', help='JSON file (for apply-keigo, import)')
     schema_parser.add_argument('--output', '-o', help='Output file (for export, generate-keigo)')
 
+    # Bible command - series bible management
+    bible_parser = subparsers.add_parser(
+        'bible',
+        parents=[parent_parser],
+        help='Series Bible management (cross-volume canonical metadata)'
+    )
+    bible_subparsers = bible_parser.add_subparsers(dest='bible_action')
+
+    # bible list
+    bible_subparsers.add_parser('list', help='List all registered series bibles')
+
+    # bible show <bible_id>
+    bible_show_p = bible_subparsers.add_parser('show', help='Display categorized bible contents')
+    bible_show_p.add_argument('bible_id', type=str, help='Series bible ID (e.g. madan_no_ou_to_vanadis)')
+
+    # bible validate <bible_id>
+    bible_validate_p = bible_subparsers.add_parser('validate', help='Validate bible for issues')
+    bible_validate_p.add_argument('bible_id', type=str, help='Series bible ID')
+
+    # bible import <volume_id>
+    bible_import_p = bible_subparsers.add_parser('import', help='Import terms from volume manifest into bible')
+    bible_import_p.add_argument('volume_id', type=str, help='Volume ID (e.g. 25d9)')
+
+    # bible link <volume_id> [--bible <bible_id>]
+    bible_link_p = bible_subparsers.add_parser('link', help='Link volume to series bible')
+    bible_link_p.add_argument('volume_id', type=str, help='Volume ID (e.g. 25d9)')
+    bible_link_p.add_argument('--bible', dest='bible_id', type=str, help='Target bible ID (auto-detect if omitted)')
+
+    # bible unlink <volume_id>
+    bible_unlink_p = bible_subparsers.add_parser('unlink', help='Unlink volume from its bible')
+    bible_unlink_p.add_argument('volume_id', type=str, help='Volume ID')
+
+    # bible orphans
+    bible_subparsers.add_parser('orphans', help='Find WORK/ volumes not linked to any bible')
+
+    # bible prompt <bible_id>
+    bible_prompt_p = bible_subparsers.add_parser('prompt', help='Preview injected prompt block')
+    bible_prompt_p.add_argument('bible_id', type=str, help='Series bible ID')
+
+    # bible sync <volume_id> [--direction pull|push|both]
+    bible_sync_p = bible_subparsers.add_parser('sync', help='Run bible ↔ manifest sync (pull + push)')
+    bible_sync_p.add_argument('volume_id', type=str, help='Volume short ID (e.g. 25d9)')
+    bible_sync_p.add_argument('--direction', choices=['pull', 'push', 'both'],
+                              default='both', help='Sync direction (default: both)')
+
     return parser

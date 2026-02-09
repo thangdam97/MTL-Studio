@@ -1266,10 +1266,33 @@ class MetadataProcessor:
                 )
 
         # New flow:
-        # Librarian Extraction -> Schema Agent autoupdate -> Title/Chapter translation -> Phase 2
+        # Librarian Extraction -> Schema Agent autoupdate -> Bible Sync -> Title/Chapter translation -> Phase 2
         self._run_schema_autoupdate()
-            
+
+        # ── Bible Auto-Sync: PULL (Bible → Manifest) ─────────────
+        # Inherit canonical terms from the series bible BEFORE ruby
+        # translation, so batch_translate_ruby can skip known names.
+        bible_sync = None
+        bible_pull = None
+        bible_known_names = {}
+        try:
+            from pipeline.metadata_processor.bible_sync import BibleSyncAgent
+            from pipeline.config import PIPELINE_ROOT
+            bible_sync = BibleSyncAgent(self.work_dir, PIPELINE_ROOT)
+            if bible_sync.resolve(self.manifest):
+                bible_pull = bible_sync.pull(self.manifest)
+                bible_known_names = bible_pull.known_characters
+                logger.info(f"📖 Bible PULL complete: {bible_pull.summary()}")
+        except Exception as e:
+            logger.warning(f"Bible sync (pull) skipped: {e}")
+            bible_sync = None
+
         inheritance_context = ""
+
+        # Append bible context block if available
+        if bible_pull and bible_pull.context_block:
+            inheritance_context += bible_pull.context_block
+
         if parent_data:
             match_title = parent_data.get('title_en', 'Unknown')
             match_author = parent_data.get('author_en', 'Unknown')
@@ -1306,16 +1329,24 @@ class MetadataProcessor:
             context_parts.append("Ensure all character names and terms above remain consistent.")
             context_parts.append("Only translate NEW characters/terms not listed above.\n")
             
-            inheritance_context = "\n".join(context_parts)
+            inheritance_context += "\n".join(context_parts)
         
         # Batch translate ruby-extracted character names
-        if ruby_names:
-            logger.info("Batch translating ruby entries...")
-            name_registry = self._batch_translate_ruby(
-                ruby_names, parent_data
-            )
+        # Pre-populate with bible known names so they can be skipped
+        if bible_known_names:
+            name_registry = dict(bible_known_names)  # Bible as base
+            logger.info(f"   Pre-populated {len(bible_known_names)} bible character names → ruby skip list")
         else:
             name_registry = {}
+
+        if ruby_names:
+            logger.info("Batch translating ruby entries...")
+            ruby_translated = self._batch_translate_ruby(
+                ruby_names, parent_data
+            )
+            # Merge: ruby translated names override bible (for newly discovered chars)
+            name_registry.update(ruby_translated)
+        # else: name_registry already has bible names (or empty dict)
         
         # No term glossary in simplified version
         term_glossary = {}
@@ -1403,6 +1434,17 @@ class MetadataProcessor:
 
             with open(self.manifest_path, 'w', encoding='utf-8') as f:
                 json.dump(self.manifest, f, indent=2, ensure_ascii=False)
+
+            # ── Bible Auto-Sync: PUSH (Manifest → Bible) ─────────
+            # Export newly discovered terms back to the series bible.
+            # This runs AFTER the final manifest write so the bible
+            # gets the fully processed, finalized data.
+            if bible_sync and bible_sync.bible:
+                try:
+                    push_result = bible_sync.push(self.manifest)
+                    logger.info(f"📖 Bible PUSH complete: {push_result.summary()}")
+                except Exception as e:
+                    logger.warning(f"Bible sync (push) failed: {e}")
 
         except Exception as e:
             logger.error(f"Failed to parse metadata response: {e}")

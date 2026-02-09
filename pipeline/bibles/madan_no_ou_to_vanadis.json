@@ -1,0 +1,632 @@
+{
+  "bible_version": "1.0",
+  "series_id": "madan_no_ou_to_vanadis",
+  "series_title": {
+    "ja": "魔弾の王と戦姫",
+    "en": "Lord Marksman and Vanadis",
+    "romaji": "Madan no Ou to Vanadis"
+  },
+  "created_at": "2026-02-09T03:40:03.229537+00:00",
+  "last_updated": "2026-02-09T04:18:38.897586+00:00",
+  "volumes_registered": [
+    {
+      "volume_id": "25d9",
+      "title": "魔弾の王と戦姫 第1章―出逢い―",
+      "index": 1
+    },
+    {
+      "volume_id": "15c4",
+      "title": "第2章―銀の流星―",
+      "index": 2
+    },
+    {
+      "volume_id": "0721",
+      "title": "魔弾の王と戦姫 第2章―銀の流星―",
+      "index": 2
+    }
+  ],
+  "world_setting": {
+    "type": "fantasy",
+    "label": "Medieval European Fantasy",
+    "honorifics": {
+      "mode": "localize",
+      "policy": "Drop all JP honorifics. Convey respect through register, word choice, and English-equivalent titles (Lord, Lady, Sir, Your Majesty, etc.)."
+    },
+    "name_order": {
+      "default": "given_family",
+      "policy": "Western first-name order for all characters."
+    },
+    "exceptions": []
+  },
+  "characters": {
+    "アニエス": {
+      "canonical_en": "Agnes"
+    },
+    "アラム": {
+      "canonical_en": "Aram"
+    },
+    "アリファル": {
+      "canonical_en": "Arifal"
+    },
+    "アルテシウム": {
+      "canonical_en": "Artesium"
+    },
+    "アレクサンドラ": {
+      "canonical_en": "Alexandra"
+    },
+    "アーロン": {
+      "canonical_en": "Aaron"
+    },
+    "ウルス": {
+      "canonical_en": "Urs"
+    },
+    "エミール": {
+      "canonical_en": "Emile"
+    },
+    "エリザヴェータ": {
+      "canonical_en": "Elizavetta"
+    },
+    "エレオノーラ": {
+      "canonical_en": "Eleonora"
+    },
+    "オリビエ": {
+      "canonical_en": "Olivier"
+    },
+    "オルガ": {
+      "canonical_en": "Olga"
+    },
+    "オルメア": {
+      "canonical_en": "Ormea"
+    },
+    "オーギュスト": {
+      "canonical_en": "Auguste"
+    },
+    "オージェ": {
+      "canonical_en": "Augre"
+    },
+    "オーランジュ": {
+      "canonical_en": "Orangey"
+    },
+    "カシム": {
+      "canonical_en": "Kasim"
+    },
+    "カルヴァドス": {
+      "canonical_en": "Calvados"
+    },
+    "ガヌロン": {
+      "canonical_en": "Ganelon"
+    },
+    "クレイシュ": {
+      "canonical_en": "Kreisch"
+    },
+    "グレアスト": {
+      "canonical_en": "Greast"
+    },
+    "ザイアン": {
+      "canonical_en": "Zion"
+    },
+    "シャトール": {
+      "canonical_en": "Chatol"
+    },
+    "シルヴミーティオ": {
+      "canonical_en": "Silver Meteor"
+    },
+    "ジェラール": {
+      "canonical_en": "Gerard"
+    },
+    "ジルニトラ": {
+      "canonical_en": "Zirnitra"
+    },
+    "スティード": {
+      "canonical_en": "Steed"
+    },
+    "セレスタ": {
+      "canonical_en": "Celesta"
+    },
+    "ソフィー": {
+      "canonical_en": "Sofie"
+    },
+    "ソフィーヤ": {
+      "canonical_en": "Sofya"
+    },
+    "ソーニエ": {
+      "canonical_en": "Saunier"
+    },
+    "ソーニエール": {
+      "canonical_en": "Sauniere"
+    },
+    "ティグル": {
+      "canonical_en": "Tigre"
+    },
+    "ティグルヴルムド": {
+      "canonical_en": "Tigrevurmud"
+    },
+    "ティッタ": {
+      "canonical_en": "Titta",
+      "affiliation": "Brune Kingdom - Alsace",
+      "category": "Childhood friend, maid, harbors feelings for Tigre",
+      "notes": "Caring, devoted, worried, motherly despite age, assertive about Tigre's wellbeing",
+      "keigo": {
+        "narration": "warm",
+        "internal_thoughts": "worried_caring",
+        "speaking_to": {
+          "Tigre": "familiar_scolding_when_needed",
+          "others": "polite_service"
+        },
+        "emotional_shifts": {
+          "worried": "more_insistent",
+          "relieved": "bright_and_warm"
+        },
+        "notes": "One year younger than Tigre. Childhood friends, she's like family. Worries constantly about him going to war."
+      }
+    },
+    "ティル＝ナ＝ファ": {
+      "canonical_en": "Tir Na Fal"
+    },
+    "テナルディエ": {
+      "canonical_en": "Thenardier"
+    },
+    "テリトアール": {
+      "canonical_en": "Territoire"
+    },
+    "ディナント": {
+      "canonical_en": "Dinant"
+    },
+    "デュランダル": {
+      "canonical_en": "Durandal"
+    },
+    "ドレカヴァク": {
+      "canonical_en": "Drekavac"
+    },
+    "ナイス": {
+      "canonical_en": "Nice"
+    },
+    "ニース": {
+      "canonical_en": "Nice"
+    },
+    "バヤール": {
+      "canonical_en": "Bayard"
+    },
+    "バートラン": {
+      "canonical_en": "Bertrand",
+      "affiliation": "Brune Kingdom",
+      "category": "Fellow soldier, ally",
+      "notes": "Loyal, military-minded, honorable, dutiful, professional",
+      "keigo": {
+        "narration": "formal",
+        "internal_thoughts": "duty_focused",
+        "speaking_to": {
+          "superiors": "military_respect",
+          "Tigre": "respectful_peer",
+          "subordinates": "commanding"
+        },
+        "emotional_shifts": {
+          "battle": "sharp_orders",
+          "satisfaction": "gruff_approval"
+        },
+        "notes": "Professional soldier. Military precision in speech and action."
+      }
+    },
+    "ファーロン": {
+      "canonical_en": "Faron"
+    },
+    "フェリックス": {
+      "canonical_en": "Felix"
+    },
+    "フレスベルグ": {
+      "canonical_en": "Hraesvelgr"
+    },
+    "ペルクナス": {
+      "canonical_en": "Perkunas"
+    },
+    "ボロスロー": {
+      "canonical_en": "Boroislav"
+    },
+    "ボードワン": {
+      "canonical_en": "Baudouin"
+    },
+    "マスハス": {
+      "canonical_en": "Mashas"
+    },
+    "メレヴィル": {
+      "canonical_en": "Mereville"
+    },
+    "モントーバン": {
+      "canonical_en": "Montauban"
+    },
+    "モーシア": {
+      "canonical_en": "Molsheim"
+    },
+    "ラヴィアス": {
+      "canonical_en": "Lavias"
+    },
+    "リムアリーシャ": {
+      "canonical_en": "Limalisha",
+      "short_name": "Lim",
+      "affiliation": "Zhcted Kingdom",
+      "category": "Initially suspicious, gradually accepts",
+      "notes": "Loyal, serious, protective, blunt, dutiful, professional",
+      "keigo": {
+        "narration": "formal",
+        "internal_thoughts": "formal",
+        "speaking_to": {
+          "Eleonora": "respectful_military",
+          "Tigre": "initially_cold_then_neutral",
+          "others": "professional"
+        },
+        "emotional_shifts": {
+          "protective_mode": "sharper_more_direct",
+          "rare_approval": "slight_warmth"
+        },
+        "notes": "Military discipline defines her speech. Rarely uses contractions. Protective of Eleonora."
+      }
+    },
+    "リュドミラ": {
+      "canonical_en": "Ludmila"
+    },
+    "リュベロン": {
+      "canonical_en": "Luberon"
+    },
+    "ルテティア": {
+      "canonical_en": "Lutetia"
+    },
+    "ルリエ": {
+      "canonical_en": "Lourie"
+    },
+    "ルーニエ": {
+      "canonical_en": "Lunie"
+    },
+    "ルーリック": {
+      "canonical_en": "Rurick"
+    },
+    "レギン": {
+      "canonical_en": "Regin",
+      "affiliation": "Brune (Princess)",
+      "category": "ally, princess, developing romantic interest",
+      "notes": "timid, gentle, intelligent, determined_when_needed, initially_fragile",
+      "keigo": {
+        "narration": "polite",
+        "internal_thoughts": "polite_vulnerable",
+        "speaking_to": {
+          "Tigre": "polite_formal",
+          "Ellen": "polite_respectful",
+          "Ludmila": "polite_respectful",
+          "Sofya": "polite_respectful",
+          "Bertrand": "polite",
+          "Titta": "polite_friendly",
+          "King Faron": "formal_affectionate"
+        }
+      }
+    },
+    "レグナス": {
+      "canonical_en": "Regnas"
+    },
+    "ロラン": {
+      "canonical_en": "Roland",
+      "short_name": "Black Knight",
+      "affiliation": "Brune",
+      "category": "initial antagonist, respected warrior",
+      "notes": "honorable, strong, loyal_to_king, stoic, powerful_warrior",
+      "keigo": {
+        "narration": "formal",
+        "internal_thoughts": "formal",
+        "speaking_to": {
+          "Everyone": "formal_direct"
+        }
+      }
+    },
+    "ローダント": {
+      "canonical_en": "Rodant"
+    },
+    "ヴァタン": {
+      "canonical_en": "Vatan"
+    },
+    "ヴァレンティナ": {
+      "canonical_en": "Valentina"
+    },
+    "ヴィクトール": {
+      "canonical_en": "Viktor"
+    },
+    "ヴォジャノーイ": {
+      "canonical_en": "Vodyanoy"
+    },
+    "ヴォルン": {
+      "canonical_en": "Vorn"
+    },
+    "ヴォージュ": {
+      "canonical_en": "Vosges"
+    },
+    "ブリューヌ": {
+      "canonical_en": "Brune",
+      "source": "phase1.5_auto_sync",
+      "discovered_in": "魔弾の王と戦姫 第 2 章―出逢い―_20260208_0721"
+    },
+    "ジスタート": {
+      "canonical_en": "Zhcted",
+      "source": "phase1.5_auto_sync",
+      "discovered_in": "魔弾の王と戦姫 第 2 章―出逢い―_20260208_0721"
+    },
+    "アルサス": {
+      "canonical_en": "Alsace",
+      "source": "phase1.5_auto_sync",
+      "discovered_in": "魔弾の王と戦姫 第 2 章―出逢い―_20260208_0721"
+    },
+    "ライトメリッツ": {
+      "canonical_en": "Leitmeritz",
+      "source": "phase1.5_auto_sync",
+      "discovered_in": "魔弾の王と戦姫 第 2 章―出逢い―_20260208_0721"
+    },
+    "オルミュッツ": {
+      "canonical_en": "Olmutz",
+      "source": "phase1.5_auto_sync",
+      "discovered_in": "魔弾の王と戦姫 第 2 章―出逢い―_20260208_0721"
+    },
+    "シレジア": {
+      "canonical_en": "Silesia",
+      "source": "phase1.5_auto_sync",
+      "discovered_in": "魔弾の王と戦姫 第 2 章―出逢い―_20260208_0721"
+    },
+    "ムオジネル": {
+      "canonical_en": "Muozinel",
+      "source": "phase1.5_auto_sync",
+      "discovered_in": "魔弾の王と戦姫 第 2 章―出逢い―_20260208_0721"
+    },
+    "ザクスタン": {
+      "canonical_en": "Sachstein",
+      "source": "phase1.5_auto_sync",
+      "discovered_in": "魔弾の王と戦姫 第 2 章―出逢い―_20260208_0721"
+    },
+    "アスヴァール": {
+      "canonical_en": "Asvarre",
+      "source": "phase1.5_auto_sync",
+      "discovered_in": "魔弾の王と戦姫 第 2 章―出逢い―_20260208_0721"
+    },
+    "レグニーツァ": {
+      "canonical_en": "Legnica",
+      "source": "phase1.5_auto_sync",
+      "discovered_in": "魔弾の王と戦姫 第 2 章―出逢い―_20260208_0721"
+    },
+    "ブレスト": {
+      "canonical_en": "Brest",
+      "source": "phase1.5_auto_sync",
+      "discovered_in": "魔弾の王と戦姫 第 2 章―出逢い―_20260208_0721"
+    },
+    "ポリーシャ": {
+      "canonical_en": "Polesia",
+      "source": "phase1.5_auto_sync",
+      "discovered_in": "魔弾の王と戦姫 第 2 章―出逢い―_20260208_0721"
+    },
+    "ルヴーシュ": {
+      "canonical_en": "Lebus",
+      "source": "phase1.5_auto_sync",
+      "discovered_in": "魔弾の王と戦姫 第 2 章―出逢い―_20260208_0721"
+    },
+    "オステローデ": {
+      "canonical_en": "Osterode",
+      "source": "phase1.5_auto_sync",
+      "discovered_in": "魔弾の王と戦姫 第 2 章―出逢い―_20260208_0721"
+    },
+    "ネメタクム": {
+      "canonical_en": "Nemetacum",
+      "source": "phase1.5_auto_sync",
+      "discovered_in": "魔弾の王と戦姫 第 2 章―出逢い―_20260208_0721"
+    }
+  },
+  "geography": {
+    "countries": {
+      "ジスタート": {
+        "canonical_en": "Zhcted"
+      },
+      "ブリューヌ": {
+        "canonical_en": "Brune"
+      },
+      "ザクスタン": {
+        "canonical_en": "Sachstein"
+      },
+      "ムオジネル": {
+        "canonical_en": "Muozinel"
+      },
+      "アスヴァール": {
+        "canonical_en": "Asvarre"
+      }
+    },
+    "regions": {
+      "アルサス": {
+        "canonical_en": "Alsace"
+      },
+      "テナルディエ領": {
+        "canonical_en": "Thenardier Territory"
+      },
+      "ガヌロン領": {
+        "canonical_en": "Ganelon Territory"
+      },
+      "ライトメリッツ": {
+        "canonical_en": "Leitmeritz"
+      },
+      "オルミュッツ": {
+        "canonical_en": "Olmütz"
+      },
+      "ルヴーシュ": {
+        "canonical_en": "Lebus"
+      },
+      "ポリーシャ": {
+        "canonical_en": "Polesia"
+      },
+      "ブレスト": {
+        "canonical_en": "Brest"
+      },
+      "オステローデ": {
+        "canonical_en": "Osterode"
+      },
+      "レグニーツァ": {
+        "canonical_en": "Legnica"
+      }
+    },
+    "cities": {
+      "リュテティア": {
+        "canonical_en": "Lutetia"
+      },
+      "シレジア": {
+        "canonical_en": "Silesia"
+      },
+      "テリトリー": {
+        "canonical_en": "Territory"
+      },
+      "ネメタクム": {
+        "canonical_en": "Nemetacum"
+      },
+      "モルスール平原": {
+        "canonical_en": "Molsheim Plains"
+      },
+      "ディナント平原": {
+        "canonical_en": "Dinant Plains"
+      },
+      "オード川": {
+        "canonical_en": "Aude River"
+      },
+      "ボルドー": {
+        "canonical_en": "Bordeaux"
+      },
+      "タトゥリア": {
+        "canonical_en": "Tatria"
+      },
+      "ヴォージュ山脈": {
+        "canonical_en": "Vosges Mountains"
+      },
+      "メルヴィル": {
+        "canonical_en": "Merville"
+      }
+    }
+  },
+  "weapons_artifacts": {
+    "dragonic_tools": {
+      "アリファール": {
+        "canonical_en": "Arifar",
+        "type": "sword",
+        "wielder": "Eleonora Viltaria",
+        "element": "wind"
+      },
+      "ラヴィアス": {
+        "canonical_en": "Lavias",
+        "type": "spear",
+        "wielder": "Ludmila Lourie",
+        "element": "ice"
+      },
+      "ザシュト": {
+        "canonical_en": "Zaht",
+        "type": "scythe",
+        "wielder": "Valentina Glinka Estes",
+        "element": "void"
+      },
+      "ヴァリツァイフ": {
+        "canonical_en": "Valitsaif",
+        "type": "twin sabers",
+        "wielder": "Alexandra Alshavin",
+        "element": "lightning/fire"
+      },
+      "エザンディス": {
+        "canonical_en": "Ezendeis",
+        "type": "staff",
+        "wielder": "Sofya Obertas",
+        "element": "light"
+      },
+      "ムーマ": {
+        "canonical_en": "Muma",
+        "type": "sword",
+        "wielder": "Elizaveta Fomina",
+        "element": "lightning"
+      },
+      "バルグレン": {
+        "canonical_en": "Bargren",
+        "type": "axe",
+        "wielder": "Olga Tamm",
+        "element": "fire"
+      }
+    },
+    "legendary_weapons": {
+      "黒弓": {
+        "canonical_en": "Black Bow",
+        "wielder": "Tigrevurmud Vorn",
+        "notes": "Mysterious bow inherited from Tigre's father Urs"
+      },
+      "デュランダル": {
+        "canonical_en": "Durandal",
+        "wielder": "Roland",
+        "notes": "Legendary sword of the knight Roland"
+      }
+    }
+  },
+  "organizations": {
+    "ナヴァール騎士団": {
+      "canonical_en": "Navarre Knights",
+      "allegiance": "Brune"
+    },
+    "カルヴァドス騎士団": {
+      "canonical_en": "Calvados Knights",
+      "allegiance": "Brune"
+    },
+    "マスハス隊": {
+      "canonical_en": "Mashas' Company",
+      "allegiance": "Brune/Tigre"
+    }
+  },
+  "cultural_terms": {
+    "戦姫": {
+      "canonical_en": "Vanadis",
+      "literal": "War Princess",
+      "notes": "Title for 7 wielders of Dragonic Tools in Zhcted"
+    },
+    "竜具": {
+      "canonical_en": "Dragonic Tool",
+      "literal": "Dragon Tool",
+      "notes": "Seven sacred weapons wielded by the Vanadis"
+    },
+    "公爵": {
+      "canonical_en": "Duke",
+      "literal": "Duke"
+    },
+    "伯爵": {
+      "canonical_en": "Earl",
+      "literal": "Earl"
+    },
+    "王": {
+      "canonical_en": "King",
+      "literal": "King"
+    },
+    "騎士団": {
+      "canonical_en": "Knights",
+      "literal": "Knight Order"
+    },
+    "姫": {
+      "canonical_en": "Princess",
+      "literal": "Princess"
+    }
+  },
+  "mythology": {
+    "ジルニトラ": {
+      "canonical_en": "Zirnitra",
+      "type": "deity",
+      "notes": "Black Dragon god of Zhcted"
+    },
+    "ティール": {
+      "canonical_en": "Tir Na Fal",
+      "type": "deity",
+      "notes": "Goddess of night, darkness, and death. Worshipped in Brune."
+    },
+    "ペルーン": {
+      "canonical_en": "Perkūnas",
+      "type": "deity",
+      "notes": "God of thunder and lightning. Zhcted mythology."
+    }
+  },
+  "translation_rules": {
+    "style": "Medieval European fantasy — period-appropriate English, not archaic.",
+    "titles": {
+      "王": "King",
+      "公爵": "Duke",
+      "伯爵": "Earl",
+      "卿": "Sir/Lord",
+      "姫": "Princess"
+    }
+  }
+}

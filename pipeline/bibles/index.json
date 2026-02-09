@@ -1,0 +1,21 @@
+{
+  "version": "1.0",
+  "last_updated": "2026-02-09T04:18:38.898434+00:00",
+  "series": {
+    "madan_no_ou_to_vanadis": {
+      "bible_file": "madan_no_ou_to_vanadis.json",
+      "match_patterns": [
+        "魔弾の王と戦姫",
+        "Madan no Ou to Vanadis",
+        "Lord Marksman and Vanadis"
+      ],
+      "volumes": [
+        "25d9",
+        "15c4",
+        "0721"
+      ],
+      "entry_count": 136,
+      "last_updated": "2026-02-09T03:40:03.230429+00:00"
+    }
+  }
+}

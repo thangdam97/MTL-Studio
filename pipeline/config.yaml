@@ -172,6 +172,11 @@ directories:
   prompts: prompts/
   modules: modules/
   templates: templates/
+  bibles: bibles/
+bibles:
+  enabled: true
+  auto_resolve: true
+  inject_in_prompt: true
 multimodal:
   enabled: true
   models:

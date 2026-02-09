@@ -109,6 +109,9 @@ class MTLApp:
                 elif action == "resume":
                     self._handle_resume_volume()
 
+                elif action == "phase1.55":
+                    self._handle_phase1_55()
+
                 elif action == "settings":
                     self._handle_settings()
 
@@ -198,6 +201,9 @@ class MTLApp:
         elif action == "build":
             success = self._run_phase4(volume_id)
 
+        elif action == "phase1.55":
+            success = self._run_phase1_55(volume_id)
+
         elif action == "phase1.6":
             success = self._run_phase1_6(volume_id)
 
@@ -249,6 +255,19 @@ class MTLApp:
             show_status_panel(self.work_dir, selected)
             input("\nPress Enter to continue...")
 
+    def _handle_phase1_55(self) -> None:
+        """Handle running Phase 1.55 from main menu."""
+        selected = list_volumes_panel(self.work_dir)
+        if not selected:
+            return
+
+        success = self._run_phase1_55(selected)
+        if success:
+            print_success(f"Phase 1.55 completed for {selected}")
+        else:
+            print_error(f"Phase 1.55 failed for {selected}")
+        input("\nPress Enter to continue...")
+
     # Pipeline execution methods
 
     def _run_full_pipeline(
@@ -299,6 +318,11 @@ class MTLApp:
         if not controller.run_phase1_5(volume_id):
             return False
 
+        # Phase 1.55: Rich metadata cache enrichment
+        console.print("\n[bold cyan]Phase 1.55: Rich Metadata Cache[/bold cyan]")
+        if not controller.run_phase1_55(volume_id):
+            return False
+
         # Phase 2: Translator
         console.print("\n[bold cyan]Phase 2: Translator[/bold cyan]")
         if not controller.run_phase2(volume_id, force=force):
@@ -327,6 +351,19 @@ class MTLApp:
 
         console.print("\n[bold cyan]Phase 2: Translator[/bold cyan]")
         return controller.run_phase2(volume_id, chapters=chapters, force=force)
+
+    def _run_phase1_55(self, volume_id: str) -> bool:
+        """Run Phase 1.55 (Rich Metadata Cache) only."""
+        from scripts.mtl import PipelineController
+
+        controller = PipelineController(
+            work_dir=self.work_dir,
+            verbose=self.config.verbose_mode,
+        )
+
+        console.print("\n[bold cyan]Phase 1.55: Rich Metadata Cache[/bold cyan]")
+        console.print("[dim]Caching full LN context + enriching rich metadata...[/dim]")
+        return controller.run_phase1_55(volume_id)
 
     def _run_phase1_6(self, volume_id: str) -> bool:
         """Run Phase 1.6 (Multimodal Processor) only."""

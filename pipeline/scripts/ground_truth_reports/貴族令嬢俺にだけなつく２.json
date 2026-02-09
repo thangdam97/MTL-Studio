@@ -1,0 +1,413 @@
+{
+  "series_id": "貴族令嬢俺にだけなつく２",
+  "series_title": {
+    "ja": "貴族令嬢。俺にだけなつく",
+    "en": "The Noble Lady Who Only Fawns Over Me",
+    "romaji": ""
+  },
+  "world_type": "fantasy",
+  "total_entries": 44,
+  "results": [
+    {
+      "jp": "シア",
+      "current_en": "Sia",
+      "verified_en": "Sia",
+      "source": "Fan wiki/NovelUpdates (referencing J-Novel Club LN)",
+      "confidence": "high",
+      "status": "correct",
+      "note": ""
+    },
+    {
+      "jp": "エレナ・ルクレール",
+      "current_en": "Elena Leclerc",
+      "verified_en": "Elena Leclerc",
+      "source": "Fan wiki/NovelUpdates (referencing J-Novel Club LN)",
+      "confidence": "high",
+      "status": "correct",
+      "note": ""
+    },
+    {
+      "jp": "エレナ",
+      "current_en": "Elena",
+      "verified_en": "Elena",
+      "source": "Fan wiki/NovelUpdates (referencing J-Novel Club LN)",
+      "confidence": "high",
+      "status": "correct",
+      "note": "alias"
+    },
+    {
+      "jp": "ルーナ・ペレンメル",
+      "current_en": "Luna Peremmer",
+      "verified_en": "Luna Peremmer",
+      "source": "Fan wiki/NovelUpdates (referencing J-Novel Club LN)",
+      "confidence": "high",
+      "status": "correct",
+      "note": ""
+    },
+    {
+      "jp": "ルーナ",
+      "current_en": "Luna",
+      "verified_en": "Luna",
+      "source": "Fan wiki/NovelUpdates (referencing J-Novel Club LN)",
+      "confidence": "high",
+      "status": "correct",
+      "note": "alias"
+    },
+    {
+      "jp": "アラン",
+      "current_en": "Alan",
+      "verified_en": "Alan",
+      "source": "Fan wiki/NovelUpdates (referencing J-Novel Club LN)",
+      "confidence": "high",
+      "status": "correct",
+      "note": ""
+    },
+    {
+      "jp": "ベレト・セントフォード",
+      "current_en": "Beret Sandford",
+      "verified_en": "Belet St. Ford",
+      "source": "Fan wiki/NovelUpdates (referencing J-Novel Club LN)",
+      "confidence": "high",
+      "status": "incorrect",
+      "note": "Official translation uses 'St. Ford' for セントフォード."
+    },
+    {
+      "jp": "ベレト",
+      "current_en": "Beret",
+      "verified_en": "Belet",
+      "source": "Fan wiki/NovelUpdates (referencing J-Novel Club LN)",
+      "confidence": "high",
+      "status": "incorrect",
+      "note": "Alias for Belet St. Ford. Spelling corrected to 'Belet'."
+    },
+    {
+      "jp": "アリア・ティエール",
+      "current_en": "Aria Tier",
+      "verified_en": "Aria Tier",
+      "source": "Fan wiki/NovelUpdates (referencing J-Novel Club LN)",
+      "confidence": "high",
+      "status": "correct",
+      "note": ""
+    },
+    {
+      "jp": "アリア",
+      "current_en": "Aria",
+      "verified_en": "Aria",
+      "source": "Fan wiki/NovelUpdates (referencing J-Novel Club LN)",
+      "confidence": "high",
+      "status": "correct",
+      "note": "alias"
+    },
+    {
+      "jp": "サーニャ",
+      "current_en": "Sanya",
+      "verified_en": "Sanya",
+      "source": "Fan wiki/NovelUpdates (referencing J-Novel Club LN)",
+      "confidence": "high",
+      "status": "correct",
+      "note": ""
+    },
+    {
+      "jp": "可哀想",
+      "current_en": "Kawaisou",
+      "verified_en": "pitiful / poor thing",
+      "source": "Standard Japanese-English dictionary",
+      "confidence": "medium",
+      "status": "incorrect",
+      "note": "Romaji is not an English translation. Standard translation used as no series-specific context found."
+    },
+    {
+      "jp": "貴女",
+      "current_en": "Anata",
+      "verified_en": "you (polite female address)",
+      "source": "Standard Japanese-English dictionary",
+      "confidence": "medium",
+      "status": "incorrect",
+      "note": "Romaji is not an English translation. Standard translation used as no series-specific context found."
+    },
+    {
+      "jp": "思慕",
+      "current_en": "Shibo",
+      "verified_en": "yearning / adoration",
+      "source": "Standard Japanese-English dictionary",
+      "confidence": "medium",
+      "status": "incorrect",
+      "note": "Romaji is not an English translation. Standard translation used as no series-specific context found."
+    },
+    {
+      "jp": "刺繡",
+      "current_en": "Shishu",
+      "verified_en": "embroidery",
+      "source": "Standard Japanese-English dictionary",
+      "confidence": "medium",
+      "status": "incorrect",
+      "note": "Romaji is not an English translation. Standard translation used as no series-specific context found."
+    },
+    {
+      "jp": "何卒",
+      "current_en": "Nanitozo",
+      "verified_en": "please / kindly",
+      "source": "Standard Japanese-English dictionary",
+      "confidence": "medium",
+      "status": "incorrect",
+      "note": "Romaji is not an English translation. Standard translation used as no series-specific context found."
+    },
+    {
+      "jp": "今宵",
+      "current_en": "Koyoi",
+      "verified_en": "tonight / this evening",
+      "source": "Standard Japanese-English dictionary",
+      "confidence": "medium",
+      "status": "incorrect",
+      "note": "Romaji is not an English translation. Standard translation used as no series-specific context found."
+    },
+    {
+      "jp": "高嶺",
+      "current_en": "Takane",
+      "verified_en": "high peak / out of reach (as in 'takane no hana')",
+      "source": "Standard Japanese-English dictionary",
+      "confidence": "medium",
+      "status": "incorrect",
+      "note": "Romaji is not an English translation. Standard translation used as no series-specific context found."
+    },
+    {
+      "jp": "不躾",
+      "current_en": "Bushitsuke",
+      "verified_en": "rude / impolite",
+      "source": "Standard Japanese-English dictionary",
+      "confidence": "medium",
+      "status": "incorrect",
+      "note": "Romaji is not an English translation. Standard translation used as no series-specific context found."
+    },
+    {
+      "jp": "敷地",
+      "current_en": "Shikichi",
+      "verified_en": "grounds / premises",
+      "source": "Standard Japanese-English dictionary",
+      "confidence": "medium",
+      "status": "incorrect",
+      "note": "Romaji is not an English translation. Standard translation used as no series-specific context found."
+    },
+    {
+      "jp": "晩餐",
+      "current_en": "Bansan",
+      "verified_en": "dinner / supper",
+      "source": "Standard Japanese-English dictionary",
+      "confidence": "medium",
+      "status": "incorrect",
+      "note": "Romaji is not an English translation. Standard translation used as no series-specific context found."
+    },
+    {
+      "jp": "真似",
+      "current_en": "Mane",
+      "verified_en": "imitation / mimicry",
+      "source": "Standard Japanese-English dictionary",
+      "confidence": "medium",
+      "status": "incorrect",
+      "note": "Romaji is not an English translation. Standard translation used as no series-specific context found."
+    },
+    {
+      "jp": "乖離",
+      "current_en": "Kairi",
+      "verified_en": "estrangement / divergence",
+      "source": "Standard Japanese-English dictionary",
+      "confidence": "medium",
+      "status": "incorrect",
+      "note": "Romaji is not an English translation. Standard translation used as no series-specific context found."
+    },
+    {
+      "jp": "贅沢",
+      "current_en": "Zeitaku",
+      "verified_en": "luxury / extravagance",
+      "source": "Standard Japanese-English dictionary",
+      "confidence": "medium",
+      "status": "incorrect",
+      "note": "Romaji is not an English translation. Standard translation used as no series-specific context found."
+    },
+    {
+      "jp": "侍女",
+      "current_en": "Mono",
+      "verified_en": "Jijo / lady-in-waiting / maidservant",
+      "source": "Standard Japanese-English dictionary",
+      "confidence": "high",
+      "status": "incorrect",
+      "note": "Current romaji 'Mono' is incorrect; correct romaji is 'Jijo'. Romaji is not an English translation. Standard translation used."
+    },
+    {
+      "jp": "屋敷",
+      "current_en": "Yashiki",
+      "verified_en": "mansion / residence",
+      "source": "Standard Japanese-English dictionary",
+      "confidence": "medium",
+      "status": "incorrect",
+      "note": "Romaji is not an English translation. Standard translation used as no series-specific context found."
+    },
+    {
+      "jp": "所以",
+      "current_en": "Yuen",
+      "verified_en": "reason / cause",
+      "source": "Standard Japanese-English dictionary",
+      "confidence": "medium",
+      "status": "incorrect",
+      "note": "Romaji is not an English translation. Standard translation used as no series-specific context found."
+    },
+    {
+      "jp": "阿吽",
+      "current_en": "Aun",
+      "verified_en": "A-un / perfect synchronicity / unspoken understanding",
+      "source": "Standard Japanese-English dictionary",
+      "confidence": "medium",
+      "status": "incorrect",
+      "note": "Romaji is not an English translation. Standard translation used as no series-specific context found."
+    },
+    {
+      "jp": "他人事",
+      "current_en": "Hitogoto",
+      "verified_en": "someone else's affair / not one's own business",
+      "source": "Standard Japanese-English dictionary",
+      "confidence": "medium",
+      "status": "incorrect",
+      "note": "Romaji is not an English translation. Standard translation used as no series-specific context found."
+    },
+    {
+      "jp": "煽動",
+      "current_en": "Sendou",
+      "verified_en": "instigation / incitement",
+      "source": "Standard Japanese-English dictionary",
+      "confidence": "medium",
+      "status": "incorrect",
+      "note": "Romaji is not an English translation. Standard translation used as no series-specific context found."
+    },
+    {
+      "jp": "雲泥",
+      "current_en": "Undei",
+      "verified_en": "vast difference (like heaven and earth)",
+      "source": "Standard Japanese-English dictionary",
+      "confidence": "medium",
+      "status": "incorrect",
+      "note": "Romaji is not an English translation. Standard translation used as no series-specific context found."
+    },
+    {
+      "jp": "寵愛",
+      "current_en": "Chouai",
+      "verified_en": "favor / affection / deep love",
+      "source": "Standard Japanese-English dictionary",
+      "confidence": "medium",
+      "status": "incorrect",
+      "note": "Romaji is not an English translation. Standard translation used as no series-specific context found."
+    },
+    {
+      "jp": "矜持",
+      "current_en": "Kyouji",
+      "verified_en": "pride / self-esteem / dignity",
+      "source": "Standard Japanese-English dictionary",
+      "confidence": "medium",
+      "status": "incorrect",
+      "note": "Romaji is not an English translation. Standard translation used as no series-specific context found."
+    },
+    {
+      "jp": "自惚",
+      "current_en": "Unubo",
+      "verified_en": "Unubore / conceit / vanity",
+      "source": "Standard Japanese-English dictionary",
+      "confidence": "high",
+      "status": "incorrect",
+      "note": "Current romaji 'Unubo' is incorrect; correct romaji is 'Unubore'. Romaji is not an English translation. Standard translation used."
+    },
+    {
+      "jp": "夜更",
+      "current_en": "Yofu",
+      "verified_en": "Yofuke / late at night",
+      "source": "Standard Japanese-English dictionary",
+      "confidence": "high",
+      "status": "incorrect",
+      "note": "Current romaji 'Yofu' is incorrect; correct romaji is 'Yofuke'. Romaji is not an English translation. Standard translation used."
+    },
+    {
+      "jp": "払拭",
+      "current_en": "Fusshoku",
+      "verified_en": "wiping away / dispelling",
+      "source": "Standard Japanese-English dictionary",
+      "confidence": "medium",
+      "status": "incorrect",
+      "note": "Romaji is not an English translation. Standard translation used as no series-specific context found."
+    },
+    {
+      "jp": "物凄",
+      "current_en": "Monosugo",
+      "verified_en": "Monosugoi / tremendous / amazing",
+      "source": "Standard Japanese-English dictionary",
+      "confidence": "high",
+      "status": "incorrect",
+      "note": "Current romaji 'Monosugo' is incorrect; correct romaji is 'Monosugoi'. Romaji is not an English translation. Standard translation used."
+    },
+    {
+      "jp": "彷徨",
+      "current_en": "Samayo",
+      "verified_en": "Samayou / to wander / to roam",
+      "source": "Standard Japanese-English dictionary",
+      "confidence": "high",
+      "status": "incorrect",
+      "note": "Current romaji 'Samayo' is an incomplete verb form; correct romaji for the root is 'Samayou'. Romaji is not an English translation. Standard translation used."
+    },
+    {
+      "jp": "壁際",
+      "current_en": "Kabegiwa",
+      "verified_en": "by the wall / at the edge of the wall",
+      "source": "Standard Japanese-English dictionary",
+      "confidence": "medium",
+      "status": "incorrect",
+      "note": "Romaji is not an English translation. Standard translation used as no series-specific context found."
+    },
+    {
+      "jp": "牽制",
+      "current_en": "Kensei",
+      "verified_en": "restraint / check / feint",
+      "source": "Standard Japanese-English dictionary",
+      "confidence": "medium",
+      "status": "incorrect",
+      "note": "Romaji is not an English translation. Standard translation used as no series-specific context found."
+    },
+    {
+      "jp": "一瞥",
+      "current_en": "Ichibetsu",
+      "verified_en": "A Glance",
+      "source": "No official character name found; common Japanese noun meaning 'a glance'.",
+      "confidence": "high",
+      "status": "incorrect",
+      "note": "This is not a character name. It is a common Japanese noun meaning 'a glance' or 'a quick look'."
+    },
+    {
+      "jp": "幕間",
+      "current_en": "Makuai",
+      "verified_en": "Interlude",
+      "source": "Kakuyomu (used as a chapter title in the original web novel) [cite: 16 in previous turn]. Not a character name.",
+      "confidence": "high",
+      "status": "incorrect",
+      "note": "This is not a character name. It is a common Japanese noun meaning 'interlude' or 'interval', often used for chapter breaks."
+    },
+    {
+      "jp": "呆気",
+      "current_en": "Akke",
+      "verified_en": "Dumbfounded",
+      "source": "No official character name found; common Japanese noun component for 'dumbfounded'.",
+      "confidence": "high",
+      "status": "incorrect",
+      "note": "This is not a character name. It is a common Japanese noun, often used in phrases like '呆気にとられる' (to be dumbfounded)."
+    },
+    {
+      "jp": "夏乃実",
+      "current_en": "Natsunomi",
+      "verified_en": "Natsunomi",
+      "source": "J-Novel Club / Fantasia Bunko official pages (author name).",
+      "confidence": "high",
+      "status": "incorrect",
+      "note": "This is the author's name, not a character name. The romanization 'Natsunomi' is correct for the author's name."
+    }
+  ],
+  "summary": {
+    "correct": 9,
+    "incorrect": 35,
+    "unverifiable": 0
+  }
+}

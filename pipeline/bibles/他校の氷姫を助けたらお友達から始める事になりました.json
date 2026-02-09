@@ -6,7 +6,7 @@
     "en": "After I Saved the Ice Princess of Another School, We Became Friends",
     "romaji": ""
   },
-  "last_updated": "2026-02-09T08:16:46Z",
+  "last_updated": "2026-02-09T10:38:24.356056+00:00",
   "volumes_registered": [
     {
       "volume_id": "1d46",
@@ -17,12 +17,149 @@
       "volume_id": "1ab4",
       "title": "After I Saved the Ice Princess of Another School, We Became Friends 2",
       "index": 2
+    },
+    {
+      "volume_id": "1a60",
+      "title": "他校の氷姫を助けたら、お友達から始める事になりました３",
+      "index": 3
     }
   ],
   "characters": {
     "海以蒼太": {
       "canonical_en": "Minori Souta",
-      "category": "protagonist"
+      "category": "protagonist",
+      "volume_events": {
+        "1a60": {
+          "relationship_to_protagonist": "protagonist",
+          "rtas_relationships": [
+            {
+              "target": "東雲凪",
+              "relationship_type": "girlfriend",
+              "rtas_score": 4.8,
+              "contraction_rate_override": 95,
+              "notes": "Intimate, casual speech with girlfriend, deeply affectionate"
+            },
+            {
+              "target": "巻坂瑛二",
+              "relationship_type": "best_friend",
+              "rtas_score": 4.5,
+              "contraction_rate_override": 95,
+              "notes": "Close male friendship, very casual"
+            },
+            {
+              "target": "海以大吾",
+              "relationship_type": "father",
+              "rtas_score": 3.5,
+              "contraction_rate_override": 80,
+              "notes": "Affectionate but sometimes exasperated, respectful but casual with family"
+            },
+            {
+              "target": "海以和美",
+              "relationship_type": "mother",
+              "rtas_score": 3.8,
+              "contraction_rate_override": 85,
+              "notes": "Affectionate, respectful but casual with family"
+            },
+            {
+              "target": "西沢霧香",
+              "relationship_type": "friend",
+              "rtas_score": 4.0,
+              "contraction_rate_override": 90,
+              "notes": "Friendly, casual"
+            },
+            {
+              "target": "羽山光",
+              "relationship_type": "friend",
+              "rtas_score": 4.0,
+              "contraction_rate_override": 90,
+              "notes": "Friendly, casual"
+            },
+            {
+              "target": "東雲宗一郎",
+              "relationship_type": "father_in_law",
+              "rtas_score": 2.8,
+              "contraction_rate_override": 70,
+              "notes": "Polite and respectful, now calling him 'Otousan'"
+            },
+            {
+              "target": "東雲千恵",
+              "relationship_type": "mother_in_law",
+              "rtas_score": 3.0,
+              "contraction_rate_override": 75,
+              "notes": "Polite and respectful, now calling her 'Okaasan'"
+            },
+            {
+              "target": "新田先生",
+              "relationship_type": "former_teacher",
+              "rtas_score": 3.0,
+              "contraction_rate_override": 80,
+              "notes": "Respectful but familiar due to past relationship"
+            },
+            {
+              "target": "白山さん",
+              "relationship_type": "acquaintance_elder",
+              "rtas_score": 3.0,
+              "contraction_rate_override": 75,
+              "notes": "Polite and friendly with an elder acquaintance"
+            }
+          ],
+          "how_character_refers_to_others": {
+            "東雲凪": "凪 (Nagi) - first name, intimate",
+            "巻坂瑛二": "瑛二 (Eiji) - first name, close friend",
+            "西沢霧香": "霧香 (Kirika) - first name, friend",
+            "羽山光": "光 (Hikaru) - first name, friend",
+            "海以大吾": "父さん (Tousan) - father",
+            "海以和美": "母さん (Kaasan) - mother",
+            "東雲宗一郎": "お義父さん (Otousan) - father-in-law (newly adopted)",
+            "東雲千恵": "お義母さん (Okaasan) - mother-in-law (newly adopted)",
+            "新田先生": "新田先生 (Nitta-sensei) - teacher",
+            "白山さん": "白山さん (Shirayama-san) - Ms. Shirayama (elderly acquaintance)"
+          },
+          "keigo_switch": {
+            "narration": "casual",
+            "internal_thoughts": "casual",
+            "speaking_to": {
+              "東雲凪": "casual_affectionate",
+              "巻坂瑛二": "casual_bro",
+              "海以大吾": "casual_familiar",
+              "海以和美": "casual_familiar",
+              "西沢霧香": "casual",
+              "羽山光": "casual",
+              "東雲宗一郎": "polite_familiar",
+              "東雲千恵": "polite_familiar",
+              "新田先生": "polite",
+              "白山さん": "polite_familiar",
+              "strangers": "polite"
+            },
+            "emotional_shifts": {
+              "nervous": "stammering, sentence fragments",
+              "relieved": "softer tone",
+              "protective": "firmer direct tone",
+              "embarrassed": "blushing, avoiding eye contact, flustered speech",
+              "affectionate": "gentle, soft-spoken, more direct expressions of feeling"
+            }
+          },
+          "contraction_rate": {
+            "baseline": 0.95,
+            "narration": 0.95,
+            "speaking_to": {
+              "東雲凪": 0.95,
+              "巻坂瑛二": 0.95,
+              "海以大吾": 0.8,
+              "海以和美": 0.85,
+              "西沢霧香": 0.9,
+              "羽山光": 0.9,
+              "東雲宗一郎": 0.7,
+              "東雲千恵": 0.75,
+              "新田先生": 0.8,
+              "白山さん": 0.75,
+              "adults": 0.8,
+              "strangers": 0.8
+            },
+            "notes": "Contemporary teen voice; formal with elders and Nagi's parents, but more casual with his own. Very casual with close friends and Nagi."
+          }
+        }
+      }
     },
     "蒼太": {
       "canonical_en": "Souta",
@@ -34,14 +171,236 @@
     },
     "東雲凪": {
       "canonical_en": "Shinonome Nagi",
-      "category": "heroine"
+      "category": "heroine",
+      "volume_events": {
+        "1a60": {
+          "relationship_to_protagonist": "girlfriend",
+          "rtas_relationships": [
+            {
+              "target": "海以蒼太",
+              "relationship_type": "boyfriend",
+              "rtas_score": 4.9,
+              "contraction_rate_override": 90,
+              "notes": "Fiancée - intimate in private, formal-polite in public, but increasingly sweet and casual with Souta in private."
+            },
+            {
+              "target": "羽山光",
+              "relationship_type": "close_friend",
+              "rtas_score": 4.0,
+              "contraction_rate_override": 85,
+              "notes": "Best friend, casual with, now calling her Hikaru-chan."
+            },
+            {
+              "target": "東雲宗一郎",
+              "relationship_type": "father",
+              "rtas_score": 3.8,
+              "contraction_rate_override": 75,
+              "notes": "Reconciled with adoptive father, now calling him 'Papa'."
+            },
+            {
+              "target": "東雲千恵",
+              "relationship_type": "mother",
+              "rtas_score": 4.0,
+              "contraction_rate_override": 80,
+              "notes": "Reconciled with adoptive mother, now calling her 'Mama'."
+            },
+            {
+              "target": "巻坂瑛二",
+              "relationship_type": "friend",
+              "rtas_score": 3.8,
+              "contraction_rate_override": 80,
+              "notes": "Friendly, polite but familiar, now calling him Eiji-san."
+            },
+            {
+              "target": "西沢霧香",
+              "relationship_type": "friend",
+              "rtas_score": 3.9,
+              "contraction_rate_override": 85,
+              "notes": "Friendly, polite but familiar, now calling her Kirika-chan."
+            },
+            {
+              "target": "海以大吾",
+              "relationship_type": "father_in_law",
+              "rtas_score": 3.5,
+              "contraction_rate_override": 70,
+              "notes": "Polite and respectful, now calling him 'Otousama'."
+            },
+            {
+              "target": "海以和美",
+              "relationship_type": "mother_in_law",
+              "rtas_score": 3.8,
+              "contraction_rate_override": 75,
+              "notes": "Polite and respectful, now calling her 'Okaasama'."
+            },
+            {
+              "target": "新田先生",
+              "relationship_type": "souta_former_teacher",
+              "rtas_score": 3.0,
+              "contraction_rate_override": 75,
+              "notes": "Polite and respectful, formal with teachers."
+            },
+            {
+              "target": "白山さん",
+              "relationship_type": "acquaintance_elder",
+              "rtas_score": 3.0,
+              "contraction_rate_override": 75,
+              "notes": "Polite and friendly with an elder acquaintance."
+            }
+          ],
+          "how_character_refers_to_others": {
+            "海以蒼太": "蒼太君 (Souta-kun) - first name with kun, intimate",
+            "羽山光": "光ちゃん (Hikaru-chan) - first name with chan (newly adopted)",
+            "東雲宗一郎": "パパ (Papa) - adoptive father",
+            "東雲千恵": "ママ (Mama) - adoptive mother",
+            "巻坂瑛二": "瑛二さん (Eiji-san) - first name with san (newly adopted)",
+            "西沢霧香": "霧香ちゃん (Kirika-chan) - first name with chan (newly adopted)",
+            "海以大吾": "お義父様 (Otousama) - father-in-law",
+            "海以和美": "お義母様 (Okaasama) - mother-in-law",
+            "須坂翔子": "須坂さん (Suzaka-san) - Ms. Suzaka (housekeeper)",
+            "新田先生": "新田先生 (Nitta-sensei) - teacher",
+            "白山さん": "白山さん (Shirayama-san) - Ms. Shirayama (elderly acquaintance)"
+          },
+          "keigo_switch": {
+            "narration": "formal-polite",
+            "internal_thoughts": "polite with vulnerability, sometimes very casual when flustered or deeply affectionate",
+            "speaking_to": {
+              "海以蒼太": "DUAL: 75% formal / 90% sweet-casual intimate",
+              "strangers": "very_formal",
+              "羽山光": "polite_casual",
+              "東雲宗一郎": "polite_familiar",
+              "東雲千恵": "polite_familiar",
+              "巻坂瑛二": "polite_familiar",
+              "西沢霧香": "polite_familiar",
+              "海以大吾": "polite_formal",
+              "海以和美": "polite_formal",
+              "新田先生": "polite_formal",
+              "白山さん": "polite_formal",
+              "teachers": "polite_formal"
+            },
+            "emotional_shifts": {
+              "embarrassed": "stammering, casual slips, very red face",
+              "vulnerable": "drops formality, softer tone",
+              "happy_with_Souta": "sweet informal, contractions increase, playful teasing",
+              "angry": "cold, sharp, direct, very formal, threatening tone",
+              "sleepy": "slurred speech, very affectionate, drops formality"
+            }
+          },
+          "contraction_rate": {
+            "baseline": 0.75,
+            "narration": 0.75,
+            "speaking_to": {
+              "海以蒼太_public": 0.75,
+              "海以蒼太_intimate": 0.9,
+              "東雲宗一郎": 0.75,
+              "東雲千恵": 0.8,
+              "羽山光": 0.85,
+              "巻坂瑛二": 0.8,
+              "西沢霧香": 0.85,
+              "海以大吾": 0.7,
+              "海以和美": 0.75,
+              "friends": 0.85,
+              "strangers": 0.6
+            },
+            "notes": "⚠️ CRITICAL EXCEPTION: Nagi is TEEN but NOT teen rates (0.95). Dual threshold: 0.75 public / 0.90 intimate. Rate increases when flustered or deeply affectionate."
+          }
+        }
+      }
     },
     "東雲": {
       "canonical_en": "Shinonome",
       "notes": "Surname / short ref for Nagi"
     },
     "巻坂瑛二": {
-      "canonical_en": "Makizaka Eiji"
+      "canonical_en": "Makizaka Eiji",
+      "volume_events": {
+        "1a60": {
+          "relationship_to_protagonist": "best_friend",
+          "rtas_relationships": [
+            {
+              "target": "海以蒼太",
+              "relationship_type": "best_friend",
+              "rtas_score": 4.5,
+              "contraction_rate_override": 95,
+              "notes": "Close male friendship, very casual"
+            },
+            {
+              "target": "西沢霧香",
+              "relationship_type": "girlfriend",
+              "rtas_score": 4.8,
+              "contraction_rate_override": 98,
+              "notes": "Intimate, very casual with girlfriend, teasing"
+            },
+            {
+              "target": "東雲凪",
+              "relationship_type": "friend",
+              "rtas_score": 3.8,
+              "contraction_rate_override": 85,
+              "notes": "Friendly, polite but familiar, now calling her Nagi-san."
+            },
+            {
+              "target": "羽山光",
+              "relationship_type": "friend",
+              "rtas_score": 3.8,
+              "contraction_rate_override": 85,
+              "notes": "Friendly, polite but familiar, now calling her Hikaru-san."
+            },
+            {
+              "target": "海以大吾",
+              "relationship_type": "souta_father",
+              "rtas_score": 3.0,
+              "contraction_rate_override": 75,
+              "notes": "Polite and respectful, but with a touch of his usual casualness."
+            },
+            {
+              "target": "海以和美",
+              "relationship_type": "souta_mother",
+              "rtas_score": 3.2,
+              "contraction_rate_override": 80,
+              "notes": "Polite and respectful, but with a touch of his usual casualness."
+            }
+          ],
+          "how_character_refers_to_others": {
+            "海以蒼太": "蒼太 (Souta) - first name, close friend",
+            "西沢霧香": "霧香 (Kirika) - first name, girlfriend",
+            "東雲凪": "凪さん (Nagi-san) - first name with san (newly adopted)",
+            "羽山光": "光さん (Hikaru-san) - first name with san (newly adopted)",
+            "海以大吾": "蒼太の父さん (Souta no Tousan) / お父さん (Otousan) - Souta's father / father",
+            "海以和美": "蒼太の母さん (Souta no Kaasan) / お母さん (Okaasan) - Souta's mother / mother"
+          },
+          "keigo_switch": {
+            "narration": "casual",
+            "internal_thoughts": "casual",
+            "speaking_to": {
+              "海以蒼太": "casual_bro",
+              "西沢霧香": "casual_affectionate_teasing",
+              "東雲凪": "polite_familiar",
+              "羽山光": "polite_familiar",
+              "海以大吾": "polite_familiar",
+              "海以和美": "polite_familiar",
+              "strangers": "casual"
+            },
+            "emotional_shifts": {
+              "serious": "lower tone, direct speech",
+              "angry": "sharp, direct, slightly aggressive",
+              "teasing": "playful, higher pitch"
+            }
+          },
+          "contraction_rate": {
+            "baseline": 0.95,
+            "narration": 0.95,
+            "speaking_to": {
+              "海以蒼太": 0.95,
+              "西沢霧香": 0.98,
+              "東雲凪": 0.85,
+              "羽山光": 0.85,
+              "海以大吾": 0.75,
+              "海以和美": 0.8,
+              "adults": 0.8
+            },
+            "notes": "Very high contraction rate, typical contemporary teen. Slightly more formal with adults and Nagi/Hikaru, but still comfortable."
+          }
+        }
+      }
     },
     "瑛二": {
       "canonical_en": "Eiji",
@@ -52,7 +411,96 @@
       "notes": "Surname for 巻坂瑛二"
     },
     "西沢霧香": {
-      "canonical_en": "Nishizawa Kirika"
+      "canonical_en": "Nishizawa Kirika",
+      "volume_events": {
+        "1a60": {
+          "relationship_to_protagonist": "friend",
+          "rtas_relationships": [
+            {
+              "target": "巻坂瑛二",
+              "relationship_type": "boyfriend",
+              "rtas_score": 4.8,
+              "contraction_rate_override": 98,
+              "notes": "Intimate, very casual with boyfriend, teasing"
+            },
+            {
+              "target": "海以蒼太",
+              "relationship_type": "friend",
+              "rtas_score": 4.0,
+              "contraction_rate_override": 90,
+              "notes": "Friendly, casual, now calling him Minori-n."
+            },
+            {
+              "target": "東雲凪",
+              "relationship_type": "friend",
+              "rtas_score": 3.9,
+              "contraction_rate_override": 90,
+              "notes": "Friendly, casual, now calling her Nagi-rin."
+            },
+            {
+              "target": "羽山光",
+              "relationship_type": "friend",
+              "rtas_score": 4.2,
+              "contraction_rate_override": 95,
+              "notes": "Close friend, very casual, playful, now calling her Hikaru-n."
+            },
+            {
+              "target": "海以大吾",
+              "relationship_type": "souta_father",
+              "rtas_score": 3.0,
+              "contraction_rate_override": 75,
+              "notes": "Polite and respectful, but with her usual energetic flair."
+            },
+            {
+              "target": "海以和美",
+              "relationship_type": "souta_mother",
+              "rtas_score": 3.2,
+              "contraction_rate_override": 80,
+              "notes": "Polite and respectful, but with her usual energetic flair."
+            }
+          ],
+          "how_character_refers_to_others": {
+            "巻坂瑛二": "瑛二 (Eiji) - first name, boyfriend",
+            "海以蒼太": "みのりん (Minorin) - nickname based on surname",
+            "東雲凪": "なぎりん (Nagirin) - nickname based on first name",
+            "羽山光": "ひかるん (Hikarun) - nickname based on first name",
+            "海以大吾": "お父さん (Otousan) - father (Souta's father)",
+            "海以和美": "お母さん (Okaasan) - mother (Souta's mother)"
+          },
+          "keigo_switch": {
+            "narration": "casual",
+            "internal_thoughts": "casual",
+            "speaking_to": {
+              "巻坂瑛二": "casual_affectionate_teasing",
+              "海以蒼太": "casual",
+              "東雲凪": "casual",
+              "羽山光": "casual_affectionate",
+              "海以大吾": "polite_familiar",
+              "海以和美": "polite_familiar",
+              "strangers": "casual"
+            },
+            "emotional_shifts": {
+              "excited": "loud, exclamatory speech",
+              "teasing": "playful, slightly mocking tone",
+              "serious": "rare, but direct and firm"
+            }
+          },
+          "contraction_rate": {
+            "baseline": 0.98,
+            "narration": 0.98,
+            "speaking_to": {
+              "巻坂瑛二": 0.98,
+              "海以蒼太": 0.9,
+              "東雲凪": 0.9,
+              "羽山光": 0.95,
+              "海以大吾": 0.75,
+              "海以和美": 0.8,
+              "adults": 0.8
+            },
+            "notes": "Very high contraction rate, typical energetic teen. Slightly more formal with adults, but still maintains her genki style."
+          }
+        }
+      }
     },
     "霧香": {
       "canonical_en": "Kirika",
@@ -63,7 +511,96 @@
       "notes": "Surname for 西沢霧香"
     },
     "羽山光": {
-      "canonical_en": "Hayama Hikaru"
+      "canonical_en": "Hayama Hikaru",
+      "volume_events": {
+        "1a60": {
+          "relationship_to_protagonist": "friend",
+          "rtas_relationships": [
+            {
+              "target": "東雲凪",
+              "relationship_type": "close_friend",
+              "rtas_score": 4.0,
+              "contraction_rate_override": 85,
+              "notes": "Best friend, casual with, now calling her Nagi."
+            },
+            {
+              "target": "海以蒼太",
+              "relationship_type": "friend",
+              "rtas_score": 4.0,
+              "contraction_rate_override": 90,
+              "notes": "Friendly, polite but familiar, now calling him Souta."
+            },
+            {
+              "target": "巻坂瑛二",
+              "relationship_type": "friend",
+              "rtas_score": 3.8,
+              "contraction_rate_override": 85,
+              "notes": "Friendly, polite but familiar, now calling him Eiji."
+            },
+            {
+              "target": "西沢霧香",
+              "relationship_type": "close_friend",
+              "rtas_score": 4.2,
+              "contraction_rate_override": 95,
+              "notes": "Close friend, very casual, playful, now calling her Kirika."
+            },
+            {
+              "target": "海以大吾",
+              "relationship_type": "souta_father",
+              "rtas_score": 3.0,
+              "contraction_rate_override": 75,
+              "notes": "Polite and respectful."
+            },
+            {
+              "target": "海以和美",
+              "relationship_type": "souta_mother",
+              "rtas_score": 3.2,
+              "contraction_rate_override": 80,
+              "notes": "Polite and respectful."
+            }
+          ],
+          "how_character_refers_to_others": {
+            "東雲凪": "凪 (Nagi) - first name",
+            "海以蒼太": "蒼太 (Souta) - first name (newly adopted)",
+            "巻坂瑛二": "瑛二 (Eiji) - first name (newly adopted)",
+            "西沢霧香": "霧香 (Kirika) - first name (newly adopted)",
+            "海以大吾": "海以君のお父さん (Minori-kun no Otousan) - Minori-kun's father",
+            "海以和美": "海以君のお母さん (Minori-kun no Okaasan) - Minori-kun's mother"
+          },
+          "keigo_switch": {
+            "narration": "casual",
+            "internal_thoughts": "casual",
+            "speaking_to": {
+              "東雲凪": "casual",
+              "海以蒼太": "casual",
+              "巻坂瑛二": "casual",
+              "西沢霧香": "casual",
+              "海以大吾": "polite",
+              "海以和美": "polite",
+              "strangers": "polite"
+            },
+            "emotional_shifts": {
+              "surprised": "slight widening of eyes, soft gasp",
+              "amused": "slight smirk, quiet chuckle",
+              "annoyed": "slight frown, direct tone"
+            }
+          },
+          "contraction_rate": {
+            "baseline": 0.9,
+            "narration": 0.9,
+            "speaking_to": {
+              "東雲凪": 0.85,
+              "海以蒼太": 0.9,
+              "巻坂瑛二": 0.85,
+              "西沢霧香": 0.95,
+              "海以大吾": 0.75,
+              "海以和美": 0.8,
+              "adults": 0.8
+            },
+            "notes": "Generally casual but polite. Slightly higher contraction rate with close friends."
+          }
+        }
+      }
     },
     "羽山": {
       "canonical_en": "Hayama",
@@ -91,7 +628,86 @@
     },
     "東雲宗一郎": {
       "canonical_en": "Shinonome Souichirou",
-      "introduced_in": 2
+      "introduced_in": 2,
+      "volume_events": {
+        "1a60": {
+          "relationship_to_protagonist": "father_in_law",
+          "rtas_relationships": [
+            {
+              "target": "東雲凪",
+              "relationship_type": "daughter",
+              "rtas_score": 3.8,
+              "contraction_rate_override": 75,
+              "notes": "Reconciled with adoptive daughter, now called 'Papa'. Deeply caring and proud."
+            },
+            {
+              "target": "東雲千恵",
+              "relationship_type": "wife",
+              "rtas_score": 4.5,
+              "contraction_rate_override": 85,
+              "notes": "Loving and supportive of wife."
+            },
+            {
+              "target": "海以蒼太",
+              "relationship_type": "son_in_law",
+              "rtas_score": 3.0,
+              "contraction_rate_override": 70,
+              "notes": "Respectful and welcoming towards Souta, now called 'Otousan'. Deeply grateful for Souta's influence on Nagi."
+            },
+            {
+              "target": "海以大吾",
+              "relationship_type": "souta_father",
+              "rtas_score": 3.0,
+              "contraction_rate_override": 70,
+              "notes": "Polite and friendly, now called 'Minori-san'."
+            },
+            {
+              "target": "海以和美",
+              "relationship_type": "souta_mother",
+              "rtas_score": 3.0,
+              "contraction_rate_override": 70,
+              "notes": "Polite and friendly, now called 'Minori-san'."
+            }
+          ],
+          "how_character_refers_to_others": {
+            "東雲凪": "凪 (Nagi) - first name, daughter",
+            "東雲千恵": "千恵 (Chie) - first name, wife",
+            "海以蒼太": "蒼太君 (Souta-kun) - first name with kun",
+            "海以大吾": "海以さん (Minori-san) - surname with san",
+            "海以和美": "海以さん (Minori-san) - surname with san"
+          },
+          "keigo_switch": {
+            "narration": "formal",
+            "internal_thoughts": "formal",
+            "speaking_to": {
+              "東雲凪": "polite_familiar",
+              "東雲千恵": "polite_familiar",
+              "海以蒼太": "polite_familiar",
+              "海以大吾": "polite",
+              "海以和美": "polite",
+              "strangers": "very_formal"
+            },
+            "emotional_shifts": {
+              "grateful": "softer tone, more open",
+              "proud": "slight smile, warm tone",
+              "teasing (rare)": "subtle humor"
+            }
+          },
+          "contraction_rate": {
+            "baseline": 0.7,
+            "narration": 0.7,
+            "speaking_to": {
+              "東雲凪": 0.75,
+              "東雲千恵": 0.85,
+              "海以蒼太": 0.7,
+              "海以大吾": 0.7,
+              "海以和美": 0.7,
+              "adults": 0.7
+            },
+            "notes": "Maintains a formal tone, but softens with Nagi and Chie. Slightly more casual with Chie. Lower contraction rate with Souta's parents."
+          }
+        }
+      }
     },
     "宗一郎": {
       "canonical_en": "Souichirou",
@@ -99,7 +715,86 @@
     },
     "東雲千恵": {
       "canonical_en": "Shinonome Chie",
-      "introduced_in": 2
+      "introduced_in": 2,
+      "volume_events": {
+        "1a60": {
+          "relationship_to_protagonist": "mother_in_law",
+          "rtas_relationships": [
+            {
+              "target": "東雲凪",
+              "relationship_type": "daughter",
+              "rtas_score": 4.0,
+              "contraction_rate_override": 80,
+              "notes": "Reconciled with adoptive daughter, now called 'Mama'. Warm and supportive."
+            },
+            {
+              "target": "東雲宗一郎",
+              "relationship_type": "husband",
+              "rtas_score": 4.5,
+              "contraction_rate_override": 85,
+              "notes": "Loving and supportive of husband."
+            },
+            {
+              "target": "海以蒼太",
+              "relationship_type": "son_in_law",
+              "rtas_score": 3.2,
+              "contraction_rate_override": 75,
+              "notes": "Respectful and welcoming towards Souta, now called 'Okaasan'. Deeply grateful for Souta's influence on Nagi."
+            },
+            {
+              "target": "海以大吾",
+              "relationship_type": "souta_father",
+              "rtas_score": 3.0,
+              "contraction_rate_override": 70,
+              "notes": "Polite and friendly, now called 'Minori-san'."
+            },
+            {
+              "target": "海以和美",
+              "relationship_type": "souta_mother",
+              "rtas_score": 3.0,
+              "contraction_rate_override": 70,
+              "notes": "Polite and friendly, now called 'Minori-san'."
+            }
+          ],
+          "how_character_refers_to_others": {
+            "東雲凪": "凪 (Nagi) - first name, daughter",
+            "東雲宗一郎": "宗一郎さん (Souichirou-san) - first name with san",
+            "海以蒼太": "蒼太君 (Souta-kun) - first name with kun",
+            "海以大吾": "海以さん (Minori-san) - surname with san",
+            "海以和美": "海以さん (Minori-san) - surname with san"
+          },
+          "keigo_switch": {
+            "narration": "polite",
+            "internal_thoughts": "polite",
+            "speaking_to": {
+              "東雲凪": "polite_familiar",
+              "東雲宗一郎": "polite_familiar",
+              "海以蒼太": "polite_familiar",
+              "海以大吾": "polite",
+              "海以和美": "polite",
+              "strangers": "polite"
+            },
+            "emotional_shifts": {
+              "grateful": "softer tone, warm smile",
+              "amused": "gentle chuckle",
+              "concerned": "slightly worried tone"
+            }
+          },
+          "contraction_rate": {
+            "baseline": 0.75,
+            "narration": 0.75,
+            "speaking_to": {
+              "東雲凪": 0.8,
+              "東雲宗一郎": 0.85,
+              "海以蒼太": 0.75,
+              "海以大吾": 0.7,
+              "海以和美": 0.7,
+              "adults": 0.75
+            },
+            "notes": "Maintains a polite tone, but softens with Nagi and Souichirou. Slightly more casual with Souichirou. Lower contraction rate with Souta's parents."
+          }
+        }
+      }
     },
     "千恵": {
       "canonical_en": "Chie",

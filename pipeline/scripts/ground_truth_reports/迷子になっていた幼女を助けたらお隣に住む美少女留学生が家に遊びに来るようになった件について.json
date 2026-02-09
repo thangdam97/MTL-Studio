@@ -1,0 +1,80 @@
+{
+  "series_id": "迷子になっていた幼女を助けたらお隣に住む美少女留学生が家に遊びに来るようになった件について",
+  "series_title": {
+    "ja": "迷子になっていた幼女を助けたら、お隣に住む美少女留学生が家に遊びに来るようになった件について",
+    "en": "I Rescued a Lost Little Girl, and Now the Beautiful Exchange Student Next Door Won't Stop Visiting!",
+    "romaji": ""
+  },
+  "world_type": "modern_japan",
+  "total_entries": 7,
+  "results": [
+    {
+      "jp": "青柳明人",
+      "current_en": "Aoyagi Akihito",
+      "verified_en": "Aoyagi Akihito",
+      "source": "Novel Translator summary, YouTube Manga Recap, NamuWiki",
+      "confidence": "high",
+      "status": "correct",
+      "note": ""
+    },
+    {
+      "jp": "シャーロット・ベネット",
+      "current_en": "Charlotte Bennett",
+      "verified_en": "Charlotte Bennett",
+      "source": "Scribd PDF, Novel Translator summary, YouTube Manga Recap, NamuWiki",
+      "confidence": "high",
+      "status": "correct",
+      "note": ""
+    },
+    {
+      "jp": "エマ・ベネット",
+      "current_en": "Emma Bennett",
+      "verified_en": "Emma Bennett",
+      "source": "Novel Translator summary, YouTube Manga Recap, Manga Recap video, NamuWiki",
+      "confidence": "high",
+      "status": "correct",
+      "note": ""
+    },
+    {
+      "jp": "西園寺彰",
+      "current_en": "Saionji Akira",
+      "verified_en": "Saionji Akira",
+      "source": "YouTube Manga Recap (mentions 'Sion Gi Akira' as Akihito's childhood friend, which is a phonetic rendering of Saionji Akira)",
+      "confidence": "medium",
+      "status": "correct",
+      "note": "The YouTube recap phonetically renders it as 'Sion Gi Akira', but 'Saionji Akira' is the standard romanization and contextually correct."
+    },
+    {
+      "jp": "花澤美優",
+      "current_en": "Hanazawa Miyu",
+      "verified_en": "Hanazawa Miyu",
+      "source": "YouTube Manga Recap (mentions 'Miyu sensei')",
+      "confidence": "medium",
+      "status": "correct",
+      "note": "Only 'Miyu sensei' is explicitly mentioned, but 'Hanazawa' is the standard romanization for 花澤."
+    },
+    {
+      "jp": "東雲",
+      "current_en": "Shinonome",
+      "verified_en": "Shinonome",
+      "source": "no source found",
+      "confidence": "unverifiable",
+      "status": "unverifiable",
+      "note": "No official or widely accepted fan translation of this character's name was found in the search results for the specified series."
+    },
+    {
+      "jp": "クレア",
+      "current_en": "Claire",
+      "verified_en": "Claire",
+      "source": "no source found",
+      "confidence": "unverifiable",
+      "status": "unverifiable",
+      "note": "No official or widely accepted fan translation of this character's name was found in the search results for the specified series."
+    }
+  ],
+  "summary": {
+    "correct": 5,
+    "incorrect": 0,
+    "unverifiable": 2
+  }
+}

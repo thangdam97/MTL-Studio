@@ -239,6 +239,8 @@ def resume_volume_flow(
         "What would you like to do?",
         choices=[
             questionary.Choice("Continue Translation (Phase 2)", value="translate"),
+            questionary.Choice("Run Phase 1.55 (Rich Metadata Cache)", value="phase1.55"),
+            questionary.Choice("Run Phase 1.6 (Multimodal Processor)", value="phase1.6"),
             questionary.Choice("Build EPUB (Phase 4)", value="build"),
             questionary.Choice("Run Full Pipeline", value="run"),
             questionary.Choice("View Detailed Status", value="status"),

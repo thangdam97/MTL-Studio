@@ -1,0 +1,233 @@
+{
+  "series_id": "他校の氷姫を助けたらお友達から始める事になりました",
+  "series_title": {
+    "ja": "他校の氷姫を助けたら、お友達から始める事になりました",
+    "en": "After I Saved the Ice Princess of Another School, We Became Friends",
+    "romaji": ""
+  },
+  "world_type": "modern_japan",
+  "total_entries": 24,
+  "results": [
+    {
+      "jp": "海以蒼太",
+      "current_en": "Minori Souta",
+      "verified_en": "Minori Souta",
+      "source": "NamuWiki / Novel Summaries [1, 2, 3, 4, 5, 6, 11, 15]",
+      "confidence": "high",
+      "status": "correct",
+      "note": ""
+    },
+    {
+      "jp": "蒼太",
+      "current_en": "Souta",
+      "verified_en": "Souta",
+      "source": "Alias of 海以蒼太",
+      "confidence": "high",
+      "status": "correct",
+      "note": "alias"
+    },
+    {
+      "jp": "海以",
+      "current_en": "Minori",
+      "verified_en": "Minori",
+      "source": "Alias of 海以蒼太",
+      "confidence": "high",
+      "status": "correct",
+      "note": "alias"
+    },
+    {
+      "jp": "東雲凪",
+      "current_en": "Shinonome Nagi",
+      "verified_en": "Shinonome Nagi",
+      "source": "NamuWiki / Novel Summaries [1, 2, 3, 4, 5, 6, 11, 15]",
+      "confidence": "high",
+      "status": "correct",
+      "note": ""
+    },
+    {
+      "jp": "東雲",
+      "current_en": "Shinonome",
+      "verified_en": "Shinonome",
+      "source": "Alias of 東雲凪",
+      "confidence": "high",
+      "status": "correct",
+      "note": "alias"
+    },
+    {
+      "jp": "巻坂瑛二",
+      "current_en": "Makizaka Eiji",
+      "verified_en": "Makisaka Eiji",
+      "source": "Novel Summary [1], NamuWiki [3]",
+      "confidence": "high",
+      "status": "correct",
+      "note": ""
+    },
+    {
+      "jp": "瑛二",
+      "current_en": "Eiji",
+      "verified_en": "Eiji",
+      "source": "Alias of 巻坂瑛二",
+      "confidence": "high",
+      "status": "correct",
+      "note": "alias"
+    },
+    {
+      "jp": "巻坂",
+      "current_en": "Makizaka",
+      "verified_en": "Makizaka",
+      "source": "Alias of 巻坂瑛二",
+      "confidence": "high",
+      "status": "correct",
+      "note": "alias"
+    },
+    {
+      "jp": "西沢霧香",
+      "current_en": "Nishizawa Kirika",
+      "verified_en": "Nishizawa Kirika",
+      "source": "NamuWiki [3]",
+      "confidence": "medium",
+      "status": "correct",
+      "note": ""
+    },
+    {
+      "jp": "霧香",
+      "current_en": "Kirika",
+      "verified_en": "Kirika",
+      "source": "Alias of 西沢霧香",
+      "confidence": "high",
+      "status": "correct",
+      "note": "alias"
+    },
+    {
+      "jp": "西沢",
+      "current_en": "Nishizawa",
+      "verified_en": "Nishizawa",
+      "source": "Alias of 西沢霧香",
+      "confidence": "high",
+      "status": "correct",
+      "note": "alias"
+    },
+    {
+      "jp": "羽山光",
+      "current_en": "Hayama Hikaru",
+      "verified_en": "Hayama Hikaru",
+      "source": "NamuWiki [3]",
+      "confidence": "medium",
+      "status": "correct",
+      "note": ""
+    },
+    {
+      "jp": "羽山",
+      "current_en": "Hayama",
+      "verified_en": "Hayama",
+      "source": "Alias of 羽山光",
+      "confidence": "high",
+      "status": "correct",
+      "note": "alias"
+    },
+    {
+      "jp": "須坂翔子",
+      "current_en": "Suzaka Shouko",
+      "verified_en": "Suzaka Shoko",
+      "source": "NamuWiki [3]",
+      "confidence": "medium",
+      "status": "incorrect",
+      "note": "Official romanization uses 'Shoko' instead of 'Shouko'."
+    },
+    {
+      "jp": "須坂",
+      "current_en": "Suzaka",
+      "verified_en": "Suzaka",
+      "source": "Alias of 須坂翔子",
+      "confidence": "high",
+      "status": "correct",
+      "note": "alias"
+    },
+    {
+      "jp": "南川陽斗",
+      "current_en": "Minamikawa Youto",
+      "verified_en": "Minamikawa Youto",
+      "source": "no source found",
+      "confidence": "unverifiable",
+      "status": "unverifiable",
+      "note": "Character not found in available official or fan-compiled character lists."
+    },
+    {
+      "jp": "南川",
+      "current_en": "Minamikawa",
+      "verified_en": "Minamikawa",
+      "source": "no source found",
+      "confidence": "unverifiable",
+      "status": "unverifiable",
+      "note": "Character not found in available official or fan-compiled character lists."
+    },
+    {
+      "jp": "村田",
+      "current_en": "Murata",
+      "verified_en": "Murata",
+      "source": "no source found",
+      "confidence": "unverifiable",
+      "status": "unverifiable",
+      "note": "Character not found in available official or fan-compiled character lists."
+    },
+    {
+      "jp": "皐月陽龍",
+      "current_en": "Satsuki Hiryu",
+      "verified_en": "Hiryu Satsuki",
+      "source": "NamuWiki [3], MangaDex [11, 15]",
+      "confidence": "high",
+      "status": "incorrect",
+      "note": "This is the author's name, not a character. Also, the order is typically Given Name Surname (Hiryu Satsuki) in English for Japanese authors."
+    },
+    {
+      "jp": "東雲宗一郎",
+      "current_en": "Shinonome Souichirou",
+      "verified_en": "Shinonome Souichirou",
+      "source": "no source found",
+      "confidence": "unverifiable",
+      "status": "unverifiable",
+      "note": "Character not found in available official or fan-compiled character lists."
+    },
+    {
+      "jp": "宗一郎",
+      "current_en": "Souichirou",
+      "verified_en": "Souichirou",
+      "source": "no source found",
+      "confidence": "unverifiable",
+      "status": "unverifiable",
+      "note": "Character not found in available official or fan-compiled character lists."
+    },
+    {
+      "jp": "東雲千恵",
+      "current_en": "Shinonome Chie",
+      "verified_en": "Shinonome Chie",
+      "source": "no source found",
+      "confidence": "unverifiable",
+      "status": "unverifiable",
+      "note": "Character not found in available official or fan-compiled character lists."
+    },
+    {
+      "jp": "千恵",
+      "current_en": "Chie",
+      "verified_en": "Chie",
+      "source": "no source found",
+      "confidence": "unverifiable",
+      "status": "unverifiable",
+      "note": "Character not found in available official or fan-compiled character lists."
+    },
+    {
+      "jp": "新谷静子",
+      "current_en": "Araya Shizuko",
+      "verified_en": "Araya Shizuko",
+      "source": "no source found",
+      "confidence": "unverifiable",
+      "status": "unverifiable",
+      "note": "Character not found in available official or fan-compiled character lists."
+    }
+  ],
+  "summary": {
+    "correct": 14,
+    "incorrect": 2,
+    "unverifiable": 8
+  }
+}

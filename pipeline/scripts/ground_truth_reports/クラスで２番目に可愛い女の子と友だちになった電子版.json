@@ -1,0 +1,557 @@
+{
+  "series_id": "クラスで２番目に可愛い女の子と友だちになった電子版",
+  "series_title": {
+    "ja": "クラスで２番目に可愛い女の子と友だちになった【電子版】４",
+    "en": "I Befriended the Second Cutest Girl in My Class",
+    "romaji": ""
+  },
+  "world_type": "modern_japan",
+  "total_entries": 60,
+  "results": [
+    {
+      "jp": "泳未《えみ》",
+      "current_en": "Emi",
+      "verified_en": "Emi",
+      "source": "Standard Hepburn romanization",
+      "confidence": "medium",
+      "status": "correct",
+      "note": "Standard romanization of furigana. Not a prominent character."
+    },
+    {
+      "jp": "大地《だいち》",
+      "current_en": "Daichi",
+      "verified_en": "Daichi",
+      "source": "Standard Hepburn romanization",
+      "confidence": "medium",
+      "status": "correct",
+      "note": "Standard romanization of furigana. Not a prominent character."
+    },
+    {
+      "jp": "真樹《まき》",
+      "current_en": "Maki",
+      "verified_en": "Maki",
+      "source": "Fandom Wiki (Kura Nika), Crunchyroll anime [5, 8]",
+      "confidence": "high",
+      "status": "correct",
+      "note": "Surname of main character Maki Maehara."
+    },
+    {
+      "jp": "天海《あまみ》",
+      "current_en": "Amami",
+      "verified_en": "Amami",
+      "source": "Fandom Wiki (Kura Nika), Crunchyroll anime [3, 8]",
+      "confidence": "high",
+      "status": "correct",
+      "note": "Surname of main character Yu Amami."
+    },
+    {
+      "jp": "新田《につた》",
+      "current_en": "Nitsuta",
+      "verified_en": "Nitta",
+      "source": "Fandom Wiki (Kura Nika), Crunchyroll anime [8, 10]",
+      "confidence": "high",
+      "status": "incorrect",
+      "note": "Incorrect romanization. Official romanization is Nitta."
+    },
+    {
+      "jp": "朝凪《あさなぎ》",
+      "current_en": "Asanagi",
+      "verified_en": "Asanagi",
+      "source": "Fandom Wiki (Kura Nika), Crunchyroll anime [3, 8]",
+      "confidence": "high",
+      "status": "correct",
+      "note": "Surname of main character Umi Asanagi."
+    },
+    {
+      "jp": "溌溂《はつらつ》",
+      "current_en": "Hatsuratsu",
+      "verified_en": "Hatsuratsu",
+      "source": "Standard Hepburn romanization",
+      "confidence": "medium",
+      "status": "correct",
+      "note": "Standard romanization of a general term, not a character."
+    },
+    {
+      "jp": "荒江《あらえ》",
+      "current_en": "Arae",
+      "verified_en": "Arae",
+      "source": "Standard Hepburn romanization, implied from Arae Nagisa",
+      "confidence": "high",
+      "status": "correct",
+      "note": "Standard romanization of furigana. Implied surname from Arae Nagisa."
+    },
+    {
+      "jp": "柔肌《やわはだ》",
+      "current_en": "Yawahada",
+      "verified_en": "Yawahada",
+      "source": "Standard Hepburn romanization",
+      "confidence": "medium",
+      "status": "correct",
+      "note": "Standard romanization of a general term, not a character."
+    },
+    {
+      "jp": "新奈《にな》",
+      "current_en": "Nina",
+      "verified_en": "Nina",
+      "source": "Fandom Wiki (Kura Nika), Crunchyroll anime [8, 10]",
+      "confidence": "high",
+      "status": "correct",
+      "note": "Given name of main character Nina Nitta."
+    },
+    {
+      "jp": "八木沢《やぎさわ》",
+      "current_en": "Yagisawa",
+      "verified_en": "Yagisawa",
+      "source": "Standard Hepburn romanization",
+      "confidence": "medium",
+      "status": "correct",
+      "note": "Standard romanization of furigana. Not a prominent character."
+    },
+    {
+      "jp": "百聞《ひやくぶん》",
+      "current_en": "Hiyakubun",
+      "verified_en": "Hyakubun",
+      "source": "Standard Hepburn romanization",
+      "confidence": "high",
+      "status": "incorrect",
+      "note": "Incorrect romanization. Official romanization is Hyakubun."
+    },
+    {
+      "jp": "伝手《つて》",
+      "current_en": "Tsute",
+      "verified_en": "Tsute",
+      "source": "Standard Hepburn romanization",
+      "confidence": "medium",
+      "status": "correct",
+      "note": "Standard romanization of a general term, not a character."
+    },
+    {
+      "jp": "真似《まね》",
+      "current_en": "Mane",
+      "verified_en": "Mane",
+      "source": "Standard Hepburn romanization",
+      "confidence": "medium",
+      "status": "correct",
+      "note": "Standard romanization of a general term, not a character."
+    },
+    {
+      "jp": "茉奈佳《まなか》",
+      "current_en": "Manaka",
+      "verified_en": "Manaka",
+      "source": "Crunchyroll anime (voice actor Manaka Iwami) [8]",
+      "confidence": "high",
+      "status": "correct",
+      "note": "Given name of voice actress Manaka Iwami."
+    },
+    {
+      "jp": "伊達《だて》",
+      "current_en": "Date",
+      "verified_en": "Date",
+      "source": "Standard Hepburn romanization",
+      "confidence": "medium",
+      "status": "correct",
+      "note": "Standard romanization of furigana. Not a prominent character."
+    },
+    {
+      "jp": "牽制《けんせい》",
+      "current_en": "Kensei",
+      "verified_en": "Kensei",
+      "source": "Standard Hepburn romanization",
+      "confidence": "medium",
+      "status": "correct",
+      "note": "Standard romanization of a general term, not a character."
+    },
+    {
+      "jp": "紗那絵《さなえ》",
+      "current_en": "Sanae",
+      "verified_en": "Sanae",
+      "source": "Standard Hepburn romanization",
+      "confidence": "medium",
+      "status": "correct",
+      "note": "Standard romanization of furigana. Not a prominent character."
+    },
+    {
+      "jp": "二取《にとり》",
+      "current_en": "Nitori",
+      "verified_en": "Nitori",
+      "source": "Standard Hepburn romanization",
+      "confidence": "medium",
+      "status": "correct",
+      "note": "Standard romanization of furigana. Not a prominent character."
+    },
+    {
+      "jp": "北条《ほうじよう》",
+      "current_en": "Houjiyou",
+      "verified_en": "Hojo",
+      "source": "Standard Hepburn romanization",
+      "confidence": "high",
+      "status": "incorrect",
+      "note": "Incorrect romanization. Official romanization is Hojo (or Hōjō)."
+    },
+    {
+      "jp": "前原《まえはら》",
+      "current_en": "Maehara",
+      "verified_en": "Maehara",
+      "source": "Fandom Wiki (Kura Nika), Crunchyroll anime [5, 8]",
+      "confidence": "high",
+      "status": "correct",
+      "note": "Surname of main character Maki Maehara."
+    },
+    {
+      "jp": "我儘《わがまま》",
+      "current_en": "Wagamama",
+      "verified_en": "Wagamama",
+      "source": "Standard Hepburn romanization",
+      "confidence": "medium",
+      "status": "correct",
+      "note": "Standard romanization of a general term, not a character."
+    },
+    {
+      "jp": "悶着《もんちやく》",
+      "current_en": "Monchiyaku",
+      "verified_en": "Monchaku",
+      "source": "Standard Hepburn romanization",
+      "confidence": "high",
+      "status": "incorrect",
+      "note": "Incorrect romanization. Official romanization is Monchaku."
+    },
+    {
+      "jp": "中村《なかむら》",
+      "current_en": "Nakamura",
+      "verified_en": "Nakamura",
+      "source": "Standard Hepburn romanization",
+      "confidence": "medium",
+      "status": "correct",
+      "note": "Standard romanization of furigana. Not a prominent character."
+    },
+    {
+      "jp": "図体《ずうたい》",
+      "current_en": "Zutai",
+      "verified_en": "Zutai",
+      "source": "Standard Hepburn romanization",
+      "confidence": "medium",
+      "status": "correct",
+      "note": "Standard romanization of a general term (Zūtai or Zutai)."
+    },
+    {
+      "jp": "美玖《みく》",
+      "current_en": "Miku",
+      "verified_en": "Miku",
+      "source": "Standard Hepburn romanization",
+      "confidence": "medium",
+      "status": "correct",
+      "note": "Standard romanization of furigana. Not a prominent character."
+    },
+    {
+      "jp": "涼子《りようこ》",
+      "current_en": "Riyouko",
+      "verified_en": "Ryoko",
+      "source": "Standard Hepburn romanization",
+      "confidence": "high",
+      "status": "incorrect",
+      "note": "Incorrect romanization. Official romanization is Ryoko (or Ryōko)."
+    },
+    {
+      "jp": "早川《はやかわ》",
+      "current_en": "Hayakawa",
+      "verified_en": "Hayakawa",
+      "source": "Standard Hepburn romanization",
+      "confidence": "medium",
+      "status": "correct",
+      "note": "Standard romanization of furigana. Not a prominent character."
+    },
+    {
+      "jp": "一匹狼《いつぴきおおかみ》",
+      "current_en": "Itsupikioookami",
+      "verified_en": "Ippiki Ookami",
+      "source": "Standard Hepburn romanization",
+      "confidence": "high",
+      "status": "incorrect",
+      "note": "Incorrect romanization. Official romanization is Ippiki Ookami."
+    },
+    {
+      "jp": "七野《しちの》",
+      "current_en": "Shichino",
+      "verified_en": "Shichino",
+      "source": "Standard Hepburn romanization",
+      "confidence": "medium",
+      "status": "correct",
+      "note": "Standard romanization of furigana. Not a prominent character."
+    },
+    {
+      "jp": "前哨戦《ぜんしようせん》",
+      "current_en": "Zenshiyousen",
+      "verified_en": "Zenshousen",
+      "source": "Standard Hepburn romanization",
+      "confidence": "high",
+      "status": "incorrect",
+      "note": "Incorrect romanization. Official romanization is Zenshousen (or Zenshōsen)."
+    },
+    {
+      "jp": "加賀《かが》",
+      "current_en": "Kaga",
+      "verified_en": "Kaga",
+      "source": "Standard Hepburn romanization",
+      "confidence": "medium",
+      "status": "correct",
+      "note": "Standard romanization of furigana. Not a prominent character."
+    },
+    {
+      "jp": "他人様《ひとさま》",
+      "current_en": "Hitosama",
+      "verified_en": "Hitosama",
+      "source": "Standard Hepburn romanization",
+      "confidence": "medium",
+      "status": "correct",
+      "note": "Standard romanization of a general term, not a character."
+    },
+    {
+      "jp": "荒江渚《あなた》",
+      "current_en": "Anata",
+      "verified_en": "Arae Nagisa",
+      "source": "Fandom Wiki (Kura Nika) [7]",
+      "confidence": "high",
+      "status": "incorrect",
+      "note": "The character's name is Arae Nagisa. 'Anata' is an unusual furigana reading for 'Nagisa' in this context, likely a narrative device or nickname, not the official romanization of the character's full name."
+    },
+    {
+      "jp": "天海夕《あまみゆう》",
+      "current_en": "Amami Yu",
+      "verified_en": "Amami Yu",
+      "source": "Crunchyroll anime [8]",
+      "confidence": "high",
+      "status": "correct",
+      "note": "Official romanization from anime cast list. Also appears as Yuu Amami in Fandom Wiki."
+    },
+    {
+      "jp": "尾野凛《おのりん》",
+      "current_en": "Ono Rin",
+      "verified_en": "Ono Rin",
+      "source": "Yen Press manga (Rin Ono as illustrator) [3]",
+      "confidence": "high",
+      "status": "correct",
+      "note": "Canonical name. 'Onorin' is a furigana variant (nickname)."
+    },
+    {
+      "jp": "石見舞菜香《いわみまなか》",
+      "current_en": "Iwami Manaka",
+      "verified_en": "Iwami Manaka",
+      "source": "Crunchyroll anime (voice actor) [8]",
+      "confidence": "high",
+      "status": "correct",
+      "note": "Official romanization of voice actress name."
+    },
+    {
+      "jp": "石谷春貴《いしやはるき》",
+      "current_en": "Ishiya Haruki",
+      "verified_en": "Ishiya Haruki",
+      "source": "Crunchyroll anime (voice actor) [8]",
+      "confidence": "high",
+      "status": "correct",
+      "note": "Official romanization of voice actor name."
+    },
+    {
+      "jp": "鈴代紗弓《すずしろさゆみ》",
+      "current_en": "Suzushiro Sayumi",
+      "verified_en": "Suzushiro Sayumi",
+      "source": "Crunchyroll anime (voice actor) [8]",
+      "confidence": "high",
+      "status": "correct",
+      "note": "Official romanization of voice actress name."
+    },
+    {
+      "jp": "電子版《でんしばん》",
+      "current_en": "Denshiban",
+      "verified_en": "Denshiban",
+      "source": "Standard Hepburn romanization",
+      "confidence": "high",
+      "status": "correct",
+      "note": "Standard romanization of 'digital edition'."
+    },
+    {
+      "jp": "荒江渚《あらえなぎさ》",
+      "current_en": "Arae Nagisa",
+      "verified_en": "Arae Nagisa",
+      "source": "Fandom wiki - I Befriended the Second Cutest Girl in My Class Wiki",
+      "confidence": "high",
+      "status": "correct",
+      "note": "furigana variant"
+    },
+    {
+      "jp": "呆気《あつけ》",
+      "current_en": "Atsuke",
+      "verified_en": "Atsuke",
+      "source": "no source found",
+      "confidence": "unverifiable",
+      "status": "unverifiable",
+      "note": "Could not find this as a character name in official or fan sources. It might be a descriptive term or a very minor character not listed."
+    },
+    {
+      "jp": "無茶《むちや》",
+      "current_en": "Muchiya",
+      "verified_en": "Muchiya",
+      "source": "no source found",
+      "confidence": "unverifiable",
+      "status": "unverifiable",
+      "note": "Could not find this as a character name in official or fan sources. It might be a descriptive term or a very minor character not listed."
+    },
+    {
+      "jp": "人好《ひとよ》",
+      "current_en": "Hitoyo",
+      "verified_en": "Hitoyo",
+      "source": "no source found",
+      "confidence": "unverifiable",
+      "status": "unverifiable",
+      "note": "Could not find this as a character name in official or fan sources. It might be a descriptive term or a very minor character not listed."
+    },
+    {
+      "jp": "一瞥《いちべつ》",
+      "current_en": "Ichibetsu",
+      "verified_en": "Ichibetsu",
+      "source": "no source found",
+      "confidence": "unverifiable",
+      "status": "unverifiable",
+      "note": "Could not find this as a character name in official or fan sources. It might be a descriptive term or a very minor character not listed."
+    },
+    {
+      "jp": "凛々《りり》",
+      "current_en": "Riri",
+      "verified_en": "Riri",
+      "source": "no source found",
+      "confidence": "unverifiable",
+      "status": "unverifiable",
+      "note": "Could not find this as a character name in official or fan sources. It might be a descriptive term or a very minor character not listed."
+    },
+    {
+      "jp": "手強《てごわ》",
+      "current_en": "Tegowa",
+      "verified_en": "Tegowa",
+      "source": "no source found",
+      "confidence": "unverifiable",
+      "status": "unverifiable",
+      "note": "Could not find this as a character name in official or fan sources. It might be a descriptive term or a very minor character not listed."
+    },
+    {
+      "jp": "対峙《たいじ》",
+      "current_en": "Taiji",
+      "verified_en": "Taiji",
+      "source": "no source found",
+      "confidence": "unverifiable",
+      "status": "unverifiable",
+      "note": "Could not find this as a character name in official or fan sources. It might be a descriptive term or a very minor character not listed."
+    },
+    {
+      "jp": "前原",
+      "current_en": "Maehara",
+      "verified_en": "Maehara",
+      "source": "Fandom wiki - I Befriended the Second Cutest Girl in My Class Wiki",
+      "confidence": "high",
+      "status": "correct",
+      "note": "Surname of Maehara Nao"
+    },
+    {
+      "jp": "天海",
+      "current_en": "Amami",
+      "verified_en": "Amami",
+      "source": "Fandom wiki - I Befriended the Second Cutest Girl in My Class Wiki",
+      "confidence": "high",
+      "status": "correct",
+      "note": "Surname of Amami Yu"
+    },
+    {
+      "jp": "朝凪",
+      "current_en": "Asanagi",
+      "verified_en": "Asanagi",
+      "source": "Fandom wiki - I Befriended the Second Cutest Girl in My Class Wiki",
+      "confidence": "high",
+      "status": "correct",
+      "note": "Surname of Asanagi Umi"
+    },
+    {
+      "jp": "大山",
+      "current_en": "Ooyama",
+      "verified_en": "Ooyama",
+      "source": "Fandom wiki - I Befriended the Second Cutest Girl in My Class Wiki",
+      "confidence": "high",
+      "status": "correct",
+      "note": "Surname of Ooyama Akira"
+    },
+    {
+      "jp": "真樹",
+      "current_en": "Maki",
+      "verified_en": "Maki",
+      "source": "Fandom wiki - I Befriended the Second Cutest Girl in My Class Wiki",
+      "confidence": "high",
+      "status": "correct",
+      "note": "Given name of Maki Natsume"
+    },
+    {
+      "jp": "新田",
+      "current_en": "Nitsuta",
+      "verified_en": "Nitta",
+      "source": "Fandom wiki - I Befriended the Second Cutest Girl in My Class Wiki",
+      "confidence": "high",
+      "status": "incorrect",
+      "note": "The official romanization is 'Nitta'."
+    },
+    {
+      "jp": "新奈",
+      "current_en": "Nina",
+      "verified_en": "Nina",
+      "source": "Fandom wiki - I Befriended the Second Cutest Girl in My Class Wiki",
+      "confidence": "high",
+      "status": "correct",
+      "note": "Given name of Nitta Nina"
+    },
+    {
+      "jp": "真咲",
+      "current_en": "Masaki",
+      "verified_en": "Masaki",
+      "source": "Fandom wiki - I Befriended the Second Cutest Girl in My Class Wiki",
+      "confidence": "high",
+      "status": "correct",
+      "note": "Given name of Nitta Masaki"
+    },
+    {
+      "jp": "八木沢",
+      "current_en": "Yagisawa",
+      "verified_en": "Yagisawa",
+      "source": "Fandom wiki - I Befriended the Second Cutest Girl in My Class Wiki",
+      "confidence": "high",
+      "status": "correct",
+      "note": "Surname of Yagisawa Akane"
+    },
+    {
+      "jp": "朝凪海",
+      "current_en": "Asanagi Umi",
+      "verified_en": "Asanagi Umi",
+      "source": "Fandom wiki - I Befriended the Second Cutest Girl in My Class Wiki",
+      "confidence": "high",
+      "status": "correct",
+      "note": null
+    },
+    {
+      "jp": "天海夕",
+      "current_en": "Amami Yu",
+      "verified_en": "Amami Yu",
+      "source": "Fandom wiki - I Befriended the Second Cutest Girl in My Class Wiki",
+      "confidence": "high",
+      "status": "correct",
+      "note": null
+    },
+    {
+      "jp": "大地",
+      "current_en": "Daichi",
+      "verified_en": "Daichi",
+      "source": "Fandom wiki - I Befriended the Second Cutest Girl in My Class Wiki",
+      "confidence": "high",
+      "status": "correct",
+      "note": "Given name of Kashiwagi Daichi"
+    }
+  ],
+  "summary": {
+    "correct": 44,
+    "incorrect": 9,
+    "unverifiable": 7
+  }
+}

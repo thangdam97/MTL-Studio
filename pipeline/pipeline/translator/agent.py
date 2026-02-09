@@ -218,7 +218,13 @@ class TranslatorAgent:
             else:
                 logger.debug("No series bible found for this volume (standalone)")
         except Exception as e:
-            logger.warning(f"Bible system error (non-fatal, continuing without bible): {e}")
+            # Hard fallback path: ignore bible and continue with manifest-only continuity.
+            self.bible = None
+            self._bible_glossary = {}
+            logger.warning(
+                f"Bible system error (non-fatal): {e}. "
+                "Falling back to manifest-based continuity."
+            )
 
         # Load and inject character names from manifest (for cached system instruction)
         character_names = self._load_character_names()
@@ -939,9 +945,17 @@ class TranslatorAgent:
                         f"cached {self._volume_cache_stats.get('cached_chapters', 0)}/"
                         f"{self._volume_cache_stats.get('target_chapters', 0)} chapter sources"
                     )
+                logger.info(
+                    "[CACHE VERIFY] Full-LN JP corpus + system instruction are bundled "
+                    "in the active external cache for chapter translation."
+                )
             else:
                 logger.info("Pre-warming context cache (volume cache unavailable)...")
                 self._prewarm_cache()
+                logger.info(
+                    "[CACHE VERIFY] Falling back to prompt-only internal cache "
+                    "(no full-LN external cache)."
+                )
         
         success_count = 0
         
@@ -1011,6 +1025,17 @@ class TranslatorAgent:
                     f"({chapter_model} != {default_model})"
                 )
                 effective_cache_name = None
+
+            if i == 0:
+                if self.volume_cache_name and effective_cache_name:
+                    logger.info(
+                        "[CACHE VERIFY] Chapter translation will use external full-LN cache "
+                        "with embedded prompt instructions."
+                    )
+                elif effective_cache_name:
+                    logger.info("[CACHE VERIFY] Chapter translation will use cached prompt context.")
+                else:
+                    logger.warning("[CACHE VERIFY] Chapter translation running without cache.")
 
             result = self.processor.translate_chapter(
                 source_path,

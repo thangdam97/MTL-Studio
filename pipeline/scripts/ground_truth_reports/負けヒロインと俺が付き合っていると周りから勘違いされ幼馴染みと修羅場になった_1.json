@@ -1,0 +1,251 @@
+{
+  "series_id": "負けヒロインと俺が付き合っていると周りから勘違いされ幼馴染みと修羅場になった_1",
+  "series_title": {
+    "ja": "負けヒロインと俺が付き合っていると周りから勘違いされ、幼馴染みと修羅場になった",
+    "en": "Everyone Thinks I'm Dating the Losing Heroine, Kicking Off a Rom-Com War With My Childhood Friend!,",
+    "romaji": ""
+  },
+  "world_type": "modern_japan",
+  "total_entries": 26,
+  "results": [
+    {
+      "jp": "葉桜陽《はざくらよう》",
+      "current_en": "Hazakura Yo",
+      "verified_en": "Yō Hazakura",
+      "source": "NeoSekai Translations, Novel Translator, NamuWiki, Novel Updates (Fan translation consensus)",
+      "confidence": "high",
+      "status": "incorrect",
+      "note": "Name order is reversed and macron is missing in current_en."
+    },
+    {
+      "jp": "根本《ねもと》",
+      "current_en": "Nemoto",
+      "verified_en": "Nemoto",
+      "source": "NeoSekai Translations, Novel Translator, NamuWiki, Novel Updates (Fan translation consensus)",
+      "confidence": "high",
+      "status": "correct",
+      "note": ""
+    },
+    {
+      "jp": "秋実真凛《あきみまりん》",
+      "current_en": "Akimi Marin",
+      "verified_en": "Marin Akimi",
+      "source": "NeoSekai Translations, Novel Translator, NamuWiki, Novel Updates (Fan translation consensus)",
+      "confidence": "high",
+      "status": "incorrect",
+      "note": "Name order is reversed in current_en."
+    },
+    {
+      "jp": "木下晴喜《きのしたはるき》",
+      "current_en": "Kinoshita Haruki",
+      "verified_en": "Haruki Kinoshita",
+      "source": "NeoSekai Translations (Fan translation consensus)",
+      "confidence": "high",
+      "status": "incorrect",
+      "note": "Name order is reversed in current_en."
+    },
+    {
+      "jp": "佳純《かすみ》",
+      "current_en": "Kasumi",
+      "verified_en": "Kasumi",
+      "source": "NeoSekai Translations, Novel Translator, NamuWiki, Novel Updates (Fan translation consensus)",
+      "confidence": "high",
+      "status": "correct",
+      "note": ""
+    },
+    {
+      "jp": "秋実《あきみ》",
+      "current_en": "Akimi",
+      "verified_en": "Akimi",
+      "source": "NeoSekai Translations, Novel Translator, NamuWiki, Novel Updates (Fan translation consensus)",
+      "confidence": "high",
+      "status": "correct",
+      "note": ""
+    },
+    {
+      "jp": "真凛《まりん》",
+      "current_en": "Marin",
+      "verified_en": "Marin",
+      "source": "NeoSekai Translations, Novel Translator, NamuWiki, Novel Updates (Fan translation consensus)",
+      "confidence": "high",
+      "status": "correct",
+      "note": ""
+    },
+    {
+      "jp": "葉桜《はざくら》",
+      "current_en": "Hazakura",
+      "verified_en": "Hazakura",
+      "source": "NeoSekai Translations, Novel Translator, NamuWiki, Novel Updates (Fan translation consensus)",
+      "confidence": "high",
+      "status": "correct",
+      "note": ""
+    },
+    {
+      "jp": "晴喜《はるき》",
+      "current_en": "Haruki",
+      "verified_en": "Haruki",
+      "source": "NeoSekai Translations (Fan translation consensus)",
+      "confidence": "high",
+      "status": "correct",
+      "note": ""
+    },
+    {
+      "jp": "木下《きのした》",
+      "current_en": "Kinoshita",
+      "verified_en": "Kinoshita",
+      "source": "NeoSekai Translations (Fan translation consensus)",
+      "confidence": "high",
+      "status": "correct",
+      "note": ""
+    },
+    {
+      "jp": "根本佳純《ねもとかすみ》",
+      "current_en": "Nemoto Kasumi",
+      "verified_en": "Kasumi Nemoto",
+      "source": "NeoSekai Translations, Novel Translator, NamuWiki, Novel Updates (Fan translation consensus)",
+      "confidence": "high",
+      "status": "incorrect",
+      "note": "Name order is reversed in current_en."
+    },
+    {
+      "jp": "凪沙《なぎさ》",
+      "current_en": "Nagisa",
+      "verified_en": "Nagisa",
+      "source": "Narou (Japanese web novel site, fan translation consensus)",
+      "confidence": "medium",
+      "status": "correct",
+      "note": ""
+    },
+    {
+      "jp": "神風《かみかぜ》",
+      "current_en": "Kamikaze",
+      "verified_en": "Kamikaze",
+      "source": "no source found",
+      "confidence": "unverifiable",
+      "status": "unverifiable",
+      "note": "No character named Kamikaze found in official or fan translations of this series."
+    },
+    {
+      "jp": "葛井聡《くずいさとし》",
+      "current_en": "Kuzui Satoshi",
+      "verified_en": "Kuzui Satoshi",
+      "source": "no source found",
+      "confidence": "unverifiable",
+      "status": "unverifiable",
+      "note": "No character named Kuzui Satoshi found in official or fan translations of this series."
+    },
+    {
+      "jp": "葛井《くずい》",
+      "current_en": "Kuzui",
+      "verified_en": "Kuzui",
+      "source": "no source found",
+      "confidence": "unverifiable",
+      "status": "unverifiable",
+      "note": "No character named Kuzui found in official or fan translations of this series."
+    },
+    {
+      "jp": "真凛",
+      "current_en": "Marin",
+      "verified_en": "Marin",
+      "source": "Alias of Entry 7",
+      "confidence": "high",
+      "status": "correct",
+      "note": "furigana variant"
+    },
+    {
+      "jp": "晴喜",
+      "current_en": "Haruki",
+      "verified_en": "Haruki",
+      "source": "Alias of Entry 9",
+      "confidence": "high",
+      "status": "correct",
+      "note": "furigana variant"
+    },
+    {
+      "jp": "佳純",
+      "current_en": "Kasumi",
+      "verified_en": "Kasumi",
+      "source": "Alias of Entry 5",
+      "confidence": "high",
+      "status": "correct",
+      "note": "furigana variant"
+    },
+    {
+      "jp": "葉桜",
+      "current_en": "Hazakura",
+      "verified_en": "Hazakura",
+      "source": "Alias of Entry 8",
+      "confidence": "high",
+      "status": "correct",
+      "note": "furigana variant"
+    },
+    {
+      "jp": "根本",
+      "current_en": "Nemoto",
+      "verified_en": "Nemoto",
+      "source": "Alias of Entry 2",
+      "confidence": "high",
+      "status": "correct",
+      "note": "furigana variant"
+    },
+    {
+      "jp": "凪沙",
+      "current_en": "Nagisa",
+      "verified_en": "Nagisa",
+      "source": "Alias of Entry 12",
+      "confidence": "medium",
+      "status": "correct",
+      "note": "furigana variant"
+    },
+    {
+      "jp": "木下",
+      "current_en": "Kinoshita",
+      "verified_en": "Kinoshita",
+      "source": "Alias of Entry 10",
+      "confidence": "high",
+      "status": "correct",
+      "note": "furigana variant"
+    },
+    {
+      "jp": "秋実",
+      "current_en": "Akimi",
+      "verified_en": "Akimi",
+      "source": "Alias of Entry 6",
+      "confidence": "high",
+      "status": "correct",
+      "note": "furigana variant"
+    },
+    {
+      "jp": "神庭",
+      "current_en": "Kanba",
+      "verified_en": "Kanba",
+      "source": "no source found",
+      "confidence": "unverifiable",
+      "status": "unverifiable",
+      "note": "No character named Kanba found in official or fan translations of this series."
+    },
+    {
+      "jp": "純陽",
+      "current_en": "Junyo",
+      "verified_en": "Junyo",
+      "source": "no source found",
+      "confidence": "unverifiable",
+      "status": "unverifiable",
+      "note": "No character named Junyo found in official or fan translations of this series."
+    },
+    {
+      "jp": "観音寺",
+      "current_en": "Kanonji",
+      "verified_en": "Kanonji",
+      "source": "no source found",
+      "confidence": "unverifiable",
+      "status": "unverifiable",
+      "note": "No character named Kanonji found in official or fan translations of this series."
+    }
+  ],
+  "summary": {
+    "correct": 16,
+    "incorrect": 4,
+    "unverifiable": 6
+  }
+}

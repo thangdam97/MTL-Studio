@@ -1,0 +1,80 @@
+{
+  "series_id": "義妹生活電子特典付き_mf文庫j",
+  "series_title": {
+    "ja": "義妹生活【電子特典付き】 (MF文庫J)",
+    "en": "Days with My Stepsister",
+    "romaji": ""
+  },
+  "world_type": "modern_japan",
+  "total_entries": 7,
+  "results": [
+    {
+      "jp": "asamura_yuta",
+      "current_en": "Yuuta Asamura (浅村悠太)",
+      "verified_en": "Yuuta Asamura (浅村悠太)",
+      "source": "API call failed",
+      "confidence": "unverifiable",
+      "status": "unverifiable",
+      "note": "API returned unparseable response"
+    },
+    {
+      "jp": "ayase_saki",
+      "current_en": "Saki Ayase (綾瀬沙季)",
+      "verified_en": "Saki Ayase (綾瀬沙季)",
+      "source": "API call failed",
+      "confidence": "unverifiable",
+      "status": "unverifiable",
+      "note": "API returned unparseable response"
+    },
+    {
+      "jp": "maru_tomokazu",
+      "current_en": "Tomokazu Maru (丸友和)",
+      "verified_en": "Tomokazu Maru (丸友和)",
+      "source": "API call failed",
+      "confidence": "unverifiable",
+      "status": "unverifiable",
+      "note": "API returned unparseable response"
+    },
+    {
+      "jp": "narasaka_maaya",
+      "current_en": "Maaya Narasaka (奈良坂真綾)",
+      "verified_en": "Maaya Narasaka (奈良坂真綾)",
+      "source": "API call failed",
+      "confidence": "unverifiable",
+      "status": "unverifiable",
+      "note": "API returned unparseable response"
+    },
+    {
+      "jp": "yomiuri_senpai",
+      "current_en": "Yomiuri-senpai (読売先輩)",
+      "verified_en": "Yomiuri-senpai (読売先輩)",
+      "source": "API call failed",
+      "confidence": "unverifiable",
+      "status": "unverifiable",
+      "note": "API returned unparseable response"
+    },
+    {
+      "jp": "asamura_taichi",
+      "current_en": "Taichi Asamura (father)",
+      "verified_en": "Taichi Asamura (father)",
+      "source": "API call failed",
+      "confidence": "unverifiable",
+      "status": "unverifiable",
+      "note": "API returned unparseable response"
+    },
+    {
+      "jp": "ayase_akiko",
+      "current_en": "Akiko Ayase (stepmother)",
+      "verified_en": "Akiko Ayase (stepmother)",
+      "source": "API call failed",
+      "confidence": "unverifiable",
+      "status": "unverifiable",
+      "note": "API returned unparseable response"
+    }
+  ],
+  "summary": {
+    "correct": 0,
+    "incorrect": 0,
+    "unverifiable": 7
+  }
+}

@@ -1,0 +1,116 @@
+{
+  "series_id": "幼なじみは負けフラグって本当ですか",
+  "series_title": {
+    "ja": "幼なじみは負けフラグって本当ですか？",
+    "en": "Is My Childhood Friend Really a Losing Flag?",
+    "romaji": ""
+  },
+  "world_type": "modern_japan",
+  "total_entries": 11,
+  "results": [
+    {
+      "jp": "萌々花",
+      "current_en": "Momoka",
+      "verified_en": "Momoka",
+      "source": "API call failed",
+      "confidence": "unverifiable",
+      "status": "unverifiable",
+      "note": "API returned unparseable response"
+    },
+    {
+      "jp": "雪野麗奈",
+      "current_en": "Yukino Rena",
+      "verified_en": "Yukino Rena",
+      "source": "API call failed",
+      "confidence": "unverifiable",
+      "status": "unverifiable",
+      "note": "API returned unparseable response"
+    },
+    {
+      "jp": "福村",
+      "current_en": "Fukumura",
+      "verified_en": "Fukumura",
+      "source": "API call failed",
+      "confidence": "unverifiable",
+      "status": "unverifiable",
+      "note": "API returned unparseable response"
+    },
+    {
+      "jp": "天沢",
+      "current_en": "Amazawa",
+      "verified_en": "Amazawa",
+      "source": "API call failed",
+      "confidence": "unverifiable",
+      "status": "unverifiable",
+      "note": "API returned unparseable response"
+    },
+    {
+      "jp": "福田",
+      "current_en": "Fukuda",
+      "verified_en": "Fukuda",
+      "source": "API call failed",
+      "confidence": "unverifiable",
+      "status": "unverifiable",
+      "note": "API returned unparseable response"
+    },
+    {
+      "jp": "風香",
+      "current_en": "Fuka",
+      "verified_en": "Fuka",
+      "source": "API call failed",
+      "confidence": "unverifiable",
+      "status": "unverifiable",
+      "note": "API returned unparseable response"
+    },
+    {
+      "jp": "雪野",
+      "current_en": "Yukino",
+      "verified_en": "Yukino",
+      "source": "API call failed",
+      "confidence": "unverifiable",
+      "status": "unverifiable",
+      "note": "API returned unparseable response"
+    },
+    {
+      "jp": "片桐",
+      "current_en": "Katagiri",
+      "verified_en": "Katagiri",
+      "source": "API call failed",
+      "confidence": "unverifiable",
+      "status": "unverifiable",
+      "note": "API returned unparseable response"
+    },
+    {
+      "jp": "麗奈",
+      "current_en": "Rena",
+      "verified_en": "Rena",
+      "source": "API call failed",
+      "confidence": "unverifiable",
+      "status": "unverifiable",
+      "note": "API returned unparseable response"
+    },
+    {
+      "jp": "悠馬",
+      "current_en": "Yuma",
+      "verified_en": "Yuma",
+      "source": "API call failed",
+      "confidence": "unverifiable",
+      "status": "unverifiable",
+      "note": "API returned unparseable response"
+    },
+    {
+      "jp": "桜木",
+      "current_en": "Sakuragi",
+      "verified_en": "Sakuragi",
+      "source": "API call failed",
+      "confidence": "unverifiable",
+      "status": "unverifiable",
+      "note": "API returned unparseable response"
+    }
+  ],
+  "summary": {
+    "correct": 0,
+    "incorrect": 0,
+    "unverifiable": 11
+  }
+}

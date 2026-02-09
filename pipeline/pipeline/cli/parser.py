@@ -1,4 +1,4 @@
-"""CLI parser construction for MTL Studio v5.1."""
+"""CLI parser construction for MTL Studio v5.2."""
 
 import argparse
 
@@ -21,12 +21,12 @@ def _add_ui_flags(parser: argparse.ArgumentParser) -> None:
 def build_parser() -> argparse.ArgumentParser:
     """Build the top-level CLI parser with all command definitions."""
     parser = argparse.ArgumentParser(
-        description="MTL Studio 5.1 CLI | Three-Pillar Translation Pipeline (RAG + Vector Search + Multimodal)",
+        description="MTL Studio v5.2 CLI | Bible + Series Continuity + Three-Pillar Translation",
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""
-Pipeline Flow (v5.1):
-  Phase 1 -> 1.5 -> 1.6 -> 2 -> 3 -> 4
-  Librarian -> Metadata -> Art Director -> Translator -> Critics -> Builder
+Pipeline Flow (v5.2):
+  Phase 1 -> 1.5 -> 1.55 -> 1.6 -> 2 -> 3 -> 4
+  Librarian -> Metadata -> Rich Cache -> Art Director -> Translator -> Critics -> Builder
 
 Quick Start:
   mtl.py run INPUT/novel_v1.epub
@@ -35,9 +35,12 @@ Quick Start:
 Core Commands:
   mtl.py phase1 INPUT/novel_v1.epub --id novel_v1
   mtl.py phase1.5 novel_v1
+  mtl.py phase1.55 novel_v1
   mtl.py phase1.6 novel_v1
   mtl.py phase2 novel_v1 --enable-multimodal
   mtl.py phase4 novel_v1
+  mtl.py bible list
+  mtl.py bible sync novel_v1 --direction both
 
 Quality Control:
   mtl.py cjk-clean novel_v1 --dry-run
@@ -78,7 +81,7 @@ Metadata Schema Auto-Transform:
     run_parser = subparsers.add_parser(
         'run',
         parents=[parent_parser],
-        help='Run full pipeline (1 -> 1.5 -> 1.6 -> 2 -> 4)'
+        help='Run full pipeline (1 -> 1.5 -> 1.55 -> 1.6 -> 2 -> 4)'
     )
     run_parser.add_argument('epub_path', type=str, help='Path to Japanese EPUB file')
     run_parser.add_argument('--id', dest='volume_id', type=str, help='Custom volume ID (auto-generated if not provided)')
@@ -109,6 +112,14 @@ Metadata Schema Auto-Transform:
     )
     phase1_5_parser.add_argument('volume_id', type=str, nargs='?', help='Volume ID (optional - will prompt if not provided)')
 
+    # Phase 1.55
+    phase1_55_parser = subparsers.add_parser(
+        'phase1.55',
+        parents=[parent_parser],
+        help='Run Phase 1.55: Full-LN cache rich metadata enrichment'
+    )
+    phase1_55_parser.add_argument('volume_id', type=str, nargs='?', help='Volume ID (optional - will prompt if not provided)')
+
     # Phase 1.6 (Multimodal Processor)
     phase1_6_parser = subparsers.add_parser(
         'phase1.6',
@@ -132,10 +143,11 @@ Metadata Schema Auto-Transform:
     phase2_parser.add_argument('volume_id', type=str, nargs='?', help='Volume ID (optional - will prompt if not provided)')
     phase2_parser.add_argument('--chapters', nargs='+', help='Specific chapters to translate')
     phase2_parser.add_argument('--force', action='store_true', help='Re-translate completed chapters')
+    # Deprecated legacy continuity switch kept as hidden no-op for backward compatibility.
     phase2_parser.add_argument(
         '--enable-continuity',
         action='store_true',
-        help='[ALPHA] Enable schema extraction and continuity (experimental, unstable)'
+        help=argparse.SUPPRESS,
     )
     phase2_parser.add_argument(
         '--enable-gap-analysis',
@@ -215,7 +227,7 @@ Metadata Schema Auto-Transform:
     subparsers.add_parser('list', parents=[parent_parser], help='List all volumes')
 
     # Config
-    config_parser = subparsers.add_parser('config', parents=[parent_parser], help='View or modify v5.1 pipeline configuration')
+    config_parser = subparsers.add_parser('config', parents=[parent_parser], help='View or modify v5.2 pipeline configuration')
     config_parser.add_argument('--show', action='store_true', help='Show current configuration')
     config_parser.add_argument('--toggle-pre-toc', action='store_true', help='Toggle pre-TOC content detection (rare opening hooks before prologue)')
     config_parser.add_argument('--toggle-multimodal', action='store_true', help='Toggle multimodal visual context (experimental)')

@@ -6,6 +6,7 @@ Multi-language Japanese EPUB translation pipeline (EN/VN supported)
 Phases:
   1. Librarian      - Extract Japanese EPUB to markdown
   1.5 Metadata      - Schema autoupdate + title/author/chapter translation
+  1.55 Rich Cache   - Full-LN JP cache + rich metadata enrichment (Gemini 2.5 Flash)
   1.6 Multimodal    - Pre-bake illustration analysis (Gemini 3 Pro Vision)
   2. Translator     - Gemini-powered translation with RAG + visual context
   3. Critics        - Manual/Agentic quality review (Gemini CLI + IDE Agent)
@@ -18,6 +19,7 @@ Usage:
   mtl.py run <epub_path> --skip-multimodal  # Skip Phase 1.6 (faster, no visual context)
   mtl.py phase1 <epub_path>              # Run Phase 1 only
   mtl.py phase1.5 [volume_id]            # Run Phase 1.5 (metadata processing)
+  mtl.py phase1.55 [volume_id]           # Run Phase 1.55 (full-LN cache metadata enrichment)
   mtl.py phase1.6 [volume_id]            # Run Phase 1.6 (multimodal pre-bake)
   mtl.py phase2 [volume_id]              # Run Phase 2 (interactive if no ID)
   mtl.py phase2 [volume_id] --enable-multimodal  # Phase 2 with visual context
@@ -26,6 +28,8 @@ Usage:
   mtl.py status <volume_id>              # Check pipeline status
   mtl.py list                            # List all volumes
   mtl.py metadata <volume_id>            # Inspect metadata and schema
+  mtl.py bible list                      # List all linked series bibles
+  mtl.py bible sync <volume_id>          # Sync bible <-> manifest continuity data
   mtl.py cache-inspect [volume_id]       # Inspect visual analysis cache
   mtl.py visual-thinking [volume_id]     # Convert visual thought logs to markdown
   mtl.py visual-thinking [volume_id] --split        # One file per illustration
@@ -68,6 +72,11 @@ Phase 1.5 (Metadata Processor):
   - Translates: title, author, chapter titles, character names
   - PRESERVES: v3 enhanced schema (character_profiles, localization_notes, keigo_switch)
   - Safe to re-run on volumes with existing schema configurations
+
+Phase 1.55 (Rich Metadata Cache):
+  - Loads bible continuity context (when linked)
+  - Caches full JP volume text and calls Gemini 2.5 Flash (temp 0.5)
+  - Enriches rich metadata fields for stronger Phase 2 continuity
 
 Phase 1.6 (Multimodal Processor):
   - Analyzes illustrations using Gemini 3 Pro Vision
@@ -137,13 +146,13 @@ class PipelineController:
         self.ui = ModernCLIUI(mode=ui_mode, no_color=no_color)
 
     def _ui_header(self, title: str, subtitle: str = "") -> None:
-        """Print a consistent v5.1 CLI header."""
+        """Print a consistent v5.2 CLI header."""
         if self.ui.print_header(title, subtitle):
             return
 
         line = "=" * 78
         logger.info(line)
-        logger.info(f"MTL Studio 5.1 | {title}")
+        logger.info(f"MTL Studio v5.2 | {title}")
         if subtitle:
             logger.info(subtitle)
         logger.info(line)
@@ -312,8 +321,19 @@ class PipelineController:
         illust_count = len(list((assets_dir / "illustrations").glob("*.*"))) if (assets_dir / "illustrations").is_dir() else 0
         kuchie_count = len(list((assets_dir / "kuchie").glob("*.*"))) if (assets_dir / "kuchie").is_dir() else 0
 
-        # Bible ID
+        # Bible linkage (explicit or resolvable from index patterns)
         bible_id = manifest.get("bible_id", None)
+        bible_display = bible_id or "NOT SET"
+        if not bible_id:
+            try:
+                from pipeline.translator.series_bible import BibleController
+                bc = BibleController(PROJECT_ROOT)
+                resolved = bc.detect_series(manifest)
+                if resolved:
+                    bible_display = f"AUTO-DETECT: {resolved[:27]}..."
+            except Exception:
+                # Keep default display if bible detection is unavailable.
+                pass
 
         # Multimodal
         mm = manifest.get("multimodal", {})
@@ -337,7 +357,7 @@ class PipelineController:
         logger.info(f"│  Color Plates:      {kuchie_count:<5}  (kuchie)                          │")
         logger.info(f"│  Multimodal:        {'ENABLED' if mm_enabled else 'DISABLED':<10}                               │")
         logger.info("├─────────────────────────────────────────────────────────────┤")
-        logger.info(f"│  Bible ID:          {(bible_id or 'NOT SET'):<40}│")
+        logger.info(f"│  Bible ID:          {bible_display:<40}│")
         logger.info("└─────────────────────────────────────────────────────────────┘")
 
     def _log_phase1_5_confirmation(self, volume_id: str) -> None:
@@ -460,6 +480,53 @@ class PipelineController:
                 logger.info(f"    {jp} → {en}")
             if len(char_names) > 5:
                 logger.info(f"    ... and {len(char_names) - 5} more")
+
+    def _log_phase1_55_confirmation(self, volume_id: str) -> None:
+        """Log verbose confirmation for Phase 1.55 rich metadata cache results."""
+        manifest = self.load_manifest(volume_id)
+        if not manifest:
+            return
+
+        from pipeline.config import get_target_language
+        target_lang = get_target_language()
+        meta_key = f"metadata_{target_lang}"
+        metadata = manifest.get(meta_key, {})
+        if not metadata and target_lang == "en":
+            metadata = manifest.get("metadata_en", {})
+
+        state = manifest.get("pipeline_state", {}).get("rich_metadata_cache", {})
+        status = state.get("status", "not started")
+        cache_stats = state.get("cache_stats", {}) if isinstance(state, dict) else {}
+        cached = int(cache_stats.get("cached_chapters", 0))
+        total = int(cache_stats.get("target_chapters", 0))
+        cache_used = bool(state.get("used_external_cache", False)) if isinstance(state, dict) else False
+        patch_keys = state.get("patch_keys", []) if isinstance(state, dict) else []
+
+        profiles = metadata.get("character_profiles", {})
+        dialogue_patterns = metadata.get("dialogue_patterns", {})
+        scene_contexts = metadata.get("scene_contexts", {})
+        guidelines = metadata.get("translation_guidelines", {})
+
+        logger.info("")
+        logger.info("┌─────────────────────────────────────────────────────────────┐")
+        logger.info("│  PHASE 1.55 CONFIRMATION — Rich Metadata Cache             │")
+        logger.info("├─────────────────────────────────────────────────────────────┤")
+        logger.info(f"│  Status:            {status[:46]:<46}│")
+        logger.info(f"│  Model:             gemini-2.5-flash (temp=0.5)            │")
+        logger.info(f"│  Full-LN Cache:     {'USED' if cache_used else 'FALLBACK':<46}│")
+        logger.info(f"│  Cache Coverage:    {cached}/{total} JP chapters                          │")
+        logger.info("├─────────────────────────────────────────────────────────────┤")
+        logger.info(f"│  Character Profiles:{len(profiles):<5}  (rich profiles)                  │")
+        logger.info(f"│  Dialogue Patterns: {len(dialogue_patterns):<5}                                    │")
+        logger.info(f"│  Scene Contexts:    {len(scene_contexts):<5}                                    │")
+        logger.info(f"│  Guidelines:        {len(guidelines):<5}                                    │")
+        logger.info("└─────────────────────────────────────────────────────────────┘")
+
+        if patch_keys:
+            shown = ", ".join(str(k) for k in patch_keys[:8])
+            if len(patch_keys) > 8:
+                shown += f", ... (+{len(patch_keys) - 8})"
+            logger.info(f"  Patch keys: {shown}")
 
     def _log_phase1_6_confirmation(self, volume_id: str) -> None:
         """Log verbose confirmation for Phase 1.6 (Multimodal) results."""
@@ -770,6 +837,7 @@ class PipelineController:
 
             p1 = self._status_badge(status.get('librarian', {}).get('status', ''))
             p15 = self._status_badge(status.get('metadata_processor', {}).get('status', ''))
+            p155 = self._status_badge(status.get('rich_metadata_cache', {}).get('status', ''))
             p16 = self._visual_phase_badge(vol['id'])
             p2 = self._status_badge(status.get('translator', {}).get('status', ''))
             p4 = self._status_badge(status.get('builder', {}).get('status', ''))
@@ -778,6 +846,7 @@ class PipelineController:
                 "index": i,
                 "p1": p1,
                 "p15": p15,
+                "p155": p155,
                 "p16": p16,
                 "p2": p2,
                 "p4": p4,
@@ -791,6 +860,7 @@ class PipelineController:
                 stage_summary = " ".join([
                     self.ui.format_compact_badge(row["p1"]),
                     self.ui.format_compact_badge(row["p15"]),
+                    self.ui.format_compact_badge(row["p155"]),
                     self.ui.format_compact_badge(row["p16"]),
                     self.ui.format_compact_badge(row["p2"]),
                     self.ui.format_compact_badge(row["p4"]),
@@ -805,7 +875,7 @@ class PipelineController:
                 title=f"Select Volume for {phase_name}",
                 columns=[
                     {"header": "#", "justify": "right", "style": "bold"},
-                    {"header": "Stages (P1/P1.5/P1.6/P2/P4)", "no_wrap": True},
+                    {"header": "Stages (P1/P1.5/P1.55/P1.6/P2/P4)", "no_wrap": True},
                     {"header": "ID Key", "style": "cyan", "no_wrap": True},
                     {"header": "Title", "no_wrap": True, "overflow": "ellipsis", "max_width": 56},
                 ],
@@ -813,19 +883,19 @@ class PipelineController:
                 caption="0 = Cancel",
             )
         else:
-            print("\n" + "=" * 108)
-            print(f"MTL Studio 5.1 | Select Volume for {phase_name}")
-            print("=" * 108)
-            print(" #  P1   P1.5  P1.6     P2    P4    ID key          Title")
-            print("-" * 108)
+            print("\n" + "=" * 118)
+            print(f"MTL Studio v5.2 | Select Volume for {phase_name}")
+            print("=" * 118)
+            print(" #  P1   P1.5  P1.55 P1.6     P2    P4    ID key          Title")
+            print("-" * 118)
             for row in rows:
                 print(
-                    f"{row['index']:>2}  {row['p1']:<4} {row['p15']:<5} {row['p16']:<8} "
+                    f"{row['index']:>2}  {row['p1']:<4} {row['p15']:<5} {row['p155']:<5} {row['p16']:<8} "
                     f"{row['p2']:<5} {row['p4']:<5} {row['id_key']:<14} {row['title']}"
                 )
-            print("-" * 108)
+            print("-" * 118)
             print(" 0  Cancel")
-            print("=" * 108)
+            print("=" * 118)
         
         while True:
             try:
@@ -946,6 +1016,127 @@ class PipelineController:
         
         with open(manifest_path, 'r', encoding='utf-8') as f:
             return json.load(f)
+
+    def _get_manifest_chapters(self, manifest: Dict[str, Any]) -> List[Dict[str, Any]]:
+        """Return manifest chapter list from root or legacy structure block."""
+        chapters = manifest.get("chapters", [])
+        if not chapters:
+            chapters = manifest.get("structure", {}).get("chapters", [])
+        return chapters if isinstance(chapters, list) else []
+
+    def _check_full_ln_cache_state(self, manifest: Dict[str, Any]) -> Dict[str, Any]:
+        """
+        Validate Phase 1.55 full-LN cache readiness from manifest pipeline state.
+
+        Returns:
+            Dict with keys:
+              - ready (bool)
+              - reason (str)
+              - cached (int)
+              - expected (int)
+        """
+        pipeline_state = manifest.get("pipeline_state", {})
+        rich_state = pipeline_state.get("rich_metadata_cache", {})
+        if not isinstance(rich_state, dict):
+            return {"ready": False, "reason": "missing_state", "cached": 0, "expected": 0}
+
+        status = str(rich_state.get("status", "not run")).lower()
+        cache_stats = rich_state.get("cache_stats", {})
+        if not isinstance(cache_stats, dict):
+            cache_stats = {}
+
+        expected = len(self._get_manifest_chapters(manifest))
+        cached = int(cache_stats.get("cached_chapters", 0) or 0)
+        target = int(cache_stats.get("target_chapters", 0) or 0)
+
+        # Prefer chapter count from manifest; fallback to recorded target.
+        expected_total = expected if expected > 0 else target
+
+        if status != "completed":
+            return {
+                "ready": False,
+                "reason": f"status_{status or 'unknown'}",
+                "cached": cached,
+                "expected": expected_total,
+            }
+        if expected_total > 0 and cached < expected_total:
+            return {
+                "ready": False,
+                "reason": "incomplete_coverage",
+                "cached": cached,
+                "expected": expected_total,
+            }
+        if cached <= 0:
+            return {
+                "ready": False,
+                "reason": "empty_cache_payload",
+                "cached": cached,
+                "expected": expected_total,
+            }
+
+        return {
+            "ready": True,
+            "reason": "ready",
+            "cached": cached,
+            "expected": expected_total,
+        }
+
+    def ensure_full_ln_cache(
+        self,
+        volume_id: str,
+        *,
+        for_phase: str,
+        manifest: Optional[Dict[str, Any]] = None,
+    ) -> bool:
+        """
+        Ensure Phase 1.55 full-LN cache exists for downstream phases.
+
+        Auto-runs Phase 1.55 when cache is missing/incomplete.
+        """
+        manifest_data = manifest if manifest is not None else self.load_manifest(volume_id)
+        if not manifest_data:
+            logger.error(f"No manifest.json found for volume: {volume_id}")
+            logger.error("  Please run Phase 1 first to extract the EPUB")
+            return False
+
+        cache_state = self._check_full_ln_cache_state(manifest_data)
+        if cache_state["ready"]:
+            logger.info(
+                f"Full-LN cache ready for {for_phase}: "
+                f"{cache_state['cached']}/{cache_state['expected']} JP chapters cached."
+            )
+            return True
+
+        logger.warning(
+            f"Full-LN cache missing for {for_phase} "
+            f"(reason={cache_state['reason']}, "
+            f"coverage={cache_state['cached']}/{cache_state['expected']})."
+        )
+        logger.info("Auto-running Phase 1.55 to build/update full-LN cache...")
+
+        if not self.run_phase1_55(volume_id):
+            logger.error(f"Phase 1.55 failed; cannot continue {for_phase}.")
+            return False
+
+        refreshed_manifest = self.load_manifest(volume_id)
+        if not refreshed_manifest:
+            logger.error("Manifest reload failed after Phase 1.55.")
+            return False
+
+        refreshed_state = self._check_full_ln_cache_state(refreshed_manifest)
+        if not refreshed_state["ready"]:
+            logger.error(
+                "Full-LN cache validation still failed after Phase 1.55 "
+                f"(reason={refreshed_state['reason']}, "
+                f"coverage={refreshed_state['cached']}/{refreshed_state['expected']})."
+            )
+            return False
+
+        logger.info(
+            f"Full-LN cache prepared for {for_phase}: "
+            f"{refreshed_state['cached']}/{refreshed_state['expected']} JP chapters cached."
+        )
+        return True
     
     def get_pipeline_status(self, volume_id: str) -> Dict[str, str]:
         """Get status of all pipeline phases."""
@@ -1077,6 +1268,30 @@ class PipelineController:
             self._log_phase1_5_confirmation(volume_id)
             return True
         return False
+
+    def run_phase1_55(self, volume_id: str) -> bool:
+        """Run Phase 1.55: Full-LN cache enrichment for rich metadata."""
+        self._ui_header(
+            "Phase 1.55 - Rich Metadata Cache",
+            "Cache full JP LN + Gemini 2.5 Flash rich-metadata enrichment",
+        )
+
+        manifest = self.load_manifest(volume_id)
+        if not manifest:
+            logger.error(f"No manifest.json found for volume: {volume_id}")
+            logger.error("  Please run Phase 1 and Phase 1.5 first")
+            return False
+
+        cmd = [
+            sys.executable, "-m", "pipeline.metadata_processor.rich_metadata_cache",
+            "--volume", volume_id
+        ]
+
+        if self._run_command(cmd, "Phase 1.55 (Rich Metadata Cache)"):
+            logger.info("✓ Phase 1.55 completed successfully")
+            self._log_phase1_55_confirmation(volume_id)
+            return True
+        return False
     
     def run_phase1_6(self, volume_id: str, standalone: bool = False) -> bool:
         """
@@ -1100,6 +1315,10 @@ class PipelineController:
             logger.error(f"No manifest.json found for volume: {volume_id}")
             logger.error("  Please run Phase 1 first to extract the EPUB")
             return False
+
+        if not self.ensure_full_ln_cache(volume_id, for_phase="Phase 1.6 (Multimodal)", manifest=manifest):
+            return False
+        manifest = self.load_manifest(volume_id) or manifest
 
         logger.info(f"Volume: {manifest.get('metadata', {}).get('title', volume_id)}")
 
@@ -1172,12 +1391,12 @@ class PipelineController:
         return self.run_phase1_6(volume_id, standalone=True)
 
     def run_phase2(self, volume_id: str, chapters: Optional[list] = None, force: bool = False,
-                   enable_continuity: bool = False, enable_gap_analysis: bool = False,
+                   enable_gap_analysis: bool = False,
                    enable_multimodal: bool = False) -> bool:
         """Run Phase 2: Translator (Gemini MT)."""
         self._ui_header(
             "Phase 2 - Translator",
-            "Advanced stack: Tiered RAG + Vector Search + Multimodal (optional)"
+            "Advanced stack: Bible continuity + Tiered RAG + Vector Search + Multimodal (optional)"
         )
         runtime_lines = self._phase2_runtime_profile_lines(enable_multimodal)
         if not self.ui.render_phase2_runtime_panel(runtime_lines):
@@ -1190,12 +1409,21 @@ class PipelineController:
             logger.error(f"✗ No manifest.json found for volume: {volume_id}")
             logger.error("  Please run Phase 1 first to extract the EPUB")
             return False
-        
-        logger.info(f"✓ Loaded manifest for: {manifest.get('metadata', {}).get('title', volume_id)}")
 
-        manifest_chapters = manifest.get('chapters', [])
-        if not manifest_chapters:
-            manifest_chapters = manifest.get('structure', {}).get('chapters', [])
+        if not self.ensure_full_ln_cache(volume_id, for_phase="Phase 2 (Translator)", manifest=manifest):
+            return False
+        manifest = self.load_manifest(volume_id) or manifest
+
+        if manifest.get("bible_id"):
+            logger.info(
+                "Bible continuity: attempting linked bible load "
+                "(fallback to manifest metadata if bible is unavailable)."
+            )
+        else:
+            logger.info("Bible continuity: no bible link, using manifest metadata only.")
+
+        logger.info(f"✓ Loaded manifest for: {manifest.get('metadata', {}).get('title', volume_id)}")
+        manifest_chapters = self._get_manifest_chapters(manifest)
 
         target_chapters = manifest_chapters
         if chapters:
@@ -1213,9 +1441,6 @@ class PipelineController:
         
         if force:
             cmd.append("--force")
-        
-        if enable_continuity:
-            cmd.append("--enable-continuity")
         
         if enable_gap_analysis:
             cmd.append("--enable-gap-analysis")
@@ -1365,16 +1590,16 @@ class PipelineController:
             volume_id = self.generate_volume_id(epub_path)
             logger.info(f"Generated volume ID: {volume_id}")
 
-        self._ui_header("Full Pipeline Run (v5.1)", "1 -> 1.5 -> 1.6 -> 2 -> 4")
+        self._ui_header("Full Pipeline Run (v5.2)", "1 -> 1.5 -> 1.55 -> 1.6 -> 2 -> 4")
         logger.info(f"Target Language: {language_name} ({target_lang.upper()})")
         logger.info(f"Source: {epub_path}")
         logger.info(f"Volume ID: {volume_id}")
         logger.info("")
 
-        phase_total = 4 if skip_multimodal else 5
+        phase_total = 5 if skip_multimodal else 6
         phase_done = 0
 
-        with self.ui.phase_progress(phase_total, "Pipeline v5.1") as pipeline_tracker:
+        with self.ui.phase_progress(phase_total, "Pipeline v5.2") as pipeline_tracker:
             def _advance_pipeline(label: str) -> None:
                 nonlocal phase_done
                 phase_done += 1
@@ -1400,7 +1625,15 @@ class PipelineController:
 
             logger.info("")
 
-            # Interactive pause after Phase 1.5 (only in verbose mode)
+            # Phase 1.55: Rich Metadata Cache Enrichment
+            if not self.run_phase1_55(volume_id):
+                pipeline_tracker.fail("P1.55 Rich Metadata")
+                return False
+            _advance_pipeline("P1.55 Rich Metadata")
+
+            logger.info("")
+
+            # Interactive pause after metadata enrichment (only in verbose mode)
             if self.verbose:
                 while True:
                     self._ui_header("Checkpoint: Metadata Complete", "Review metadata or continue to translation")
@@ -1700,6 +1933,7 @@ class PipelineController:
         pipeline_state = manifest.get('pipeline_state', {})
         p1_raw = pipeline_state.get('librarian', {}).get('status', 'not started')
         p15_raw = pipeline_state.get('metadata_processor', {}).get('status', 'not started')
+        p155_raw = pipeline_state.get('rich_metadata_cache', {}).get('status', 'not started')
         p2_raw = pipeline_state.get('translator', {}).get('status', 'not started')
         p3_raw = pipeline_state.get('critics', {}).get('status', 'manual review')
         p4_raw = pipeline_state.get('builder', {}).get('status', 'not started')
@@ -1707,6 +1941,7 @@ class PipelineController:
         logger.info("Phase Overview:")
         logger.info(f"  P1   Librarian: {self._status_badge(p1_raw):<5} ({p1_raw})")
         logger.info(f"  P1.5 Metadata:  {self._status_badge(p15_raw):<5} ({p15_raw})")
+        logger.info(f"  P1.55 Rich:     {self._status_badge(p155_raw):<5} ({p155_raw})")
 
         # Phase 1.6 (Multimodal) - check for visual_cache.json
         volume_path = self.work_dir / volume_id
@@ -1733,10 +1968,11 @@ class PipelineController:
         completed_phases = 0
         completed_phases += int(self._status_badge(p1_raw) == "DONE")
         completed_phases += int(self._status_badge(p15_raw) == "DONE")
+        completed_phases += int(self._status_badge(p155_raw) == "DONE")
         completed_phases += int(p16_raw.startswith("cached"))
         completed_phases += int(self._status_badge(p2_raw) == "DONE")
         completed_phases += int(self._status_badge(p4_raw) == "DONE")
-        self.ui.render_status_bar("Phase Completion", completed_phases, 5)
+        self.ui.render_status_bar("Phase Completion", completed_phases, 6)
         logger.info("")
         
         # Chapters
@@ -2196,6 +2432,7 @@ class PipelineController:
             pipeline_state = manifest.get('pipeline_state', {})
             p1 = self._status_badge(pipeline_state.get('librarian', {}).get('status', ''))
             p15 = self._status_badge(pipeline_state.get('metadata_processor', {}).get('status', ''))
+            p155 = self._status_badge(pipeline_state.get('rich_metadata_cache', {}).get('status', ''))
             p16 = self._visual_phase_badge(volume_id)
             p2 = self._status_badge(pipeline_state.get('translator', {}).get('status', ''))
             p4 = self._status_badge(pipeline_state.get('builder', {}).get('status', ''))
@@ -2206,6 +2443,7 @@ class PipelineController:
             rows.append({
                 "p1": p1,
                 "p15": p15,
+                "p155": p155,
                 "p16": p16,
                 "p2": p2,
                 "p4": p4,
@@ -2220,6 +2458,7 @@ class PipelineController:
                 stage_summary = " ".join([
                     self.ui.format_compact_badge(row["p1"]),
                     self.ui.format_compact_badge(row["p15"]),
+                    self.ui.format_compact_badge(row["p155"]),
                     self.ui.format_compact_badge(row["p16"]),
                     self.ui.format_compact_badge(row["p2"]),
                     self.ui.format_compact_badge(row["p4"]),
@@ -2233,7 +2472,7 @@ class PipelineController:
             self.ui.render_table(
                 title=f"Workspace Volumes ({len(rows)})",
                 columns=[
-                    {"header": "Stages (P1/P1.5/P1.6/P2/P4)", "no_wrap": True},
+                    {"header": "Stages (P1/P1.5/P1.55/P1.6/P2/P4)", "no_wrap": True},
                     {"header": "Lang", "justify": "center", "style": "cyan"},
                     {"header": "ID Key", "style": "cyan", "no_wrap": True},
                     {"header": "Title", "no_wrap": True, "overflow": "ellipsis", "max_width": 56},
@@ -2244,14 +2483,14 @@ class PipelineController:
             return
 
         self._ui_header("Workspace Volumes", f"Total: {len(rows)}")
-        logger.info(" P1   P1.5  P1.6     P2    P4    Lang  ID Key         Title")
-        logger.info("-" * 102)
+        logger.info(" P1   P1.5  P1.55 P1.6     P2    P4    Lang  ID Key         Title")
+        logger.info("-" * 110)
         for row in rows:
             logger.info(
-                f" {row['p1']:<4} {row['p15']:<5} {row['p16']:<8} {row['p2']:<5} {row['p4']:<5} "
+                f" {row['p1']:<4} {row['p15']:<5} {row['p155']:<5} {row['p16']:<8} {row['p2']:<5} {row['p4']:<5} "
                 f"{row['lang']:<5} {row['id_key']:<14} {row['title']}"
             )
-        logger.info("-" * 102)
+        logger.info("-" * 110)
         logger.info("Tip: run `mtl.py status <id>` for detailed per-volume metrics.")
     
     def inspect_metadata(self, volume_id: str, validate: bool = False) -> bool:
@@ -2564,7 +2803,7 @@ class PipelineController:
             and top_k is None
             and not language
         ):
-            self._ui_header("Pipeline Configuration", "MTL Studio 5.1 runtime settings")
+            self._ui_header("Pipeline Configuration", "MTL Studio v5.2 runtime settings")
 
             # Target Language
             try:
@@ -2757,8 +2996,11 @@ def main():
     args = parser.parse_args()
     
     if not args.command:
-        logger.info("MTL Studio 5.1 CLI")
-        logger.info("Use one of: run | phase1 | phase1.5 | phase1.6 | phase2 | phase4 | list | status")
+        logger.info("MTL Studio v5.2 CLI")
+        logger.info(
+            "Use one of: run | phase1 | phase1.5 | phase1.55 | phase1.6 | phase2 | phase4 | "
+            "list | status | metadata | schema | bible"
+        )
         parser.print_help()
         sys.exit(1)
     
@@ -2802,9 +3044,22 @@ def main():
         # Run Phase 1.6 first, then Phase 2 with multimodal enabled
         controller._ui_header(
             "Multimodal Translator",
-            "Phase 1.6 (visual analysis) -> Phase 2 (translation with visual context)"
+            "Phase 1.55 (if needed) -> Phase 1.6 (visual analysis) -> Phase 2"
         )
         logger.info("")
+        manifest = controller.load_manifest(args.volume_id)
+        rich_state = (
+            manifest.get("pipeline_state", {}).get("rich_metadata_cache", {}).get("status", "not run")
+            if manifest else "not run"
+        )
+        if rich_state != "completed":
+            logger.info("Step 0: Running Phase 1.55 (Rich Metadata Cache)...")
+            success_p155 = controller.run_phase1_55(args.volume_id)
+            if not success_p155:
+                logger.error("Phase 1.55 failed. Aborting multimodal translation.")
+                sys.exit(1)
+            logger.info("")
+
         logger.info("Step 1: Running Phase 1.6 (Visual Analysis)...")
         success_p16 = controller.run_phase1_6(args.volume_id, standalone=False)
         
@@ -2824,7 +3079,6 @@ def main():
         
         success_p2 = controller.run_phase2(
             args.volume_id, chapters, force,
-            enable_continuity=False,
             enable_gap_analysis=False,
             enable_multimodal=True  # Always enable multimodal for this command
         )
@@ -2848,17 +3102,25 @@ def main():
     elif args.command == 'phase1.5':
         success = controller.run_phase1_5(args.volume_id)
         sys.exit(0 if success else 1)
+
+    elif args.command == 'phase1.55':
+        success = controller.run_phase1_55(args.volume_id)
+        sys.exit(0 if success else 1)
     
     elif args.command == 'phase2':
         # Keep legacy verbose behavior in plain mode; rich mode has live chapter bars.
         if not args.verbose and not controller.ui.rich_enabled:
             logger.info("ℹ️  Running Phase 2 in verbose mode (use `--ui rich` for modern progress)")
             controller = PipelineController(verbose=True, ui_mode=ui_mode, no_color=no_color)
-        enable_continuity = getattr(args, 'enable_continuity', False)
+        if getattr(args, 'enable_continuity', False):
+            logger.warning(
+                "Ignoring deprecated --enable-continuity flag. "
+                "v5.2 uses Bible/manifest continuity automatically."
+            )
         enable_gap_analysis = getattr(args, 'enable_gap_analysis', False)
         enable_multimodal = getattr(args, 'enable_multimodal', False)
         success = controller.run_phase2(args.volume_id, args.chapters, args.force,
-                                        enable_continuity, enable_gap_analysis, enable_multimodal)
+                                        enable_gap_analysis, enable_multimodal)
         sys.exit(0 if success else 1)
     
     elif args.command == 'phase3':

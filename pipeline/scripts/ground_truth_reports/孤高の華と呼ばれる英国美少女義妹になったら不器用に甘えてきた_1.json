@@ -1,0 +1,215 @@
+{
+  "series_id": "孤高の華と呼ばれる英国美少女義妹になったら不器用に甘えてきた_1",
+  "series_title": {
+    "ja": "孤高の華と呼ばれる英国美少女、義妹になったら不器用に甘えてきた",
+    "en": "My Stepsister, the British Ice Queen, Is an Awkward Sweetheart at Home",
+    "romaji": ""
+  },
+  "world_type": "modern_japan",
+  "total_entries": 22,
+  "results": [
+    {
+      "jp": "黒金",
+      "current_en": "Kurogane",
+      "verified_en": "Kurogane",
+      "source": "J-Novel Club LN Vol.1 (implied from full name Kurogane Shuuto on Wikipedia, consistent romanization)",
+      "confidence": "high",
+      "status": "correct",
+      "note": "surname of Kurogane Shuuto"
+    },
+    {
+      "jp": "柊斗",
+      "current_en": "Shiyuto",
+      "verified_en": "Shuuto",
+      "source": "J-Novel Club LN Vol.1 (implied from full name Kurogane Shuuto on Wikipedia)",
+      "confidence": "high",
+      "status": "incorrect",
+      "note": "given name of Kurogane Shuuto"
+    },
+    {
+      "jp": "灰宮",
+      "current_en": "Haimiya",
+      "verified_en": "Haimiya",
+      "source": "no source found",
+      "confidence": "unverifiable",
+      "status": "unverifiable",
+      "note": "Could not find official English translation for this character name in the context of the series."
+    },
+    {
+      "jp": "撫子",
+      "current_en": "Nadeshiko",
+      "verified_en": "Nadeshiko",
+      "source": "J-Novel Club LN Vol.1 (implied from full name Kujouin Nadeshiko on Wikipedia)",
+      "confidence": "high",
+      "status": "correct",
+      "note": "given name of Kujouin Nadeshiko"
+    },
+    {
+      "jp": "竜胆",
+      "current_en": "Rindou",
+      "verified_en": "Rindou",
+      "source": "no source found",
+      "confidence": "unverifiable",
+      "status": "unverifiable",
+      "note": "Could not find official English translation for this character name in the context of the series."
+    },
+    {
+      "jp": "賢人",
+      "current_en": "Kento",
+      "verified_en": "Kento",
+      "source": "J-Novel Club LN Vol.1 (Shirakawa Kento mentioned in series description)",
+      "confidence": "high",
+      "status": "correct",
+      "note": "given name of Shirakawa Kento"
+    },
+    {
+      "jp": "有栖",
+      "current_en": "Arisu",
+      "verified_en": "Arisu",
+      "source": "no source found",
+      "confidence": "unverifiable",
+      "status": "unverifiable",
+      "note": "Could not find official English translation for this character name in the context of the series."
+    },
+    {
+      "jp": "志倉坂",
+      "current_en": "Shigurazaka",
+      "verified_en": "Shigurazaka",
+      "source": "no source found",
+      "confidence": "unverifiable",
+      "status": "unverifiable",
+      "note": "Could not find official English translation for this character name in the context of the series."
+    },
+    {
+      "jp": "白川",
+      "current_en": "Shirakawa",
+      "verified_en": "Shirakawa",
+      "source": "J-Novel Club LN Vol.1 (Shirakawa Kento mentioned in series description)",
+      "confidence": "high",
+      "status": "correct",
+      "note": "surname of Shirakawa Kento"
+    },
+    {
+      "jp": "美海",
+      "current_en": "Miu",
+      "verified_en": "Miu",
+      "source": "no source found",
+      "confidence": "unverifiable",
+      "status": "unverifiable",
+      "note": "Could not find official English translation for this character name in the context of the series."
+    },
+    {
+      "jp": "ソフィア",
+      "current_en": "Sofia",
+      "verified_en": "Sophia",
+      "source": "J-Novel Club LN Vol.1 (Sophia Frost mentioned in series description)",
+      "confidence": "high",
+      "status": "incorrect",
+      "note": "Official romanization uses 'ph' instead of 'f'."
+    },
+    {
+      "jp": "九条院",
+      "current_en": "Kujouin",
+      "verified_en": "Kujouin",
+      "source": "J-Novel Club LN Vol.1 (implied from full name Kujouin Nadeshiko on Wikipedia)",
+      "confidence": "high",
+      "status": "correct",
+      "note": "surname of Kujouin Nadeshiko"
+    },
+    {
+      "jp": "広洋",
+      "current_en": "Kouyou",
+      "verified_en": "Kouyou",
+      "source": "no source found",
+      "confidence": "unverifiable",
+      "status": "unverifiable",
+      "note": "Could not find official English translation for this character name in the context of the series."
+    },
+    {
+      "jp": "夜嶋",
+      "current_en": "Yajima",
+      "verified_en": "Yajima",
+      "source": "no source found",
+      "confidence": "unverifiable",
+      "status": "unverifiable",
+      "note": "Could not find official English translation for this character name in the context of the series."
+    },
+    {
+      "jp": "皇洸也",
+      "current_en": "Sumeragi Kouya",
+      "verified_en": "Sumeragi Kouya",
+      "source": "no source found",
+      "confidence": "unverifiable",
+      "status": "unverifiable",
+      "note": "Could not find official English translation for this character name in the context of the series."
+    },
+    {
+      "jp": "鬼頭",
+      "current_en": "Kitou",
+      "verified_en": "Kitou",
+      "source": "no source found",
+      "confidence": "unverifiable",
+      "status": "unverifiable",
+      "note": "Could not find official English translation for this character name in the context of the series."
+    },
+    {
+      "jp": "ジェシカ",
+      "current_en": "Jessica",
+      "verified_en": "Jessica",
+      "source": "J-Novel Club LN Vol.1 (Jessica Frost mentioned on Wikipedia as Sophia's mother)",
+      "confidence": "high",
+      "status": "correct",
+      "note": "full name Jessica Frost"
+    },
+    {
+      "jp": "翔太",
+      "current_en": "Shouta",
+      "verified_en": "Shouta",
+      "source": "J-Novel Club LN Vol.1 (implied from full name Kannagi Shouta on Wikipedia)",
+      "confidence": "high",
+      "status": "correct",
+      "note": "given name of Kannagi Shouta"
+    },
+    {
+      "jp": "青城",
+      "current_en": "Seijou",
+      "verified_en": "Seijou",
+      "source": "no source found",
+      "confidence": "unverifiable",
+      "status": "unverifiable",
+      "note": "Could not find official English translation for this character name in the context of the series."
+    },
+    {
+      "jp": "神薙",
+      "current_en": "Kannagi",
+      "verified_en": "Kannagi",
+      "source": "J-Novel Club LN Vol.1 (implied from full name Kannagi Shouta on Wikipedia)",
+      "confidence": "high",
+      "status": "correct",
+      "note": "surname of Kannagi Shouta"
+    },
+    {
+      "jp": "洸也",
+      "current_en": "Kouya",
+      "verified_en": "Kouya",
+      "source": "no source found",
+      "confidence": "unverifiable",
+      "status": "unverifiable",
+      "note": "Could not find official English translation for this character name in the context of the series. Potentially given name of Sumeragi Kouya."
+    },
+    {
+      "jp": "玲音",
+      "current_en": "Reon",
+      "verified_en": "Reon",
+      "source": "no source found",
+      "confidence": "unverifiable",
+      "status": "unverifiable",
+      "note": "Could not find official English translation for this character name in the context of the series."
+    }
+  ],
+  "summary": {
+    "correct": 8,
+    "incorrect": 2,
+    "unverifiable": 12
+  }
+}

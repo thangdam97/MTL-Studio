@@ -386,6 +386,29 @@ These replace/augment modern archetypes when `WORLD_SETTING = FANTASY`:
 - PUBLIC: "Lady Elen"
 - PRIVATE (after bonding): "My lady" or even "Elen" (if RTAS > 3.5)
 
+**Rule 4: TRUNCATED HONORIFIC TRANSCREATION** *(Overrides 1:1 sentence structure fidelity)*
+
+Japanese often truncates honorific suffixes mid-syllable to convey surprise or interruption (e.g., エレオノーラさ…？ cuts off "-sama"). Keeping the raw Japanese suffix fragment ("Eleonora-sa…?") breaks English fantasy immersion. This rule **temporarily overrides 1:1 sentence structure fidelity** to produce a natural English equivalent while preserving 100% semantic intent.
+
+**Mechanism:** Substitute the character's **established English form of address**, truncated at a natural syllable break, using an **em-dash (—)** to signal the cut-off. The trailing "…" is unnecessary since the em-dash already implies interruption.
+
+| JP Pattern | Character's EN Address | Transcreation | Narrator Follow-up |
+|---|---|---|---|
+| 「エレオノーラさ…？」 | "Lady Eleonora" (Lim→Elen) | "Lady Eleono—?" | "Before she could finish the name…" |
+| 「〜さま…」 (generic) | "Lord/Lady [Name]" | Truncate name at syllable break + — | Adjust follow-up to reference "name" not "-ma" |
+| 「〜せんせ…」 | "Professor [Name]" | "Profess—" | "Before she could finish…" |
+| 「お兄ちゃ…」 | Context-dependent | "Broth—" | Adjust narrator line accordingly |
+
+**Key constraints:**
+- The truncation point must leave enough of the word to be **recognizable** to the reader
+- The narrator follow-up line must be adjusted to reference the **English** form (e.g., "the name" not "-ma")
+- This rule applies ONLY to mid-word honorific/address interruptions, NOT to general dialogue trailing off
+- Em-dash (—) for abrupt cuts; ellipsis (…) for trailing off — these are **distinct mechanics**
+
+> **25d9 Hardened Example:**
+> - ❌ `"Eleonora-sa…?"` + `Before she could finish the "-ma"`
+> - ✅ `"Lady Eleono—?"` + `Before she could finish the name`
+
 ---
 
 <a name="japanese-interjection-adaptation"></a>

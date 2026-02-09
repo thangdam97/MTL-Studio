@@ -1,0 +1,395 @@
+{
+  "series_id": "この中に1人妹がいる_3",
+  "series_title": {
+    "ja": "この中に1人、妹がいる！",
+    "en": "One of Them Is My Sister! Volume",
+    "romaji": ""
+  },
+  "world_type": "modern_japan",
+  "total_entries": 42,
+  "results": [
+    {
+      "jp": "帝野将悟",
+      "current_en": "Shougo Mikadono",
+      "verified_en": "Shogo Mikadono",
+      "source": "Anime News Network, Wikipedia, MyAnimeList (English dub cast)",
+      "confidence": "high",
+      "status": "incorrect",
+      "note": "Official romanization is 'Shogo', not 'Shougo'."
+    },
+    {
+      "jp": "帝野《みかどの》",
+      "current_en": "Mikadono",
+      "verified_en": "Mikadono",
+      "source": "Anime News Network, Wikipedia, MyAnimeList",
+      "confidence": "high",
+      "status": "correct",
+      "note": "Furigana variant/surname."
+    },
+    {
+      "jp": "鶴眞心乃枝",
+      "current_en": "Tsuruma Konoha",
+      "verified_en": "Konoe Tsuruma",
+      "source": "Wikipedia, Anime News Network, MyAnimeList (English dub cast)",
+      "confidence": "high",
+      "status": "incorrect",
+      "note": "Official English sources list the given name first: Konoe Tsuruma."
+    },
+    {
+      "jp": "鶴眞《つるま》",
+      "current_en": "Tsuruma",
+      "verified_en": "Tsuruma",
+      "source": "Anime News Network, Wikipedia, MyAnimeList",
+      "confidence": "high",
+      "status": "correct",
+      "note": "Furigana variant/surname."
+    },
+    {
+      "jp": "柚璃奈",
+      "current_en": "Yurina",
+      "verified_en": "Yuzurina",
+      "source": "Wikipedia, Anime News Network, Fandom Wiki, NamuWiki, MyAnimeList",
+      "confidence": "high",
+      "status": "incorrect",
+      "note": "Official romanization is 'Yuzurina', not 'Yurina'."
+    },
+    {
+      "jp": "国立凜香",
+      "current_en": "Kunitachi Rinka",
+      "verified_en": "Rinka Kunitachi",
+      "source": "Wikipedia, Anime News Network, MyAnimeList (English dub cast)",
+      "confidence": "high",
+      "status": "incorrect",
+      "note": "Official English sources list the given name first: Rinka Kunitachi."
+    },
+    {
+      "jp": "国立《くにたち》",
+      "current_en": "Kunitachi",
+      "verified_en": "Kunitachi",
+      "source": "Anime News Network, Wikipedia, MyAnimeList",
+      "confidence": "high",
+      "status": "correct",
+      "note": "Furigana variant/surname."
+    },
+    {
+      "jp": "凜香《りんか》",
+      "current_en": "Rinka",
+      "verified_en": "Rinka",
+      "source": "Anime News Network, Wikipedia, MyAnimeList",
+      "confidence": "high",
+      "status": "correct",
+      "note": "Furigana variant/given name."
+    },
+    {
+      "jp": "天導愛菜",
+      "current_en": "Tendou Mana",
+      "verified_en": "Mana Tendou",
+      "source": "Wikipedia, Anime News Network, MyAnimeList (English dub cast)",
+      "confidence": "high",
+      "status": "incorrect",
+      "note": "Official English sources list the given name first: Mana Tendou."
+    },
+    {
+      "jp": "天導《てんどう》",
+      "current_en": "Tendou",
+      "verified_en": "Tendou",
+      "source": "Anime News Network, Wikipedia, MyAnimeList",
+      "confidence": "high",
+      "status": "correct",
+      "note": "Furigana variant/surname."
+    },
+    {
+      "jp": "愛菜《まな》",
+      "current_en": "Mana",
+      "verified_en": "Mana",
+      "source": "Anime News Network, Wikipedia, MyAnimeList",
+      "confidence": "high",
+      "status": "correct",
+      "note": "Furigana variant/given name."
+    },
+    {
+      "jp": "嵯峨良",
+      "current_en": "Sagara",
+      "verified_en": "Sagara",
+      "source": "Anime News Network, Wikipedia, MyAnimeList",
+      "confidence": "high",
+      "status": "correct",
+      "note": "Alias (surname)."
+    },
+    {
+      "jp": "嵯峨良《さがら》",
+      "current_en": "Sagara",
+      "verified_en": "Sagara",
+      "source": "Anime News Network, Wikipedia, MyAnimeList",
+      "confidence": "high",
+      "status": "correct",
+      "note": "Furigana variant/surname."
+    },
+    {
+      "jp": "帝野熊五郎",
+      "current_en": "Kumagorou Mikadono",
+      "verified_en": "Kumagoro Mikadono",
+      "source": "Wikipedia, Anime News Network, MyAnimeList (English dub cast)",
+      "confidence": "high",
+      "status": "incorrect",
+      "note": "Official romanization is 'Kumagoro', not 'Kumagorou'."
+    },
+    {
+      "jp": "熊五郎《くまごろう》",
+      "current_en": "Kumagorou",
+      "verified_en": "Kumagoro",
+      "source": "Wikipedia, Anime News Network, MyAnimeList",
+      "confidence": "high",
+      "status": "incorrect",
+      "note": "Official romanization is 'Kumagoro', not 'Kumagorou'."
+    },
+    {
+      "jp": "鹿野子《かのこ》",
+      "current_en": "Kanoko",
+      "verified_en": "Kanoko",
+      "source": "Wikipedia, Anime News Network, MyAnimeList",
+      "confidence": "high",
+      "status": "correct",
+      "note": "Furigana variant/given name (alias)."
+    },
+    {
+      "jp": "小都里《ことり》",
+      "current_en": "Kotori",
+      "verified_en": "Kotori",
+      "source": "Anime News Network, Wikipedia, MyAnimeList",
+      "confidence": "high",
+      "status": "correct",
+      "note": "Furigana variant/given name (alias)."
+    },
+    {
+      "jp": "神凪《かんなぎ》",
+      "current_en": "Kannagi",
+      "verified_en": "Kannagi",
+      "source": "Anime News Network, Wikipedia, MyAnimeList",
+      "confidence": "high",
+      "status": "correct",
+      "note": "Furigana variant/surname (alias)."
+    },
+    {
+      "jp": "将悟《しようご》",
+      "current_en": "Shougo",
+      "verified_en": "Shogo",
+      "source": "Anime News Network, Wikipedia, MyAnimeList",
+      "confidence": "high",
+      "status": "incorrect",
+      "note": "Official romanization is 'Shogo', not 'Shougo'."
+    },
+    {
+      "jp": "小野《おのの》",
+      "current_en": "Onono",
+      "verified_en": "Onono",
+      "source": "no source found",
+      "confidence": "unverifiable",
+      "status": "unverifiable",
+      "note": "Could not find any official English translation or character named 'Onono' in the context of the series."
+    },
+    {
+      "jp": "瀬利《せり》",
+      "current_en": "Seri",
+      "verified_en": "Seri",
+      "source": "Wikipedia, Anime News Network, MyAnimeList",
+      "confidence": "high",
+      "status": "correct",
+      "note": "Furigana variant/surname (alias)."
+    },
+    {
+      "jp": "水谷《みずたに》",
+      "current_en": "Mizutani",
+      "verified_en": "Mizutani",
+      "source": "Wikipedia, Anime News Network, MyAnimeList",
+      "confidence": "high",
+      "status": "correct",
+      "note": "Furigana variant/surname (alias)."
+    },
+    {
+      "jp": "誠二《せいじ》",
+      "current_en": "Seiji",
+      "verified_en": "Seiji",
+      "source": "NamuWiki",
+      "confidence": "medium",
+      "status": "correct",
+      "note": "Furigana variant/given name (alias)."
+    },
+    {
+      "jp": "衣楠《いくす》",
+      "current_en": "Ikusu",
+      "verified_en": "Ikusu",
+      "source": "Wikipedia, Anime News Network, MyAnimeList",
+      "confidence": "high",
+      "status": "correct",
+      "note": "Furigana variant/given name (alias)."
+    },
+    {
+      "jp": "センパイ",
+      "current_en": "Senpai",
+      "verified_en": "Senpai",
+      "source": "General anime/manga usage",
+      "confidence": "high",
+      "status": "correct",
+      "note": "Common Japanese honorific/term."
+    },
+    {
+      "jp": "カード",
+      "current_en": "Card",
+      "verified_en": "Card",
+      "source": "General Japanese to English translation",
+      "confidence": "high",
+      "status": "correct",
+      "note": "Katakana term."
+    },
+    {
+      "jp": "ウェイトレス",
+      "current_en": "Waitress",
+      "verified_en": "Waitress",
+      "source": "General Japanese to English translation",
+      "confidence": "high",
+      "status": "correct",
+      "note": "Katakana term."
+    },
+    {
+      "jp": "オーナー",
+      "current_en": "Owner",
+      "verified_en": "Owner",
+      "source": "General Japanese to English translation",
+      "confidence": "high",
+      "status": "correct",
+      "note": "Katakana term."
+    },
+    {
+      "jp": "グループ",
+      "current_en": "Group",
+      "verified_en": "Group",
+      "source": "Wikipedia, TheTVDB, WordPress.com",
+      "confidence": "high",
+      "status": "correct",
+      "note": "Katakana term, often seen in 'Mikadono Group'."
+    },
+    {
+      "jp": "チラシ",
+      "current_en": "Flyer",
+      "verified_en": "Flyer",
+      "source": "General Japanese to English translation",
+      "confidence": "high",
+      "status": "correct",
+      "note": "Katakana term."
+    },
+    {
+      "jp": "心乃枝《このえ》",
+      "current_en": "Konoe",
+      "verified_en": "Konoe",
+      "source": "Anime News Network, Wikipedia, MyAnimeList",
+      "confidence": "high",
+      "status": "correct",
+      "note": "Furigana variant/given name."
+    },
+    {
+      "jp": "神凪雅",
+      "current_en": "Kannagi Miyabi",
+      "verified_en": "Miyabi Kannagi",
+      "source": "Wikipedia, Anime News Network, MyAnimeList (English dub cast)",
+      "confidence": "high",
+      "status": "incorrect",
+      "note": "Official English sources list the given name first: Miyabi Kannagi."
+    },
+    {
+      "jp": "雅《みやび》",
+      "current_en": "Miyabi",
+      "verified_en": "Miyabi",
+      "source": "Anime News Network, Wikipedia, MyAnimeList",
+      "confidence": "high",
+      "status": "correct",
+      "note": "Furigana variant/given name."
+    },
+    {
+      "jp": "水谷衣楠",
+      "current_en": "Mizutani Ikusu",
+      "verified_en": "Ikusu Mizutani",
+      "source": "Wikipedia, Anime News Network, MyAnimeList (English dub cast)",
+      "confidence": "high",
+      "status": "incorrect",
+      "note": "Official English sources list the given name first: Ikusu Mizutani."
+    },
+    {
+      "jp": "小都里まい子",
+      "current_en": "Kotori Maiko",
+      "verified_en": "Maiko Kotori",
+      "source": "Wikipedia, Anime News Network, MyAnimeList (English dub cast)",
+      "confidence": "high",
+      "status": "incorrect",
+      "note": "Official English sources list the given name first: Maiko Kotori."
+    },
+    {
+      "jp": "まい子《こ》",
+      "current_en": "Maiko",
+      "verified_en": "Maiko",
+      "source": "Wikipedia, Anime News Network, MyAnimeList",
+      "confidence": "high",
+      "status": "correct",
+      "note": "Furigana variant/given name."
+    },
+    {
+      "jp": "嵯峨良芽依",
+      "current_en": "Sagara Mei",
+      "verified_en": "Mei Sagara",
+      "source": "Wikipedia, Anime News Network, MyAnimeList (English dub cast)",
+      "confidence": "high",
+      "status": "incorrect",
+      "note": "Official English sources list the given name first: Mei Sagara."
+    },
+    {
+      "jp": "芽依《めい》",
+      "current_en": "Mei",
+      "verified_en": "Mei",
+      "source": "Anime News Network, Wikipedia, MyAnimeList",
+      "confidence": "high",
+      "status": "correct",
+      "note": "Furigana variant/given name."
+    },
+    {
+      "jp": "帝野鹿野子",
+      "current_en": "Mikadono Kanoko",
+      "verified_en": "Kanoko Mikadono",
+      "source": "Wikipedia, Anime News Network, MyAnimeList (English dub cast)",
+      "confidence": "high",
+      "status": "incorrect",
+      "note": "Official English sources list the given name first: Kanoko Mikadono."
+    },
+    {
+      "jp": "鶴眞誠二",
+      "current_en": "Tsuruma Seiji",
+      "verified_en": "Seiji Tsuruma",
+      "source": "NamuWiki",
+      "confidence": "medium",
+      "status": "incorrect",
+      "note": "Official English sources list the given name first: Seiji Tsuruma."
+    },
+    {
+      "jp": "アンタッチャブルス《手を出せぬ者たち》",
+      "current_en": "The Untouchables",
+      "verified_en": "The Untouchables",
+      "source": "no source found",
+      "confidence": "unverifiable",
+      "status": "unverifiable",
+      "note": "Could not find an official English translation for this specific term within the licensed light novel, anime, or manga. The current English is a direct and plausible translation of the furigana (手を出せぬ者たち - 'those who cannot be touched')."
+    },
+    {
+      "jp": "ゼリー《》",
+      "current_en": "Jelly",
+      "verified_en": "Jelly",
+      "source": "no source found",
+      "confidence": "unverifiable",
+      "status": "unverifiable",
+      "note": "Could not find any character or specific term named 'Jelly' or 'ゼリー' in official English releases (light novel, anime, manga) or comprehensive fan wikis for the series 'Nakaimo - My Sister Is Among Them!'."
+    }
+  ],
+  "summary": {
+    "correct": 25,
+    "incorrect": 14,
+    "unverifiable": 3
+  }
+}

@@ -76,6 +76,10 @@ def main_menu() -> Optional[str]:
             value="resume"
         ),
         questionary.Choice(
+            title="Run Phase 1.55 (Rich Metadata Cache)",
+            value="phase1.55"
+        ),
+        questionary.Choice(
             title="Settings",
             value="settings"
         ),
@@ -139,6 +143,7 @@ def phase_menu(volume_id: str) -> Optional[str]:
     choices = [
         questionary.Choice("Phase 1: Librarian (EPUB Extraction)", value="phase1"),
         questionary.Choice("Phase 1.5: Metadata (Title/Author Translation)", value="phase1.5"),
+        questionary.Choice("Phase 1.55: Rich Metadata Cache (Full-LN Enrichment)", value="phase1.55"),
         questionary.Choice("Phase 1.6: Multimodal Processor (Illustration Analysis)", value="phase1.6"),
         questionary.Choice("Phase 2: Translator (Gemini MT)", value="phase2"),
         questionary.Choice("Phase 3: Critics (Manual Review)", value="phase3"),

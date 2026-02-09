@@ -839,6 +839,49 @@ class MetadataProcessor:
             # Fallback: return inherited only
             return inherited_names.copy()
 
+    def _sync_bible_post_metadata(
+        self,
+        bible_sync=None,
+        bible_pull=None,
+    ) -> None:
+        """Finalize Bible continuity after manifest write.
+
+        Ensures sequel and non-sequel paths both:
+        - resolve series bible
+        - persist manifest.bible_id when detected
+        - push/register current volume into bible index
+        - emit continuity diff report
+        """
+        try:
+            if bible_sync is None:
+                from pipeline.metadata_processor.bible_sync import BibleSyncAgent
+                from pipeline.config import PIPELINE_ROOT
+                bible_sync = BibleSyncAgent(self.work_dir, PIPELINE_ROOT)
+
+            if not getattr(bible_sync, "bible", None):
+                if not bible_sync.resolve(self.manifest):
+                    return
+
+            if bible_sync.series_id and self.manifest.get("bible_id") != bible_sync.series_id:
+                self.manifest["bible_id"] = bible_sync.series_id
+                with open(self.manifest_path, "w", encoding="utf-8") as f:
+                    json.dump(self.manifest, f, indent=2, ensure_ascii=False)
+                logger.info(f"📖 Linked manifest to bible_id: {bible_sync.series_id}")
+
+            push_result = bible_sync.push(self.manifest)
+            logger.info(f"📖 Bible PUSH complete: {push_result.summary()}")
+
+            try:
+                bible_sync.generate_continuity_report(
+                    self.manifest,
+                    pull_result=bible_pull,
+                    push_result=push_result,
+                )
+            except Exception as report_err:
+                logger.warning(f"Continuity report generation failed: {report_err}")
+        except Exception as e:
+            logger.warning(f"Bible sync (post-metadata) failed: {e}")
+
     def _process_sequel_metadata_direct_copy(
         self,
         parent_data: Dict,
@@ -996,6 +1039,9 @@ class MetadataProcessor:
 
         with open(self.manifest_path, 'w', encoding='utf-8') as f:
             json.dump(self.manifest, f, indent=2, ensure_ascii=False)
+
+        # Keep sequel flow in sync with bible registry and volume linking.
+        self._sync_bible_post_metadata()
 
         logger.info("="*70)
         logger.info("✅ FULL SEQUEL MODE COMPLETE - Maximum API savings achieved!")
@@ -1196,7 +1242,10 @@ class MetadataProcessor:
         
         with open(self.manifest_path, 'w', encoding='utf-8') as f:
             json.dump(self.manifest, f, indent=2, ensure_ascii=False)
-        
+
+        # Keep sequel flow in sync with bible registry and volume linking.
+        self._sync_bible_post_metadata()
+
         logger.info("="*70)
         logger.info("✅ SEQUEL OPTIMIZATION COMPLETE - API calls minimized!")
         logger.info(f"   • Inherited: {len(parent_data.get('character_roster', {}))} names, "
@@ -1280,6 +1329,9 @@ class MetadataProcessor:
             from pipeline.config import PIPELINE_ROOT
             bible_sync = BibleSyncAgent(self.work_dir, PIPELINE_ROOT)
             if bible_sync.resolve(self.manifest):
+                if bible_sync.series_id and self.manifest.get("bible_id") != bible_sync.series_id:
+                    self.manifest["bible_id"] = bible_sync.series_id
+                    logger.info(f"📖 Linked manifest to bible_id: {bible_sync.series_id}")
                 bible_pull = bible_sync.pull(self.manifest)
                 bible_known_names = bible_pull.known_characters
                 logger.info(f"📖 Bible PULL complete: {bible_pull.summary()}")
@@ -1436,24 +1488,8 @@ class MetadataProcessor:
                 json.dump(self.manifest, f, indent=2, ensure_ascii=False)
 
             # ── Bible Auto-Sync: PUSH (Manifest → Bible) ─────────
-            # Export newly discovered terms back to the series bible.
-            # This runs AFTER the final manifest write so the bible
-            # gets the fully processed, finalized data.
-            if bible_sync and bible_sync.bible:
-                try:
-                    push_result = bible_sync.push(self.manifest)
-                    logger.info(f"📖 Bible PUSH complete: {push_result.summary()}")
-                    # Generate continuity diff report artifact
-                    try:
-                        bible_sync.generate_continuity_report(
-                            self.manifest,
-                            pull_result=bible_pull,
-                            push_result=push_result,
-                        )
-                    except Exception as report_err:
-                        logger.warning(f"Continuity report generation failed: {report_err}")
-                except Exception as e:
-                    logger.warning(f"Bible sync (push) failed: {e}")
+            # Export newly discovered terms and register volume.
+            self._sync_bible_post_metadata(bible_sync=bible_sync, bible_pull=bible_pull)
 
         except Exception as e:
             logger.error(f"Failed to parse metadata response: {e}")

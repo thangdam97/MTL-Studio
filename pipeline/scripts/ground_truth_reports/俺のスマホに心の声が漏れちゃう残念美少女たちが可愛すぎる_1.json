@@ -1,0 +1,125 @@
+{
+  "series_id": "俺のスマホに心の声が漏れちゃう残念美少女たちが可愛すぎる_1",
+  "series_title": {
+    "ja": "俺のスマホに心の声が漏れちゃう残念美少女たちが可愛すぎる",
+    "en": "My Smartphone Leaks the Inner Thoughts of These Disappointing Beauties!",
+    "romaji": ""
+  },
+  "world_type": "modern_japan",
+  "total_entries": 12,
+  "results": [
+    {
+      "jp": "スマホ",
+      "current_en": "Smartphone",
+      "verified_en": "Smartphone",
+      "source": "Yen Press LN series title",
+      "confidence": "high",
+      "status": "correct",
+      "note": ""
+    },
+    {
+      "jp": "小恋",
+      "current_en": "Koko",
+      "verified_en": "Koko",
+      "source": "Yen Press LN Vol.1 synopsis",
+      "confidence": "high",
+      "status": "correct",
+      "note": ""
+    },
+    {
+      "jp": "如月",
+      "current_en": "Kisaragi",
+      "verified_en": "Kisaragi",
+      "source": "Yen Press LN Vol.1 synopsis",
+      "confidence": "high",
+      "status": "correct",
+      "note": ""
+    },
+    {
+      "jp": "スカート",
+      "current_en": "Skirt",
+      "verified_en": "Skirt",
+      "source": "no specific series source found, common translation",
+      "confidence": "medium",
+      "status": "correct",
+      "note": "Common loanword, no specific official series translation found but highly likely to be correct."
+    },
+    {
+      "jp": "ピンチ",
+      "current_en": "Pinch",
+      "verified_en": "Pinch",
+      "source": "no specific series source found, common translation",
+      "confidence": "medium",
+      "status": "correct",
+      "note": "Common loanword, no specific official series translation found but highly likely to be correct."
+    },
+    {
+      "jp": "可愛",
+      "current_en": "Kawai",
+      "verified_en": "Kawai",
+      "source": "Fandom wiki (part of Kawai Chika)",
+      "confidence": "medium",
+      "status": "correct",
+      "note": "This appears to be the family name of Kawai Chika. No direct Yen Press confirmation for 'Kawai' as a standalone character entry, but consistent with character naming conventions."
+    },
+    {
+      "jp": "千歌",
+      "current_en": "Chika",
+      "verified_en": "Chika",
+      "source": "Yen Press LN Vol.1 synopsis",
+      "confidence": "high",
+      "status": "correct",
+      "note": ""
+    },
+    {
+      "jp": "クラスメイト",
+      "current_en": "Classmate",
+      "verified_en": "Classmate",
+      "source": "no specific series source found, common translation",
+      "confidence": "medium",
+      "status": "correct",
+      "note": "Common loanword, no specific official series translation found but highly likely to be correct."
+    },
+    {
+      "jp": "美咲",
+      "current_en": "Misaki",
+      "verified_en": "Misaki",
+      "source": "Yen Press LN Vol.1 synopsis",
+      "confidence": "high",
+      "status": "correct",
+      "note": ""
+    },
+    {
+      "jp": "奈央",
+      "current_en": "Nao",
+      "verified_en": "Nao",
+      "source": "Yen Press LN Vol.1 synopsis",
+      "confidence": "high",
+      "status": "correct",
+      "note": ""
+    },
+    {
+      "jp": "裸足",
+      "current_en": "Barefoot",
+      "verified_en": "Barefoot",
+      "source": "no specific series source found, common translation",
+      "confidence": "medium",
+      "status": "correct",
+      "note": "Common Japanese word, no specific official series translation found but highly likely to be correct."
+    },
+    {
+      "jp": "ココロン",
+      "current_en": "Kokoron",
+      "verified_en": "Kokoron",
+      "source": "Fandom wiki (nickname for Koko)",
+      "confidence": "medium",
+      "status": "correct",
+      "note": "Confirmed as a nickname for Koko on a fan wiki, consistent with typical Japanese nicknames."
+    }
+  ],
+  "summary": {
+    "correct": 12,
+    "incorrect": 0,
+    "unverifiable": 0
+  }
+}

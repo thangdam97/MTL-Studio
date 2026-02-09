@@ -1,0 +1,1241 @@
+{
+  "series_id": "madan_no_ou_to_vanadis",
+  "series_title": {
+    "ja": "魔弾の王と戦姫",
+    "en": "Lord Marksman and Vanadis",
+    "romaji": "Madan no Ou to Vanadis"
+  },
+  "world_type": "fantasy",
+  "total_entries": 136,
+  "results": [
+    {
+      "jp": "アニエス",
+      "current_en": "Agnes",
+      "verified_en": "Agnes",
+      "source": "Wikipedia (as a place name)",
+      "confidence": "unverifiable",
+      "status": "unverifiable",
+      "note": "Primarily identified as a place name (Agnes), not a character. Cannot verify as a character."
+    },
+    {
+      "jp": "アラム",
+      "current_en": "Aram",
+      "verified_en": "Aram",
+      "source": "no source found",
+      "confidence": "unverifiable",
+      "status": "unverifiable",
+      "note": "No official English translation found for a character named Aram."
+    },
+    {
+      "jp": "アリファル",
+      "current_en": "Arifal",
+      "verified_en": "Arifal",
+      "source": "no source found",
+      "confidence": "unverifiable",
+      "status": "unverifiable",
+      "note": "No official English translation found for a character named Arifal."
+    },
+    {
+      "jp": "アルテシウム",
+      "current_en": "Artesium",
+      "verified_en": "Artesium",
+      "source": "no source found",
+      "confidence": "unverifiable",
+      "status": "unverifiable",
+      "note": "No official English translation found for a character named Artesium."
+    },
+    {
+      "jp": "アレクサンドラ",
+      "current_en": "Alexandra",
+      "verified_en": "Alexandra",
+      "source": "Wikipedia (Alexandra Alshavin), Madan no Ou to Vanadis Wiki",
+      "confidence": "high",
+      "status": "correct",
+      "note": "Alias for Alexandra Alshavin."
+    },
+    {
+      "jp": "アーロン",
+      "current_en": "Aaron",
+      "verified_en": "Aaron",
+      "source": "Wikipedia (Felix Aaron Thenardier), Heroes Wiki",
+      "confidence": "high",
+      "status": "correct",
+      "note": "Part of Felix Aaron Thenardier's full name."
+    },
+    {
+      "jp": "ウルス",
+      "current_en": "Urs",
+      "verified_en": "Urs",
+      "source": "Wikipedia, Madan no Ou to Vanadis Wiki, Heroes Wiki",
+      "confidence": "high",
+      "status": "correct",
+      "note": "Alternate name for Tigrevurmud Vorn."
+    },
+    {
+      "jp": "エミール",
+      "current_en": "Emile",
+      "verified_en": "Emil",
+      "source": "Madan no Ou to Vanadis Wiki",
+      "confidence": "high",
+      "status": "incorrect",
+      "note": "Official spelling is Emil, not Emile."
+    },
+    {
+      "jp": "エリザヴェータ",
+      "current_en": "Elizavetta",
+      "verified_en": "Elizaveta",
+      "source": "Wikipedia (Elizaveta Fomina), Madan no Ou to Vanadis Wiki",
+      "confidence": "high",
+      "status": "incorrect",
+      "note": "Official spelling is Elizaveta, not Elizavetta."
+    },
+    {
+      "jp": "エレオノーラ",
+      "current_en": "Eleonora",
+      "verified_en": "Eleonora",
+      "source": "Crunchyroll anime, Seven Seas Entertainment manga, Wikipedia",
+      "confidence": "high",
+      "status": "correct",
+      "note": ""
+    },
+    {
+      "jp": "オリビエ",
+      "current_en": "Olivier",
+      "verified_en": "Olivier",
+      "source": "Wikipedia",
+      "confidence": "high",
+      "status": "correct",
+      "note": ""
+    },
+    {
+      "jp": "オルガ",
+      "current_en": "Olga",
+      "verified_en": "Olga",
+      "source": "Madan no Ou to Vanadis Wiki (Olga Tamm), TV Tropes",
+      "confidence": "high",
+      "status": "correct",
+      "note": ""
+    },
+    {
+      "jp": "オルメア",
+      "current_en": "Ormea",
+      "verified_en": "Ormea",
+      "source": "no source found",
+      "confidence": "unverifiable",
+      "status": "unverifiable",
+      "note": "No official English translation found for a character named Ormea."
+    },
+    {
+      "jp": "オーギュスト",
+      "current_en": "Auguste",
+      "verified_en": "Auguste",
+      "source": "no source found",
+      "confidence": "unverifiable",
+      "status": "unverifiable",
+      "note": "No official English translation found for a character named Auguste."
+    },
+    {
+      "jp": "オージェ",
+      "current_en": "Augre",
+      "verified_en": "Augre",
+      "source": "Madan no Ou to Vanadis Wiki (Hughes Augre, Gerard Augre)",
+      "confidence": "high",
+      "status": "correct",
+      "note": "Identified as a surname."
+    },
+    {
+      "jp": "オーランジュ",
+      "current_en": "Orangey",
+      "verified_en": "Orangey",
+      "source": "no source found",
+      "confidence": "unverifiable",
+      "status": "unverifiable",
+      "note": "No official English translation found for a character named Orangey."
+    },
+    {
+      "jp": "カシム",
+      "current_en": "Kasim",
+      "verified_en": "Kasim",
+      "source": "no source found",
+      "confidence": "unverifiable",
+      "status": "unverifiable",
+      "note": "No official English translation found for a character named Kasim."
+    },
+    {
+      "jp": "カルヴァドス",
+      "current_en": "Calvados",
+      "verified_en": "Calvados",
+      "source": "no source found",
+      "confidence": "unverifiable",
+      "status": "unverifiable",
+      "note": "No official English translation found for a character named Calvados."
+    },
+    {
+      "jp": "ガヌロン",
+      "current_en": "Ganelon",
+      "verified_en": "Ganelon",
+      "source": "Wikipedia (Maximilian Bennusa Ganelon)",
+      "confidence": "high",
+      "status": "correct",
+      "note": ""
+    },
+    {
+      "jp": "クレイシュ",
+      "current_en": "Kreisch",
+      "verified_en": "Kreisch",
+      "source": "no source found",
+      "confidence": "unverifiable",
+      "status": "unverifiable",
+      "note": "No official English translation found for a character named Kreisch."
+    },
+    {
+      "jp": "グレアスト",
+      "current_en": "Greast",
+      "verified_en": "Greast",
+      "source": "Wikipedia (as a location/group in context)",
+      "confidence": "unverifiable",
+      "status": "unverifiable",
+      "note": "Primarily identified as a place or group, not a character. Cannot verify as a character."
+    },
+    {
+      "jp": "ザイアン",
+      "current_en": "Zion",
+      "verified_en": "Zion",
+      "source": "Google Play (anime description), YouTube (Funimation dub), Madan no Ou to Vanadis Wiki (Zion Thenardier)",
+      "confidence": "high",
+      "status": "correct",
+      "note": ""
+    },
+    {
+      "jp": "シャトール",
+      "current_en": "Chatol",
+      "verified_en": "Chatol",
+      "source": "no source found",
+      "confidence": "unverifiable",
+      "status": "unverifiable",
+      "note": "No official English translation found for a character named Chatol."
+    },
+    {
+      "jp": "シルヴミーティオ",
+      "current_en": "Silver Meteor",
+      "verified_en": "Silver Meteor",
+      "source": "Apple TV (Silver Meteor Storm), Google Play (Silver Meteor Storm)",
+      "confidence": "unverifiable",
+      "status": "unverifiable",
+      "note": "Primarily identified as part of a group/army name ('Silver Meteor Storm'), not a character. Cannot verify as a character."
+    },
+    {
+      "jp": "ジェラール",
+      "current_en": "Gerard",
+      "verified_en": "Gerard",
+      "source": "Madan no Ou to Vanadis Wiki (Gerard Augre)",
+      "confidence": "high",
+      "status": "correct",
+      "note": ""
+    },
+    {
+      "jp": "ジルニトラ",
+      "current_en": "Zirnitra",
+      "verified_en": "Zirnitra",
+      "source": "no source found",
+      "confidence": "unverifiable",
+      "status": "unverifiable",
+      "note": "No official English translation found for a character named Zirnitra."
+    },
+    {
+      "jp": "スティード",
+      "current_en": "Steed",
+      "verified_en": "Steed",
+      "source": "no source found",
+      "confidence": "unverifiable",
+      "status": "unverifiable",
+      "note": "No official English translation found for a character named Steed."
+    },
+    {
+      "jp": "セレスタ",
+      "current_en": "Celesta",
+      "verified_en": "Celesta",
+      "source": "no source found",
+      "confidence": "unverifiable",
+      "status": "unverifiable",
+      "note": "No official English translation found for a character named Celesta."
+    },
+    {
+      "jp": "ソフィー",
+      "current_en": "Sofie",
+      "verified_en": "Sofya",
+      "source": "Madan no Ou to Vanadis Wiki (Sofya Obertas, Sofya (Sofy)), TV Tropes (Sofy)",
+      "confidence": "high",
+      "status": "incorrect",
+      "note": "The character is officially translated as Sofya or Sofy."
+    },
+    {
+      "jp": "ソフィーヤ",
+      "current_en": "Sofya",
+      "verified_en": "Sofya",
+      "source": "Madan no Ou to Vanadis Wiki (Sofya Obertas, Sofya (Sofy)), TV Tropes (Sofy)",
+      "confidence": "high",
+      "status": "correct",
+      "note": ""
+    },
+    {
+      "jp": "ソーニエ",
+      "current_en": "Saunier",
+      "verified_en": "Saunier",
+      "source": "no source found",
+      "confidence": "unverifiable",
+      "status": "unverifiable",
+      "note": "No official English translation found for a character named Saunier."
+    },
+    {
+      "jp": "ソーニエール",
+      "current_en": "Sauniere",
+      "verified_en": "Sauniere",
+      "source": "no source found",
+      "confidence": "unverifiable",
+      "status": "unverifiable",
+      "note": "No official English translation found for a character named Sauniere."
+    },
+    {
+      "jp": "ティグル",
+      "current_en": "Tigre",
+      "verified_en": "Tigre",
+      "source": "Crunchyroll anime, Seven Seas Entertainment manga, Wikipedia",
+      "confidence": "high",
+      "status": "correct",
+      "note": "Short name for Tigrevurmud Vorn."
+    },
+    {
+      "jp": "ティグルヴルムド",
+      "current_en": "Tigrevurmud",
+      "verified_en": "Tigrevurmud",
+      "source": "Crunchyroll anime, Seven Seas Entertainment manga, Wikipedia",
+      "confidence": "high",
+      "status": "correct",
+      "note": ""
+    },
+    {
+      "jp": "ティッタ",
+      "current_en": "Titta",
+      "verified_en": "Titta",
+      "source": "Wikipedia, Madan no Ou to Vanadis Wiki",
+      "confidence": "high",
+      "status": "correct",
+      "note": ""
+    },
+    {
+      "jp": "ティル＝ナ＝ファ",
+      "current_en": "Tir Na Fal",
+      "verified_en": "Tir Na Fal",
+      "source": "Mental Block Wiki",
+      "confidence": "unverifiable",
+      "status": "unverifiable",
+      "note": "Identified as a goddess/temple name, not a character. Cannot verify as a character."
+    },
+    {
+      "jp": "テナルディエ",
+      "current_en": "Thenardier",
+      "verified_en": "Thenardier",
+      "source": "Google Play (anime description), Wikipedia",
+      "confidence": "high",
+      "status": "correct",
+      "note": ""
+    },
+    {
+      "jp": "テリトアール",
+      "current_en": "Territoire",
+      "verified_en": "Territoire",
+      "source": "no source found",
+      "confidence": "unverifiable",
+      "status": "unverifiable",
+      "note": "No official English translation found for a character named Territoire."
+    },
+    {
+      "jp": "ディナント",
+      "current_en": "Dinant",
+      "verified_en": "Dinant",
+      "source": "Wikipedia (Battle of Dinant)",
+      "confidence": "unverifiable",
+      "status": "unverifiable",
+      "note": "Identified as a place name (Battle of Dinant), not a character. Cannot verify as a character."
+    },
+    {
+      "jp": "デュランダル",
+      "current_en": "Durandal",
+      "verified_en": "Durandal",
+      "source": "no source found",
+      "confidence": "unverifiable",
+      "status": "unverifiable",
+      "note": "No official English translation found for a character named Durandal."
+    },
+    {
+      "jp": "ドレカヴァク",
+      "current_en": "Drekavac",
+      "verified_en": "Drekavac",
+      "source": "Fandom wiki (English Voice Over Wikia) [4]",
+      "confidence": "high",
+      "status": "correct",
+      "note": ""
+    },
+    {
+      "jp": "ナイス",
+      "current_en": "Nice",
+      "verified_en": "Nice",
+      "source": "no clear official source found as a distinct character, likely an alias or furigana variant of ニース",
+      "confidence": "low",
+      "status": "unverifiable",
+      "note": "No clear official English source found for ナイス as a distinct character. Could be an alias or furigana variant of ニース."
+    },
+    {
+      "jp": "ニース",
+      "current_en": "Nice",
+      "verified_en": "Nice",
+      "source": "Fandom wiki consensus (no direct official source found in snippets)",
+      "confidence": "medium",
+      "status": "correct",
+      "note": "Based on fan wiki consensus, but no direct official English LN/anime credit found in snippets."
+    },
+    {
+      "jp": "バヤール",
+      "current_en": "Bayard",
+      "verified_en": "Bayard",
+      "source": "no clear official source found",
+      "confidence": "low",
+      "status": "unverifiable",
+      "note": "No clear official English source found."
+    },
+    {
+      "jp": "バートラン",
+      "current_en": "Bertrand",
+      "verified_en": "Bertrand",
+      "source": "Fandom wiki (English Voice Over Wikia) [4]",
+      "confidence": "high",
+      "status": "correct",
+      "note": ""
+    },
+    {
+      "jp": "ファーロン",
+      "current_en": "Faron",
+      "verified_en": "Faron",
+      "source": "Wikipedia [2], Fandom wiki (English Voice Over Wikia) [4]",
+      "confidence": "high",
+      "status": "correct",
+      "note": ""
+    },
+    {
+      "jp": "フェリックス",
+      "current_en": "Felix",
+      "verified_en": "Felix",
+      "source": "Wikipedia [3], Fandom wiki (English Voice Over Wikia) [4]",
+      "confidence": "high",
+      "status": "correct",
+      "note": ""
+    },
+    {
+      "jp": "フレスベルグ",
+      "current_en": "Hraesvelgr",
+      "verified_en": "Hraesvelgr",
+      "source": "Fandom wiki consensus (no direct official source found in snippets)",
+      "confidence": "medium",
+      "status": "correct",
+      "note": "Based on fan wiki consensus, but no direct official English LN/anime credit found in snippets."
+    },
+    {
+      "jp": "ペルクナス",
+      "current_en": "Perkunas",
+      "verified_en": "Perkunas",
+      "source": "Fandom wiki consensus (no direct official source found in snippets)",
+      "confidence": "medium",
+      "status": "correct",
+      "note": "Based on fan wiki consensus, but no direct official English LN/anime credit found in snippets."
+    },
+    {
+      "jp": "ボロスロー",
+      "current_en": "Boroislav",
+      "verified_en": "Boroislav",
+      "source": "Fandom wiki consensus (no direct official source found in snippets)",
+      "confidence": "medium",
+      "status": "correct",
+      "note": "Based on fan wiki consensus, but no direct official English LN/anime credit found in snippets."
+    },
+    {
+      "jp": "ボードワン",
+      "current_en": "Baudouin",
+      "verified_en": "Badouin",
+      "source": "Fandom wiki (English Voice Over Wikia) [4] (Pierre Badouin)",
+      "confidence": "high",
+      "status": "incorrect",
+      "note": "Official dub uses 'Badouin' for the surname, though 'Baudouin' is a more direct romanization of the JP."
+    },
+    {
+      "jp": "マスハス",
+      "current_en": "Mashas",
+      "verified_en": "Mashas",
+      "source": "Fandom wiki (English Voice Over Wikia) [4]",
+      "confidence": "high",
+      "status": "correct",
+      "note": ""
+    },
+    {
+      "jp": "メレヴィル",
+      "current_en": "Mereville",
+      "verified_en": "Mereville",
+      "source": "Fandom wiki consensus (no direct official source found in snippets)",
+      "confidence": "medium",
+      "status": "correct",
+      "note": "Based on fan wiki consensus, but no direct official English LN/anime credit found in snippets."
+    },
+    {
+      "jp": "モントーバン",
+      "current_en": "Montauban",
+      "verified_en": "Montauban",
+      "source": "Fandom wiki consensus (no direct official source found in snippets)",
+      "confidence": "medium",
+      "status": "correct",
+      "note": "Based on fan wiki consensus, but no direct official English LN/anime credit found in snippets."
+    },
+    {
+      "jp": "モーシア",
+      "current_en": "Molsheim",
+      "verified_en": "Molsheim",
+      "source": "Fandom wiki consensus (no direct official source found in snippets)",
+      "confidence": "medium",
+      "status": "correct",
+      "note": "Based on fan wiki consensus, but no direct official English LN/anime credit found in snippets."
+    },
+    {
+      "jp": "ラヴィアス",
+      "current_en": "Lavias",
+      "verified_en": "Lavias",
+      "source": "Fandom wiki consensus (no direct official source found in snippets)",
+      "confidence": "medium",
+      "status": "correct",
+      "note": "Based on fan wiki consensus, but no direct official English LN/anime credit found in snippets."
+    },
+    {
+      "jp": "リムアリーシャ",
+      "current_en": "Limalisha",
+      "verified_en": "Limalisha",
+      "source": "Fandom wiki (English Voice Over Wikia) [4], Wikipedia [3]",
+      "confidence": "high",
+      "status": "correct",
+      "note": ""
+    },
+    {
+      "jp": "リュドミラ",
+      "current_en": "Ludmila",
+      "verified_en": "Ludmila",
+      "source": "Fandom wiki (English Voice Over Wikia) [4]",
+      "confidence": "high",
+      "status": "correct",
+      "note": ""
+    },
+    {
+      "jp": "リュベロン",
+      "current_en": "Luberon",
+      "verified_en": "Luberon",
+      "source": "Fandom wiki consensus (no direct official source found in snippets)",
+      "confidence": "medium",
+      "status": "correct",
+      "note": "Based on fan wiki consensus, but no direct official English LN/anime credit found in snippets."
+    },
+    {
+      "jp": "ルテティア",
+      "current_en": "Lutetia",
+      "verified_en": "Lutetia",
+      "source": "Fandom wiki consensus (no direct official source found in snippets)",
+      "confidence": "medium",
+      "status": "correct",
+      "note": "Based on fan wiki consensus, but no direct official English LN/anime credit found in snippets."
+    },
+    {
+      "jp": "ルリエ",
+      "current_en": "Lourie",
+      "verified_en": "Lourie",
+      "source": "Fandom wiki (English Voice Over Wikia) [4] (Ludmila Lourie)",
+      "confidence": "high",
+      "status": "correct",
+      "note": ""
+    },
+    {
+      "jp": "ルーニエ",
+      "current_en": "Lunie",
+      "verified_en": "Lunie",
+      "source": "Fandom wiki (English Voice Over Wikia) [4]",
+      "confidence": "high",
+      "status": "correct",
+      "note": ""
+    },
+    {
+      "jp": "ルーリック",
+      "current_en": "Rurick",
+      "verified_en": "Ryurik",
+      "source": "Fandom wiki (English Voice Over Wikia) [4]",
+      "confidence": "high",
+      "status": "incorrect",
+      "note": "Official dub uses 'Ryurik'."
+    },
+    {
+      "jp": "レギン",
+      "current_en": "Regin",
+      "verified_en": "Regin",
+      "source": "Fandom wiki (English Voice Over Wikia) [4]",
+      "confidence": "high",
+      "status": "correct",
+      "note": ""
+    },
+    {
+      "jp": "レグナス",
+      "current_en": "Regnas",
+      "verified_en": "Regnas",
+      "source": "Fandom wiki consensus (no direct official source found in snippets)",
+      "confidence": "medium",
+      "status": "correct",
+      "note": "Based on fan wiki consensus, but no direct official English LN/anime credit found in snippets."
+    },
+    {
+      "jp": "ロラン",
+      "current_en": "Roland",
+      "verified_en": "Roland",
+      "source": "Fandom wiki (English Voice Over Wikia) [4]",
+      "confidence": "high",
+      "status": "correct",
+      "note": ""
+    },
+    {
+      "jp": "ローダント",
+      "current_en": "Rodant",
+      "verified_en": "Rodant",
+      "source": "Fandom wiki (English Voice Over Wikia) [4]",
+      "confidence": "high",
+      "status": "correct",
+      "note": ""
+    },
+    {
+      "jp": "ヴァタン",
+      "current_en": "Vatan",
+      "verified_en": "Vatan",
+      "source": "Fandom wiki consensus (no direct official source found in snippets)",
+      "confidence": "medium",
+      "status": "correct",
+      "note": "Based on fan wiki consensus, but no direct official English LN/anime credit found in snippets."
+    },
+    {
+      "jp": "ヴァレンティナ",
+      "current_en": "Valentina",
+      "verified_en": "Valentina",
+      "source": "Fandom wiki (English Voice Over Wikia) [4]",
+      "confidence": "high",
+      "status": "correct",
+      "note": ""
+    },
+    {
+      "jp": "ヴィクトール",
+      "current_en": "Viktor",
+      "verified_en": "Viktor",
+      "source": "Fandom wiki (English Voice Over Wikia) [4]",
+      "confidence": "high",
+      "status": "correct",
+      "note": ""
+    },
+    {
+      "jp": "ヴォジャノーイ",
+      "current_en": "Vodyanoy",
+      "verified_en": "Vodyanoy",
+      "source": "Fandom wiki consensus (no direct official source found in snippets)",
+      "confidence": "medium",
+      "status": "correct",
+      "note": "Based on fan wiki consensus, but no direct official English LN/anime credit found in snippets."
+    },
+    {
+      "jp": "ヴォルン",
+      "current_en": "Vorn",
+      "verified_en": "Vorn",
+      "source": "Wikipedia [2], Fandom wiki (English Voice Over Wikia) [4]",
+      "confidence": "high",
+      "status": "correct",
+      "note": ""
+    },
+    {
+      "jp": "ヴォージュ",
+      "current_en": "Vosges",
+      "verified_en": "Vosges",
+      "source": "Fandom wiki consensus (no direct official source found in snippets)",
+      "confidence": "medium",
+      "status": "correct",
+      "note": "Based on fan wiki consensus, but no direct official English LN/anime credit found in snippets."
+    },
+    {
+      "jp": "ブリューヌ",
+      "current_en": "Brune",
+      "verified_en": "Brune",
+      "source": "Wikipedia [2], Seven Seas Entertainment [5], Crunchyroll [12]",
+      "confidence": "high",
+      "status": "correct",
+      "note": ""
+    },
+    {
+      "jp": "ジスタート",
+      "current_en": "Zhcted",
+      "verified_en": "Zhcted",
+      "source": "Wikipedia [2], Seven Seas Entertainment [5], Crunchyroll [12]",
+      "confidence": "high",
+      "status": "correct",
+      "note": ""
+    },
+    {
+      "jp": "アルサス",
+      "current_en": "Alsace",
+      "verified_en": "Alsace",
+      "source": "Wikipedia [3]",
+      "confidence": "high",
+      "status": "correct",
+      "note": ""
+    },
+    {
+      "jp": "ライトメリッツ",
+      "current_en": "Leitmeritz",
+      "verified_en": "Leitmeritz",
+      "source": "Wikipedia [2, 3]",
+      "confidence": "high",
+      "status": "correct",
+      "note": ""
+    },
+    {
+      "jp": "オルミュッツ",
+      "current_en": "Olmutz",
+      "verified_en": "Olmutz",
+      "source": "Fandom wiki consensus (no direct official source found in snippets)",
+      "confidence": "medium",
+      "status": "correct",
+      "note": "Based on fan wiki consensus, but no direct official English LN/anime credit found in snippets."
+    },
+    {
+      "jp": "シレジア",
+      "current_en": "Silesia",
+      "verified_en": "Silesia",
+      "source": "Fandom wiki consensus (no direct official source found in snippets)",
+      "confidence": "medium",
+      "status": "correct",
+      "note": "Based on fan wiki consensus, but no direct official English LN/anime credit found in snippets."
+    },
+    {
+      "jp": "ムオジネル",
+      "current_en": "Muozinel",
+      "verified_en": "Muozinel",
+      "source": "Fandom wiki consensus (no direct official source found in snippets)",
+      "confidence": "medium",
+      "status": "correct",
+      "note": "Based on fan wiki consensus, but no direct official English LN/anime credit found in snippets."
+    },
+    {
+      "jp": "ザクスタン",
+      "current_en": "Sachstein",
+      "verified_en": "Sachstein",
+      "source": "Wikipedia 'List of Lord Marksman and Vanadis characters', Madan no Ou to Vanadis Wiki",
+      "confidence": "high",
+      "status": "incorrect",
+      "note": "Incorrect category; 'Sachstein' is a country/kingdom, not a character."
+    },
+    {
+      "jp": "アスヴァール",
+      "current_en": "Asvarre",
+      "verified_en": "Asvarre",
+      "source": "Wikipedia 'List of Lord Marksman and Vanadis characters', Madan no Ou to Vanadis Wiki",
+      "confidence": "high",
+      "status": "incorrect",
+      "note": "Incorrect category; 'Asvarre' is a country/kingdom, not a character."
+    },
+    {
+      "jp": "レグニーツァ",
+      "current_en": "Legnica",
+      "verified_en": "Legnica",
+      "source": "Madan no Ou to Vanadis Wiki",
+      "confidence": "high",
+      "status": "incorrect",
+      "note": "Incorrect category; 'Legnica' is a region/territory, not a character."
+    },
+    {
+      "jp": "ブレスト",
+      "current_en": "Brest",
+      "verified_en": "Brest",
+      "source": "Wikipedia 'List of Lord Marksman and Vanadis characters', Madan no Ou to Vanadis Wiki",
+      "confidence": "high",
+      "status": "incorrect",
+      "note": "Incorrect category; 'Brest' is a region/territory, not a character. The War Maiden of Brest is Olga."
+    },
+    {
+      "jp": "ポリーシャ",
+      "current_en": "Polesia",
+      "verified_en": "Polesia",
+      "source": "Madan no Ou to Vanadis Wiki",
+      "confidence": "high",
+      "status": "incorrect",
+      "note": "Incorrect category; 'Polesia' is a region/territory, not a character."
+    },
+    {
+      "jp": "ルヴーシュ",
+      "current_en": "Lebus",
+      "verified_en": "Lebus",
+      "source": "Wikipedia 'List of Lord Marksman and Vanadis characters', Madan no Ou to Vanadis Wiki",
+      "confidence": "high",
+      "status": "incorrect",
+      "note": "Incorrect category; 'Lebus' is a region/territory, not a character. The War Maiden of Lebus is Liza."
+    },
+    {
+      "jp": "オステローデ",
+      "current_en": "Osterode",
+      "verified_en": "Osterode",
+      "source": "Madan no Ou to Vanadis Wiki",
+      "confidence": "high",
+      "status": "incorrect",
+      "note": "Incorrect category; 'Osterode' is a region/territory, not a character."
+    },
+    {
+      "jp": "ネメタクム",
+      "current_en": "Nemetacum",
+      "verified_en": "Nemetacum",
+      "source": "Madan no Ou to Vanadis Wiki",
+      "confidence": "high",
+      "status": "incorrect",
+      "note": "Incorrect category; 'Nemetacum' is a city, not a character."
+    },
+    {
+      "jp": "ジスタート",
+      "current_en": "Zhcted",
+      "verified_en": "Zhcted",
+      "source": "Crunchyroll anime, Wikipedia, Seven Seas Entertainment LN Vol. 1",
+      "confidence": "high",
+      "status": "correct",
+      "note": ""
+    },
+    {
+      "jp": "ブリューヌ",
+      "current_en": "Brune",
+      "verified_en": "Brune",
+      "source": "Crunchyroll anime, Wikipedia, Seven Seas Entertainment LN Vol. 1",
+      "confidence": "high",
+      "status": "correct",
+      "note": ""
+    },
+    {
+      "jp": "ザクスタン",
+      "current_en": "Sachstein",
+      "verified_en": "Sachstein",
+      "source": "Wikipedia 'List of Lord Marksman and Vanadis characters', Seven Seas Entertainment LN Vol. 1",
+      "confidence": "high",
+      "status": "correct",
+      "note": ""
+    },
+    {
+      "jp": "ムオジネル",
+      "current_en": "Muozinel",
+      "verified_en": "Muozinel",
+      "source": "Wikipedia 'List of Lord Marksman and Vanadis characters'",
+      "confidence": "high",
+      "status": "correct",
+      "note": ""
+    },
+    {
+      "jp": "アスヴァール",
+      "current_en": "Asvarre",
+      "verified_en": "Asvarre",
+      "source": "Wikipedia 'List of Lord Marksman and Vanadis characters'",
+      "confidence": "high",
+      "status": "correct",
+      "note": ""
+    },
+    {
+      "jp": "アルサス",
+      "current_en": "Alsace",
+      "verified_en": "Alsace",
+      "source": "Wikipedia 'List of Lord Marksman and Vanadis episodes', Crunchyroll anime",
+      "confidence": "high",
+      "status": "correct",
+      "note": ""
+    },
+    {
+      "jp": "テナルディエ領",
+      "current_en": "Thenardier Territory",
+      "verified_en": "Thenardier Territory",
+      "source": "Wikipedia 'List of Lord Marksman and Vanadis episodes', TV Tropes",
+      "confidence": "high",
+      "status": "correct",
+      "note": ""
+    },
+    {
+      "jp": "ガヌロン領",
+      "current_en": "Ganelon Territory",
+      "verified_en": "Ganelon Territory",
+      "source": "Lord Marksman and Vanadis (2014) | Japanese Voice-Over Wikia",
+      "confidence": "high",
+      "status": "correct",
+      "note": ""
+    },
+    {
+      "jp": "ライトメリッツ",
+      "current_en": "Leitmeritz",
+      "verified_en": "Leitmeritz",
+      "source": "Wikipedia 'List of Lord Marksman and Vanadis episodes'",
+      "confidence": "high",
+      "status": "correct",
+      "note": ""
+    },
+    {
+      "jp": "オルミュッツ",
+      "current_en": "Olmütz",
+      "verified_en": "Olmutz",
+      "source": "Madan no Ou to Vanadis Wiki",
+      "confidence": "medium",
+      "status": "incorrect",
+      "note": "Official English translation drops the umlaut."
+    },
+    {
+      "jp": "ルヴーシュ",
+      "current_en": "Lebus",
+      "verified_en": "Lebus",
+      "source": "Wikipedia 'List of Lord Marksman and Vanadis characters'",
+      "confidence": "high",
+      "status": "correct",
+      "note": ""
+    },
+    {
+      "jp": "ポリーシャ",
+      "current_en": "Polesia",
+      "verified_en": "Polesia",
+      "source": "Madan no Ou to Vanadis Wiki",
+      "confidence": "high",
+      "status": "correct",
+      "note": ""
+    },
+    {
+      "jp": "ブレスト",
+      "current_en": "Brest",
+      "verified_en": "Brest",
+      "source": "Wikipedia 'List of Lord Marksman and Vanadis characters'",
+      "confidence": "high",
+      "status": "correct",
+      "note": ""
+    },
+    {
+      "jp": "オステローデ",
+      "current_en": "Osterode",
+      "verified_en": "Osterode",
+      "source": "Madan no Ou to Vanadis Wiki",
+      "confidence": "high",
+      "status": "correct",
+      "note": ""
+    },
+    {
+      "jp": "レグニーツァ",
+      "current_en": "Legnica",
+      "verified_en": "Legnica",
+      "source": "Madan no Ou to Vanadis Wiki",
+      "confidence": "high",
+      "status": "correct",
+      "note": ""
+    },
+    {
+      "jp": "リュテティア",
+      "current_en": "Lutetia",
+      "verified_en": "Lutetia",
+      "source": "Madan no Ou to Vanadis Wiki",
+      "confidence": "medium",
+      "status": "correct",
+      "note": "No higher-priority official source found, but consistent with fan wiki and plausible given setting."
+    },
+    {
+      "jp": "シレジア",
+      "current_en": "Silesia",
+      "verified_en": "Silesia",
+      "source": "Madan no Ou to Vanadis Wiki",
+      "confidence": "medium",
+      "status": "correct",
+      "note": "No higher-priority official source found, but consistent with fan wiki and plausible given setting."
+    },
+    {
+      "jp": "テリトリー",
+      "current_en": "Territory",
+      "verified_en": "Territory",
+      "source": "no source found",
+      "confidence": "unverifiable",
+      "status": "unverifiable",
+      "note": "Cannot confirm 'Territory' as a proper noun city name from official sources or fan wikis. It appears to be a generic term."
+    },
+    {
+      "jp": "ネメタクム",
+      "current_en": "Nemetacum",
+      "verified_en": "Nemetacum",
+      "source": "Madan no Ou to Vanadis Wiki",
+      "confidence": "high",
+      "status": "correct",
+      "note": ""
+    },
+    {
+      "jp": "モルスール平原",
+      "current_en": "Molsheim Plains",
+      "verified_en": "Molsheim Plains",
+      "source": "Madan no Ou to Vanadis Wiki",
+      "confidence": "high",
+      "status": "correct",
+      "note": ""
+    },
+    {
+      "jp": "ディナント平原",
+      "current_en": "Dinant Plains",
+      "verified_en": "Dinant Plains",
+      "source": "Madan no Ou to Vanadis Wiki",
+      "confidence": "high",
+      "status": "correct",
+      "note": ""
+    },
+    {
+      "jp": "オード川",
+      "current_en": "Aude River",
+      "verified_en": "Aude River",
+      "source": "Madan no Ou to Vanadis Wiki",
+      "confidence": "high",
+      "status": "correct",
+      "note": ""
+    },
+    {
+      "jp": "ボルドー",
+      "current_en": "Bordeaux",
+      "verified_en": "Bordeaux",
+      "source": "Madan no Ou to Vanadis Wiki",
+      "confidence": "high",
+      "status": "correct",
+      "note": ""
+    },
+    {
+      "jp": "タトゥリア",
+      "current_en": "Tatria",
+      "verified_en": "Tatria",
+      "source": "Madan no Ou to Vanadis Wiki",
+      "confidence": "high",
+      "status": "correct",
+      "note": ""
+    },
+    {
+      "jp": "ヴォージュ山脈",
+      "current_en": "Vosges Mountains",
+      "verified_en": "Vosges Mountains",
+      "source": "Madan no Ou to Vanadis Wiki",
+      "confidence": "high",
+      "status": "correct",
+      "note": ""
+    },
+    {
+      "jp": "メルヴィル",
+      "current_en": "Merville",
+      "verified_en": "Merville",
+      "source": "Madan no Ou to Vanadis Wiki",
+      "confidence": "high",
+      "status": "correct",
+      "note": ""
+    },
+    {
+      "jp": "アリファール",
+      "current_en": "Arifar",
+      "verified_en": "Arifar",
+      "source": "Madan no Ou to Vanadis Wiki",
+      "confidence": "high",
+      "status": "correct",
+      "note": ""
+    },
+    {
+      "jp": "ラヴィアス",
+      "current_en": "Lavias",
+      "verified_en": "Lavias",
+      "source": "Madan no Ou to Vanadis Wiki",
+      "confidence": "high",
+      "status": "correct",
+      "note": ""
+    },
+    {
+      "jp": "ザシュト",
+      "current_en": "Zaht",
+      "verified_en": "Zaht",
+      "source": "Madan no Ou to Vanadis Wiki",
+      "confidence": "high",
+      "status": "correct",
+      "note": ""
+    },
+    {
+      "jp": "ヴァリツァイフ",
+      "current_en": "Valitsaif",
+      "verified_en": "Valitsaif",
+      "source": "Madan no Ou to Vanadis Wiki",
+      "confidence": "high",
+      "status": "correct",
+      "note": ""
+    },
+    {
+      "jp": "エザンディス",
+      "current_en": "Ezendeis",
+      "verified_en": "Ezendeis",
+      "source": "Madan no Ou to Vanadis Wiki",
+      "confidence": "high",
+      "status": "correct",
+      "note": ""
+    },
+    {
+      "jp": "ムーマ",
+      "current_en": "Muma",
+      "verified_en": "Muma",
+      "source": "Madan no Ou to Vanadis Wiki",
+      "confidence": "high",
+      "status": "correct",
+      "note": ""
+    },
+    {
+      "jp": "バルグレン",
+      "current_en": "Bargren",
+      "verified_en": "Bargren",
+      "source": "Fandom wiki",
+      "confidence": "medium",
+      "status": "correct",
+      "note": ""
+    },
+    {
+      "jp": "黒弓",
+      "current_en": "Black Bow",
+      "verified_en": "Black Bow",
+      "source": "Fandom wiki, Mental Block Wiki",
+      "confidence": "high",
+      "status": "correct",
+      "note": ""
+    },
+    {
+      "jp": "デュランダル",
+      "current_en": "Durandal",
+      "verified_en": "Durandal",
+      "source": "Fandom wiki",
+      "confidence": "medium",
+      "status": "correct",
+      "note": ""
+    },
+    {
+      "jp": "ナヴァール騎士団",
+      "current_en": "Navarre Knights",
+      "verified_en": "Navarre Knights",
+      "source": "Fandom wiki",
+      "confidence": "medium",
+      "status": "correct",
+      "note": ""
+    },
+    {
+      "jp": "カルヴァドス騎士団",
+      "current_en": "Calvados Knights",
+      "verified_en": "Calvados Knights",
+      "source": "Fandom wiki",
+      "confidence": "medium",
+      "status": "correct",
+      "note": ""
+    },
+    {
+      "jp": "マスハス隊",
+      "current_en": "Mashas' Company",
+      "verified_en": "Mashas' Company",
+      "source": "Fandom wiki",
+      "confidence": "medium",
+      "status": "correct",
+      "note": ""
+    },
+    {
+      "jp": "戦姫",
+      "current_en": "Vanadis",
+      "verified_en": "Vanadis",
+      "source": "Seven Seas Entertainment LN, Crunchyroll anime, Wikipedia, Fandom wiki",
+      "confidence": "high",
+      "status": "correct",
+      "note": ""
+    },
+    {
+      "jp": "竜具",
+      "current_en": "Dragonic Tool",
+      "verified_en": "Dragonic Tool",
+      "source": "Fandom wiki",
+      "confidence": "medium",
+      "status": "correct",
+      "note": "Official synopses describe them as 'powerful weapons from the dragon' or 'supernatural arms from a dragon', while the Fandom wiki uses 'Dragonic Tools' as a proper noun."
+    },
+    {
+      "jp": "公爵",
+      "current_en": "Duke",
+      "verified_en": "Duke",
+      "source": "Seven Seas Entertainment LN Vol.10",
+      "confidence": "high",
+      "status": "correct",
+      "note": ""
+    },
+    {
+      "jp": "伯爵",
+      "current_en": "Earl",
+      "verified_en": "Earl",
+      "source": "J-Novel Club Forums (LN synopsis), Fandom wiki",
+      "confidence": "high",
+      "status": "correct",
+      "note": "While 'Count' is also used in some anime synopses, 'Earl' is present in LN-related contexts and matches the current entry."
+    },
+    {
+      "jp": "王",
+      "current_en": "King",
+      "verified_en": "King",
+      "source": "Seven Seas Entertainment LN, Crunchyroll anime, Wikipedia",
+      "confidence": "high",
+      "status": "correct",
+      "note": ""
+    },
+    {
+      "jp": "騎士団",
+      "current_en": "Knights",
+      "verified_en": "Knights",
+      "source": "Funimation anime",
+      "confidence": "high",
+      "status": "correct",
+      "note": ""
+    },
+    {
+      "jp": "姫",
+      "current_en": "Princess",
+      "verified_en": "Princess",
+      "source": "Seven Seas Entertainment LN Vol.10, Fandom wiki",
+      "confidence": "high",
+      "status": "correct",
+      "note": ""
+    },
+    {
+      "jp": "ジルニトラ",
+      "current_en": "Zirnitra",
+      "verified_en": "Zirnitra",
+      "source": "Fandom wiki",
+      "confidence": "medium",
+      "status": "correct",
+      "note": ""
+    },
+    {
+      "jp": "ティール",
+      "current_en": "Tir Na Fal",
+      "verified_en": "Tir Na Fal",
+      "source": "Fandom wiki, Mental Block Wiki",
+      "confidence": "high",
+      "status": "correct",
+      "note": ""
+    },
+    {
+      "jp": "ペルーン",
+      "current_en": "Perkūnas",
+      "verified_en": "Perkūnas",
+      "source": "Fandom wiki",
+      "confidence": "medium",
+      "status": "correct",
+      "note": ""
+    }
+  ],
+  "summary": {
+    "correct": 97,
+    "incorrect": 14,
+    "unverifiable": 25
+  }
+}

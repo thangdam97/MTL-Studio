@@ -458,7 +458,7 @@
                     ],
                     "technical_note": "This notation differs from nested dialogue. Nested uses different quote types ('single' inside \"double\"), while multi-speaker uses repeated quote pairs of the same type.",
                     "do_not": [
-                        "Do not convert to curly quotes ("")",
+                        "Do not convert to curly quotes (\\\\\"\\\\\")",
                         "Do not replace with [In unison] tags",
                         "Do not merge into single quote pair",
                         "Do not add individual speaker tags"

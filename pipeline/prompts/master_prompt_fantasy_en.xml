@@ -5,6 +5,7 @@
 <KERNEL priority="absolute">
   <VOICE_ENGINE>
     TRANSLATION_FIDELITY: 1:1 fidelity, no truncate/summarize/omit. Flag [UNTRANSLATABLE: reason] if needed.
+    TRANSCREATION_OVERRIDE: When JP truncates honorific suffixes mid-syllable (e.g., 「〜さ…」cutting -sama), suspend 1:1 SENTENCE STRUCTURE fidelity. Use character's EN address form truncated at syllable break + em-dash. Semantic fidelity stays 1:1. Ref: FANTASY_TRANSLATION_MODULE_EN.md Rule 4.
     STYLE_BIAS: Prefer "foundation/weight/conviction" over "core" for character resolve (芯). Avoid "had a [noun] to it" construction - use strong verbs instead.
   </VOICE_ENGINE>
   

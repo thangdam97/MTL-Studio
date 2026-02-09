@@ -1,0 +1,134 @@
+{
+  "series_id": "油断できない彼女",
+  "series_title": {
+    "ja": "油断できない彼女",
+    "en": "My Girlfriend: Never Let Your Guard Down",
+    "romaji": ""
+  },
+  "world_type": "modern_japan",
+  "total_entries": 13,
+  "results": [
+    {
+      "jp": "内田蒼太",
+      "current_en": "Uchida Souta",
+      "verified_en": "Uchida Souta",
+      "source": "API call failed",
+      "confidence": "unverifiable",
+      "status": "unverifiable",
+      "note": "API returned unparseable response"
+    },
+    {
+      "jp": "蒼太",
+      "current_en": "Souta",
+      "verified_en": "Souta",
+      "source": "API call failed",
+      "confidence": "unverifiable",
+      "status": "unverifiable",
+      "note": "API returned unparseable response"
+    },
+    {
+      "jp": "胡桃",
+      "current_en": "Kurumi",
+      "verified_en": "Kurumi",
+      "source": "API call failed",
+      "confidence": "unverifiable",
+      "status": "unverifiable",
+      "note": "API returned unparseable response"
+    },
+    {
+      "jp": "遠藤健太",
+      "current_en": "Endou Kenta",
+      "verified_en": "Endou Kenta",
+      "source": "API call failed",
+      "confidence": "unverifiable",
+      "status": "unverifiable",
+      "note": "API returned unparseable response"
+    },
+    {
+      "jp": "遠藤",
+      "current_en": "Endou",
+      "verified_en": "Endou",
+      "source": "API call failed",
+      "confidence": "unverifiable",
+      "status": "unverifiable",
+      "note": "API returned unparseable response"
+    },
+    {
+      "jp": "天崎",
+      "current_en": "Amasaki",
+      "verified_en": "Amasaki",
+      "source": "API call failed",
+      "confidence": "unverifiable",
+      "status": "unverifiable",
+      "note": "API returned unparseable response"
+    },
+    {
+      "jp": "和田",
+      "current_en": "Wada",
+      "verified_en": "Wada",
+      "source": "API call failed",
+      "confidence": "unverifiable",
+      "status": "unverifiable",
+      "note": "API returned unparseable response"
+    },
+    {
+      "jp": "内田",
+      "current_en": "Uchida",
+      "verified_en": "Uchida",
+      "source": "API call failed",
+      "confidence": "unverifiable",
+      "status": "unverifiable",
+      "note": "API returned unparseable response"
+    },
+    {
+      "jp": "鈴音",
+      "current_en": "Suzune",
+      "verified_en": "Suzune",
+      "source": "API call failed",
+      "confidence": "unverifiable",
+      "status": "unverifiable",
+      "note": "API returned unparseable response"
+    },
+    {
+      "jp": "天崎鈴音",
+      "current_en": "Amasaki Suzune",
+      "verified_en": "Amasaki Suzune",
+      "source": "API call failed",
+      "confidence": "unverifiable",
+      "status": "unverifiable",
+      "note": "API returned unparseable response"
+    },
+    {
+      "jp": "反吐",
+      "current_en": "Hedo",
+      "verified_en": "Hedo",
+      "source": "API call failed",
+      "confidence": "unverifiable",
+      "status": "unverifiable",
+      "note": "API returned unparseable response"
+    },
+    {
+      "jp": "呆気",
+      "current_en": "Akke",
+      "verified_en": "Akke",
+      "source": "API call failed",
+      "confidence": "unverifiable",
+      "status": "unverifiable",
+      "note": "API returned unparseable response"
+    },
+    {
+      "jp": "勿論",
+      "current_en": "Mochiron",
+      "verified_en": "Mochiron",
+      "source": "API call failed",
+      "confidence": "unverifiable",
+      "status": "unverifiable",
+      "note": "API returned unparseable response"
+    }
+  ],
+  "summary": {
+    "correct": 0,
+    "incorrect": 0,
+    "unverifiable": 13
+  }
+}

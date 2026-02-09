@@ -1,0 +1,44 @@
+{
+  "series_id": "小説版_君に届け３_それぞれの片想いカラーイラスト付_集英社コバルト文庫",
+  "series_title": {
+    "ja": "小説版 君に届け３ ～それぞれの片想い～【カラーイラスト付】 (集英社コバルト文庫)",
+    "en": "Kimi ni Todoke: From Me to You,: Their Unrequited Loves",
+    "romaji": ""
+  },
+  "world_type": "modern_japan",
+  "total_entries": 3,
+  "results": [
+    {
+      "jp": "一昨日",
+      "current_en": "Ototoi",
+      "verified_en": "Ototoi",
+      "source": "API call failed",
+      "confidence": "unverifiable",
+      "status": "unverifiable",
+      "note": "API returned unparseable response"
+    },
+    {
+      "jp": "行方",
+      "current_en": "Yukue",
+      "verified_en": "Yukue",
+      "source": "API call failed",
+      "confidence": "unverifiable",
+      "status": "unverifiable",
+      "note": "API returned unparseable response"
+    },
+    {
+      "jp": "胡桃沢",
+      "current_en": "Kurumizawa",
+      "verified_en": "Kurumizawa",
+      "source": "API call failed",
+      "confidence": "unverifiable",
+      "status": "unverifiable",
+      "note": "API returned unparseable response"
+    }
+  ],
+  "summary": {
+    "correct": 0,
+    "incorrect": 0,
+    "unverifiable": 3
+  }
+}

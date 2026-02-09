@@ -1,0 +1,404 @@
+{
+  "series_id": "隣国から来た嫁が可愛すぎてどうしよう",
+  "series_title": {
+    "ja": "隣国から来た嫁が可愛すぎてどうしよう。２",
+    "en": "My Bride from the Neighboring Kingdom is So Cute, I'm Helpless!",
+    "romaji": ""
+  },
+  "world_type": "fantasy",
+  "total_entries": 43,
+  "results": [
+    {
+      "jp": "箝口令",
+      "current_en": "Kankourei",
+      "verified_en": "gag order",
+      "source": "General Japanese-English dictionary (Jisho.org)",
+      "confidence": "low",
+      "status": "incorrect",
+      "note": "The current_en is a romanization. The official English translation of the term is 'gag order'. No series-specific translation found."
+    },
+    {
+      "jp": "不躾",
+      "current_en": "Bushitsuke",
+      "verified_en": "rude",
+      "source": "General Japanese-English dictionary (Jisho.org)",
+      "confidence": "low",
+      "status": "incorrect",
+      "note": "The current_en is a romanization. The official English translation of the term is 'rude' or 'impolite'. No series-specific translation found."
+    },
+    {
+      "jp": "息女",
+      "current_en": "Sokujo",
+      "verified_en": "daughter",
+      "source": "General Japanese-English dictionary (Jisho.org)",
+      "confidence": "low",
+      "status": "incorrect",
+      "note": "The current_en is a romanization. The official English translation of the term is 'daughter' (honorific). No series-specific translation found."
+    },
+    {
+      "jp": "刺青",
+      "current_en": "Irezumi",
+      "verified_en": "tattoo",
+      "source": "General Japanese-English dictionary (Jisho.org)",
+      "confidence": "low",
+      "status": "incorrect",
+      "note": "The current_en is a romanization. The official English translation of the term is 'tattoo'. No series-specific translation found."
+    },
+    {
+      "jp": "悪阻",
+      "current_en": "Tsuwari",
+      "verified_en": "morning sickness",
+      "source": "General Japanese-English dictionary (Jisho.org)",
+      "confidence": "low",
+      "status": "incorrect",
+      "note": "The current_en is a romanization. The official English translation of the term is 'morning sickness'. No series-specific translation found."
+    },
+    {
+      "jp": "ラウル",
+      "current_en": "Raul",
+      "verified_en": "Raul",
+      "source": "Fandom wiki / Novel Updates (common romanization)",
+      "confidence": "medium",
+      "status": "correct",
+      "note": "Common romanization for character name. No official J-Novel Club spelling found for this specific character alone, but 'Raul Miller' is consistent."
+    },
+    {
+      "jp": "ヴァンデル",
+      "current_en": "Vandel",
+      "verified_en": "Vandel",
+      "source": "Fandom wiki / Novel Updates (common romanization)",
+      "confidence": "medium",
+      "status": "correct",
+      "note": "Common romanization for character name. No official J-Novel Club spelling found."
+    },
+    {
+      "jp": "頻脈",
+      "current_en": "Hinmyaku",
+      "verified_en": "tachycardia",
+      "source": "General Japanese-English dictionary (Jisho.org)",
+      "confidence": "low",
+      "status": "incorrect",
+      "note": "The current_en is a romanization. The official English translation of the term is 'tachycardia' or 'rapid pulse'. No series-specific translation found."
+    },
+    {
+      "jp": "起坐",
+      "current_en": "Kiza",
+      "verified_en": "sitting up",
+      "source": "General Japanese-English dictionary (Jisho.org)",
+      "confidence": "low",
+      "status": "incorrect",
+      "note": "The current_en is a romanization. The official English translation of the term is 'sitting up' or 'sitting posture'. No series-specific translation found."
+    },
+    {
+      "jp": "マーダー",
+      "current_en": "Murder",
+      "verified_en": "Murder",
+      "source": "Fandom wiki / Novel Updates (common romanization)",
+      "confidence": "medium",
+      "status": "correct",
+      "note": "Common romanization for character name. Given 'Doctor Mada' for 'マーダー卿', this is likely the intended name 'Murder' in English, or 'Mada' if it's a different character or an alias."
+    },
+    {
+      "jp": "シトエン",
+      "current_en": "Shitoen",
+      "verified_en": "Sitoen",
+      "source": "MangaDex / Novel Updates / J-Novel Club (implied from full name)",
+      "confidence": "high",
+      "status": "incorrect",
+      "note": "While 'Shitoen' is a common romanization, J-Novel Club's official title and character listings (e.g., 'Sitoen Barrymore') use 'Sitoen'."
+    },
+    {
+      "jp": "哨戒",
+      "current_en": "Shoukai",
+      "verified_en": "patrol",
+      "source": "General Japanese-English dictionary (Jisho.org)",
+      "confidence": "low",
+      "status": "incorrect",
+      "note": "The current_en is a romanization. The official English translation of the term is 'patrol' or 'sentry'. No series-specific translation found."
+    },
+    {
+      "jp": "竜紋",
+      "current_en": "Ryumon",
+      "verified_en": "dragon crest",
+      "source": "General Japanese-English dictionary (Jisho.org)",
+      "confidence": "low",
+      "status": "incorrect",
+      "note": "The current_en is a romanization. The official English translation of the term is 'dragon crest' or 'dragon pattern'. No series-specific translation found."
+    },
+    {
+      "jp": "僭越",
+      "current_en": "Senetsu",
+      "verified_en": "presumptuous",
+      "source": "General Japanese-English dictionary (Jisho.org)",
+      "confidence": "low",
+      "status": "incorrect",
+      "note": "The current_en is a romanization. The official English translation of the term is 'presumptuous' or 'arrogant'. No series-specific translation found."
+    },
+    {
+      "jp": "飾緒",
+      "current_en": "Shokusho",
+      "verified_en": "aiguillette",
+      "source": "General Japanese-English dictionary (Jisho.org)",
+      "confidence": "low",
+      "status": "incorrect",
+      "note": "The current_en is a romanization. The official English translation of the term is 'aiguillette'. No series-specific translation found."
+    },
+    {
+      "jp": "大店",
+      "current_en": "Oodana",
+      "verified_en": "large store",
+      "source": "General Japanese-English dictionary (Jisho.org)",
+      "confidence": "low",
+      "status": "incorrect",
+      "note": "The current_en is a romanization. The official English translation of the term is 'large store' or 'big shop'. No series-specific translation found."
+    },
+    {
+      "jp": "御簾",
+      "current_en": "Misu",
+      "verified_en": "bamboo blind",
+      "source": "General Japanese-English dictionary (Jisho.org)",
+      "confidence": "low",
+      "status": "incorrect",
+      "note": "The current_en is a romanization. The official English translation of the term is 'bamboo blind' or 'screen'. No series-specific translation found."
+    },
+    {
+      "jp": "胡座",
+      "current_en": "Agura",
+      "verified_en": "sitting cross-legged",
+      "source": "General Japanese-English dictionary (Jisho.org)",
+      "confidence": "low",
+      "status": "incorrect",
+      "note": "The current_en is a romanization. The official English translation of the term is 'sitting cross-legged'. No series-specific translation found."
+    },
+    {
+      "jp": "黒御影石",
+      "current_en": "Kuromikageishi",
+      "verified_en": "black granite",
+      "source": "General Japanese-English dictionary (Jisho.org)",
+      "confidence": "low",
+      "status": "incorrect",
+      "note": "The current_en is a romanization. The official English translation of the term is 'black granite'. No series-specific translation found."
+    },
+    {
+      "jp": "閨房術",
+      "current_en": "Keiboujutsu",
+      "verified_en": "bedroom arts",
+      "source": "General Japanese-English dictionary (Jisho.org)",
+      "confidence": "low",
+      "status": "incorrect",
+      "note": "The current_en is a romanization. The official English translation of the term is 'bedroom arts' or 'sexual techniques'. No series-specific translation found."
+    },
+    {
+      "jp": "ユキヒョウ",
+      "current_en": "Mone",
+      "verified_en": "snow leopard",
+      "source": "General Japanese-English dictionary (Jisho.org)",
+      "confidence": "high",
+      "status": "incorrect",
+      "note": "The current_en 'Mone' is completely unrelated to the Japanese term 'ユキヒョウ' (yuki-hyou), which means 'snow leopard'. No series-specific translation found, so using general meaning."
+    },
+    {
+      "jp": "遮蔽物",
+      "current_en": "Shaheibutsu",
+      "verified_en": "cover",
+      "source": "General Japanese-English dictionary (Jisho.org)",
+      "confidence": "low",
+      "status": "incorrect",
+      "note": "The current_en is a romanization. The official English translation of the term is 'cover', 'shield', or 'barrier'. No series-specific translation found."
+    },
+    {
+      "jp": "手甲鉤",
+      "current_en": "Tekkoukagi",
+      "verified_en": "tekko-kagi",
+      "source": "General Japanese-English dictionary (Jisho.org)",
+      "confidence": "low",
+      "status": "incorrect",
+      "note": "The current_en is a romanization. The term refers to 'hand claw weapons' or 'tekko-kagi'. 'Tekko-kagi' is often used as the English term for this specific weapon. No series-specific translation found."
+    },
+    {
+      "jp": "嫣然",
+      "current_en": "Enzen",
+      "verified_en": "charming smile",
+      "source": "General Japanese-English dictionary (Jisho.org)",
+      "confidence": "low",
+      "status": "incorrect",
+      "note": "The current_en is a romanization. The official English translation of the term is 'charming smile' or 'sweet smile'. No series-specific translation found."
+    },
+    {
+      "jp": "イートン",
+      "current_en": "Eaton",
+      "verified_en": "Eaton",
+      "source": "Fandom wiki / Novel Updates (common romanization)",
+      "confidence": "medium",
+      "status": "correct",
+      "note": "Common romanization for character name. No official J-Novel Club spelling found."
+    },
+    {
+      "jp": "左側臥位",
+      "current_en": "Sasokugai",
+      "verified_en": "left lateral recumbent position",
+      "source": "General Japanese-English dictionary (Jisho.org)",
+      "confidence": "low",
+      "status": "incorrect",
+      "note": "The current_en is a romanization. The official English translation of the term is 'left lateral recumbent position' (medical term). No series-specific translation found."
+    },
+    {
+      "jp": "漏斗",
+      "current_en": "Routo",
+      "verified_en": "funnel",
+      "source": "General Japanese-English dictionary (Jisho.org)",
+      "confidence": "low",
+      "status": "incorrect",
+      "note": "The current_en is a romanization. The official English translation of the term is 'funnel'. No series-specific translation found."
+    },
+    {
+      "jp": "閲兵式",
+      "current_en": "Eppeishiki",
+      "verified_en": "military parade",
+      "source": "General Japanese-English dictionary (Jisho.org)",
+      "confidence": "low",
+      "status": "incorrect",
+      "note": "The current_en is a romanization. The official English translation of the term is 'military parade' or 'review of troops'. No series-specific translation found."
+    },
+    {
+      "jp": "鎖鎌",
+      "current_en": "Kusarigama",
+      "verified_en": "kusarigama",
+      "source": "General Japanese-English dictionary (Jisho.org)",
+      "confidence": "low",
+      "status": "correct",
+      "note": "The current_en is a romanization, but 'kusarigama' is also commonly used as the English term for this specific Japanese weapon. No series-specific translation found."
+    },
+    {
+      "jp": "サリュ",
+      "current_en": "Salyu",
+      "verified_en": "Saryu",
+      "source": "MangaDex / Novel Updates / J-Novel Club (implied from series synopsis)",
+      "confidence": "high",
+      "status": "incorrect",
+      "note": "The most common romanization and likely official spelling from J-Novel Club (based on series synopsis and character mentions) is 'Saryu'."
+    },
+    {
+      "jp": "シトエン・バリモア",
+      "current_en": "Sitoen Balimore",
+      "verified_en": "Sitoen Barrymore",
+      "source": "MangaDex / Novel Updates / J-Novel Club (implied from series synopsis)",
+      "confidence": "high",
+      "status": "incorrect",
+      "note": "The common and likely official spelling for the surname is 'Barrymore', not 'Balimore'. The given name 'Sitoen' is consistent with J-Novel Club's usage."
+    },
+    {
+      "jp": "バリモア卿",
+      "current_en": "Lord Balimore",
+      "verified_en": "Lord Barrymore",
+      "source": "MangaDex / Novel Updates (consistent with character full name)",
+      "confidence": "high",
+      "status": "incorrect",
+      "note": "Consistent with the corrected full name 'Sitoen Barrymore', the surname should be 'Barrymore'."
+    },
+    {
+      "jp": "アリオス・ルミナス",
+      "current_en": "Arios Luminas",
+      "verified_en": "Arios Luminas",
+      "source": "Novel Updates / MangaDex (common romanization)",
+      "confidence": "medium",
+      "status": "correct",
+      "note": "Common romanization for character full name."
+    },
+    {
+      "jp": "ラウル・ミラー",
+      "current_en": "Raul Miller",
+      "verified_en": "Raul Miller",
+      "source": "Fandom wiki / Novel Updates (common romanization)",
+      "confidence": "medium",
+      "status": "correct",
+      "note": "Common romanization for character full name. No official J-Novel Club spelling found."
+    },
+    {
+      "jp": "マーダー卿",
+      "current_en": "Doctor Mada",
+      "verified_en": "Lord Mada",
+      "source": "Fandom wiki / Novel Updates (implied from 'Mada' romanization)",
+      "confidence": "medium",
+      "status": "incorrect",
+      "note": "卿 (kyou) translates to 'Lord' or 'Sir', not 'Doctor'. While 'マーダー' could be romanized as 'Mada', the title 'Doctor' is not supported by '卿'. If the character is a doctor, it's not indicated by 卿. If 'Mada' is the intended name, then 'Lord Mada' would be the correct translation of the title. No official J-Novel Club spelling found."
+    },
+    {
+      "jp": "テオドール伯爵",
+      "current_en": "Count Theodor",
+      "verified_en": "Count Theodor",
+      "source": "Fandom wiki / Novel Updates (common romanization)",
+      "confidence": "medium",
+      "status": "correct",
+      "note": "Common romanization for character title and name. No official J-Novel Club spelling found."
+    },
+    {
+      "jp": "アツヒト",
+      "current_en": "Atsuhito",
+      "verified_en": "Atsuhito",
+      "source": "Reddit r/manga discussions (fan consensus)",
+      "confidence": "medium",
+      "status": "correct",
+      "note": "Common romanization for character name, appears in fan discussions related to the series."
+    },
+    {
+      "jp": "メイル",
+      "current_en": "Meiru",
+      "verified_en": "Meiru",
+      "source": "Fandom wiki / Novel Updates (common romanization)",
+      "confidence": "medium",
+      "status": "correct",
+      "note": "Common romanization for character name. No official J-Novel Club spelling found."
+    },
+    {
+      "jp": "宰相",
+      "current_en": "Prime Minister",
+      "verified_en": "Prime Minister",
+      "source": "General Japanese-English dictionary (Jisho.org) / Wikipedia (for general term)",
+      "confidence": "high",
+      "status": "correct",
+      "note": "Standard English translation for the term."
+    },
+    {
+      "jp": "国王",
+      "current_en": "King",
+      "verified_en": "King",
+      "source": "General Japanese-English dictionary (Jisho.org) / Wikipedia (for general term)",
+      "confidence": "high",
+      "status": "correct",
+      "note": "Standard English translation for the term."
+    },
+    {
+      "jp": "王妃",
+      "current_en": "Queen",
+      "verified_en": "Queen",
+      "source": "Reddit r/manga discussion (fan consensus based on official translation context)",
+      "confidence": "high",
+      "status": "correct",
+      "note": ""
+    },
+    {
+      "jp": "王太子",
+      "current_en": "Crown Prince",
+      "verified_en": "Crown Prince",
+      "source": "Novel Updates (Light Novel synopsis)",
+      "confidence": "high",
+      "status": "correct",
+      "note": ""
+    },
+    {
+      "jp": "次兄",
+      "current_en": "Second Prince",
+      "verified_en": "Second Prince",
+      "source": "Contextual inference from official synopsis (mention of 'third son') and common translation usage",
+      "confidence": "medium",
+      "status": "correct",
+      "note": "The protagonist is the 'third son' (Saryu), implying the existence of a second eldest brother who would be the 'Second Prince'. While not explicitly named in official English synopses found, 'Second Prince' is the standard translation for 次兄 in a royal context."
+    }
+  ],
+  "summary": {
+    "correct": 15,
+    "incorrect": 28,
+    "unverifiable": 0
+  }
+}

@@ -1,0 +1,35 @@
+{
+  "series_id": "学年一の金髪碧眼美少女に勉強を教えることになりました２",
+  "series_title": {
+    "ja": "学年一の金髪碧眼美少女に勉強を教えることになりました（ブレイブ文庫）１",
+    "en": "Private Lessons with the School's Golden Girl",
+    "romaji": ""
+  },
+  "world_type": "modern_japan",
+  "total_entries": 2,
+  "results": [
+    {
+      "jp": "会釈《えしやく》",
+      "current_en": "Eshiyaku",
+      "verified_en": "Eshiyaku",
+      "source": "API call failed",
+      "confidence": "unverifiable",
+      "status": "unverifiable",
+      "note": "API returned unparseable response"
+    },
+    {
+      "jp": "一昨日《おととい》",
+      "current_en": "Ototoi",
+      "verified_en": "Ototoi",
+      "source": "API call failed",
+      "confidence": "unverifiable",
+      "status": "unverifiable",
+      "note": "API returned unparseable response"
+    }
+  ],
+  "summary": {
+    "correct": 0,
+    "incorrect": 0,
+    "unverifiable": 2
+  }
+}

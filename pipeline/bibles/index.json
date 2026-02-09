@@ -1,6 +1,6 @@
 {
   "version": "1.0",
-  "last_updated": "2026-02-09T08:04:39Z",
+  "last_updated": "2026-02-09T08:16:46Z",
   "series": {
     "madan_no_ou_to_vanadis": {
       "bible_file": "madan_no_ou_to_vanadis.json",
@@ -114,14 +114,16 @@
     "迷子になっていた幼女を助けたらお隣に住む美少女留学生が家に遊びに来るようになった件について": {
       "bible_file": "迷子になっていた幼女を助けたらお隣に住む美少女留学生が家に遊びに来るようになった件について.json",
       "match_patterns": [
-        "迷子になっていた幼女を助けたら、お隣に住む美少女留学生が家に遊びに来るようになった件について"
+        "迷子になっていた幼女を助けたら、お隣に住む美少女留学生が家に遊びに来るようになった件について",
+        "I Rescued a Lost Little Girl, and Now the Beautiful Exchange Student Next Door Won't Stop Visiting!"
       ],
       "volumes": [
         "0b24",
+        "0fa9",
         "0a51"
       ],
-      "entry_count": 0,
-      "last_updated": "2026-02-09T08:04:39Z"
+      "entry_count": 7,
+      "last_updated": "2026-02-09T08:16:46Z"
     },
     "クラスで２番目に可愛い女の子と友だちになった電子版": {
       "bible_file": "クラスで２番目に可愛い女の子と友だちになった電子版.json",
@@ -256,6 +258,20 @@
       ],
       "entry_count": 43,
       "last_updated": "2026-02-09T08:04:39Z"
+    },
+    "他校の氷姫を助けたらお友達から始める事になりました": {
+      "bible_file": "他校の氷姫を助けたらお友達から始める事になりました.json",
+      "match_patterns": [
+        "他校の氷姫を助けたら、お友達から始める事になりました",
+        "After I Saved the Ice Princess of Another School, We Became Friends",
+        "After I Saved the Ice Princess From Another School"
+      ],
+      "volumes": [
+        "1d46",
+        "1ab4"
+      ],
+      "entry_count": 24,
+      "last_updated": "2026-02-09T08:16:46Z"
     }
   }
 }

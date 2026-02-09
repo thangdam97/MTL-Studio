@@ -3,23 +3,51 @@
   "series_id": "迷子になっていた幼女を助けたらお隣に住む美少女留学生が家に遊びに来るようになった件について",
   "series_title": {
     "ja": "迷子になっていた幼女を助けたら、お隣に住む美少女留学生が家に遊びに来るようになった件について",
-    "en": "迷子になっていた幼女を助けたら、お隣に住む美少女留学生が家に遊びに来るようになった件について",
+    "en": "I Rescued a Lost Little Girl, and Now the Beautiful Exchange Student Next Door Won't Stop Visiting!",
     "romaji": ""
   },
-  "last_updated": "2026-02-09T08:04:39Z",
+  "last_updated": "2026-02-09T08:16:46Z",
   "volumes_registered": [
     {
-      "volume_id": "0a51",
-      "title": "迷子になっていた幼女を助けたら、お隣に住む美少女留学生が家に遊びに来るようになった件について 5",
+      "volume_id": "0b24",
+      "title": "I Rescued a Lost Little Girl, and Now the Beautiful Exchange Student Next Door Won't Stop Visiting!",
       "index": 1
     },
     {
-      "volume_id": "0b24",
-      "title": "迷子になっていた幼女を助けたら、お隣に住む美少女留学生が家に遊びに来るようになった件について",
-      "index": 2
+      "volume_id": "0fa9",
+      "title": "I Rescued a Lost Little Girl, and Now the Beautiful Exchange Student Next Door Won't Stop Visiting! 4",
+      "index": 4
+    },
+    {
+      "volume_id": "0a51",
+      "title": "迷子になっていた幼女を助けたら、お隣に住む美少女留学生が家に遊びに来るようになった件について 5",
+      "index": 5
     }
   ],
-  "characters": {},
+  "characters": {
+    "青柳明人": {
+      "canonical_en": "Aoyagi Akihito",
+      "category": "protagonist"
+    },
+    "シャーロット・ベネット": {
+      "canonical_en": "Charlotte Bennett"
+    },
+    "エマ・ベネット": {
+      "canonical_en": "Emma Bennett"
+    },
+    "西園寺彰": {
+      "canonical_en": "Saionji Akira"
+    },
+    "花澤美優": {
+      "canonical_en": "Hanazawa Miyu"
+    },
+    "東雲": {
+      "canonical_en": "Shinonome"
+    },
+    "クレア": {
+      "canonical_en": "Claire"
+    }
+  },
   "geography": {
     "countries": {},
     "regions": {},
@@ -40,7 +68,29 @@
       "default": "family_given",
       "policy": "Japanese surname-first order for Japanese characters."
     },
-    "exceptions": []
+    "exceptions": [
+      {
+        "character_jp": "シャーロット・ベネット",
+        "character_en": "Charlotte Bennett",
+        "reason": "Foreign character (Western)",
+        "honorifics_override": "retain",
+        "name_order_override": "given_family"
+      },
+      {
+        "character_jp": "エマ・ベネット",
+        "character_en": "Emma Bennett",
+        "reason": "Foreign character (Western)",
+        "honorifics_override": "retain",
+        "name_order_override": "given_family"
+      },
+      {
+        "character_jp": "クレア",
+        "character_en": "Claire",
+        "reason": "Foreign character (Western)",
+        "honorifics_override": "retain",
+        "name_order_override": "given_family"
+      }
+    ]
   },
   "translation_rules": {
     "style": "Natural English prose matching the genre tone."

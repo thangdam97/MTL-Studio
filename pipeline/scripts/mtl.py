@@ -279,6 +279,274 @@ class PipelineController:
         digest = hashlib.sha1(volume_id.encode("utf-8")).hexdigest()[:8]
         return f"id_{digest}"
         
+    # ── Verbose Phase Confirmation Logs ───────────────────────────────
+
+    def _log_phase1_confirmation(self, volume_id: str) -> None:
+        """Log verbose confirmation for Phase 1 (Librarian) results."""
+        manifest = self.load_manifest(volume_id)
+        if not manifest:
+            return
+
+        vol_path = self.work_dir / volume_id
+
+        # Chapters
+        jp_dir = vol_path / "JP"
+        jp_chapters = sorted(jp_dir.glob("CHAPTER_*.md")) if jp_dir.is_dir() else []
+
+        # Metadata
+        metadata = manifest.get("metadata", {})
+        title = metadata.get("title", "N/A")
+        author = metadata.get("author", "N/A")
+
+        # Ruby extraction
+        ruby_names = manifest.get("ruby_names", {})
+        ruby_terms = manifest.get("ruby_terms", [])
+
+        # Character names (raw JP extraction)
+        meta_en = manifest.get("metadata_en", {})
+        char_names = meta_en.get("character_names", {})
+        char_profiles = meta_en.get("character_profiles", {})
+
+        # Assets
+        assets_dir = vol_path / "assets" if (vol_path / "assets").is_dir() else vol_path / "_assets"
+        illust_count = len(list((assets_dir / "illustrations").glob("*.*"))) if (assets_dir / "illustrations").is_dir() else 0
+        kuchie_count = len(list((assets_dir / "kuchie").glob("*.*"))) if (assets_dir / "kuchie").is_dir() else 0
+
+        # Bible ID
+        bible_id = manifest.get("bible_id", None)
+
+        # Multimodal
+        mm = manifest.get("multimodal", {})
+        mm_enabled = mm.get("enabled", False)
+
+        logger.info("")
+        logger.info("┌─────────────────────────────────────────────────────────────┐")
+        logger.info("│  PHASE 1 CONFIRMATION — Librarian Output                   │")
+        logger.info("├─────────────────────────────────────────────────────────────┤")
+        logger.info(f"│  Title:     {title[:50]:<50}│")
+        logger.info(f"│  Author:    {author[:50]:<50}│")
+        logger.info(f"│  Volume ID: {volume_id[-40:]:<50}│")
+        logger.info("├─────────────────────────────────────────────────────────────┤")
+        logger.info(f"│  JP Chapters:       {len(jp_chapters):<5}                                    │")
+        logger.info(f"│  Ruby Names:        {len(ruby_names):<5}                                    │")
+        logger.info(f"│  Ruby Terms:        {len(ruby_terms):<5}                                    │")
+        logger.info(f"│  Character Names:   {len(char_names):<5}  (Gemini extraction)               │")
+        logger.info(f"│  Character Profiles:{len(char_profiles):<5}  (rich profiles)                  │")
+        logger.info("├─────────────────────────────────────────────────────────────┤")
+        logger.info(f"│  Illustrations:     {illust_count:<5}                                    │")
+        logger.info(f"│  Color Plates:      {kuchie_count:<5}  (kuchie)                          │")
+        logger.info(f"│  Multimodal:        {'ENABLED' if mm_enabled else 'DISABLED':<10}                               │")
+        logger.info("├─────────────────────────────────────────────────────────────┤")
+        logger.info(f"│  Bible ID:          {(bible_id or 'NOT SET'):<40}│")
+        logger.info("└─────────────────────────────────────────────────────────────┘")
+
+    def _log_phase1_5_confirmation(self, volume_id: str) -> None:
+        """Log verbose confirmation for Phase 1.5 (Metadata Processor) results."""
+        manifest = self.load_manifest(volume_id)
+        if not manifest:
+            return
+
+        from pipeline.config import get_target_language
+        target_lang = get_target_language()
+
+        metadata = manifest.get("metadata", {})
+        meta_key = f"metadata_{target_lang}"
+        meta_translated = manifest.get(meta_key, {})
+        if not meta_translated and target_lang == "en":
+            meta_translated = manifest.get("metadata_en", {})
+
+        title_key = f"title_{target_lang}"
+        author_key = f"author_{target_lang}"
+        series_key = f"series_title_{target_lang}"
+        title_en = meta_translated.get(title_key, "N/A")
+        author_en = meta_translated.get(author_key, "N/A")
+        series_en = meta_translated.get(series_key, "—")
+
+        char_names = meta_translated.get("character_names", {})
+        char_profiles = meta_translated.get("character_profiles", {})
+        glossary = meta_translated.get("glossary", {})
+
+        # Chapters
+        chapters = manifest.get("chapters", [])
+        translated_titles = sum(1 for c in chapters if c.get(f"title_{target_lang}") or c.get("title_en"))
+
+        # Bible integration
+        bible_id = manifest.get("bible_id", None)
+        bible_status = "NOT LINKED"
+        bible_entries = 0
+        bible_categories = ""
+        if bible_id:
+            try:
+                from pipeline.translator.series_bible import BibleController
+                bc = BibleController(PROJECT_ROOT)
+                bible = bc.load(manifest)
+                if bible:
+                    bible_entries = bible.entry_count()
+                    stats = bible.stats()
+                    cats = []
+                    # Use short labels to fit in the panel width
+                    stat_map = [
+                        ("chars", "characters"),
+                        ("weapons", "weapons_artifacts"),
+                        ("orgs", "organizations"),
+                        ("cultural", "cultural_terms"),
+                        ("myth", "mythology"),
+                    ]
+                    for short_name, stat_key in stat_map:
+                        count = stats.get(stat_key, 0)
+                        if isinstance(count, int) and count > 0:
+                            cats.append(f"{short_name}={count}")
+                    # Geography is nested dict: {countries: N, regions: N, cities: N}
+                    geo_stats = stats.get("geography", {})
+                    if isinstance(geo_stats, dict):
+                        geo_total = sum(v for v in geo_stats.values() if isinstance(v, int))
+                        if geo_total > 0:
+                            cats.append(f"geo={geo_total}")
+                    elif isinstance(geo_stats, int) and geo_stats > 0:
+                        cats.append(f"geo={geo_stats}")
+                    bible_categories = ", ".join(cats)
+                    bible_status = f"LOADED ({bible_entries} entries)"
+                else:
+                    bible_status = f"DECLARED but NOT FOUND: {bible_id}"
+            except Exception:
+                bible_status = f"DECLARED: {bible_id} (load error)"
+
+        # Bible sync result (check if pull was done)
+        bible_sync_status = "—"
+        if bible_id:
+            try:
+                from pipeline.metadata_processor.bible_sync import BibleSyncAgent
+                sync = BibleSyncAgent(self.work_dir / volume_id, PROJECT_ROOT)
+                resolved = sync.resolve(manifest)
+                if resolved:
+                    pull = sync.pull(manifest)
+                    if pull:
+                        inherited = getattr(pull, "total_inherited", 0)
+                        known_chars = len(getattr(pull, "known_characters", {}))
+                        bible_sync_status = f"PULL OK: {inherited} terms, {known_chars} known chars"
+                    else:
+                        bible_sync_status = "PULL returned empty"
+                else:
+                    bible_sync_status = "resolve() failed — bible not found"
+            except Exception:
+                bible_sync_status = "PULL not available"
+
+        logger.info("")
+        logger.info("┌─────────────────────────────────────────────────────────────┐")
+        logger.info("│  PHASE 1.5 CONFIRMATION — Metadata Processor               │")
+        logger.info("├─────────────────────────────────────────────────────────────┤")
+        logger.info(f"│  Title ({target_lang.upper()}):  {title_en[:48]:<48} │")
+        logger.info(f"│  Series ({target_lang.upper()}): {series_en[:48]:<48} │")
+        logger.info(f"│  Author ({target_lang.upper()}): {author_en[:48]:<48} │")
+        logger.info("├─────────────────────────────────────────────────────────────┤")
+        logger.info(f"│  Character Names:   {len(char_names):<5}  (JP → {target_lang.upper()} pairs)               │")
+        logger.info(f"│  Character Profiles:{len(char_profiles):<5}  (rich profiles)                  │")
+        logger.info(f"│  Glossary Terms:    {len(glossary):<5}                                    │")
+        logger.info(f"│  Chapter Titles:    {translated_titles:<5}  translated                       │")
+        logger.info("├─────────────────────────────────────────────────────────────┤")
+        logger.info(f"│  📖 Bible: {bible_status[:50]:<50}│")
+        if bible_categories:
+            cat_str = bible_categories[:56]
+            if len(bible_categories) > 56:
+                cat_str = bible_categories[:53] + "..."
+            logger.info(f"│     {cat_str:<56}│")
+        logger.info(f"│     Sync: {bible_sync_status[:50]:<50}│")
+        logger.info("└─────────────────────────────────────────────────────────────┘")
+
+        # Show top character name samples
+        if char_names and len(char_names) > 0:
+            logger.info("  Sample character names:")
+            for jp, en in list(char_names.items())[:5]:
+                logger.info(f"    {jp} → {en}")
+            if len(char_names) > 5:
+                logger.info(f"    ... and {len(char_names) - 5} more")
+
+    def _log_phase1_6_confirmation(self, volume_id: str) -> None:
+        """Log verbose confirmation for Phase 1.6 (Multimodal) results."""
+        manifest = self.load_manifest(volume_id)
+        if not manifest:
+            return
+
+        vol_path = self.work_dir / volume_id
+
+        # Visual cache
+        cache_path = vol_path / "visual_cache.json"
+        cache_total = 0
+        cached_ok = 0
+        safety_blocked = 0
+        manual_override = 0
+        has_ground_truth = 0
+        if cache_path.exists():
+            try:
+                with open(cache_path, "r", encoding="utf-8") as f:
+                    cache = json.load(f)
+                cache_total = len(cache)
+                for entry in cache.values():
+                    status = entry.get("status", "")
+                    if status == "cached":
+                        cached_ok += 1
+                    elif status == "safety_blocked":
+                        safety_blocked += 1
+                    elif status == "manual_override":
+                        manual_override += 1
+                    vgt = entry.get("visual_ground_truth", {})
+                    if vgt and vgt.get("composition"):
+                        has_ground_truth += 1
+            except Exception:
+                pass
+
+        # Multimodal manifest block
+        mm = manifest.get("multimodal", {})
+        vision_model = mm.get("models", {}).get("vision", "N/A")
+        epub_map = mm.get("epub_id_to_cache_id", {})
+        illust_count = mm.get("illustration_count", 0)
+
+        # Canon Name Enforcer readiness
+        canon_status = "—"
+        canon_count = 0
+        nickname_count = 0
+        try:
+            sys.path.insert(0, str(PROJECT_ROOT))
+            from modules.multimodal.prompt_injector import CanonNameEnforcer
+            enforcer = CanonNameEnforcer(manifest=manifest)
+            canon_count = len(enforcer.canon_map)
+            nickname_count = len(enforcer.nickname_map)
+            canon_status = f"{canon_count} canon, {nickname_count} nicknames"
+        except Exception:
+            canon_status = "NOT AVAILABLE"
+
+        # Bible connection for visual context enrichment
+        bible_id = manifest.get("bible_id", None)
+        bible_flat_count = 0
+        if bible_id:
+            try:
+                from pipeline.translator.series_bible import BibleController
+                bc = BibleController(PROJECT_ROOT)
+                bible = bc.load(manifest)
+                if bible:
+                    bible_flat_count = len(bible.flat_glossary())
+            except Exception:
+                pass
+
+        logger.info("")
+        logger.info("┌─────────────────────────────────────────────────────────────┐")
+        logger.info("│  PHASE 1.6 CONFIRMATION — Art Director (Multimodal)        │")
+        logger.info("├─────────────────────────────────────────────────────────────┤")
+        logger.info(f"│  Vision Model:      {vision_model[:40]:<40} │")
+        logger.info(f"│  Illustrations:     {illust_count:<5}  total in volume                  │")
+        logger.info(f"│  EPUB→Cache Map:    {len(epub_map):<5}  kuchie/embed mappings             │")
+        logger.info("├─────────────────────────────────────────────────────────────┤")
+        logger.info(f"│  Cache Total:       {cache_total:<5}                                    │")
+        logger.info(f"│  ✓ Analyzed:        {cached_ok:<5}                                    │")
+        logger.info(f"│  ✗ Safety Blocked:  {safety_blocked:<5}                                    │")
+        logger.info(f"│  ⚙ Manual Override: {manual_override:<5}                                    │")
+        logger.info(f"│  Ground Truth:      {has_ground_truth:<5}  (composition + directives)       │")
+        logger.info("├─────────────────────────────────────────────────────────────┤")
+        logger.info(f"│  Canon Names:       {canon_status:<40} │")
+        if bible_flat_count > 0:
+            logger.info(f"│  Bible Glossary:    {bible_flat_count:<5}  terms for GlossaryLock            │")
+        logger.info("└─────────────────────────────────────────────────────────────┘")
+
     def _run_command(self, cmd: list, description: str) -> bool:
         """Run a command with verbosity control."""
         if self.verbose:
@@ -711,6 +979,7 @@ class PipelineController:
         
         if self._run_command(cmd, "Phase 1 (Librarian)"):
             logger.info("✓ Phase 1 completed successfully")
+            self._log_phase1_confirmation(volume_id)
             return True
         return False
     
@@ -805,6 +1074,7 @@ class PipelineController:
         
         if self._run_command(cmd, "Phase 1.5 (Metadata)"):
             logger.info("✓ Phase 1.5 completed successfully")
+            self._log_phase1_5_confirmation(volume_id)
             return True
         return False
     
@@ -875,6 +1145,8 @@ class PipelineController:
             logger.info(f"  Already cached:      {stats.get('cached', 0)}")
             logger.info(f"  Newly analyzed:      {stats.get('generated', 0)}")
             logger.info(f"  Safety blocked:      {stats.get('blocked', 0)}")
+
+            self._log_phase1_6_confirmation(volume_id)
             
             if standalone:
                 logger.info("")

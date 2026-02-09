@@ -8,9 +8,164 @@ Version 5.1 | Production Ready | February 2026
 
 ---
 
-![MTL Studio Interface](assets/screenshot_main.png)
+```mermaid
+%%{init: {'theme': 'dark', 'themeVariables': {'primaryColor': '#1a1a2e', 'primaryTextColor': '#e0e0e0', 'primaryBorderColor': '#6c63ff', 'lineColor': '#6c63ff', 'secondaryColor': '#16213e', 'tertiaryColor': '#0f3460', 'fontFamily': 'monospace', 'fontSize': '13px'}, 'flowchart': {'curve': 'basis', 'padding': 20, 'nodeSpacing': 30, 'rankSpacing': 50}}}%%
+flowchart TB
+    INPUT["📥 INPUT/novel.epub\nRaw Japanese Light Novel"]
 
-*V4.5 Landmark: Single-pass automated translation matches multi-pass professional editorial quality*
+    subgraph P1["PHASE 1 — LIBRARIAN · No API · Pure Extraction"]
+        direction TB
+        P1A["LibrarianAgent\nagent.py · 2459 lines"]
+        P1S1["epub_extractor → Unzip + OPF detect"]
+        P1S2["metadata_parser → OPF XML parsing"]
+        P1S3["toc_parser + spine_parser → TOC/Spine"]
+        P1S4["xhtml_to_markdown → XHTML→MD"]
+        P1S5["ruby_extractor → Furigana names"]
+        P1S6["image_extractor → Catalog assets"]
+        P1S7["publisher_profiles → Kadokawa/MF/etc"]
+        P1A --> P1S1 --> P1S2 --> P1S3 --> P1S4 --> P1S5 --> P1S6
+        P1S4 -.-> P1S7
+    end
+
+    subgraph WK1["WORK/vol/"]
+        direction LR
+        MANIFEST["manifest.json\nmetadata · chapters\nruby_names · assets"]
+        TOC["toc.json"]
+        JP["JP/CHAPTER_*.md\nSource chapters"]
+        ASSETS["assets/\ncover · kuchie\nillustrations"]
+    end
+
+    subgraph P15["PHASE 1.5 — METADATA · Gemini 2.5 Flash + Google Search"]
+        direction TB
+        P15A["MetadataProcessor\nagent.py · 1475 lines"]
+        P15S1["SchemaAutoUpdater\n390 lines · Google Search grounding\nanime/manga canon priority"]
+        P15S2["Bible Sync PULL\nBibleSyncAgent · 497 lines\nImport canon terms"]
+        P15S3["Sequel Detection\nInheritance from prior volume"]
+        P15S4["Metadata Translation\nGemini 2.5 Flash\ntitle · author · synopsis"]
+        P15S5["Bible Sync PUSH\nExport newly discovered terms"]
+        P15A --> P15S1 --> P15S2 --> P15S3 --> P15S4 --> P15S5
+    end
+
+    BIBLE[("📖 Series Bible\nbibles/series.json\ncharacters · geography\nweapons · orgs · cultural\nmythology")]
+
+    subgraph P16["PHASE 1.6 — ART DIRECTOR · Gemini 3 Pro Preview · Vision + Thinking"]
+        direction TB
+        P16A["VisualAssetProcessor\nasset_processor.py · 487 lines"]
+        P16S1["integrity_checker → Pre-flight check"]
+        P16S2["Illustration Discovery\nMap images to chapters"]
+        P16S3["Vision Analysis\nGemini 3 Pro · thinking: HIGH\nCanonNameEnforcer injection"]
+        P16S4["cache_manager → Persist results"]
+        P16S5["thought_logger → CoT logs"]
+        P16A --> P16S1 --> P16S2 --> P16S3 --> P16S4 --> P16S5
+    end
+
+    VCACHE["visual_cache.json\nper-illustration analysis\n+ Art Director's Notes"]
+
+    subgraph P2["PHASE 2 — TRANSLATOR · Gemini 2.5 Pro · 3-Tier RAG"]
+        direction TB
+        P2A["TranslatorAgent\nagent.py · 1515 lines\n16-step initialization"]
+        P2CP["ChapterProcessor\nchapter_processor.py · 1472 lines\nper-chapter translate + QC"]
+
+        subgraph RAG["3-Tier RAG System · PromptLoader · 2393 lines"]
+            direction LR
+            T1["T1 Core\nMaster Prompt\nGrammar RAG\nLiteracy Techniques"]
+            T2["T2 Reference\nRAG Modules 9+\nAnti-AI-ism\nGenre Rules"]
+            T3["T3 Lookback\nChapter Summaries\nName Registry\nContinuity Pack"]
+        end
+
+        subgraph POST["Post-Processing Stack"]
+            direction LR
+            PP1["CJK Cleaner"]
+            PP2["AntiAIismAgent\n3-layer LLM fix"]
+            PP3["RTAS Voice"]
+            PP4["Truncation\nValidator"]
+            PP5["GlossaryLock\nName drift guard"]
+            PP6["Scene Break\nFormatter"]
+        end
+
+        P2A --> P2CP
+        P2CP --> RAG
+        P2CP --> POST
+    end
+
+    CHROMA[("🔍 ChromaDB\nEN patterns · VN patterns\nSino-VN · Anti-AI-ism")]
+
+    subgraph WK2["WORK/vol/ translated"]
+        direction LR
+        EN["EN/CHAPTER_*.md\nTranslated chapters"]
+        CTX[".context/\nname_registry\nglossary · summaries"]
+        THINK["THINKING/\nCoT thinking logs"]
+    end
+
+    subgraph P3["PHASE 3 — CRITICS · Agentic QC · Manual"]
+        direction TB
+        P3A["Gemini CLI + AUDIT_AGENT.md\nCJK validation · Translation audit\nIllustration insertion · Final approval"]
+    end
+
+    subgraph P4["PHASE 4 — BUILDER · No API · EPUB 3.0 Packaging"]
+        direction TB
+        P4A["BuilderAgent\nagent.py · 1730 lines"]
+        P4S1["markdown_to_xhtml → MD→XHTML"]
+        P4S2["image_handler → Copy assets"]
+        P4S3["nav_generator + ncx_generator"]
+        P4S4["opf_generator → Package manifest"]
+        P4S5["css_processor + font_processor"]
+        P4S6["epub_packager → Zip .epub"]
+        P4A --> P4S1 --> P4S2 --> P4S3 --> P4S4 --> P4S5 --> P4S6
+    end
+
+    OUTPUT["📦 OUTPUT/title_EN.epub\nPublication-Ready EPUB"]
+
+    subgraph CLI["MTL Studio CLI · mtl_cli.py · Rich TUI"]
+        direction LR
+        CLI1["40+ Commands"]
+        CLI2["Interactive Menus"]
+        CLI3["Live Progress"]
+        CLI4["Bible Manager"]
+        CLI5["Settings Panel"]
+    end
+
+    CONFIG["⚙️ config.yaml\nmodels · languages · RAG\nsafety · rate limits · caching"]
+
+    INPUT ==> P1
+    P1 ==> WK1
+    WK1 ==> P15
+    P15 ==> P16
+    P16 ==> P2
+    P2 ==> WK2
+    WK2 ==> P3
+    P3 ==> P4
+    P4 ==> OUTPUT
+
+    BIBLE <-..->|"PULL / PUSH"| P15
+    BIBLE -.->|"Glossary injection"| P2
+
+    P16 --> VCACHE
+    VCACHE -.->|"Art Director's Notes"| P2
+
+    MANIFEST -.->|"read by all phases"| P15
+    MANIFEST -.-> P16
+    MANIFEST -.-> P2
+    MANIFEST -.-> P4
+
+    CHROMA <-.->|"Vector search"| RAG
+
+    CONFIG -.-> P15
+    CONFIG -.-> P16
+    CONFIG -.-> P2
+    CONFIG -.-> P4
+
+    CLI -.->|"orchestrates"| P1
+    CLI -.->|"orchestrates"| P15
+    CLI -.->|"orchestrates"| P16
+    CLI -.->|"orchestrates"| P2
+    CLI -.->|"orchestrates"| P4
+
+    CTX -.->|"lookback"| T3
+    ASSETS -.-> P4
+```
+
+*Full pipeline architecture — from raw EPUB extraction to publication-ready output*
 
 ---
 
@@ -1155,71 +1310,9 @@ This section uses the same capability taxonomy as **Core Capabilities** so the r
 
 ## System Architecture
 
-### Redesigned Architecture (Massive-LN Ready)
+### Pipeline Architecture (Massive-LN Ready)
 
-```
-                                WORKSPACE/
-                                   │
-    ┌─────────────────────────────┼─────────────────────────────┐
-    │                             │                             │
-    ▼                             ▼                             ▼
-┌─────────┐    JSON         ┌─────────┐    JSON         ┌─────────┐
-│  INPUT/ │ ─────────────►  │  WORK/  │ ─────────────►  │ OUTPUT/ │
-│ (EPUB)  │                 │ (MD+JSON)│                │ (EPUB)  │
-└─────────┘                 └─────────┘                 └─────────┘
-    │                             │                             ▲
-    ▼                             ▼                             │
-┌─────────────┐            ┌─────────────┐  ┌──────────────┐   │
-│  LIBRARIAN  │───────────►│ METADATA +  │◄─│  BIBLES/     │   │
-│   (Python)  │            │ SCHEMA AGENT│  │ index.json   │   │
-└──────┬──────┘            │             │  │ *.json       │   │
-       │                   │ ★ PULL ★    │  │ (136+ terms) │   │
-       │                   │ bible→mfst  │  └──────┬───────┘   │
-       │                   │ ★ PUSH ★    │─────────┘           │
-       │                   │ mfst→bible  │                     │
-       ▼                   └──────┬──────┘                     │
-┌─────────────────┐               │                            │
-│  ART DIRECTOR   │               ▼                            │
-│ Gemini 3 Pro    │        ┌────────────────────────────────────────────────────┐
-│   Vision        │        │                    TRANSLATOR                      │
-│ → visual_cache  │───────►│                  Gemini 2.5 Pro                    │
-│   .json         │        │                                                    │
-└─────────────────┘        │  Bible World Directive (TOP) + Categorized Glossary│
-                           │  RAG + Vector Search + (optional) Visual Context   │
-                           │                                                    │
-                           │  RELIABILITY LAYER                                 │
-                           │  • Volume Cache (full JP volume cached once)       │
-                           │  • Smart Chunking for massive chapters              │
-                           │  • Resumable chunk JSONs (temp/chunks/*.json)      │
-                           │  • Chunk Merge + boundary dedupe                    │
-                           │  • Truncation Validator                             │
-                           │  • Bible + Manifest Glossary Lock                   │
-                           └──────────────────────────┬─────────────────────────┘
-                                                      │
-                                                      ▼
-                                               ┌─────────────┐
-                                               │  EN/*.md    │
-                                               │  + THINKING │
-                                               └──────┬──────┘
-                                                      │
-                                                      ▼
-                           ┌────────────────────────────────────────────────────┐
-                           │ QC & AUDIT LAYER                                   │
-                           │ • Critics / Anti-AI-ism / CJK checks               │
-                           │ • Name Consistency Auditor (cross-chapter drift)   │
-                           └──────────────────────────┬─────────────────────────┘
-                                                      │
-                                                      ▼
-                                               ┌─────────────┐
-                                               │   BUILDER   │
-                                               │   (Python)  │
-                                               └──────┬──────┘
-                                                      │
-                                                      ▼
-                                               ┌─────────────┐
-                                               │  final.epub │
-                                               └─────────────┘
-```
+> See the full interactive diagram at the [top of this README](#mtl-studio) — GitHub renders it as a navigable SVG.
 
 ### Agent Communication Protocol
 

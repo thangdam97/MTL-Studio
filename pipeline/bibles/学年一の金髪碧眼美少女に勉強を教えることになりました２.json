@@ -1,0 +1,55 @@
+{
+  "bible_version": "1.0",
+  "series_id": "学年一の金髪碧眼美少女に勉強を教えることになりました２",
+  "series_title": {
+    "ja": "学年一の金髪碧眼美少女に勉強を教えることになりました（ブレイブ文庫）１",
+    "en": "Private Lessons with the School's Golden Girl",
+    "romaji": ""
+  },
+  "last_updated": "2026-02-09T08:04:39Z",
+  "volumes_registered": [
+    {
+      "volume_id": "033f",
+      "title": "Private Lessons with the School's Golden Girl",
+      "index": 1
+    },
+    {
+      "volume_id": "23a3",
+      "title": "Private Lessons with the School's Golden Girl 2",
+      "index": 2
+    }
+  ],
+  "characters": {
+    "会釈《えしやく》": {
+      "canonical_en": "Eshiyaku"
+    },
+    "一昨日《おととい》": {
+      "canonical_en": "Ototoi"
+    }
+  },
+  "geography": {
+    "countries": {},
+    "regions": {},
+    "cities": {}
+  },
+  "weapons_artifacts": {},
+  "organizations": {},
+  "cultural_terms": {},
+  "mythology": {},
+  "world_setting": {
+    "type": "modern_japan",
+    "label": "Contemporary Japanese Setting",
+    "honorifics": {
+      "mode": "retain",
+      "policy": "Keep all JP honorifics (-san, -kun, -chan, -sama, -senpai, -sensei)."
+    },
+    "name_order": {
+      "default": "family_given",
+      "policy": "Japanese surname-first order for Japanese characters."
+    },
+    "exceptions": []
+  },
+  "translation_rules": {
+    "style": "Natural English prose matching the genre tone."
+  }
+}

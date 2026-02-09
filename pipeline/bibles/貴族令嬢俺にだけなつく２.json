@@ -1,0 +1,191 @@
+{
+  "bible_version": "1.0",
+  "series_id": "貴族令嬢俺にだけなつく２",
+  "series_title": {
+    "ja": "貴族令嬢。俺にだけなつく",
+    "en": "The Noble Lady Who Only Fawns Over Me",
+    "romaji": ""
+  },
+  "last_updated": "2026-02-09T08:04:39Z",
+  "volumes_registered": [
+    {
+      "volume_id": "1d74",
+      "title": "The Noble Lady Who Only Fawns Over Me",
+      "index": 1
+    },
+    {
+      "volume_id": "20f7",
+      "title": "The Noble Lady Who Only Fawns Over Me 2",
+      "index": 2
+    },
+    {
+      "volume_id": "2429",
+      "title": "The Noble Lady Who Only Fawns Over Me 4",
+      "index": 3
+    },
+    {
+      "volume_id": "2707",
+      "title": "The Noble Lady Who Only Fawns Over Me 3",
+      "index": 4
+    }
+  ],
+  "characters": {
+    "シア": {
+      "canonical_en": "Sia"
+    },
+    "エレナ・ルクレール": {
+      "canonical_en": "Elena Leclerc"
+    },
+    "エレナ": {
+      "canonical_en": "Elena"
+    },
+    "ルーナ・ペレンメル": {
+      "canonical_en": "Luna Peremmer"
+    },
+    "ルーナ": {
+      "canonical_en": "Luna"
+    },
+    "アラン": {
+      "canonical_en": "Alan"
+    },
+    "ベレト・セントフォード": {
+      "canonical_en": "Beret Sandford"
+    },
+    "ベレト": {
+      "canonical_en": "Beret"
+    },
+    "アリア・ティエール": {
+      "canonical_en": "Aria Tier"
+    },
+    "アリア": {
+      "canonical_en": "Aria"
+    },
+    "サーニャ": {
+      "canonical_en": "Sanya"
+    },
+    "可哀想": {
+      "canonical_en": "Kawaisou"
+    },
+    "貴女": {
+      "canonical_en": "Anata"
+    },
+    "思慕": {
+      "canonical_en": "Shibo"
+    },
+    "刺繡": {
+      "canonical_en": "Shishu"
+    },
+    "何卒": {
+      "canonical_en": "Nanitozo"
+    },
+    "今宵": {
+      "canonical_en": "Koyoi"
+    },
+    "高嶺": {
+      "canonical_en": "Takane"
+    },
+    "不躾": {
+      "canonical_en": "Bushitsuke"
+    },
+    "敷地": {
+      "canonical_en": "Shikichi"
+    },
+    "晩餐": {
+      "canonical_en": "Bansan"
+    },
+    "真似": {
+      "canonical_en": "Mane"
+    },
+    "乖離": {
+      "canonical_en": "Kairi"
+    },
+    "贅沢": {
+      "canonical_en": "Zeitaku"
+    },
+    "侍女": {
+      "canonical_en": "Mono"
+    },
+    "屋敷": {
+      "canonical_en": "Yashiki"
+    },
+    "所以": {
+      "canonical_en": "Yuen"
+    },
+    "阿吽": {
+      "canonical_en": "Aun"
+    },
+    "他人事": {
+      "canonical_en": "Hitogoto"
+    },
+    "煽動": {
+      "canonical_en": "Sendou"
+    },
+    "雲泥": {
+      "canonical_en": "Undei"
+    },
+    "寵愛": {
+      "canonical_en": "Chouai"
+    },
+    "矜持": {
+      "canonical_en": "Kyouji"
+    },
+    "自惚": {
+      "canonical_en": "Unubo"
+    },
+    "夜更": {
+      "canonical_en": "Yofu"
+    },
+    "払拭": {
+      "canonical_en": "Fusshoku"
+    },
+    "物凄": {
+      "canonical_en": "Monosugo"
+    },
+    "彷徨": {
+      "canonical_en": "Samayo"
+    },
+    "壁際": {
+      "canonical_en": "Kabegiwa"
+    },
+    "牽制": {
+      "canonical_en": "Kensei"
+    },
+    "一瞥": {
+      "canonical_en": "Ichibetsu"
+    },
+    "幕間": {
+      "canonical_en": "Makuai"
+    },
+    "呆気": {
+      "canonical_en": "Akke"
+    },
+    "夏乃実": {
+      "canonical_en": "Natsunomi"
+    }
+  },
+  "geography": {
+    "countries": {},
+    "regions": {},
+    "cities": {}
+  },
+  "weapons_artifacts": {},
+  "organizations": {},
+  "cultural_terms": {},
+  "mythology": {},
+  "world_setting": {
+    "type": "fantasy",
+    "label": "Fantasy Setting",
+    "honorifics": {
+      "mode": "localize",
+      "policy": "Drop all JP honorifics. Use English equivalents (Lord, Lady, Sir, etc.)."
+    },
+    "name_order": {
+      "default": "given_family",
+      "policy": "Western first-name order for all characters."
+    },
+    "exceptions": []
+  },
+  "translation_rules": {
+    "style": "Natural English prose matching the genre tone."
+  }
+}

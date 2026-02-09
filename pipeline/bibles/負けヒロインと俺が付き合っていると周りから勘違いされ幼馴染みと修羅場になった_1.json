@@ -1,0 +1,127 @@
+{
+  "bible_version": "1.0",
+  "series_id": "負けヒロインと俺が付き合っていると周りから勘違いされ幼馴染みと修羅場になった_1",
+  "series_title": {
+    "ja": "負けヒロインと俺が付き合っていると周りから勘違いされ、幼馴染みと修羅場になった",
+    "en": "Everyone Thinks I'm Dating the Losing Heroine, Kicking Off a Rom-Com War With My Childhood Friend!,",
+    "romaji": ""
+  },
+  "last_updated": "2026-02-09T08:04:39Z",
+  "volumes_registered": [
+    {
+      "volume_id": "07ca",
+      "title": "Everyone Thinks I'm Dating the Losing Heroine, Kicking Off a Rom-Com War With My Childhood Friend!, Vol. 1",
+      "index": 1
+    },
+    {
+      "volume_id": "1b05",
+      "title": "Everyone Thinks I'm Dating the Losing Heroine, Kicking Off a Rom-Com War With My Childhood Friend!, Vol. 2",
+      "index": 2
+    }
+  ],
+  "characters": {
+    "葉桜陽《はざくらよう》": {
+      "canonical_en": "Hazakura Yo"
+    },
+    "根本《ねもと》": {
+      "canonical_en": "Nemoto"
+    },
+    "秋実真凛《あきみまりん》": {
+      "canonical_en": "Akimi Marin"
+    },
+    "木下晴喜《きのしたはるき》": {
+      "canonical_en": "Kinoshita Haruki"
+    },
+    "佳純《かすみ》": {
+      "canonical_en": "Kasumi"
+    },
+    "秋実《あきみ》": {
+      "canonical_en": "Akimi"
+    },
+    "真凛《まりん》": {
+      "canonical_en": "Marin"
+    },
+    "葉桜《はざくら》": {
+      "canonical_en": "Hazakura"
+    },
+    "晴喜《はるき》": {
+      "canonical_en": "Haruki"
+    },
+    "木下《きのした》": {
+      "canonical_en": "Kinoshita"
+    },
+    "根本佳純《ねもとかすみ》": {
+      "canonical_en": "Nemoto Kasumi"
+    },
+    "凪沙《なぎさ》": {
+      "canonical_en": "Nagisa"
+    },
+    "神風《かみかぜ》": {
+      "canonical_en": "Kamikaze"
+    },
+    "葛井聡《くずいさとし》": {
+      "canonical_en": "Kuzui Satoshi"
+    },
+    "葛井《くずい》": {
+      "canonical_en": "Kuzui"
+    },
+    "真凛": {
+      "canonical_en": "Marin"
+    },
+    "晴喜": {
+      "canonical_en": "Haruki"
+    },
+    "佳純": {
+      "canonical_en": "Kasumi"
+    },
+    "葉桜": {
+      "canonical_en": "Hazakura"
+    },
+    "根本": {
+      "canonical_en": "Nemoto"
+    },
+    "凪沙": {
+      "canonical_en": "Nagisa"
+    },
+    "木下": {
+      "canonical_en": "Kinoshita"
+    },
+    "秋実": {
+      "canonical_en": "Akimi"
+    },
+    "神庭": {
+      "canonical_en": "Kanba"
+    },
+    "純陽": {
+      "canonical_en": "Junyo"
+    },
+    "観音寺": {
+      "canonical_en": "Kanonji"
+    }
+  },
+  "geography": {
+    "countries": {},
+    "regions": {},
+    "cities": {}
+  },
+  "weapons_artifacts": {},
+  "organizations": {},
+  "cultural_terms": {},
+  "mythology": {},
+  "world_setting": {
+    "type": "modern_japan",
+    "label": "Contemporary Japanese Setting",
+    "honorifics": {
+      "mode": "retain",
+      "policy": "Keep all JP honorifics (-san, -kun, -chan, -sama, -senpai, -sensei)."
+    },
+    "name_order": {
+      "default": "family_given",
+      "policy": "Japanese surname-first order for Japanese characters."
+    },
+    "exceptions": []
+  },
+  "translation_rules": {
+    "style": "Natural English prose matching the genre tone."
+  }
+}

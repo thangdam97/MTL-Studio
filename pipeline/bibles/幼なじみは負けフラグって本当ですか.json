@@ -1,0 +1,82 @@
+{
+  "bible_version": "1.0",
+  "series_id": "幼なじみは負けフラグって本当ですか",
+  "series_title": {
+    "ja": "幼なじみは負けフラグって本当ですか？",
+    "en": "Is My Childhood Friend Really a Losing Flag?",
+    "romaji": ""
+  },
+  "last_updated": "2026-02-09T08:04:39Z",
+  "volumes_registered": [
+    {
+      "volume_id": "0242",
+      "title": "Is My Childhood Friend Really a Losing Flag?",
+      "index": 1
+    },
+    {
+      "volume_id": "0285",
+      "title": "幼なじみは負けフラグって本当ですか？",
+      "index": 2
+    }
+  ],
+  "characters": {
+    "萌々花": {
+      "canonical_en": "Momoka"
+    },
+    "雪野麗奈": {
+      "canonical_en": "Yukino Rena"
+    },
+    "福村": {
+      "canonical_en": "Fukumura"
+    },
+    "天沢": {
+      "canonical_en": "Amazawa"
+    },
+    "福田": {
+      "canonical_en": "Fukuda"
+    },
+    "風香": {
+      "canonical_en": "Fuka"
+    },
+    "雪野": {
+      "canonical_en": "Yukino"
+    },
+    "片桐": {
+      "canonical_en": "Katagiri"
+    },
+    "麗奈": {
+      "canonical_en": "Rena"
+    },
+    "悠馬": {
+      "canonical_en": "Yuma"
+    },
+    "桜木": {
+      "canonical_en": "Sakuragi"
+    }
+  },
+  "geography": {
+    "countries": {},
+    "regions": {},
+    "cities": {}
+  },
+  "weapons_artifacts": {},
+  "organizations": {},
+  "cultural_terms": {},
+  "mythology": {},
+  "world_setting": {
+    "type": "modern_japan",
+    "label": "Contemporary Japanese Setting",
+    "honorifics": {
+      "mode": "retain",
+      "policy": "Keep all JP honorifics (-san, -kun, -chan, -sama, -senpai, -sensei)."
+    },
+    "name_order": {
+      "default": "family_given",
+      "policy": "Japanese surname-first order for Japanese characters."
+    },
+    "exceptions": []
+  },
+  "translation_rules": {
+    "style": "Natural English prose matching the genre tone."
+  }
+}

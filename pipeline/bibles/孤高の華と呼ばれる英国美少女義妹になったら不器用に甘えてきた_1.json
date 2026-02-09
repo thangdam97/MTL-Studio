@@ -1,0 +1,125 @@
+{
+  "bible_version": "1.0",
+  "series_id": "孤高の華と呼ばれる英国美少女義妹になったら不器用に甘えてきた_1",
+  "series_title": {
+    "ja": "孤高の華と呼ばれる英国美少女、義妹になったら不器用に甘えてきた",
+    "en": "My Stepsister, the British Ice Queen, Is an Awkward Sweetheart at Home",
+    "romaji": ""
+  },
+  "last_updated": "2026-02-09T08:04:39Z",
+  "volumes_registered": [
+    {
+      "volume_id": "015c",
+      "title": "My Stepsister, the British Ice Queen, Is an Awkward Sweetheart at Home 2",
+      "index": 1
+    },
+    {
+      "volume_id": "0164",
+      "title": "My Stepsister, the British Ice Queen, Is an Awkward Sweetheart at Home",
+      "index": 2
+    },
+    {
+      "volume_id": "0860",
+      "title": "My Stepsister, the British Ice Queen, Is an Awkward Sweetheart at Home 3",
+      "index": 3
+    },
+    {
+      "volume_id": "2172",
+      "title": "My Stepsister, the British Ice Queen, Is an Awkward Sweetheart at Home 4",
+      "index": 4
+    }
+  ],
+  "characters": {
+    "黒金": {
+      "canonical_en": "Kurogane"
+    },
+    "柊斗": {
+      "canonical_en": "Shiyuto"
+    },
+    "灰宮": {
+      "canonical_en": "Haimiya"
+    },
+    "撫子": {
+      "canonical_en": "Nadeshiko"
+    },
+    "竜胆": {
+      "canonical_en": "Rindou"
+    },
+    "賢人": {
+      "canonical_en": "Kento"
+    },
+    "有栖": {
+      "canonical_en": "Arisu"
+    },
+    "志倉坂": {
+      "canonical_en": "Shigurazaka"
+    },
+    "白川": {
+      "canonical_en": "Shirakawa"
+    },
+    "美海": {
+      "canonical_en": "Miu"
+    },
+    "ソフィア": {
+      "canonical_en": "Sofia"
+    },
+    "九条院": {
+      "canonical_en": "Kujouin"
+    },
+    "広洋": {
+      "canonical_en": "Kouyou"
+    },
+    "夜嶋": {
+      "canonical_en": "Yajima"
+    },
+    "皇洸也": {
+      "canonical_en": "Sumeragi Kouya"
+    },
+    "鬼頭": {
+      "canonical_en": "Kitou"
+    },
+    "ジェシカ": {
+      "canonical_en": "Jessica"
+    },
+    "翔太": {
+      "canonical_en": "Shouta"
+    },
+    "青城": {
+      "canonical_en": "Seijou"
+    },
+    "神薙": {
+      "canonical_en": "Kannagi"
+    },
+    "洸也": {
+      "canonical_en": "Kouya"
+    },
+    "玲音": {
+      "canonical_en": "Reon"
+    }
+  },
+  "geography": {
+    "countries": {},
+    "regions": {},
+    "cities": {}
+  },
+  "weapons_artifacts": {},
+  "organizations": {},
+  "cultural_terms": {},
+  "mythology": {},
+  "world_setting": {
+    "type": "modern_japan",
+    "label": "Contemporary Japanese Setting",
+    "honorifics": {
+      "mode": "retain",
+      "policy": "Keep all JP honorifics (-san, -kun, -chan, -sama, -senpai, -sensei)."
+    },
+    "name_order": {
+      "default": "family_given",
+      "policy": "Japanese surname-first order for Japanese characters."
+    },
+    "exceptions": []
+  },
+  "translation_rules": {
+    "style": "Natural English prose matching the genre tone."
+  }
+}

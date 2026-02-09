@@ -1,0 +1,125 @@
+{
+  "bible_version": "1.0",
+  "series_id": "幼馴染の妹の家庭教師をはじめたら_疎遠だった幼馴染が怖い",
+  "series_title": {
+    "ja": "幼馴染の妹の家庭教師をはじめたら２　怖かった幼馴染が可愛い",
+    "en": "I Started Tutoring Her Sister, and Now My Estranged Childhood Friend is Dangerously Obsessed: My Intimidating Friend is Surprisingly Cute",
+    "romaji": ""
+  },
+  "last_updated": "2026-02-09T08:04:39Z",
+  "volumes_registered": [
+    {
+      "volume_id": "02fc",
+      "title": "I Started Tutoring Her Sister, and Now My Estranged Childhood Friend is Dangerously Obsessed Vol. 2: My Intimidating Friend is Surprisingly Cute",
+      "index": 1
+    },
+    {
+      "volume_id": "0460",
+      "title": "I Started Tutoring Her Sister, and Now My Estranged Childhood Friend is Dangerously Obsessed",
+      "index": 2
+    },
+    {
+      "volume_id": "0bd1",
+      "title": "I Started Tutoring Her Sister, and Now My Estranged Childhood Friend is Dangerously Obsessed Vol. 3: Now I'm Tutoring My Reunited Childhood Friend, Too",
+      "index": 3
+    },
+    {
+      "volume_id": "22f0",
+      "title": "I Started Tutoring Her Sister, and Now My Estranged Childhood Friend is Dangerously Obsessed Vol. 4: My Childhood Friend Became My Girlfriend, and We Shared a Kiss",
+      "index": 4
+    }
+  ],
+  "characters": {
+    "高西": {
+      "canonical_en": "Takanishi"
+    },
+    "康貴": {
+      "canonical_en": "Kouki"
+    },
+    "亜美": {
+      "canonical_en": "Ami"
+    },
+    "愛沙": {
+      "canonical_en": "Aisa"
+    },
+    "有紀": {
+      "canonical_en": "Yuki"
+    },
+    "葛坊煽": {
+      "canonical_en": "Kuzumachi Aoru"
+    },
+    "藤野": {
+      "canonical_en": "Fujino"
+    },
+    "滝沢": {
+      "canonical_en": "Takizawa"
+    },
+    "葛坊": {
+      "canonical_en": "Kuzumachi"
+    },
+    "明美": {
+      "canonical_en": "Akemi"
+    },
+    "宮野": {
+      "canonical_en": "Miyano"
+    },
+    "陽菜": {
+      "canonical_en": "Hina"
+    },
+    "三島": {
+      "canonical_en": "Mishima"
+    },
+    "八洲": {
+      "canonical_en": "Yashima"
+    },
+    "三枝": {
+      "canonical_en": "Mie"
+    },
+    "加納": {
+      "canonical_en": "Kanou"
+    },
+    "入野": {
+      "canonical_en": "Irino"
+    },
+    "鈴森令奈": {
+      "canonical_en": "Suzumori Rena"
+    },
+    "ファン": {
+      "canonical_en": "Ai-chan"
+    },
+    "莉香子": {
+      "canonical_en": "Rikako"
+    },
+    "藍子": {
+      "canonical_en": "Aiko"
+    },
+    "暁人": {
+      "canonical_en": "Akito"
+    }
+  },
+  "geography": {
+    "countries": {},
+    "regions": {},
+    "cities": {}
+  },
+  "weapons_artifacts": {},
+  "organizations": {},
+  "cultural_terms": {},
+  "mythology": {},
+  "world_setting": {
+    "type": "modern_japan",
+    "label": "Contemporary Japanese Setting",
+    "honorifics": {
+      "mode": "retain",
+      "policy": "Keep all JP honorifics (-san, -kun, -chan, -sama, -senpai, -sensei)."
+    },
+    "name_order": {
+      "default": "family_given",
+      "policy": "Japanese surname-first order for Japanese characters."
+    },
+    "exceptions": []
+  },
+  "translation_rules": {
+    "style": "Natural English prose matching the genre tone."
+  }
+}

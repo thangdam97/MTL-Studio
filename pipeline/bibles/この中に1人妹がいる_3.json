@@ -1,0 +1,190 @@
+{
+  "bible_version": "1.0",
+  "series_id": "この中に1人妹がいる_3",
+  "series_title": {
+    "ja": "この中に1人、妹がいる！",
+    "en": "One of Them Is My Sister! Volume",
+    "romaji": ""
+  },
+  "last_updated": "2026-02-09T08:04:39Z",
+  "volumes_registered": [
+    {
+      "volume_id": "0523",
+      "title": "One of Them Is My Sister! Volume 4",
+      "index": 4
+    },
+    {
+      "volume_id": "0a79",
+      "title": "NAKAIMO - My Little Sister Is Among Them! 5",
+      "index": 2
+    },
+    {
+      "volume_id": "0ed8",
+      "title": "One of Them Is My Sister! Volume 2",
+      "index": 3
+    },
+    {
+      "volume_id": "1a42",
+      "title": "One of Them Is My Sister!",
+      "index": 4
+    },
+    {
+      "volume_id": "24df",
+      "title": "One of Them Is My Sister! Volume 3",
+      "index": 5
+    }
+  ],
+  "characters": {
+    "帝野将悟": {
+      "canonical_en": "Shougo Mikadono"
+    },
+    "帝野《みかどの》": {
+      "canonical_en": "Mikadono"
+    },
+    "鶴眞心乃枝": {
+      "canonical_en": "Tsuruma Konoha"
+    },
+    "鶴眞《つるま》": {
+      "canonical_en": "Tsuruma"
+    },
+    "柚璃奈": {
+      "canonical_en": "Yurina"
+    },
+    "国立凜香": {
+      "canonical_en": "Kunitachi Rinka"
+    },
+    "国立《くにたち》": {
+      "canonical_en": "Kunitachi"
+    },
+    "凜香《りんか》": {
+      "canonical_en": "Rinka"
+    },
+    "天導愛菜": {
+      "canonical_en": "Tendou Mana"
+    },
+    "天導《てんどう》": {
+      "canonical_en": "Tendou"
+    },
+    "愛菜《まな》": {
+      "canonical_en": "Mana"
+    },
+    "嵯峨良": {
+      "canonical_en": "Sagara"
+    },
+    "嵯峨良《さがら》": {
+      "canonical_en": "Sagara"
+    },
+    "帝野熊五郎": {
+      "canonical_en": "Kumagorou Mikadono"
+    },
+    "熊五郎《くまごろう》": {
+      "canonical_en": "Kumagorou"
+    },
+    "鹿野子《かのこ》": {
+      "canonical_en": "Kanoko"
+    },
+    "小都里《ことり》": {
+      "canonical_en": "Kotori"
+    },
+    "神凪《かんなぎ》": {
+      "canonical_en": "Kannagi"
+    },
+    "将悟《しようご》": {
+      "canonical_en": "Shougo"
+    },
+    "小野《おのの》": {
+      "canonical_en": "Onono"
+    },
+    "瀬利《せり》": {
+      "canonical_en": "Seri"
+    },
+    "水谷《みずたに》": {
+      "canonical_en": "Mizutani"
+    },
+    "誠二《せいじ》": {
+      "canonical_en": "Seiji"
+    },
+    "衣楠《いくす》": {
+      "canonical_en": "Ikusu"
+    },
+    "センパイ": {
+      "canonical_en": "Senpai"
+    },
+    "カード": {
+      "canonical_en": "Card"
+    },
+    "ウェイトレス": {
+      "canonical_en": "Waitress"
+    },
+    "オーナー": {
+      "canonical_en": "Owner"
+    },
+    "グループ": {
+      "canonical_en": "Group"
+    },
+    "チラシ": {
+      "canonical_en": "Flyer"
+    },
+    "心乃枝《このえ》": {
+      "canonical_en": "Konoe"
+    },
+    "神凪雅": {
+      "canonical_en": "Kannagi Miyabi"
+    },
+    "雅《みやび》": {
+      "canonical_en": "Miyabi"
+    },
+    "水谷衣楠": {
+      "canonical_en": "Mizutani Ikusu"
+    },
+    "小都里まい子": {
+      "canonical_en": "Kotori Maiko"
+    },
+    "まい子《こ》": {
+      "canonical_en": "Maiko"
+    },
+    "嵯峨良芽依": {
+      "canonical_en": "Sagara Mei"
+    },
+    "芽依《めい》": {
+      "canonical_en": "Mei"
+    },
+    "帝野鹿野子": {
+      "canonical_en": "Mikadono Kanoko"
+    },
+    "鶴眞誠二": {
+      "canonical_en": "Tsuruma Seiji"
+    },
+    "アンタッチャブルス《手を出せぬ者たち》": {
+      "canonical_en": "The Untouchables"
+    },
+    "ゼリー《》": {
+      "canonical_en": "Jelly"
+    }
+  },
+  "geography": {
+    "countries": {},
+    "regions": {},
+    "cities": {}
+  },
+  "weapons_artifacts": {},
+  "organizations": {},
+  "cultural_terms": {},
+  "mythology": {},
+  "world_setting": {
+    "type": "modern_japan",
+    "label": "Contemporary Japanese Setting",
+    "honorifics": {
+      "mode": "retain",
+      "policy": "Keep all JP honorifics (-san, -kun, -chan, -sama, -senpai, -sensei)."
+    },
+    "name_order": {
+      "default": "family_given",
+      "policy": "Japanese surname-first order for Japanese characters."
+    },
+    "exceptions": []
+  },
+  "translation_rules": {
+    "style": "Natural English prose matching the genre tone."
+  }
+}

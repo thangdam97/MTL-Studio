@@ -1,0 +1,70 @@
+{
+  "bible_version": "1.0",
+  "series_id": "義妹生活電子特典付き_mf文庫j",
+  "series_title": {
+    "ja": "義妹生活【電子特典付き】 (MF文庫J)",
+    "en": "Days with My Stepsister",
+    "romaji": ""
+  },
+  "last_updated": "2026-02-09T08:04:39Z",
+  "volumes_registered": [
+    {
+      "volume_id": "01b6",
+      "title": "Days with My Stepsister",
+      "index": 1
+    },
+    {
+      "volume_id": "1ece",
+      "title": "Days with My Stepsister, Vol. 3",
+      "index": 2
+    }
+  ],
+  "characters": {
+    "asamura_yuta": {
+      "canonical_en": "Yuuta Asamura (浅村悠太)"
+    },
+    "ayase_saki": {
+      "canonical_en": "Saki Ayase (綾瀬沙季)"
+    },
+    "maru_tomokazu": {
+      "canonical_en": "Tomokazu Maru (丸友和)"
+    },
+    "narasaka_maaya": {
+      "canonical_en": "Maaya Narasaka (奈良坂真綾)"
+    },
+    "yomiuri_senpai": {
+      "canonical_en": "Yomiuri-senpai (読売先輩)"
+    },
+    "asamura_taichi": {
+      "canonical_en": "Taichi Asamura (father)"
+    },
+    "ayase_akiko": {
+      "canonical_en": "Akiko Ayase (stepmother)"
+    }
+  },
+  "geography": {
+    "countries": {},
+    "regions": {},
+    "cities": {}
+  },
+  "weapons_artifacts": {},
+  "organizations": {},
+  "cultural_terms": {},
+  "mythology": {},
+  "world_setting": {
+    "type": "modern_japan",
+    "label": "Contemporary Japanese Setting",
+    "honorifics": {
+      "mode": "retain",
+      "policy": "Keep all JP honorifics (-san, -kun, -chan, -sama, -senpai, -sensei)."
+    },
+    "name_order": {
+      "default": "family_given",
+      "policy": "Japanese surname-first order for Japanese characters."
+    },
+    "exceptions": []
+  },
+  "translation_rules": {
+    "style": "Natural English prose matching the genre tone."
+  }
+}

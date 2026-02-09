@@ -1,0 +1,178 @@
+{
+  "bible_version": "1.0",
+  "series_id": "隣国から来た嫁が可愛すぎてどうしよう",
+  "series_title": {
+    "ja": "隣国から来た嫁が可愛すぎてどうしよう。２",
+    "en": "My Bride from the Neighboring Kingdom is So Cute, I'm Helpless!",
+    "romaji": ""
+  },
+  "last_updated": "2026-02-09T08:04:39Z",
+  "volumes_registered": [
+    {
+      "volume_id": "08c3",
+      "title": "My Bride from the Neighboring Kingdom is So Cute, I'm Helpless! 2",
+      "index": 1
+    },
+    {
+      "volume_id": "211e",
+      "title": "My Bride from the Neighboring Kingdom is So Cute, I'm Helpless!",
+      "index": 2
+    }
+  ],
+  "characters": {
+    "箝口令": {
+      "canonical_en": "Kankourei"
+    },
+    "不躾": {
+      "canonical_en": "Bushitsuke"
+    },
+    "息女": {
+      "canonical_en": "Sokujo"
+    },
+    "刺青": {
+      "canonical_en": "Irezumi"
+    },
+    "悪阻": {
+      "canonical_en": "Tsuwari"
+    },
+    "ラウル": {
+      "canonical_en": "Raul"
+    },
+    "ヴァンデル": {
+      "canonical_en": "Vandel"
+    },
+    "頻脈": {
+      "canonical_en": "Hinmyaku"
+    },
+    "起坐": {
+      "canonical_en": "Kiza"
+    },
+    "マーダー": {
+      "canonical_en": "Murder"
+    },
+    "シトエン": {
+      "canonical_en": "Shitoen"
+    },
+    "哨戒": {
+      "canonical_en": "Shoukai"
+    },
+    "竜紋": {
+      "canonical_en": "Ryumon"
+    },
+    "僭越": {
+      "canonical_en": "Senetsu"
+    },
+    "飾緒": {
+      "canonical_en": "Shokusho"
+    },
+    "大店": {
+      "canonical_en": "Oodana"
+    },
+    "御簾": {
+      "canonical_en": "Misu"
+    },
+    "胡座": {
+      "canonical_en": "Agura"
+    },
+    "黒御影石": {
+      "canonical_en": "Kuromikageishi"
+    },
+    "閨房術": {
+      "canonical_en": "Keiboujutsu"
+    },
+    "ユキヒョウ": {
+      "canonical_en": "Mone"
+    },
+    "遮蔽物": {
+      "canonical_en": "Shaheibutsu"
+    },
+    "手甲鉤": {
+      "canonical_en": "Tekkoukagi"
+    },
+    "嫣然": {
+      "canonical_en": "Enzen"
+    },
+    "イートン": {
+      "canonical_en": "Eaton"
+    },
+    "左側臥位": {
+      "canonical_en": "Sasokugai"
+    },
+    "漏斗": {
+      "canonical_en": "Routo"
+    },
+    "閲兵式": {
+      "canonical_en": "Eppeishiki"
+    },
+    "鎖鎌": {
+      "canonical_en": "Kusarigama"
+    },
+    "サリュ": {
+      "canonical_en": "Salyu"
+    },
+    "シトエン・バリモア": {
+      "canonical_en": "Sitoen Balimore"
+    },
+    "バリモア卿": {
+      "canonical_en": "Lord Balimore"
+    },
+    "アリオス・ルミナス": {
+      "canonical_en": "Arios Luminas"
+    },
+    "ラウル・ミラー": {
+      "canonical_en": "Raul Miller"
+    },
+    "マーダー卿": {
+      "canonical_en": "Doctor Mada"
+    },
+    "テオドール伯爵": {
+      "canonical_en": "Count Theodor"
+    },
+    "アツヒト": {
+      "canonical_en": "Atsuhito"
+    },
+    "メイル": {
+      "canonical_en": "Meiru"
+    },
+    "宰相": {
+      "canonical_en": "Prime Minister"
+    },
+    "国王": {
+      "canonical_en": "King"
+    },
+    "王妃": {
+      "canonical_en": "Queen"
+    },
+    "王太子": {
+      "canonical_en": "Crown Prince"
+    },
+    "次兄": {
+      "canonical_en": "Second Prince"
+    }
+  },
+  "geography": {
+    "countries": {},
+    "regions": {},
+    "cities": {}
+  },
+  "weapons_artifacts": {},
+  "organizations": {},
+  "cultural_terms": {},
+  "mythology": {},
+  "world_setting": {
+    "type": "fantasy",
+    "label": "Fantasy Setting",
+    "honorifics": {
+      "mode": "localize",
+      "policy": "Drop all JP honorifics. Use English equivalents (Lord, Lady, Sir, etc.)."
+    },
+    "name_order": {
+      "default": "given_family",
+      "policy": "Western first-name order for all characters."
+    },
+    "exceptions": []
+  },
+  "translation_rules": {
+    "style": "Natural English prose matching the genre tone."
+  }
+}

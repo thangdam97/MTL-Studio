@@ -1,0 +1,229 @@
+{
+  "bible_version": "1.0",
+  "series_id": "クラスで２番目に可愛い女の子と友だちになった電子版",
+  "series_title": {
+    "ja": "クラスで２番目に可愛い女の子と友だちになった【電子版】４",
+    "en": "I Befriended the Second Cutest Girl in My Class",
+    "romaji": ""
+  },
+  "last_updated": "2026-02-09T08:04:39Z",
+  "volumes_registered": [
+    {
+      "volume_id": "03d4",
+      "title": "I Befriended the Second Cutest Girl in My Class 2",
+      "index": 1
+    },
+    {
+      "volume_id": "1d1e",
+      "title": "I Befriended the Second Cutest Girl in My Class",
+      "index": 2
+    }
+  ],
+  "characters": {
+    "泳未《えみ》": {
+      "canonical_en": "Emi"
+    },
+    "大地《だいち》": {
+      "canonical_en": "Daichi"
+    },
+    "真樹《まき》": {
+      "canonical_en": "Maki"
+    },
+    "天海《あまみ》": {
+      "canonical_en": "Amami"
+    },
+    "新田《につた》": {
+      "canonical_en": "Nitsuta"
+    },
+    "朝凪《あさなぎ》": {
+      "canonical_en": "Asanagi"
+    },
+    "溌溂《はつらつ》": {
+      "canonical_en": "Hatsuratsu"
+    },
+    "荒江《あらえ》": {
+      "canonical_en": "Arae"
+    },
+    "柔肌《やわはだ》": {
+      "canonical_en": "Yawahada"
+    },
+    "新奈《にな》": {
+      "canonical_en": "Nina"
+    },
+    "八木沢《やぎさわ》": {
+      "canonical_en": "Yagisawa"
+    },
+    "百聞《ひやくぶん》": {
+      "canonical_en": "Hiyakubun"
+    },
+    "伝手《つて》": {
+      "canonical_en": "Tsute"
+    },
+    "真似《まね》": {
+      "canonical_en": "Mane"
+    },
+    "茉奈佳《まなか》": {
+      "canonical_en": "Manaka"
+    },
+    "伊達《だて》": {
+      "canonical_en": "Date"
+    },
+    "牽制《けんせい》": {
+      "canonical_en": "Kensei"
+    },
+    "紗那絵《さなえ》": {
+      "canonical_en": "Sanae"
+    },
+    "二取《にとり》": {
+      "canonical_en": "Nitori"
+    },
+    "北条《ほうじよう》": {
+      "canonical_en": "Houjiyou"
+    },
+    "前原《まえはら》": {
+      "canonical_en": "Maehara"
+    },
+    "我儘《わがまま》": {
+      "canonical_en": "Wagamama"
+    },
+    "悶着《もんちやく》": {
+      "canonical_en": "Monchiyaku"
+    },
+    "中村《なかむら》": {
+      "canonical_en": "Nakamura"
+    },
+    "図体《ずうたい》": {
+      "canonical_en": "Zutai"
+    },
+    "美玖《みく》": {
+      "canonical_en": "Miku"
+    },
+    "涼子《りようこ》": {
+      "canonical_en": "Riyouko"
+    },
+    "早川《はやかわ》": {
+      "canonical_en": "Hayakawa"
+    },
+    "一匹狼《いつぴきおおかみ》": {
+      "canonical_en": "Itsupikioookami"
+    },
+    "七野《しちの》": {
+      "canonical_en": "Shichino"
+    },
+    "前哨戦《ぜんしようせん》": {
+      "canonical_en": "Zenshiyousen"
+    },
+    "加賀《かが》": {
+      "canonical_en": "Kaga"
+    },
+    "他人様《ひとさま》": {
+      "canonical_en": "Hitosama"
+    },
+    "荒江渚《あなた》": {
+      "canonical_en": "Anata"
+    },
+    "天海夕《あまみゆう》": {
+      "canonical_en": "Amami Yu"
+    },
+    "尾野凛《おのりん》": {
+      "canonical_en": "Ono Rin"
+    },
+    "石見舞菜香《いわみまなか》": {
+      "canonical_en": "Iwami Manaka"
+    },
+    "石谷春貴《いしやはるき》": {
+      "canonical_en": "Ishiya Haruki"
+    },
+    "鈴代紗弓《すずしろさゆみ》": {
+      "canonical_en": "Suzushiro Sayumi"
+    },
+    "電子版《でんしばん》": {
+      "canonical_en": "Denshiban"
+    },
+    "荒江渚《あらえなぎさ》": {
+      "canonical_en": "Arae Nagisa"
+    },
+    "呆気《あつけ》": {
+      "canonical_en": "Atsuke"
+    },
+    "無茶《むちや》": {
+      "canonical_en": "Muchiya"
+    },
+    "人好《ひとよ》": {
+      "canonical_en": "Hitoyo"
+    },
+    "一瞥《いちべつ》": {
+      "canonical_en": "Ichibetsu"
+    },
+    "凛々《りり》": {
+      "canonical_en": "Riri"
+    },
+    "手強《てごわ》": {
+      "canonical_en": "Tegowa"
+    },
+    "対峙《たいじ》": {
+      "canonical_en": "Taiji"
+    },
+    "前原": {
+      "canonical_en": "Maehara"
+    },
+    "天海": {
+      "canonical_en": "Amami"
+    },
+    "朝凪": {
+      "canonical_en": "Asanagi"
+    },
+    "大山": {
+      "canonical_en": "Ooyama"
+    },
+    "真樹": {
+      "canonical_en": "Maki"
+    },
+    "新田": {
+      "canonical_en": "Nitsuta"
+    },
+    "新奈": {
+      "canonical_en": "Nina"
+    },
+    "真咲": {
+      "canonical_en": "Masaki"
+    },
+    "八木沢": {
+      "canonical_en": "Yagisawa"
+    },
+    "朝凪海": {
+      "canonical_en": "Asanagi Umi"
+    },
+    "天海夕": {
+      "canonical_en": "Amami Yu"
+    },
+    "大地": {
+      "canonical_en": "Daichi"
+    }
+  },
+  "geography": {
+    "countries": {},
+    "regions": {},
+    "cities": {}
+  },
+  "weapons_artifacts": {},
+  "organizations": {},
+  "cultural_terms": {},
+  "mythology": {},
+  "world_setting": {
+    "type": "modern_japan",
+    "label": "Contemporary Japanese Setting",
+    "honorifics": {
+      "mode": "retain",
+      "policy": "Keep all JP honorifics (-san, -kun, -chan, -sama, -senpai, -sensei)."
+    },
+    "name_order": {
+      "default": "family_given",
+      "policy": "Japanese surname-first order for Japanese characters."
+    },
+    "exceptions": []
+  },
+  "translation_rules": {
+    "style": "Natural English prose matching the genre tone."
+  }
+}

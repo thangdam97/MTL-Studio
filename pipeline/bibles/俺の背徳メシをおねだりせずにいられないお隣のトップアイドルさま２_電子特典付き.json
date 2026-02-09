@@ -1,0 +1,111 @@
+{
+  "bible_version": "1.0",
+  "series_id": "俺の背徳メシをおねだりせずにいられないお隣のトップアイドルさま２_電子特典付き",
+  "series_title": {
+    "ja": "俺の背徳メシをおねだりせずにいられない、お隣のトップアイドルさま 【電子特典付き】",
+    "en": "俺の背徳メシをおねだりせずにいられない、お隣のトップアイドルさま２ 【電子特典付き】",
+    "romaji": ""
+  },
+  "last_updated": "2026-02-09T08:04:39Z",
+  "volumes_registered": [
+    {
+      "volume_id": "094e",
+      "title": "俺の背徳メシをおねだりせずにいられない、お隣のトップアイドルさま 【電子特典付き】",
+      "index": 1
+    },
+    {
+      "volume_id": "1223",
+      "title": "俺の背徳メシをおねだりせずにいられない、お隣のトップアイドルさま２ 【電子特典付き】",
+      "index": 2
+    },
+    {
+      "volume_id": "2218",
+      "title": "俺の背徳メシをおねだりせずにいられない、お隣のトップアイドルさま 【電子特典付き】",
+      "index": 3
+    }
+  ],
+  "characters": {
+    "佐々木": {
+      "canonical_en": "Sasaki"
+    },
+    "優月": {
+      "canonical_en": "Yuzuki"
+    },
+    "有須": {
+      "canonical_en": "Arisu"
+    },
+    "真守": {
+      "canonical_en": "Mamori"
+    },
+    "鈴文": {
+      "canonical_en": "Suzufumi"
+    },
+    "矢本": {
+      "canonical_en": "Yamoto"
+    },
+    "穂積": {
+      "canonical_en": "Hodzumi"
+    },
+    "三神": {
+      "canonical_en": "Mikami"
+    },
+    "百聖": {
+      "canonical_en": "Momose"
+    },
+    "織北": {
+      "canonical_en": "Orikita"
+    },
+    "莉華": {
+      "canonical_en": "Rika"
+    },
+    "岸部": {
+      "canonical_en": "Kishibe"
+    },
+    "二郎丸": {
+      "canonical_en": "Jiroumaru"
+    },
+    "家二郎": {
+      "canonical_en": "Iejirou"
+    },
+    "及川": {
+      "canonical_en": "Oikawa"
+    },
+    "輝新": {
+      "canonical_en": "Kishin"
+    },
+    "緋月": {
+      "canonical_en": "Hizuki"
+    },
+    "新潟": {
+      "canonical_en": "Niigata"
+    },
+    "東京": {
+      "canonical_en": "Toukyou"
+    }
+  },
+  "geography": {
+    "countries": {},
+    "regions": {},
+    "cities": {}
+  },
+  "weapons_artifacts": {},
+  "organizations": {},
+  "cultural_terms": {},
+  "mythology": {},
+  "world_setting": {
+    "type": "modern_japan",
+    "label": "Contemporary Japanese Setting",
+    "honorifics": {
+      "mode": "retain",
+      "policy": "Keep all JP honorifics (-san, -kun, -chan, -sama, -senpai, -sensei)."
+    },
+    "name_order": {
+      "default": "family_given",
+      "policy": "Japanese surname-first order for Japanese characters."
+    },
+    "exceptions": []
+  },
+  "translation_rules": {
+    "style": "Natural English prose matching the genre tone."
+  }
+}

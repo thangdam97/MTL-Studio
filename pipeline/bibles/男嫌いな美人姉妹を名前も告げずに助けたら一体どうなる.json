@@ -1,0 +1,282 @@
+{
+  "bible_version": "1.0",
+  "series_id": "男嫌いな美人姉妹を名前も告げずに助けたら一体どうなる",
+  "series_title": {
+    "ja": "男嫌いな美人姉妹を名前も告げずに助けたら一体どうなる？2【電子特別版】",
+    "en": "I Saved Two Man-Hating Beauties Without Giving My Name... Now What?",
+    "romaji": ""
+  },
+  "last_updated": "2026-02-09T08:04:39Z",
+  "volumes_registered": [
+    {
+      "volume_id": "024a",
+      "title": "I Saved Two Man-Hating Beauties Without Giving My Name... Now What? 2",
+      "index": 1
+    },
+    {
+      "volume_id": "1cca",
+      "title": "I Saved Two Man-Hating Beauties Without Giving My Name... Now What?",
+      "index": 2
+    },
+    {
+      "volume_id": "1d91",
+      "title": "I Saved Two Man-Hating Beauties Without Giving My Name... Now What? 1",
+      "index": 3
+    }
+  ],
+  "characters": {
+    "新条": {
+      "canonical_en": "Shinjou"
+    },
+    "藍那": {
+      "canonical_en": "Aina"
+    },
+    "颯太": {
+      "canonical_en": "Souta"
+    },
+    "隼人": {
+      "canonical_en": "Hayato"
+    },
+    "亜利沙": {
+      "canonical_en": "Arisa"
+    },
+    "新条藍那": {
+      "canonical_en": "Shinjou Aina"
+    },
+    "新条亜利沙": {
+      "canonical_en": "Shinjou Arisa"
+    },
+    "魁人": {
+      "canonical_en": "Kaito"
+    },
+    "堂本": {
+      "canonical_en": "Doumoto"
+    },
+    "堂本隼人": {
+      "canonical_en": "Doumoto Hayato"
+    },
+    "新条咲奈": {
+      "canonical_en": "Shinjou Sakina"
+    },
+    "咲奈": {
+      "canonical_en": "Sakina"
+    },
+    "宮永颯太": {
+      "canonical_en": "Miyanaga Souta"
+    },
+    "青島魁人": {
+      "canonical_en": "Aoshima Kaito"
+    },
+    "佐伯": {
+      "canonical_en": "Saeki"
+    },
+    "愛華": {
+      "canonical_en": "Aika"
+    },
+    "佐伯愛華": {
+      "canonical_en": "Saeki Aika"
+    },
+    "香澄": {
+      "canonical_en": "Kasumi"
+    },
+    "宮永": {
+      "canonical_en": "Miyanaga"
+    },
+    "青島": {
+      "canonical_en": "Aoshima"
+    },
+    "赤城高校": {
+      "canonical_en": "Akagi High School"
+    },
+    "新条《しんじよう》": {
+      "canonical_en": "Shinjou"
+    },
+    "藍那《あいな》": {
+      "canonical_en": "Aina"
+    },
+    "颯太《そうた》": {
+      "canonical_en": "Souta"
+    },
+    "隼人《はやと》": {
+      "canonical_en": "Hayato"
+    },
+    "亜利沙《ありさ》": {
+      "canonical_en": "Arisa"
+    },
+    "新条藍那《しんじようあいな》": {
+      "canonical_en": "Shinjou Aina"
+    },
+    "魁人《かいと》": {
+      "canonical_en": "Kaito"
+    },
+    "堂本《どうもと》": {
+      "canonical_en": "Doumoto"
+    },
+    "新条咲奈《しんじようさきな》": {
+      "canonical_en": "Shinjou Sakina"
+    },
+    "咲奈《さきな》": {
+      "canonical_en": "Sakina"
+    },
+    "味噌汁《みそしる》": {
+      "canonical_en": "Miso Soup"
+    },
+    "高嶺《たかね》": {
+      "canonical_en": "Takane"
+    },
+    "恍惚《こうこつ》": {
+      "canonical_en": "Koukotsu"
+    },
+    "天真爛漫《てんしんらんまん》": {
+      "canonical_en": "Tenshin Ranman"
+    },
+    "カボチャ《》": {
+      "canonical_en": "Kabocha"
+    },
+    "他所《よそ》": {
+      "canonical_en": "Yoso"
+    },
+    "彷彿《ほうふつ》": {
+      "canonical_en": "Houfutsu"
+    },
+    "腕捲《うでまく》": {
+      "canonical_en": "Udemaku"
+    },
+    "馳走《ちそう》": {
+      "canonical_en": "Chisou"
+    },
+    "欠伸《あくび》": {
+      "canonical_en": "Akubi"
+    },
+    "一匹狼《いつぴきおおかみ》": {
+      "canonical_en": "Lone Wolf"
+    },
+    "三十路《みそじ》": {
+      "canonical_en": "Misoji"
+    },
+    "巫女《みこ》": {
+      "canonical_en": "Miko"
+    },
+    "無茶《むちや》": {
+      "canonical_en": "Mucha"
+    },
+    "香澄《かすみ》": {
+      "canonical_en": "Kasumi"
+    },
+    "悪戯《いたずら》": {
+      "canonical_en": "Itazura"
+    },
+    "恰好《かつこう》": {
+      "canonical_en": "Kakkou"
+    },
+    "佐伯《さえき》": {
+      "canonical_en": "Saeki"
+    },
+    "披露目《ひろめ》": {
+      "canonical_en": "Hirome"
+    },
+    "愛華《あいか》": {
+      "canonical_en": "Aika"
+    },
+    "美人姉妹《びじんしまい》": {
+      "canonical_en": "Bijin Shimai"
+    },
+    "電子特別版《でんしとくべつばん》": {
+      "canonical_en": "Denshi Tokubetsuban"
+    },
+    "贅沢《ぜいたく》": {
+      "canonical_en": "Zeitaku"
+    },
+    "仕舞《しま》": {
+      "canonical_en": "Shimai"
+    },
+    "茶目《ちやめ》": {
+      "canonical_en": "Chame"
+    },
+    "我儘《わがまま》": {
+      "canonical_en": "Wagamama"
+    },
+    "余所《よそ》": {
+      "canonical_en": "Yoso"
+    },
+    "下駄箱《げたばこ》": {
+      "canonical_en": "Getabako"
+    },
+    "入江《いりえ》": {
+      "canonical_en": "Irie"
+    },
+    "真似《まね》": {
+      "canonical_en": "Mane"
+    },
+    "玩具《おもちや》": {
+      "canonical_en": "Omochiya"
+    },
+    "石鹸《せつけん》": {
+      "canonical_en": "Sekken"
+    },
+    "竹刀《しない》": {
+      "canonical_en": "Shinai"
+    },
+    "兄妹《きようだい》": {
+      "canonical_en": "Kyoudai"
+    },
+    "怨嗟《えんさ》": {
+      "canonical_en": "Ensa"
+    },
+    "菩薩《ぼさつ》": {
+      "canonical_en": "Bosatsu"
+    },
+    "烙印《らくいん》": {
+      "canonical_en": "Rakuin"
+    },
+    "朦朧《もうろう》": {
+      "canonical_en": "Mourou"
+    },
+    "飛沫《ひまつ》": {
+      "canonical_en": "Himatsu"
+    },
+    "柳井《やない》": {
+      "canonical_en": "Yanai"
+    },
+    "火照《ほて》": {
+      "canonical_en": "Hote"
+    },
+    "怪訝《けげん》": {
+      "canonical_en": "Kegen"
+    },
+    "逢引《あいび》": {
+      "canonical_en": "Aibi"
+    },
+    "滅多《めつた》": {
+      "canonical_en": "Metta"
+    },
+    "強請《ねだ》": {
+      "canonical_en": "Neda"
+    }
+  },
+  "geography": {
+    "countries": {},
+    "regions": {},
+    "cities": {}
+  },
+  "weapons_artifacts": {},
+  "organizations": {},
+  "cultural_terms": {},
+  "mythology": {},
+  "world_setting": {
+    "type": "modern_japan",
+    "label": "Contemporary Japanese Setting",
+    "honorifics": {
+      "mode": "retain",
+      "policy": "Keep all JP honorifics (-san, -kun, -chan, -sama, -senpai, -sensei)."
+    },
+    "name_order": {
+      "default": "family_given",
+      "policy": "Japanese surname-first order for Japanese characters."
+    },
+    "exceptions": []
+  },
+  "translation_rules": {
+    "style": "Natural English prose matching the genre tone."
+  }
+}

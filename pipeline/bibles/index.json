@@ -1,6 +1,6 @@
 {
   "version": "1.0",
-  "last_updated": "2026-02-09T04:18:38.898434+00:00",
+  "last_updated": "2026-02-09T08:04:39Z",
   "series": {
     "madan_no_ou_to_vanadis": {
       "bible_file": "madan_no_ou_to_vanadis.json",
@@ -16,6 +16,246 @@
       ],
       "entry_count": 136,
       "last_updated": "2026-02-09T03:40:03.230429+00:00"
+    },
+    "この中に1人妹がいる_3": {
+      "bible_file": "この中に1人妹がいる_3.json",
+      "match_patterns": [
+        "この中に1人、妹がいる！ 3",
+        "One of Them Is My Sister! Volume",
+        "この中に1人、妹がいる！"
+      ],
+      "volumes": [
+        "24df",
+        "0523",
+        "0a79",
+        "0ed8",
+        "1a42"
+      ],
+      "entry_count": 42,
+      "last_updated": "2026-02-09T08:04:39Z"
+    },
+    "孤高の華と呼ばれる英国美少女義妹になったら不器用に甘えてきた_1": {
+      "bible_file": "孤高の華と呼ばれる英国美少女義妹になったら不器用に甘えてきた_1.json",
+      "match_patterns": [
+        "My Stepsister, the British Ice Queen, Is an Awkward Sweetheart at Home",
+        "孤高の華と呼ばれる英国美少女、義妹になったら不器用に甘えてきた",
+        "孤高の華と呼ばれる英国美少女、義妹になったら不器用に甘えてきた 1"
+      ],
+      "volumes": [
+        "0164",
+        "015c",
+        "0860",
+        "2172"
+      ],
+      "entry_count": 22,
+      "last_updated": "2026-02-09T08:04:39Z"
+    },
+    "幼馴染の妹の家庭教師をはじめたら_疎遠だった幼馴染が怖い": {
+      "bible_file": "幼馴染の妹の家庭教師をはじめたら_疎遠だった幼馴染が怖い.json",
+      "match_patterns": [
+        "幼馴染の妹の家庭教師をはじめたら２　怖かった幼馴染が可愛い",
+        "幼馴染の妹の家庭教師をはじめたら　疎遠だった幼馴染が怖い",
+        "I Started Tutoring Her Sister, and Now My Estranged Childhood Friend is Dangerously Obsessed: My Intimidating Friend is Surprisingly Cute"
+      ],
+      "volumes": [
+        "0460",
+        "02fc",
+        "0bd1",
+        "22f0"
+      ],
+      "entry_count": 22,
+      "last_updated": "2026-02-09T08:04:39Z"
+    },
+    "貴族令嬢俺にだけなつく２": {
+      "bible_file": "貴族令嬢俺にだけなつく２.json",
+      "match_patterns": [
+        "貴族令嬢。俺にだけなつく２",
+        "貴族令嬢。俺にだけなつく",
+        "The Noble Lady Who Only Fawns Over Me"
+      ],
+      "volumes": [
+        "20f7",
+        "2707",
+        "2429",
+        "1d74"
+      ],
+      "entry_count": 44,
+      "last_updated": "2026-02-09T08:04:39Z"
+    },
+    "俺の背徳メシをおねだりせずにいられないお隣のトップアイドルさま２_電子特典付き": {
+      "bible_file": "俺の背徳メシをおねだりせずにいられないお隣のトップアイドルさま２_電子特典付き.json",
+      "match_patterns": [
+        "俺の背徳メシをおねだりせずにいられない、お隣のトップアイドルさま２ 【電子特典付き】",
+        "俺の背徳メシをおねだりせずにいられない、お隣のトップアイドルさま 【電子特典付き】"
+      ],
+      "volumes": [
+        "1223",
+        "094e",
+        "2218"
+      ],
+      "entry_count": 19,
+      "last_updated": "2026-02-09T08:04:39Z"
+    },
+    "男嫌いな美人姉妹を名前も告げずに助けたら一体どうなる": {
+      "bible_file": "男嫌いな美人姉妹を名前も告げずに助けたら一体どうなる.json",
+      "match_patterns": [
+        "男嫌いな美人姉妹を名前も告げずに助けたら一体どうなる？",
+        "I Saved Two Man-Hating Beauties Without Giving My Name... Now What?",
+        "男嫌いな美人姉妹を名前も告げずに助けたら一体どうなる？2【電子特別版】"
+      ],
+      "volumes": [
+        "1cca",
+        "024a",
+        "1d91"
+      ],
+      "entry_count": 76,
+      "last_updated": "2026-02-09T08:04:39Z"
+    },
+    "迷子になっていた幼女を助けたらお隣に住む美少女留学生が家に遊びに来るようになった件について": {
+      "bible_file": "迷子になっていた幼女を助けたらお隣に住む美少女留学生が家に遊びに来るようになった件について.json",
+      "match_patterns": [
+        "迷子になっていた幼女を助けたら、お隣に住む美少女留学生が家に遊びに来るようになった件について"
+      ],
+      "volumes": [
+        "0b24",
+        "0a51"
+      ],
+      "entry_count": 0,
+      "last_updated": "2026-02-09T08:04:39Z"
+    },
+    "クラスで２番目に可愛い女の子と友だちになった電子版": {
+      "bible_file": "クラスで２番目に可愛い女の子と友だちになった電子版.json",
+      "match_patterns": [
+        "I Befriended the Second Cutest Girl in My Class",
+        "クラスで２番目に可愛い女の子と友だちになった【電子版】４",
+        "クラスで２番目に可愛い女の子と友だちになった【電子版】"
+      ],
+      "volumes": [
+        "1d1e",
+        "03d4"
+      ],
+      "entry_count": 60,
+      "last_updated": "2026-02-09T08:04:39Z"
+    },
+    "義妹生活電子特典付き_mf文庫j": {
+      "bible_file": "義妹生活電子特典付き_mf文庫j.json",
+      "match_patterns": [
+        "義妹生活【電子特典付き】 (MF文庫J)",
+        "Days with My Stepsister"
+      ],
+      "volumes": [
+        "01b6",
+        "1ece"
+      ],
+      "entry_count": 7,
+      "last_updated": "2026-02-09T08:04:39Z"
+    },
+    "油断できない彼女": {
+      "bible_file": "油断できない彼女.json",
+      "match_patterns": [
+        "My Girlfriend: Never Let Your Guard Down",
+        "油断できない彼女"
+      ],
+      "volumes": [
+        "07a4",
+        "2704"
+      ],
+      "entry_count": 13,
+      "last_updated": "2026-02-09T08:04:39Z"
+    },
+    "小説版_君に届け３_それぞれの片想いカラーイラスト付_集英社コバルト文庫": {
+      "bible_file": "小説版_君に届け３_それぞれの片想いカラーイラスト付_集英社コバルト文庫.json",
+      "match_patterns": [
+        "小説版 君に届け３ ～それぞれの片想い～【カラーイラスト付】 (集英社コバルト文庫)",
+        "Kimi ni Todoke: From Me to You,: Their Unrequited Loves"
+      ],
+      "volumes": [
+        "08af",
+        "1a9b"
+      ],
+      "entry_count": 3,
+      "last_updated": "2026-02-09T08:04:39Z"
+    },
+    "俺のスマホに心の声が漏れちゃう残念美少女たちが可愛すぎる_1": {
+      "bible_file": "俺のスマホに心の声が漏れちゃう残念美少女たちが可愛すぎる_1.json",
+      "match_patterns": [
+        "俺のスマホに心の声が漏れちゃう残念美少女たちが可愛すぎる 1",
+        "My Smartphone Leaks the Inner Thoughts of These Disappointing Beauties!",
+        "俺のスマホに心の声が漏れちゃう残念美少女たちが可愛すぎる"
+      ],
+      "volumes": [
+        "test",
+        "2379"
+      ],
+      "entry_count": 12,
+      "last_updated": "2026-02-09T08:04:39Z"
+    },
+    "学園一かわいい後輩の命の恩人になったら通い妻になって関係を迫ってくる": {
+      "bible_file": "学園一かわいい後輩の命の恩人になったら通い妻になって関係を迫ってくる.json",
+      "match_patterns": [
+        "学園一かわいい後輩の命の恩人になったら、通い妻になって関係を迫ってくる。"
+      ],
+      "volumes": [
+        "0d29",
+        "0425"
+      ],
+      "entry_count": 0,
+      "last_updated": "2026-02-09T08:04:39Z"
+    },
+    "学年一の金髪碧眼美少女に勉強を教えることになりました２": {
+      "bible_file": "学年一の金髪碧眼美少女に勉強を教えることになりました２.json",
+      "match_patterns": [
+        "学年一の金髪碧眼美少女に勉強を教えることになりました（ブレイブ文庫）１",
+        "Private Lessons with the School's Golden Girl",
+        "学年一の金髪碧眼美少女に勉強を教えることになりました２"
+      ],
+      "volumes": [
+        "23a3",
+        "033f"
+      ],
+      "entry_count": 2,
+      "last_updated": "2026-02-09T08:04:39Z"
+    },
+    "幼なじみは負けフラグって本当ですか": {
+      "bible_file": "幼なじみは負けフラグって本当ですか.json",
+      "match_patterns": [
+        "幼なじみは負けフラグって本当ですか？",
+        "Is My Childhood Friend Really a Losing Flag?"
+      ],
+      "volumes": [
+        "0242",
+        "0285"
+      ],
+      "entry_count": 11,
+      "last_updated": "2026-02-09T08:04:39Z"
+    },
+    "負けヒロインと俺が付き合っていると周りから勘違いされ幼馴染みと修羅場になった_1": {
+      "bible_file": "負けヒロインと俺が付き合っていると周りから勘違いされ幼馴染みと修羅場になった_1.json",
+      "match_patterns": [
+        "Everyone Thinks I'm Dating the Losing Heroine, Kicking Off a Rom-Com War With My Childhood Friend!,",
+        "負けヒロインと俺が付き合っていると周りから勘違いされ、幼馴染みと修羅場になった 1",
+        "負けヒロインと俺が付き合っていると周りから勘違いされ、幼馴染みと修羅場になった"
+      ],
+      "volumes": [
+        "07ca",
+        "1b05"
+      ],
+      "entry_count": 26,
+      "last_updated": "2026-02-09T08:04:39Z"
+    },
+    "隣国から来た嫁が可愛すぎてどうしよう": {
+      "bible_file": "隣国から来た嫁が可愛すぎてどうしよう.json",
+      "match_patterns": [
+        "隣国から来た嫁が可愛すぎてどうしよう。",
+        "隣国から来た嫁が可愛すぎてどうしよう。２",
+        "My Bride from the Neighboring Kingdom is So Cute, I'm Helpless!"
+      ],
+      "volumes": [
+        "211e",
+        "08c3"
+      ],
+      "entry_count": 43,
+      "last_updated": "2026-02-09T08:04:39Z"
     }
   }
 }

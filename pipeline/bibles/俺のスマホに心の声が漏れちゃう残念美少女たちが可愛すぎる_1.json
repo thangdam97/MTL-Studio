@@ -1,0 +1,85 @@
+{
+  "bible_version": "1.0",
+  "series_id": "俺のスマホに心の声が漏れちゃう残念美少女たちが可愛すぎる_1",
+  "series_title": {
+    "ja": "俺のスマホに心の声が漏れちゃう残念美少女たちが可愛すぎる",
+    "en": "My Smartphone Leaks the Inner Thoughts of These Disappointing Beauties!",
+    "romaji": ""
+  },
+  "last_updated": "2026-02-09T08:04:39Z",
+  "volumes_registered": [
+    {
+      "volume_id": "2379",
+      "title": "My Smartphone Leaks the Inner Thoughts of These Disappointing Beauties! 1",
+      "index": 1
+    },
+    {
+      "volume_id": "test",
+      "title": "俺のスマホに心の声が漏れちゃう残念美少女たちが可愛すぎる 1",
+      "index": 2
+    }
+  ],
+  "characters": {
+    "スマホ": {
+      "canonical_en": "Smartphone"
+    },
+    "小恋": {
+      "canonical_en": "Koko"
+    },
+    "如月": {
+      "canonical_en": "Kisaragi"
+    },
+    "スカート": {
+      "canonical_en": "Skirt"
+    },
+    "ピンチ": {
+      "canonical_en": "Pinch"
+    },
+    "可愛": {
+      "canonical_en": "Kawai"
+    },
+    "千歌": {
+      "canonical_en": "Chika"
+    },
+    "クラスメイト": {
+      "canonical_en": "Classmate"
+    },
+    "美咲": {
+      "canonical_en": "Misaki"
+    },
+    "奈央": {
+      "canonical_en": "Nao"
+    },
+    "裸足": {
+      "canonical_en": "Barefoot"
+    },
+    "ココロン": {
+      "canonical_en": "Kokoron"
+    }
+  },
+  "geography": {
+    "countries": {},
+    "regions": {},
+    "cities": {}
+  },
+  "weapons_artifacts": {},
+  "organizations": {},
+  "cultural_terms": {},
+  "mythology": {},
+  "world_setting": {
+    "type": "modern_japan",
+    "label": "Contemporary Japanese Setting",
+    "honorifics": {
+      "mode": "retain",
+      "policy": "Keep all JP honorifics (-san, -kun, -chan, -sama, -senpai, -sensei)."
+    },
+    "name_order": {
+      "default": "family_given",
+      "policy": "Japanese surname-first order for Japanese characters."
+    },
+    "exceptions": []
+  },
+  "translation_rules": {
+    "style": "Natural English prose matching the genre tone."
+  }
+}

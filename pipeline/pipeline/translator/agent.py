@@ -25,33 +25,7 @@ from pipeline.translator.per_chapter_workflow import PerChapterWorkflow
 from pipeline.translator.glossary_lock import GlossaryLock
 from pipeline.translator.series_bible import BibleController
 from pipeline.config import get_target_language, get_language_config, PIPELINE_ROOT
-from pipeline.post_processor.format_normalizer import FormatNormalizer
 from modules.gap_integration import GapIntegrationEngine
-
-try:
-    from pipeline.post_processor.cjk_cleaner import CJKArtifactCleaner, format_results_report
-    CJK_CLEANER_AVAILABLE = True
-except ModuleNotFoundError:
-    CJK_CLEANER_AVAILABLE = False
-
-    class CJKArtifactCleaner:  # type: ignore[override]
-        """No-op fallback when legacy CJK cleaner module is unavailable."""
-
-        def __init__(self, *args, **kwargs):
-            pass
-
-        def clean_volume(self, work_dir: Path) -> Dict[str, Any]:
-            return {
-                "volume": work_dir.name,
-                "languages_processed": 0,
-                "total_files": 0,
-                "total_artifacts": 0,
-                "files_modified": 0,
-                "language_results": {},
-            }
-
-    def format_results_report(_results: Dict[str, Any]) -> str:
-        return "CJK artifact cleaner unavailable: skipped legacy CJK detection."
 
 
 @dataclass
@@ -79,9 +53,6 @@ logging.basicConfig(
     handlers=[logging.StreamHandler(sys.stdout)]
 )
 logger = logging.getLogger("TranslatorAgent")
-
-if not CJK_CLEANER_AVAILABLE:
-    logger.warning("Legacy cjk_cleaner module not found; CJK artifact detection will be skipped.")
 
 class TranslatorAgent:
     _CHAPTER_ID_PATTERN = re.compile(r"chapter[_\-](\d+)", re.IGNORECASE)
@@ -1222,64 +1193,10 @@ class TranslatorAgent:
         if success_count == total:
             self.manifest["pipeline_state"]["translator"]["status"] = "completed"
             logger.info("Volume translation COMPLETED")
-            
-            # Run format normalization on all target language outputs
-            logger.info("\n" + "="*60)
-            logger.info("POST-PROCESSING: Format Normalization")
-            logger.info("="*60)
-            try:
-                normalizer = FormatNormalizer(aggressive=False)
-                results = normalizer.normalize_volume(self.work_dir)
-                
-                # Log aggregate statistics
-                total_modified = sum(stats['files_modified'] for stats in results.values())
-                if total_modified > 0:
-                    logger.info(f"\n✓ Format normalization completed: {total_modified} files cleaned across {len(results)} language(s)")
-                else:
-                    logger.info("\n✓ Format normalization completed: No issues detected")
-            except Exception as e:
-                logger.warning(f"Format normalization failed: {e}")
-            
-            # Run CJK artifact cleanup on all language outputs
-            logger.info("\n" + "="*60)
-            logger.info("POST-PROCESSING: CJK Artifact Detection")
-            logger.info("="*60)
-            try:
-                # Use detection-only mode (strict_mode=False) to flag artifacts without auto-removal
-                cjk_cleaner = CJKArtifactCleaner(strict_mode=False, min_confidence=0.7, context_window=5)
-                cjk_results = cjk_cleaner.clean_volume(self.work_dir)
-                
-                # Log detailed report
-                if cjk_results['total_artifacts'] > 0:
-                    report = format_results_report(cjk_results)
-                    logger.warning(report)
-                    logger.warning(f"\n⚠️  Found {cjk_results['total_artifacts']} potential CJK artifacts across {cjk_results['total_files']} files")
-                    logger.warning("Review artifacts above and consider manual cleanup or enabling strict_mode for auto-removal")
-                else:
-                    logger.info("\n✓ CJK artifact detection completed: No artifacts detected")
-            except Exception as e:
-                logger.warning(f"CJK artifact detection failed: {e}")
-            
-            # Run automated audit system (v2.0 - 3 subagents)
-            logger.info("\n" + "="*60)
-            logger.info("POST-PROCESSING: Automated Quality Audit (v2.0)")
-            logger.info("="*60)
-            try:
-                self._run_quality_audit()
-            except Exception as e:
-                logger.warning(f"Quality audit failed: {e}")
-                logger.warning("Continuing without audit report...")
-
-            # Run cross-chapter name consistency audit (romanization drift detection)
-            if self.target_language == "en":
-                logger.info("\n" + "=" * 60)
-                logger.info("POST-PROCESSING: Name Consistency Audit")
-                logger.info("=" * 60)
-                try:
-                    self._run_name_consistency_audit(output_dir)
-                except Exception as e:
-                    logger.warning(f"Name consistency audit failed: {e}")
-                    logger.warning("Continuing without name consistency report...")
+            logger.info("Post-processing stages are disabled (Gemini's native quality is excellent).")
+            logger.info("Only CJK validator remains active (Vietnamese translations only).")
+            logger.info("Grammar validator REMOVED (inverted logic damaged 1a60 output).")
+            logger.info("Anti-AI-ism agent DISABLED (over-correction damages natural prose).")
             
             # Finalize continuity pack (aggregate all chapter snapshots)
             logger.info("\nFinalizing continuity pack...")
@@ -1313,180 +1230,6 @@ class TranslatorAgent:
             logger.info("Clearing context cache...")
             self.client.clear_cache()
     
-    def _run_quality_audit(self) -> None:
-        """
-        Run the automated quality audit system (v2.0).
-        
-        Executes 3 subagents in sequence:
-        1. Fidelity Auditor - Content preservation check
-        2. Integrity Auditor - Names, terms, formatting validation
-        3. Prose Auditor - English naturalness via Grammar RAG
-        
-        Then aggregates results into final report.
-        """
-        try:
-            # Import auditors (lazy import to avoid circular deps)
-            from auditors import FidelityAuditor, IntegrityAuditor, ProseAuditor, FinalAuditor
-        except ImportError:
-            logger.warning("Audit system not available (auditors module not found)")
-            logger.warning("Run: pip install -e . or ensure auditors/ is in PYTHONPATH")
-            return
-        
-        # Create audits output directory
-        audit_dir = self.work_dir / "audits"
-        audit_dir.mkdir(exist_ok=True)
-        
-        # Config directory for Grammar RAG
-        config_dir = Path(__file__).parent.parent.parent / "config"
-        
-        logger.info(f"Audit output directory: {audit_dir}")
-        
-        # === SUBAGENT 1: Fidelity Auditor ===
-        logger.info("\n🔍 Running Subagent 1: Content Fidelity Audit...")
-        try:
-            fidelity_auditor = FidelityAuditor(self.work_dir)
-            fidelity_report = fidelity_auditor.save_report(audit_dir)
-            logger.info(f"✅ Fidelity audit complete: {fidelity_report}")
-        except Exception as e:
-            logger.error(f"❌ Fidelity audit failed: {e}")
-        
-        # === SUBAGENT 2: Integrity Auditor ===
-        logger.info("\n✍️ Running Subagent 2: Content Integrity Audit...")
-        try:
-            integrity_auditor = IntegrityAuditor(self.work_dir)
-            integrity_report = integrity_auditor.save_report(audit_dir)
-            logger.info(f"✅ Integrity audit complete: {integrity_report}")
-        except Exception as e:
-            logger.error(f"❌ Integrity audit failed: {e}")
-        
-        # === SUBAGENT 3: Prose Auditor ===
-        logger.info("\n💬 Running Subagent 3: Prose Quality Audit...")
-        try:
-            prose_auditor = ProseAuditor(self.work_dir, config_dir)
-            prose_report = prose_auditor.save_report(audit_dir)
-            logger.info(f"✅ Prose audit complete: {prose_report}")
-        except Exception as e:
-            logger.error(f"❌ Prose audit failed: {e}")
-        
-        # === FINAL AGGREGATION ===
-        logger.info("\n📊 Running Final Auditor: Report Aggregation...")
-        try:
-            final_auditor = FinalAuditor(audit_dir, self.work_dir)
-            json_path, md_path = final_auditor.save_reports(audit_dir)
-            
-            # Display final result
-            import json
-            with open(json_path, 'r', encoding='utf-8') as f:
-                summary = json.load(f)
-            
-            grade = summary.get("grade", "?")
-            score = summary.get("scores", {}).get("final", 0)
-            verdict = summary.get("verdict", "UNKNOWN")
-            
-            logger.info("")
-            logger.info("╔════════════════════════════════════════════════════════════╗")
-            logger.info(f"║  AUDIT COMPLETE                                           ║")
-            logger.info(f"║  Grade: {grade:<5}  Score: {score:>5.1f}/100  Verdict: {verdict:<14} ║")
-            logger.info("╚════════════════════════════════════════════════════════════╝")
-            logger.info(f"\n📄 Full report: {md_path}")
-            
-            # Store audit result in manifest
-            self.manifest["pipeline_state"]["translator"]["audit_result"] = {
-                "grade": grade,
-                "score": score,
-                "verdict": verdict,
-                "report_path": str(md_path)
-            }
-            self._save_manifest()
-            
-        except Exception as e:
-            logger.error(f"❌ Final aggregation failed: {e}")
-
-    def _run_name_consistency_audit(self, en_output_dir: Path) -> None:
-        """Detect cross-chapter name-variant drift and write audit report."""
-        try:
-            from auditors import NameConsistencyAuditor
-        except ImportError:
-            logger.warning("NameConsistencyAuditor unavailable (auditors module not found)")
-            return
-
-        auditor = NameConsistencyAuditor()
-        canonical_names_set = set()
-
-        metadata = (
-            self.manifest.get(f"metadata_{self.target_language}", {})
-            or self.manifest.get("metadata_en", {})
-            or {}
-        )
-        character_profiles = metadata.get("character_profiles", {})
-        if isinstance(character_profiles, dict):
-            for profile in character_profiles.values():
-                if not isinstance(profile, dict):
-                    continue
-                for key in ("full_name", "nickname", "ruby_reading"):
-                    value = profile.get(key)
-                    if isinstance(value, str) and self._is_likely_person_name(value):
-                        canonical_names_set.add(value.strip())
-
-        if not canonical_names_set and getattr(self, "glossary_lock", None):
-            for value in self.glossary_lock.get_locked_names().values():
-                if isinstance(value, str) and self._is_likely_person_name(value):
-                    canonical_names_set.add(value.strip())
-
-        canonical_names = sorted(canonical_names_set)
-
-        report = auditor.audit_volume(en_output_dir, canonical_names=canonical_names or None)
-
-        audit_dir = self.work_dir / "audits"
-        audit_dir.mkdir(exist_ok=True)
-        report_path = audit_dir / "name_consistency_report.json"
-        report_payload = {
-            "chapter_count": report.chapter_count,
-            "variant_groups": [
-                {
-                    "canonical": group.canonical,
-                    "variants": sorted(group.variants),
-                    "occurrences": group.occurrences,
-                }
-                for group in report.groups
-            ],
-        }
-        with report_path.open("w", encoding="utf-8") as f:
-            json.dump(report_payload, f, indent=2, ensure_ascii=False)
-
-        if report.has_variants():
-            logger.warning(
-                f"[NAME-CONSISTENCY] Detected {len(report.groups)} variant group(s). "
-                f"Report: {report_path}"
-            )
-            for group in report.groups[:5]:
-                variants = ", ".join(sorted(group.variants))
-                logger.warning(
-                    f"  Canonical '{group.canonical}' has variants: {variants}"
-                )
-        else:
-            logger.info(f"✓ Name consistency audit passed (no drift). Report: {report_path}")
-
-    def _is_likely_person_name(self, value: str) -> bool:
-        token = value.strip()
-        if not token or len(token) < 3:
-            return False
-        stopwords = {
-            "The", "This", "That", "Some", "Soon", "Many", "More", "Maybe",
-            "Skill", "Sword", "Kingdom", "Army", "War", "Act", "Chapter",
-        }
-        if token in stopwords:
-            return False
-        if not any(ch.isalpha() for ch in token):
-            return False
-        # Reject lowercase terms like "sword", "skill", etc.
-        if token.lower() == token:
-            return False
-        if any(char.isdigit() for char in token):
-            return False
-        # Accept "Tigre", "Eleonora Viltaria", "Ludmila's" style tokens.
-        return bool(token[0].isupper())
-
     def generate_report(self) -> TranslationReport:
         """Generate a summary report of the translation."""
         log_chapters = self.translation_log.get("chapters", [])

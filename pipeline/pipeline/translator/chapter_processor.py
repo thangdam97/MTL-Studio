@@ -73,8 +73,10 @@ class ChapterProcessor:
             logger.info("✓ Vietnamese CJK post-processor initialized (hard substitution enabled)")
         
         # Initialize Self-Healing Anti-AI-ism Agent for post-processing
+        # DISABLED (2026-02-10): 1a60 audit proved Gemini's native output has near-zero AI-ism contamination.
+        # Post-processing over-correction damages natural prose quality. Trust the model.
         self._anti_ai_ism_agent = None
-        self.enable_anti_ai_ism = False  # Will be enabled from agent if needed
+        self.enable_anti_ai_ism = False  # PERMANENTLY DISABLED - model quality is excellent
         
         # Load character names from manifest.json for name consistency
         self.character_names = self._load_character_names()
@@ -875,46 +877,59 @@ This document contains the internal reasoning process that Gemini used while tra
                 f.write(final_content)
             
             # 8. Post-Processing: Vietnamese CJK Hard Substitution (VN only)
+            # NOTE (2026-02-10): Only CJK validator remains active for Vietnamese translations.
+            # All other post-processors (grammar validator, anti-AI-ism agent) have been
+            # disabled after 1a60 audit proved they damage Gemini's native prose quality.
+            # Gemini Flash 2.0 produces excellent translations with minimal errors:
+            # - 0 subject-verb errors natively
+            # - 5 possessive errors (50% better than baseline with old prompts)
+            # - 1 AI-ism total (0.015 per 1k words)
+            # - 95.8/100 prose score
+            # Conclusion: Trust the model. Minimal post-processing = better quality.
             cjk_cleaned_count = 0
             if self._vn_cjk_cleaner:
                 clean_result = self._vn_cjk_cleaner.clean_file(output_path)
                 cjk_cleaned_count = clean_result.get('substitutions', 0)
                 remaining_leaks = clean_result.get('remaining_leaks', 0)
-                
+
                 if cjk_cleaned_count > 0:
                     logger.info(f"✓ CJK post-processor: {cjk_cleaned_count} hard substitutions applied")
                 if remaining_leaks > 0:
                     logger.warning(f"⚠ CJK post-processor: {remaining_leaks} unknown leaks remain (manual review needed)")
-            
-            # 9. Post-Processing: Self-Healing Anti-AI-ism Agent (if enabled)
-            ai_ism_healed_count = 0
-            if self.enable_anti_ai_ism and self._anti_ai_ism_agent:
-                try:
-                    logger.debug(f"[ANTI-AI-ISM] Running self-healing agent on {chapter_id}...")
-                    heal_report = self._anti_ai_ism_agent.heal_file(output_path)
-                    
-                    if heal_report and heal_report.issues:
-                        ai_ism_healed_count = len([i for i in heal_report.issues if i.corrected])
-                        total_issues = len(heal_report.issues)
-                        
-                        if ai_ism_healed_count > 0:
-                            logger.info(f"✓ Anti-AI-ism agent: {ai_ism_healed_count}/{total_issues} issues auto-corrected")
-                        
-                        # Log severity breakdown
-                        critical = len([i for i in heal_report.issues if i.severity == 'CRITICAL'])
-                        major = len([i for i in heal_report.issues if i.severity == 'MAJOR'])
-                        minor = len([i for i in heal_report.issues if i.severity == 'MINOR'])
-                        
-                        if critical > 0:
-                            logger.warning(f"  Critical: {critical}, Major: {major}, Minor: {minor}")
-                        elif major > 0:
-                            logger.info(f"  Major: {major}, Minor: {minor}")
-                    else:
-                        logger.debug(f"[ANTI-AI-ISM] No AI-isms detected in {chapter_id}")
-                        
-                except Exception as e:
-                    logger.warning(f"[ANTI-AI-ISM] Self-healing failed: {e}")
-                    logger.warning("[ANTI-AI-ISM] Continuing without auto-correction (run 'mtl.py heal' manually)")
+
+            # 9. Post-Processing: Self-Healing Anti-AI-ism Agent (DISABLED - damages prose quality)
+            # DISABLED (2026-02-10): 1a60 audit found only 1 AI-ism in entire volume (0.015/1k).
+            # Gemini's native output is excellent. Post-processing over-correction damages natural prose.
+            # Evidence: Grammar validator introduced 35 errors trying to "fix" correct grammar.
+            # Philosophy: Trust the model. Minimal intervention = better quality.
+            # ai_ism_healed_count = 0  # Unused - agent permanently disabled
+            # if self.enable_anti_ai_ism and self._anti_ai_ism_agent:
+            #     try:
+            #         logger.debug(f"[ANTI-AI-ISM] Running self-healing agent on {chapter_id}...")
+            #         heal_report = self._anti_ai_ism_agent.heal_file(output_path)
+            #
+            #         if heal_report and heal_report.issues:
+            #             ai_ism_healed_count = len([i for i in heal_report.issues if i.corrected])
+            #             total_issues = len(heal_report.issues)
+            #
+            #             if ai_ism_healed_count > 0:
+            #                 logger.info(f"✓ Anti-AI-ism agent: {ai_ism_healed_count}/{total_issues} issues auto-corrected")
+            #
+            #             # Log severity breakdown
+            #             critical = len([i for i in heal_report.issues if i.severity == 'CRITICAL'])
+            #             major = len([i for i in heal_report.issues if i.severity == 'MAJOR'])
+            #             minor = len([i for i in heal_report.issues if i.severity == 'MINOR'])
+            #
+            #             if critical > 0:
+            #                 logger.warning(f"  Critical: {critical}, Major: {major}, Minor: {minor}")
+            #             elif major > 0:
+            #                 logger.info(f"  Major: {major}, Minor: {minor}")
+            #         else:
+            #             logger.debug(f"[ANTI-AI-ISM] No AI-isms detected in {chapter_id}")
+            #
+            #     except Exception as e:
+            #         logger.warning(f"[ANTI-AI-ISM] Self-healing failed: {e}")
+            #         logger.warning("[ANTI-AI-ISM] Continuing without auto-correction (run 'mtl.py heal' manually)")
 
             validation_warnings = list(audit.warnings or [])
 

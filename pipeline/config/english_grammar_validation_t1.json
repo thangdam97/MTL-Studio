@@ -1,0 +1,443 @@
+{
+  "version": "1.0",
+  "tier": "tier_1_mechanical_correctness",
+  "description": "Tier 1 English Grammar Validation Rules - Mechanical correctness checks for possessives, articles, tense, agreement, and basic syntax. Used for post-translation QC.",
+  "last_updated": "2026-02-09",
+  "priority": "blocking",
+  "usage": "Apply after translation to catch mechanical grammar errors before human review",
+
+  "validation_categories": {
+    "possessive_errors": {
+      "description": "Detect missing or incorrect possessive apostrophes",
+      "severity": "high",
+      "patterns": [
+        {
+          "id": "missing_possessive_noun",
+          "pattern": "\\b([A-Z][a-z]+)\\s+(eyes|face|hand|voice|expression|smile|heart|mind|mother|father|brother|sister|friend|family|home|room|book|bag|phone|car|body|hair|skin|lips|arms|legs|feet|words|question|answer|response|reaction|gesture|movement|action|decision|choice|thought|memory|dream|hope|wish|fear|anger|sadness|happiness|joy|pain|suffering|death|life|love|hate)\\b",
+          "requires": "'s",
+          "fix_template": "$1's $2",
+          "examples": [
+            {
+              "incorrect": "Shinonome eyes widened",
+              "correct": "Shinonome's eyes widened",
+              "context": "Proper noun + body part"
+            },
+            {
+              "incorrect": "Eiji wide social circle",
+              "correct": "Eiji's wide social circle",
+              "context": "Proper noun + descriptive noun phrase"
+            },
+            {
+              "incorrect": "Maria reaction was immediate",
+              "correct": "Maria's reaction was immediate",
+              "context": "Proper noun + abstract noun"
+            }
+          ],
+          "exceptions": [
+            "Pattern at start of sentence may be intentional fragment",
+            "Dialogue tags: 'Maria said' vs 'Maria's voice'"
+          ]
+        },
+        {
+          "id": "missing_possessive_pronoun",
+          "pattern": "\\b(his|her|its|their|my|your|our)\\s+and\\s+([A-Z][a-z]+)\\s+(eyes|face|hand|voice)\\b",
+          "requires": "'s after proper noun",
+          "fix_template": "$1 and $2's $3",
+          "examples": [
+            {
+              "incorrect": "her and Souta eyes met",
+              "correct": "her and Souta's eyes met"
+            }
+          ]
+        },
+        {
+          "id": "incorrect_its_contraction",
+          "pattern": "\\bit's\\s+(eyes|face|body|surface|contents|meaning|purpose|function)\\b",
+          "issue": "Should use possessive 'its' not contraction 'it's'",
+          "fix_template": "its $1",
+          "examples": [
+            {
+              "incorrect": "The cat licked it's paws",
+              "correct": "The cat licked its paws"
+            }
+          ]
+        }
+      ],
+      "confidence_threshold": 0.85
+    },
+
+    "article_errors": {
+      "description": "Detect missing or incorrect articles (a, an, the)",
+      "severity": "medium",
+      "patterns": [
+        {
+          "id": "missing_article_singular_countable",
+          "pattern": "\\b(is|was|has|had|like|need|want|saw|found|bought|made|took|gave|showed|told|asked|heard|felt|smelled|tasted|touched)\\s+([a-z]+ing|beautiful|small|large|big|tiny|huge|perfect|simple|complex|difficult|easy|hard|strange|weird|normal|regular|special|unique|rare|common|unusual|ordinary)\\s+(boy|girl|man|woman|person|child|student|teacher|friend|dog|cat|bird|fish|book|pen|phone|car|house|room|door|window|chair|table|desk|bed)\\b",
+          "requires": "a/an before adjective+noun",
+          "fix_template": "$1 a $2 $3",
+          "examples": [
+            {
+              "incorrect": "She saw beautiful girl",
+              "correct": "She saw a beautiful girl"
+            },
+            {
+              "incorrect": "He is smart student",
+              "correct": "He is a smart student"
+            }
+          ],
+          "exceptions": [
+            "Plural nouns don't need article",
+            "Uncountable nouns (water, air, love) don't need article",
+            "After possessives: 'his beautiful car' not 'his a beautiful car'"
+          ]
+        },
+        {
+          "id": "a_vs_an_vowel_sound",
+          "pattern": "\\ba\\s+([aeiou])",
+          "requires": "Use 'an' before vowel sounds",
+          "fix_template": "an $1",
+          "examples": [
+            {
+              "incorrect": "a apple",
+              "correct": "an apple"
+            },
+            {
+              "incorrect": "a honest person",
+              "correct": "an honest person"
+            }
+          ],
+          "exceptions": [
+            "'a user' (yoo sound, not vowel)",
+            "'a one-time event' (w sound)",
+            "'a European' (yoo sound)"
+          ]
+        }
+      ],
+      "confidence_threshold": 0.75
+    },
+
+    "subject_verb_agreement": {
+      "description": "Detect subject-verb disagreement (singular/plural mismatch)",
+      "severity": "high",
+      "patterns": [
+        {
+          "id": "singular_subject_plural_verb",
+          "pattern": "\\b(He|She|It|[A-Z][a-z]+)\\s+(are|were|have|do)\\b",
+          "issue": "Singular subject requires singular verb",
+          "fix_suggestions": {
+            "are": "is",
+            "were": "was",
+            "have": "has",
+            "do": "does"
+          },
+          "examples": [
+            {
+              "incorrect": "He are happy",
+              "correct": "He is happy"
+            },
+            {
+              "incorrect": "Shinonome have a book",
+              "correct": "Shinonome has a book"
+            }
+          ],
+          "exceptions": [
+            "'You' uses plural form even when singular"
+          ]
+        },
+        {
+          "id": "plural_subject_singular_verb",
+          "pattern": "\\b(They|We|[A-Z][a-z]+\\s+and\\s+[A-Z][a-z]+)\\s+(is|was|has|does)\\b",
+          "issue": "Plural subject requires plural verb",
+          "fix_suggestions": {
+            "is": "are",
+            "was": "were",
+            "has": "have",
+            "does": "do"
+          },
+          "examples": [
+            {
+              "incorrect": "They was happy",
+              "correct": "They were happy"
+            },
+            {
+              "incorrect": "Souta and Nagi is dating",
+              "correct": "Souta and Nagi are dating"
+            }
+          ]
+        },
+        {
+          "id": "existential_there_was_plural_noun",
+          "pattern": "\\bThere\\s+was\\s+no\\s+([A-Za-z][A-Za-z'-]*s)\\b",
+          "issue": "Plural noun after 'There was no' requires 'There were no'",
+          "fix_template": "There were no $1",
+          "examples": [
+            {
+              "incorrect": "There was no words left.",
+              "correct": "There were no words left."
+            },
+            {
+              "incorrect": "There was no tangles in her hair.",
+              "correct": "There were no tangles in her hair."
+            }
+          ],
+          "exceptions": [
+            "Singular/mass nouns are valid: 'There was no water.'",
+            "Dialectal speech in dialogue may intentionally bend agreement"
+          ]
+        },
+        {
+          "id": "existential_there_was_irregular_plural",
+          "pattern": "\\bThere\\s+was\\s+no\\s+(people|children|men|women|teeth|feet|mice|geese)\\b",
+          "issue": "Irregular plural noun after 'There was no' requires 'There were no'",
+          "fix_template": "There were no $1",
+          "examples": [
+            {
+              "incorrect": "There was no people outside.",
+              "correct": "There were no people outside."
+            },
+            {
+              "incorrect": "There was no children waiting.",
+              "correct": "There were no children waiting."
+            }
+          ]
+        }
+      ],
+      "confidence_threshold": 0.9
+    },
+
+    "tense_consistency": {
+      "description": "Detect tense shifts within paragraphs (past vs present)",
+      "severity": "medium",
+      "patterns": [
+        {
+          "id": "paragraph_tense_shift",
+          "description": "Check for unintentional tense changes within same paragraph",
+          "scope": "paragraph_level",
+          "check": "If paragraph starts with past tense verbs, flag present tense verbs (unless dialogue/thoughts)",
+          "examples": [
+            {
+              "incorrect": "I walked to school. The morning was cold. Suddenly, someone calls my name.",
+              "correct": "I walked to school. The morning was cold. Suddenly, someone called my name.",
+              "issue": "Shift from past (walked, was) to present (calls)"
+            }
+          ],
+          "exceptions": [
+            "Dialogue uses present: 'She said, \"I am happy\"' - OK",
+            "Internal thoughts in present: 'I wondered, *What is happening?*' - OK",
+            "Historical present for vividness - intentional stylistic choice",
+            "Universal truths: 'She learned that water boils at 100°C' - OK"
+          ]
+        }
+      ],
+      "confidence_threshold": 0.6
+    },
+
+    "pronoun_errors": {
+      "description": "Detect pronoun case and agreement errors",
+      "severity": "medium",
+      "patterns": [
+        {
+          "id": "object_pronoun_as_subject",
+          "pattern": "\\b(me|him|her|us|them)\\s+(is|are|was|were|am|can|will|would|should|could|have|has|had|do|does|did)\\b",
+          "issue": "Object pronoun used as subject",
+          "fix_suggestions": {
+            "me": "I",
+            "him": "he",
+            "her": "she",
+            "us": "we",
+            "them": "they"
+          },
+          "examples": [
+            {
+              "incorrect": "Me and Eiji are friends",
+              "correct": "Eiji and I are friends"
+            },
+            {
+              "incorrect": "Her is beautiful",
+              "correct": "She is beautiful"
+            }
+          ],
+          "exceptions": [
+            "'It's me' is colloquially acceptable",
+            "After 'than': 'She's taller than me' is acceptable in casual speech"
+          ]
+        },
+        {
+          "id": "subject_pronoun_as_object",
+          "pattern": "\\b(between|for|to|with|by|from|about|without)\\s+(I|he|she|we|they)\\b",
+          "issue": "Subject pronoun used as object after preposition",
+          "fix_suggestions": {
+            "I": "me",
+            "he": "him",
+            "she": "her",
+            "we": "us",
+            "they": "them"
+          },
+          "examples": [
+            {
+              "incorrect": "between you and I",
+              "correct": "between you and me"
+            },
+            {
+              "incorrect": "for he and his family",
+              "correct": "for him and his family"
+            }
+          ]
+        }
+      ],
+      "confidence_threshold": 0.85
+    },
+
+    "double_negatives": {
+      "description": "Detect unintentional double negatives (non-standard English)",
+      "severity": "low",
+      "patterns": [
+        {
+          "id": "double_negative_standard",
+          "pattern": "\\b(don't|doesn't|didn't|can't|couldn't|won't|wouldn't|shouldn't|isn't|aren't|wasn't|weren't)\\s+\\w+\\s+(nothing|nobody|nowhere|never|no one|none)\\b",
+          "issue": "Double negative creates unintended positive meaning in standard English",
+          "examples": [
+            {
+              "incorrect": "I don't know nothing",
+              "correct": "I don't know anything",
+              "note": "Double negative = 'I know something' (unintended)"
+            },
+            {
+              "incorrect": "She can't see nobody",
+              "correct": "She can't see anybody"
+            }
+          ],
+          "exceptions": [
+            "Literary/emphatic double negatives: 'not uncommon' = 'fairly common' - intentional",
+            "Dialogue representing non-standard dialect - may be character voice"
+          ]
+        }
+      ],
+      "confidence_threshold": 0.7
+    },
+
+    "contraction_errors": {
+      "description": "Detect malformed contractions",
+      "severity": "medium",
+      "patterns": [
+        {
+          "id": "incorrect_contraction_form",
+          "pattern": "\\b(I'm|you're|he's|she's|it's|we're|they're)\\s+(not)?\\s+(am|are|is|was|were|have|has|had|will|would|should|could|can)\\b",
+          "issue": "Redundant verb after contraction",
+          "examples": [
+            {
+              "incorrect": "I'm am happy",
+              "correct": "I'm happy",
+              "issue": "I'm already contains 'am'"
+            },
+            {
+              "incorrect": "He's is tall",
+              "correct": "He's tall"
+            }
+          ]
+        },
+        {
+          "id": "malformed_contraction",
+          "pattern": "\\b(could of|would of|should of|must of|might of|may of)\\b",
+          "issue": "Incorrect 'of' instead of 'have'",
+          "fix_suggestions": {
+            "could of": "could have / could've",
+            "would of": "would have / would've",
+            "should of": "should have / should've",
+            "must of": "must have / must've"
+          },
+          "examples": [
+            {
+              "incorrect": "I could of won",
+              "correct": "I could have won / I could've won"
+            }
+          ]
+        }
+      ],
+      "confidence_threshold": 0.95
+    },
+
+    "sentence_fragments": {
+      "description": "Detect incomplete sentences (missing subject or verb)",
+      "severity": "low",
+      "patterns": [
+        {
+          "id": "missing_subject",
+          "description": "Sentence starts with verb but no subject",
+          "check": "Capitalized verb at sentence start without subject",
+          "examples": [
+            {
+              "incorrect": "Walked to school.",
+              "correct": "I walked to school.",
+              "exception": "Imperative sentences: 'Walk faster!' - OK (implied 'you')"
+            }
+          ],
+          "exceptions": [
+            "Imperative mood (commands): 'Go!' 'Stop!' 'Wait!'",
+            "Literary fragments for effect: 'Rain. Endless rain.'",
+            "Dialogue fragments: 'Yep.' 'Nope.' 'Maybe.'",
+            "Answers to questions: 'Where?' 'Here.'"
+          ]
+        }
+      ],
+      "confidence_threshold": 0.5
+    },
+
+    "literal_phrasing": {
+      "description": "Detect literal JP-to-EN phrasing that reads non-native in prose",
+      "severity": "medium",
+      "patterns": [
+        {
+          "id": "words_surprise_my_heart",
+          "pattern": "\\b([Hh]er|[Hh]is|[Tt]heir|[Mm]y|[Yy]our)\\s+words\\s+surprise\\s+my\\s+heart\\b",
+          "issue": "Literal phrasing is grammatical but unnatural in polished English prose",
+          "fix_suggestions": {
+            "default": "$1 words made my heart leap"
+          },
+          "examples": [
+            {
+              "incorrect": "Her words surprise my heart.",
+              "correct": "Her words made my heart leap."
+            },
+            {
+              "incorrect": "His words surprise my heart.",
+              "correct": "His words made my heart leap."
+            }
+          ]
+        }
+      ],
+      "confidence_threshold": 0.8
+    }
+  },
+
+  "post_processing_rules": {
+    "auto_fix_eligible": {
+      "description": "Patterns that can be automatically corrected with high confidence",
+      "categories": [
+        "possessive_errors.missing_possessive_noun",
+        "article_errors.a_vs_an_vowel_sound",
+        "contraction_errors.malformed_contraction",
+        "double_negatives.double_negative_standard"
+      ],
+      "confidence_required": 0.9
+    },
+    "flag_for_review": {
+      "description": "Patterns that require human review before correction",
+      "categories": [
+        "tense_consistency.paragraph_tense_shift",
+        "sentence_fragments.missing_subject",
+        "literal_phrasing.words_surprise_my_heart",
+        "subject_verb_agreement (if in dialogue)"
+      ],
+      "confidence_required": 0.7
+    }
+  },
+
+  "integration_notes": {
+    "translator_agent": "Apply after translation pass, before final output",
+    "audit_agent": "Use as part of Prose Quality audit (Subagent 3)",
+    "batch_processing": "Can run on all EN chapters post-translation",
+    "reporting": "Generate grammar_validation_report.json with violations found",
+    "performance": "Regex-based, fast execution (<1s per chapter)"
+  }
+}

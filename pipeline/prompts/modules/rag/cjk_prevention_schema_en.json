@@ -394,6 +394,16 @@
           "english": ["situation", "appearance", "state", "how things look"],
           "context": "observing someone's condition"
         },
+        "落ち着いた色のものを着れば": {
+          "readings": ["ochitsuita iro no mono o kireba"],
+          "meaning": "if (she) wore clothing in calm/subdued colors",
+          "english": [
+            "if she wore something in calmer colors",
+            "if she wore subdued colors",
+            "if she dressed in more muted tones"
+          ],
+          "context": "appearance and clothing tone description"
+        },
         "凜々": {
           "readings": ["rinrin"],
           "meaning": "dignified/gallant/imposing",
@@ -413,6 +423,12 @@
           "meaning": "surely not/no way/don't tell me",
           "english": ["surely not", "no way", "don't tell me", "it can't be"],
           "context": "expressing disbelief/surprise"
+        },
+        "わざわざ": {
+          "readings": ["wazawaza"],
+          "meaning": "to go out of one's way; deliberately (for emphasis)",
+          "english": ["even", "went out of his/her way to", "deliberately"],
+          "context": "highlighting extra effort or intentional action"
         },
         "鈍感": {
           "readings": ["donkan"],

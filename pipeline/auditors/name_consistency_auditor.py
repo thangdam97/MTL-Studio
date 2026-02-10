@@ -33,23 +33,39 @@ class NameConsistencyAuditor:
 
     _NAME_RE = re.compile(r"\b[A-Z][a-z]+(?:[-'][A-Za-z]+)?\b")
     _STOPWORDS = {
-        "The",
-        "This",
-        "That",
-        "Then",
-        "When",
-        "Where",
-        "After",
-        "Before",
-        "Chapter",
-        "Act",
-        "Prologue",
-        "Epilogue",
-        "Lord",
-        "Lady",
-        "Sir",
-        "King",
-        "Queen",
+        # Articles, pronouns, determiners
+        "The", "This", "That", "Then", "When", "Where", "After", "Before",
+        "They", "Their", "There", "These", "Those", "Than", "What", "Which",
+        "While", "With", "Without", "Would", "Could", "Should", "From",
+
+        # Common verbs (capitalized at sentence start)
+        "Have", "Half", "Hair", "Hand", "Head", "Hear", "Help", "Here",
+        "Hold", "Hope", "Just", "Keep", "Know", "Last", "Late", "Lead",
+        "Left", "Less", "Like", "Line", "Link", "List", "Live", "Long",
+        "Look", "Lost", "Love", "Made", "Make", "Many", "Mark", "May",
+        "Mean", "Meet", "Mind", "Miss", "More", "Most", "Move", "Much",
+        "Must", "Name", "Near", "Need", "Never", "Next", "Nice", "None",
+        "Note", "Once", "Only", "Open", "Over", "Part", "Pass", "Past",
+        "Path", "Pick", "Plan", "Play", "Plus", "Point", "Poor", "Pull",
+        "Push", "Race", "Rain", "Rank", "Rate", "Read", "Real", "Rest",
+        "Rich", "Ride", "Ring", "Rise", "Risk", "Road", "Rock", "Role",
+        "Room", "Rule", "Safe", "Said", "Sale", "Same", "Save", "Seat",
+        "Seek", "Seem", "Self", "Sell", "Send", "Sent", "Show", "Side",
+        "Sign", "Site", "Size", "Skin", "Some", "Soon", "Sort", "Star",
+        "Stay", "Step", "Still", "Stop", "Such", "Sure", "Take", "Talk",
+        "Task", "Team", "Tell", "Term", "Test", "Text", "Thank", "Think",
+        "Time", "Today", "Told", "Took", "Town", "Tree", "True", "Turn",
+        "Type", "Unit", "Upon", "Used", "User", "Very", "View", "Vote",
+        "Wait", "Walk", "Wall", "Want", "Watch", "Water", "Week", "Well",
+        "Went", "Were", "West", "Wide", "Wife", "Will", "Wind", "Wish",
+        "Word", "Work", "World", "Year", "Your",
+
+        # Story structure markers
+        "Chapter", "Act", "Prologue", "Epilogue", "Interlude", "Afterword",
+
+        # Titles and honorifics
+        "Lord", "Lady", "Sir", "King", "Queen", "Duke", "Baron", "Prince",
+        "Princess", "Master", "Mister", "Miss", "Madam",
     }
 
     def audit_volume(

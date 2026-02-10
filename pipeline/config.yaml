@@ -9,7 +9,7 @@ project:
       modules_dir: modules/
       grammar_rag:
         enabled: true
-        config_file: config/english_grammar_rag.json
+        config_file: config/english_grammar_rag_compressed.json  # Optimized: 154KB (was 283KB)
         inject_mode: always
         max_patterns_per_prompt: 8
         vector_store:

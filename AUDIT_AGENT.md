@@ -8,7 +8,7 @@ This audit system leverages Claude Opus 4.6's advanced reasoning capabilities fo
 
 ```
 ┌─────────────────────────────────────────────────────────────────────────────────┐
-│                      CLAUDE OPUS 4.5 AUDIT ORCHESTRATOR                         │
+│                      CLAUDE OPUS 4.6 AUDIT ORCHESTRATOR                         │
 │  ┌───────────────────────────────────────────────────────────────────────────┐  │
 │  │  • Task Decomposition: Analyzes volume scope, assigns to optimal agents   │  │
 │  │  • Parallel Execution: Dispatches independent audits simultaneously       │  │
@@ -17,44 +17,44 @@ This audit system leverages Claude Opus 4.6's advanced reasoning capabilities fo
 │  └───────────────────────────────────────────────────────────────────────────┘  │
 └─────────────────────────────────────────────────────────────────────────────────┘
                                         │
-        ┌───────────────┬───────────────┼───────────────┬───────────────┐
-        │               │               │               │               │
-        ▼               ▼               ▼               ▼               ▼
-┌───────────────┐ ┌───────────────┐ ┌───────────────┐ ┌───────────────┐ ┌───────────────┐
-│  SUBAGENT 1   │ │  SUBAGENT 2   │ │  SUBAGENT 3   │ │  SUBAGENT 4   │ │  SUBAGENT 5   │
-│   CONTENT     │ │   CONTENT     │ │    PROSE      │ │     GAP       │ │   LITERACY    │
-│   FIDELITY    │ │   INTEGRITY   │ │   QUALITY     │ │ PRESERVATION  │ │   EXCELLENCE  │
-│               │ │               │ │               │ │               │ │               │
-│  Zero         │ │  Structural   │ │  Extended     │ │  Semantic gap │ │  Claude       │
-│  tolerance    │ │  validation   │ │  AI-ism       │ │  analysis     │ │  Zero-Shot    │
-│  truncation   │ │  (names,      │ │  detection +  │ │  (Gaps A/B/C) │ │  English      │
-│  /censorship  │ │  terms,       │ │  Semantic     │ │  + Genre      │ │  Literacy     │
-│               │ │  formatting)  │ │  Contractions │ │  traits       │ │  Analysis     │
-└───────┬───────┘ └───────┬───────┘ └───────┬───────┘ └───────┬───────┘ └───────┬───────┘
-        │                 │                 │                 │                 │
-        ▼                 ▼                 ▼                 ▼                 ▼
-┌───────────────┐ ┌───────────────┐ ┌───────────────┐ ┌───────────────┐ ┌───────────────┐
-│ fidelity_     │ │ integrity_    │ │ prose_audit   │ │ gap_preserv   │ │ literacy_     │
-│ audit_report  │ │ audit_report  │ │ _report.json  │ │ ation_audit   │ │ audit_report  │
-│ .json         │ │ .json         │ │               │ │ _report.json  │ │ .json         │
-└───────┬───────┘ └───────┬───────┘ └───────┬───────┘ └───────┬───────┘ └───────┬───────┘
-        │                 │                 │                 │                 │
-        └─────────────────┴─────────────────┼─────────────────┴─────────────────┘
-                                            │
-                                            ▼
-                           ┌────────────────────────────────┐
-                           │      OPUS FINAL AUDITOR        │
-                           │   Aggregates 5 JSON Reports    │
-                           │   Cross-validates findings     │
-                           │   → Final Grade + Publication  │
-                           └────────────────────────────────┘
-                                            │
-                                            ▼
-                           ┌────────────────────────────────┐
-                           │    FINAL_AUDIT_REPORT.md       │
-                           │    + audit_summary.json        │
-                           │    + improvement_roadmap.json  │
-                           └────────────────────────────────┘
+        ┌───────────────┬───────────────┼───────────────┬───────────────┬───────────────┐
+        │               │               │               │               │               │
+        ▼               ▼               ▼               ▼               ▼               ▼
+┌───────────────┐ ┌───────────────┐ ┌───────────────┐ ┌───────────────┐ ┌───────────────┐ ┌───────────────┐
+│  SUBAGENT 1   │ │  SUBAGENT 2   │ │  SUBAGENT 3   │ │  SUBAGENT 4   │ │  SUBAGENT 5   │ │  SUBAGENT 6   │
+│   CONTENT     │ │   CONTENT     │ │    PROSE      │ │     GAP       │ │   GRAMMAR     │ │   LITERACY    │
+│   FIDELITY    │ │   INTEGRITY   │ │   QUALITY     │ │ PRESERVATION  │ │  ERROR SCOUT  │ │   EXCELLENCE  │
+│               │ │               │ │               │ │               │ │               │ │               │
+│  Zero         │ │  Structural   │ │  Extended     │ │  Semantic gap │ │  Subject-verb │ │  Claude       │
+│  tolerance    │ │  validation   │ │  AI-ism       │ │  analysis     │ │  Possessive の│ │  Zero-Shot    │
+│  truncation   │ │  (names,      │ │  detection +  │ │  (Gaps A/B/C) │ │  Articles     │ │  English      │
+│  /censorship  │ │  terms,       │ │  Semantic     │ │  + Genre      │ │  Pronouns     │ │  Literacy     │
+│               │ │  formatting)  │ │  Contractions │ │  traits       │ │  Tense        │ │  Analysis     │
+└───────┬───────┘ └───────┬───────┘ └───────┬───────┘ └───────┬───────┘ └───────┬───────┘ └───────┬───────┘
+        │                 │                 │                 │                 │                 │
+        ▼                 ▼                 ▼                 ▼                 ▼                 ▼
+┌───────────────┐ ┌───────────────┐ ┌───────────────┐ ┌───────────────┐ ┌───────────────┐ ┌───────────────┐
+│ fidelity_     │ │ integrity_    │ │ prose_audit   │ │ gap_preserv   │ │ grammar_scout │ │ literacy_     │
+│ audit_report  │ │ audit_report  │ │ _report.json  │ │ ation_audit   │ │ _report.json  │ │ audit_report  │
+│ .json         │ │ .json         │ │               │ │ _report.json  │ │               │ │ .json         │
+└───────┬───────┘ └───────┬───────┘ └───────┬───────┘ └───────┬───────┘ └───────┬───────┘ └───────┬───────┘
+        │                 │                 │                 │                 │                 │
+        └─────────────────┴─────────────────┴─────────────────┼─────────────────┴─────────────────┘
+                                                               │
+                                                               ▼
+                                              ┌────────────────────────────────┐
+                                              │      OPUS FINAL AUDITOR        │
+                                              │   Aggregates 6 JSON Reports    │
+                                              │   Cross-validates findings     │
+                                              │   → Final Grade + Publication  │
+                                              └────────────────────────────────┘
+                                                               │
+                                                               ▼
+                                              ┌────────────────────────────────┐
+                                              │    FINAL_AUDIT_REPORT.md       │
+                                              │    + audit_summary.json        │
+                                              │    + improvement_roadmap.json  │
+                                              └────────────────────────────────┘
 ```
 
 ---
@@ -1374,7 +1374,241 @@ Validate that semantic gaps (emotion+action, ruby text, subtext) identified in t
 
 ---
 
-## SUBAGENT 5: LITERACY EXCELLENCE AUDITOR (NEW)
+## SUBAGENT 5: GRAMMAR ERROR SCOUT (NEW)
+
+### Mission
+Systematically detect and categorize grammar errors in English translation output, with specific focus on subject-verb agreement, possessive markers (Japanese の particle), article usage, pronoun clarity, and tense consistency.
+
+### Key Capabilities
+1. **Subject-Verb Agreement Detection**: Identify mismatches between subjects and verbs (especially "We was", "They was")
+2. **Possessive Marker Detection**: Find missing possessive 's from Japanese の particle translations
+3. **Article Usage Analysis**: Detect incorrect a/an/the usage
+4. **Pronoun Clarity Check**: Verify pronoun antecedents are clear
+5. **Tense Consistency**: Ensure narrative tense is maintained
+
+### Input
+- `EN/*.md` - English translated chapters
+- `JP/*.md` - Japanese source (for possessive の particle verification)
+- `config/english_grammar_rag.json` - Grammar pattern database
+
+### Output Schema: `grammar_scout_report.json`
+
+```json
+{
+  "audit_type": "grammar_error_scout",
+  "volume_id": "1a60",
+  "timestamp": "2026-02-10T16:00:00Z",
+  "auditor_version": "1.0",
+  "model": "claude-opus-4-6",
+
+  "summary": {
+    "total_errors": 15,
+    "subject_verb_errors": 0,
+    "possessive_errors": 8,
+    "article_errors": 2,
+    "pronoun_errors": 3,
+    "tense_errors": 2,
+    "error_density": 0.33,
+    "verdict": "GOOD"
+  },
+
+  "thresholds": {
+    "excellent": "<0.2 errors per 1k words",
+    "good": "0.2-0.5 errors per 1k words",
+    "acceptable": "0.5-1.0 errors per 1k words",
+    "poor": ">1.0 errors per 1k words"
+  },
+
+  "subject_verb_agreement": {
+    "status": "EXCELLENT",
+    "errors_found": 0,
+    "total_checked": 450,
+    "accuracy_rate": 100.0,
+    "common_patterns_verified": {
+      "we_were": { "correct": 45, "incorrect": 0 },
+      "they_were": { "correct": 38, "incorrect": 0 },
+      "there_are": { "correct": 23, "incorrect": 0 },
+      "she_is": { "correct": 67, "incorrect": 0 }
+    },
+    "issues": []
+  },
+
+  "possessive_markers": {
+    "status": "NEEDS_IMPROVEMENT",
+    "errors_found": 8,
+    "detection_method": "Japanese の particle cross-reference",
+    "issues": [
+      {
+        "issue_id": "GRAM-POSS-001",
+        "chapter": "01",
+        "line": 117,
+        "jp_source": "エイジの目",
+        "found": "Eiji eyes",
+        "expected": "Eiji's eyes",
+        "severity": "MEDIUM",
+        "fix": "Add possessive 's"
+      }
+    ],
+    "false_positives_filtered": {
+      "pronouns": ["Her eyes", "My face", "Your hand"],
+      "sentence_fragments": ["Please touch", "Just thought"],
+      "total_filtered": 95
+    }
+  },
+
+  "article_usage": {
+    "status": "GOOD",
+    "errors_found": 2,
+    "issues": [
+      {
+        "issue_id": "GRAM-ART-001",
+        "chapter": "02",
+        "line": 234,
+        "found": "I saw a airplane",
+        "expected": "I saw an airplane",
+        "severity": "LOW"
+      }
+    ]
+  },
+
+  "pronoun_clarity": {
+    "status": "ACCEPTABLE",
+    "errors_found": 3,
+    "issues": [
+      {
+        "issue_id": "GRAM-PRO-001",
+        "chapter": "01",
+        "line": 567,
+        "context": "Eiji and Souta talked. He smiled.",
+        "issue": "Ambiguous antecedent - unclear if 'He' refers to Eiji or Souta",
+        "severity": "MEDIUM",
+        "suggestion": "Use name: 'Eiji smiled.'"
+      }
+    ]
+  },
+
+  "tense_consistency": {
+    "status": "GOOD",
+    "primary_tense": "past",
+    "errors_found": 2,
+    "issues": [
+      {
+        "issue_id": "GRAM-TENSE-001",
+        "chapter": "03",
+        "line": 89,
+        "found": "She walks over to the window",
+        "expected": "She walked over to the window",
+        "severity": "MEDIUM"
+      }
+    ]
+  },
+
+  "comparison_with_baseline": {
+    "baseline_available": true,
+    "baseline_errors": 65,
+    "optimized_errors": 15,
+    "improvement": 76.9,
+    "breakdown": {
+      "subject_verb": { "baseline": 37, "optimized": 0, "improvement": "100%" },
+      "possessive": { "baseline": 11, "optimized": 8, "improvement": "27.3%" },
+      "pronoun": { "baseline": 16, "optimized": 3, "improvement": "81.3%" },
+      "article": { "baseline": 1, "optimized": 2, "improvement": "-100%" }
+    }
+  },
+
+  "final_verdict": {
+    "grade": "A-",
+    "error_density": 0.33,
+    "status": "GOOD",
+    "blocking_issues": 0,
+    "improvement_areas": [
+      "8 possessive の particle translations need 's marker",
+      "3 pronoun antecedents could be clearer"
+    ],
+    "recommendation": "Grammar quality significantly improved from baseline. Possessive errors are minor polish issues, not blocking."
+  }
+}
+```
+
+### Detection Rules
+
+```xml
+<GRAMMAR_DETECTION_RULES>
+  <RULE id="SUBJECT_VERB_AGREEMENT">
+    <DESCRIPTION>
+      Detect mismatches between subject number (singular/plural) and verb form.
+    </DESCRIPTION>
+    <PATTERNS>
+      <INCORRECT>
+        - "We was" → Should be "We were"
+        - "They was" → Should be "They were"
+        - "There is [plural]" → Should be "There are [plural]"
+        - "She were" → Should be "She was"
+      </INCORRECT>
+    </PATTERNS>
+    <SEVERITY>CRITICAL - Basic grammar error</SEVERITY>
+  </RULE>
+
+  <RULE id="POSSESSIVE_NO_PARTICLE">
+    <DESCRIPTION>
+      Detect missing possessive 's when translating Japanese の particle.
+      Cross-reference with JP source to verify の presence.
+    </DESCRIPTION>
+    <DETECTION>
+      1. Search JP for: [Name]の[noun] pattern
+      2. Verify EN has: [Name]'s [noun]
+      3. Flag if EN has: [Name] [noun] (missing 's)
+    </DETECTION>
+    <FALSE_POSITIVE_FILTERING>
+      - Exclude pronouns: Her, His, My, Your, Their, Our, Its
+      - Exclude determiners: This, That, These, Those
+      - Exclude sentence starters: Please, Just, When, Then
+    </FALSE_POSITIVE_FILTERING>
+    <SEVERITY>MEDIUM - Polish issue, not critical</SEVERITY>
+  </RULE>
+
+  <RULE id="ARTICLE_USAGE">
+    <DESCRIPTION>
+      Detect incorrect a/an article usage before vowel/consonant sounds.
+    </DESCRIPTION>
+    <PATTERNS>
+      <INCORRECT>
+        - "a airplane" → "an airplane"
+        - "an house" → "a house"
+        - "a hour" → "an hour" (silent h)
+      </INCORRECT>
+    </PATTERNS>
+    <SEVERITY>LOW - Minor error</SEVERITY>
+  </RULE>
+
+  <RULE id="PRONOUN_AMBIGUITY">
+    <DESCRIPTION>
+      Detect pronouns with unclear or ambiguous antecedents.
+    </DESCRIPTION>
+    <DETECTION>
+      1. Identify pronouns: he, she, it, they, him, her, them
+      2. Check previous 2-3 sentences for multiple possible antecedents
+      3. Flag if 2+ candidates of same gender/number exist
+    </DETECTION>
+    <SEVERITY>MEDIUM - Can confuse meaning</SEVERITY>
+  </RULE>
+
+  <RULE id="TENSE_CONSISTENCY">
+    <DESCRIPTION>
+      Ensure narrative maintains consistent tense (past/present).
+    </DESCRIPTION>
+    <DETECTION>
+      1. Identify primary narrative tense from first 100 sentences
+      2. Flag sentences that deviate without flashback/dialogue context
+    </DETECTION>
+    <SEVERITY>MEDIUM - Breaks narrative flow</SEVERITY>
+  </RULE>
+</GRAMMAR_DETECTION_RULES>
+```
+
+---
+
+## SUBAGENT 6: LITERACY EXCELLENCE AUDITOR
 
 ### Mission
 Leverage Claude Opus 4.6's zero-shot English literary expertise to evaluate translation quality beyond mechanical pattern matching. Analyze prose rhythm, literary techniques, narrative voice, and overall reading experience.

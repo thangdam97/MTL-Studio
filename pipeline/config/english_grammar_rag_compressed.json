@@ -1,7 +1,7 @@
 {
   "version": "2.0",
   "description": "RAG Database for English Grammar Restructuring - Natural Idiom Patterns for JP→EN Translation (Extended via 148-EPUB corpus analysis)",
-  "last_updated": "2026-02-10",
+  "last_updated": "2026-02-07",
   "pattern_categories": {
     "contrastive_comparison": {
       "description": "Comparing two subjects where both share a quality, but one is notable/surprising",
@@ -1950,53 +1950,6 @@
           ],
           "priority": "high",
           "corpus_frequency": 2176
-        }
-      ]
-    },
-    "possessive_structures": {
-      "patterns": [
-        {
-          "id": "possessive_no_particle",
-          "japanese_structure": "[Name/Noun]の[Noun] - Possessive particle の",
-          "japanese_indicators": [
-            "の目",
-            "の顔",
-            "の声",
-            "の手",
-            "の体",
-            "の心",
-            "の笑顔",
-            "の表情",
-            "の言葉"
-          ],
-          "english_pattern": "[Name]'s [noun] - ALWAYS use possessive 's",
-          "examples": [
-            {
-              "jp": "エイジの目が細くなった",
-              "literal": "Eiji eyes narrowed",
-              "natural": "Eiji's eyes narrowed",
-              "source": "POSSESSIVE_FIX_2026"
-            },
-            {
-              "jp": "ナギの笑顔を見て",
-              "literal": "Watching Nagi smile",
-              "natural": "Watching Nagi's smile",
-              "source": "POSSESSIVE_FIX_2026"
-            },
-            {
-              "jp": "颯太の頭を撫でたい",
-              "literal": "I want to pat Souta head",
-              "natural": "I want to pat Souta's head",
-              "source": "POSSESSIVE_FIX_2026"
-            }
-          ],
-          "usage_rules": [
-            "CRITICAL: の particle = ALWAYS use 's in English",
-            "[Name]の[noun] → [Name]'s [noun] (100% required)",
-            "Common with body parts: eyes, face, voice, smile, hands"
-          ],
-          "priority": "critical",
-          "gemini_note": "LLM confusion point: の particle often dropped. ALWAYS translate as 's possessive."
         }
       ]
     }

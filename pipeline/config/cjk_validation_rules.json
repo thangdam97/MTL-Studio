@@ -146,6 +146,24 @@
         "date_discovered": "2026-02-02"
       },
       {
+        "pattern": "落ち着いた色のものを着れば",
+        "description": "Japanese descriptive clause leaked inline in English sentence",
+        "example": "If she wore落ち着いた色のものを着ればNagi's maturity would be emphasized",
+        "severity": "error",
+        "fix": "落ち着いた色のものを着れば → if she wore something in calmer colors",
+        "source": "Vol 1a60 Ch02 Line 1759",
+        "date_discovered": "2026-02-10"
+      },
+      {
+        "pattern": "わざわざ",
+        "description": "Japanese adverb leaked in English context",
+        "example": "He hadわざわざ called to check on the results",
+        "severity": "error",
+        "fix": "わざわざ → even / deliberately (context-dependent emphasis)",
+        "source": "Vol 1a60 Ch03 Line 1509",
+        "date_discovered": "2026-02-10"
+      },
+      {
         "pattern": "([À-ỹa-zA-Z]+)[\\u4E00-\\u9FFF]{2,}",
         "description": "Two+ character CJK compounds attached to Vietnamese words",
         "example": "Em年頃で知, có nhiều",
@@ -186,7 +204,9 @@
       "素晴らしい": "wonderful (can be sarcastic) / fantastic (can be ironic) / just great (SARCASTIC)",
       "最高": "the best (can be sarcastic) / perfect (can be ironic) / just perfect (SARCASTIC)",
       "やったね": "yay (can be sarcastic) / how nice (IRONIC) / oh joy (SARCASTIC)",
-      "なるほど": "I see (can be dismissive) / uh-huh (SARCASTIC) / oh really (IRONIC)"
+      "なるほど": "I see (can be dismissive) / uh-huh (SARCASTIC) / oh really (IRONIC)",
+      "落ち着いた色のものを着れば": "if she wore something in calmer colors",
+      "わざわざ": "even / deliberately (context-dependent)"
     },
     "common_korean_leaks": {
       "좌": "trái/ghế/giữa",

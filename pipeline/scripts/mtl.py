@@ -1368,28 +1368,82 @@ class PipelineController:
             logger.info(f"{phase_label}: non-interactive shell detected; using full-LN cache mode 'on'.")
             return True
 
-        cache_state = self._check_full_ln_cache_state(manifest)
-        title = manifest.get("metadata", {}).get("title", volume_id)
-        print("")
-        print(f"{phase_label} - Full-LN Cache Gate")
-        print(f"  Volume: {title}")
-        print(
-            "  Current cache state: "
-            f"{cache_state['cached']}/{cache_state['expected']} "
-            f"(ready={cache_state['ready']}, reason={cache_state['reason']})"
-        )
-        print("")
-        print("Options:")
-        print("  [1] Proceed with full-LN cache preparation")
-        print("  [2] Skip full-LN cache preparation")
-        print("")
+        current_manifest = manifest
         while True:
-            choice = input("Select option [1/2]: ").strip().lower()
+            cache_state = self._check_full_ln_cache_state(current_manifest)
+            title = current_manifest.get("metadata", {}).get("title", volume_id)
+            cache_detected = bool(cache_state.get("ready")) or int(cache_state.get("cached", 0) or 0) > 0
+
+            print("")
+            print(f"{phase_label} - Full-LN Cache Gate")
+            print(f"  Volume: {title}")
+            print(
+                "  Current cache state: "
+                f"{cache_state['cached']}/{cache_state['expected']} "
+                f"(ready={cache_state['ready']}, reason={cache_state['reason']})"
+            )
+            print("")
+            print("Options:")
+            print("  [1] Proceed with full-LN cache preparation")
+            print("  [2] Skip full-LN cache preparation")
+            if cache_detected:
+                print("  [3] Purge full-LN cache state and refresh this menu")
+                prompt = "Select option [1/2/3]: "
+            else:
+                prompt = "Select option [1/2]: "
+            print("")
+
+            choice = input(prompt).strip().lower()
             if choice == "1":
                 return True
             if choice == "2":
                 return False
-            print("Invalid selection. Choose 1 or 2.")
+            if choice == "3" and cache_detected:
+                if self._purge_full_ln_cache_state(volume_id):
+                    refreshed = self.load_manifest(volume_id)
+                    current_manifest = refreshed if refreshed else {}
+                    print("Full-LN cache state purged. Menu refreshed.")
+                else:
+                    print("Failed to purge full-LN cache state. Try again.")
+                continue
+            if cache_detected:
+                print("Invalid selection. Choose 1, 2, or 3.")
+            else:
+                print("Invalid selection. Choose 1 or 2.")
+
+    def _purge_full_ln_cache_state(self, volume_id: str) -> bool:
+        """
+        Purge local full-LN cache state artifacts for a volume.
+
+        This clears manifest tracking for rich_metadata_cache and removes the
+        local patch artifact file, then persists manifest.json.
+        """
+        manifest = self.load_manifest(volume_id)
+        if not manifest:
+            logger.error(f"No manifest.json found for volume: {volume_id}")
+            return False
+
+        pipeline_state = manifest.get("pipeline_state", {})
+        if isinstance(pipeline_state, dict) and "rich_metadata_cache" in pipeline_state:
+            pipeline_state.pop("rich_metadata_cache", None)
+
+        try:
+            manifest_path = self.get_manifest_path(volume_id)
+            with open(manifest_path, "w", encoding="utf-8") as f:
+                json.dump(manifest, f, indent=2, ensure_ascii=False)
+        except Exception as e:
+            logger.error(f"Failed to persist manifest while purging full-LN cache state: {e}")
+            return False
+
+        patch_path = self.work_dir / volume_id / "rich_metadata_cache_patch.json"
+        try:
+            if patch_path.exists():
+                patch_path.unlink()
+        except Exception as e:
+            logger.warning(f"Failed removing patch artifact {patch_path.name}: {e}")
+
+        logger.info("Purged local full-LN cache state for this volume.")
+        return True
 
     def run_phase1_6(self, volume_id: str, standalone: bool = False, full_ln_cache_mode: str = "ask") -> bool:
         """

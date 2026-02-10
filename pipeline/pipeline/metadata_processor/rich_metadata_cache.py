@@ -73,7 +73,12 @@ class RichMetadataCacheUpdater:
         "tbd",
     )
 
-    def __init__(self, work_dir: Path, target_language: Optional[str] = None):
+    def __init__(
+        self,
+        work_dir: Path,
+        target_language: Optional[str] = None,
+        cache_only: bool = False,
+    ):
         self.work_dir = work_dir
         self.manifest_path = work_dir / "manifest.json"
         self.schema_spec_path = PIPELINE_ROOT / "SCHEMA_V3.9_AGENT.md"
@@ -81,6 +86,7 @@ class RichMetadataCacheUpdater:
         self.metadata_key = f"metadata_{self.target_language}"
         self.client = GeminiClient(model=self.MODEL_NAME, enable_caching=True)
         self.manifest: Dict[str, Any] = {}
+        self.cache_only = cache_only
 
     def run(self) -> bool:
         if not self.manifest_path.exists():
@@ -93,6 +99,8 @@ class RichMetadataCacheUpdater:
         logger.info("Starting Phase 1.55 rich metadata cache update")
         logger.info(f"Volume: {volume_id}")
         logger.info(f"Model: {self.MODEL_NAME} (temperature={self.TEMPERATURE})")
+        if self.cache_only:
+            logger.info("Mode: cache_only (skip metadata patch merge)")
 
         bible_sync = None
         pull_result = None
@@ -123,6 +131,67 @@ class RichMetadataCacheUpdater:
             return False
 
         system_instruction = self._build_system_instruction()
+
+        if self.cache_only:
+            cache_name = None
+            used_external_cache = False
+            try:
+                cache_name = self.client.create_cache(
+                    model=self.MODEL_NAME,
+                    system_instruction=system_instruction,
+                    contents=[full_volume_text],
+                    ttl_seconds=self.CACHE_TTL_SECONDS,
+                    display_name=f"{volume_id}_richmeta_cacheonly",
+                )
+                if cache_name:
+                    used_external_cache = True
+                    logger.info(
+                        f"[CACHE] Full-LN cache created (cache-only): {cache_name} "
+                        f"({cache_stats.get('cached_chapters', 0)}/{cache_stats.get('target_chapters', 0)} chapters)"
+                    )
+                else:
+                    logger.warning("[CACHE] Full-LN cache creation failed in cache-only mode")
+            except Exception as e:
+                logger.error(f"Cache-only run failed while creating cache: {e}")
+                self._mark_pipeline_state(
+                    status="failed",
+                    error=str(e)[:500],
+                    cache_stats=cache_stats,
+                    used_external_cache=False,
+                    mode="cache_only",
+                )
+                self._save_manifest()
+                return False
+            finally:
+                if cache_name:
+                    self.client.delete_cache(cache_name)
+
+            if not used_external_cache:
+                self._mark_pipeline_state(
+                    status="failed",
+                    error="Cache-only mode could not create external full-LN cache",
+                    cache_stats=cache_stats,
+                    used_external_cache=False,
+                    mode="cache_only",
+                )
+                self._save_manifest()
+                return False
+
+            self._mark_pipeline_state(
+                status="completed",
+                cache_stats=cache_stats,
+                used_external_cache=True,
+                output_tokens=0,
+                patch_keys=[],
+                mode="cache_only",
+            )
+            self._save_manifest()
+            logger.info(
+                "Phase 1.55 cache-only complete: full-LN cache path verified "
+                f"({cache_stats.get('cached_chapters', 0)}/{cache_stats.get('target_chapters', 0)} chapters)."
+            )
+            return True
+
         prompt = self._build_prompt(
             metadata_en=self._get_metadata_block(),
             bible_context=(pull_result.context_block if pull_result else ""),
@@ -232,6 +301,7 @@ class RichMetadataCacheUpdater:
             used_external_cache=used_external_cache,
             output_tokens=getattr(response, "output_tokens", 0),
             patch_keys=sorted(list(filtered_patch.keys())),
+            mode="full",
         )
         self._save_manifest()
 
@@ -572,6 +642,7 @@ class RichMetadataCacheUpdater:
         output_tokens: int = 0,
         patch_keys: Optional[List[str]] = None,
         error: Optional[str] = None,
+        mode: str = "full",
     ) -> None:
         pipeline_state = self.manifest.setdefault("pipeline_state", {})
         state = {
@@ -583,6 +654,7 @@ class RichMetadataCacheUpdater:
             "output_tokens": output_tokens,
             "cache_stats": cache_stats or {},
             "patch_keys": patch_keys or [],
+            "mode": mode,
         }
         if error:
             state["error"] = error
@@ -592,6 +664,11 @@ class RichMetadataCacheUpdater:
 def main() -> None:
     parser = argparse.ArgumentParser(description="Run Phase 1.55 rich metadata cache updater")
     parser.add_argument("--volume", type=str, required=True, help="Volume ID in WORK/")
+    parser.add_argument(
+        "--cache-only",
+        action="store_true",
+        help="Build/verify full-LN cache path only (skip metadata enrichment merge).",
+    )
     args = parser.parse_args()
 
     work_dir = WORK_DIR / args.volume
@@ -599,7 +676,7 @@ def main() -> None:
         logger.error(f"Volume directory not found: {work_dir}")
         sys.exit(1)
 
-    updater = RichMetadataCacheUpdater(work_dir)
+    updater = RichMetadataCacheUpdater(work_dir, cache_only=args.cache_only)
     success = updater.run()
     sys.exit(0 if success else 1)
 

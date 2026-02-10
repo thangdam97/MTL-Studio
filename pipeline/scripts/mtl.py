@@ -21,8 +21,11 @@ Usage:
   mtl.py phase1.5 [volume_id]            # Run Phase 1.5 (metadata processing)
   mtl.py phase1.55 [volume_id]           # Run Phase 1.55 (full-LN cache metadata enrichment)
   mtl.py phase1.6 [volume_id]            # Run Phase 1.6 (multimodal pre-bake)
+  mtl.py phase1.6 [volume_id] --full-ln-cache off  # Skip full-LN cache prep
   mtl.py phase2 [volume_id]              # Run Phase 2 (interactive if no ID)
   mtl.py phase2 [volume_id] --enable-multimodal  # Phase 2 with visual context
+  mtl.py phase2 [volume_id] --full-ln-cache off  # Run without full-LN cache prep
+  mtl.py phase2 [volume_id] --phase1-55-mode skip|overwrite|auto|ask
   mtl.py multimodal [volume_id]          # Run Phase 1.6 + Phase 2 with multimodal (visual translation)
   mtl.py phase4 [volume_id]              # Run Phase 4 (interactive if no ID)
   mtl.py status <volume_id>              # Check pipeline status
@@ -1300,8 +1303,95 @@ class PipelineController:
             self._log_phase1_55_confirmation(volume_id)
             return True
         return False
+
+    def run_phase1_55_cache_only(self, volume_id: str) -> bool:
+        """
+        Build/verify full-LN cache path without applying rich metadata patches.
+
+        Used by standalone Phase 2 when user skips Phase 1.55 overwrite but still
+        wants full-LN cache preparation.
+        """
+        self._ui_header(
+            "Phase 1.55 - Cache-Only Prep",
+            "Build full JP LN cache path without metadata overwrite",
+        )
+
+        manifest = self.load_manifest(volume_id)
+        if not manifest:
+            logger.error(f"No manifest.json found for volume: {volume_id}")
+            logger.error("  Please run Phase 1 and Phase 1.5 first")
+            return False
+
+        cmd = [
+            sys.executable, "-m", "pipeline.metadata_processor.rich_metadata_cache",
+            "--volume", volume_id,
+            "--cache-only",
+        ]
+
+        if self._run_command(cmd, "Phase 1.55 (Cache-Only)"):
+            logger.info("✓ Phase 1.55 cache-only prep completed successfully")
+            self._log_phase1_55_confirmation(volume_id)
+            return True
+        return False
     
-    def run_phase1_6(self, volume_id: str, standalone: bool = False) -> bool:
+    def _resolve_full_ln_cache_mode(
+        self,
+        *,
+        standalone: bool,
+        full_ln_cache_mode: str,
+        volume_id: str,
+        manifest: Dict[str, Any],
+        phase_label: str,
+    ) -> bool:
+        """
+        Resolve whether full-LN cache preparation should run before a phase.
+
+        Modes:
+          - on: always prepare/validate full-LN cache
+          - off: skip full-LN cache preparation
+          - ask: standalone interactive prompt; defaults to on for non-standalone
+        """
+        mode = (full_ln_cache_mode or "on").strip().lower()
+        valid_modes = {"ask", "on", "off"}
+        if mode not in valid_modes:
+            logger.warning(f"Unknown --full-ln-cache '{full_ln_cache_mode}', falling back to on.")
+            mode = "on"
+
+        if mode == "on":
+            return True
+        if mode == "off":
+            return False
+
+        if not standalone:
+            return True
+        if not sys.stdin.isatty():
+            logger.info(f"{phase_label}: non-interactive shell detected; using full-LN cache mode 'on'.")
+            return True
+
+        cache_state = self._check_full_ln_cache_state(manifest)
+        title = manifest.get("metadata", {}).get("title", volume_id)
+        print("")
+        print(f"{phase_label} - Full-LN Cache Gate")
+        print(f"  Volume: {title}")
+        print(
+            "  Current cache state: "
+            f"{cache_state['cached']}/{cache_state['expected']} "
+            f"(ready={cache_state['ready']}, reason={cache_state['reason']})"
+        )
+        print("")
+        print("Options:")
+        print("  [1] Proceed with full-LN cache preparation")
+        print("  [2] Skip full-LN cache preparation")
+        print("")
+        while True:
+            choice = input("Select option [1/2]: ").strip().lower()
+            if choice == "1":
+                return True
+            if choice == "2":
+                return False
+            print("Invalid selection. Choose 1 or 2.")
+
+    def run_phase1_6(self, volume_id: str, standalone: bool = False, full_ln_cache_mode: str = "ask") -> bool:
         """
         Run Phase 1.6: Multimodal Processor (Visual Asset Pre-bake).
         
@@ -1324,9 +1414,19 @@ class PipelineController:
             logger.error("  Please run Phase 1 first to extract the EPUB")
             return False
 
-        if not self.ensure_full_ln_cache(volume_id, for_phase="Phase 1.6 (Multimodal)", manifest=manifest):
-            return False
-        manifest = self.load_manifest(volume_id) or manifest
+        use_full_ln_cache = self._resolve_full_ln_cache_mode(
+            standalone=standalone,
+            full_ln_cache_mode=full_ln_cache_mode,
+            volume_id=volume_id,
+            manifest=manifest,
+            phase_label="Phase 1.6 (Multimodal)",
+        )
+        if use_full_ln_cache:
+            if not self.ensure_full_ln_cache(volume_id, for_phase="Phase 1.6 (Multimodal)", manifest=manifest):
+                return False
+            manifest = self.load_manifest(volume_id) or manifest
+        else:
+            logger.warning("Skipping full-LN cache preparation for Phase 1.6 by user request.")
 
         logger.info(f"Volume: {manifest.get('metadata', {}).get('title', volume_id)}")
 
@@ -1398,9 +1498,72 @@ class PipelineController:
         logger.warning("⚠️  'phase0' is deprecated. Use 'phase1.6' instead.")
         return self.run_phase1_6(volume_id, standalone=True)
 
+    def _resolve_phase155_mode_for_phase2(
+        self,
+        *,
+        standalone: bool,
+        phase155_mode: str,
+        volume_id: str,
+        manifest: Dict[str, Any],
+    ) -> str:
+        """
+        Resolve Phase 1.55 behavior for Phase 2 runs.
+
+        Modes:
+          - auto: run Phase 1.55 only if cache is missing/incomplete (legacy behavior)
+          - skip: skip rich-metadata overwrite, but run cache-only prep before Phase 2
+          - overwrite: always run Phase 1.55 before Phase 2
+          - ask: standalone-only interactive prompt (skip vs overwrite)
+        """
+        normalized_mode = (phase155_mode or "auto").strip().lower()
+        valid_modes = {"auto", "skip", "overwrite", "ask"}
+        if normalized_mode not in valid_modes:
+            logger.warning(f"Unknown --phase1-55-mode '{phase155_mode}', falling back to auto.")
+            normalized_mode = "auto"
+
+        if normalized_mode != "ask":
+            return normalized_mode
+
+        if not standalone:
+            return "auto"
+
+        if not sys.stdin.isatty():
+            logger.info(
+                "Phase 2 standalone: non-interactive shell detected; "
+                "using auto Phase 1.55 policy."
+            )
+            return "auto"
+
+        cache_state = self._check_full_ln_cache_state(manifest)
+        title = manifest.get("metadata", {}).get("title", volume_id)
+        print("")
+        print("Phase 2 Standalone - Phase 1.55 Gate")
+        print(f"  Volume: {title}")
+        print(
+            "  Current cache state: "
+            f"{cache_state['cached']}/{cache_state['expected']} "
+            f"(ready={cache_state['ready']}, reason={cache_state['reason']})"
+        )
+        print("")
+        print("Options:")
+        print("  [1] Skip metadata overwrite (run cache-only prep)")
+        print("  [2] Continue with Phase 1.55 (overwrite/update rich metadata)")
+        print("")
+
+        while True:
+            choice = input("Select option [1/2]: ").strip().lower()
+            if choice == "1":
+                return "skip"
+            if choice == "2":
+                return "overwrite"
+            print("Invalid selection. Choose 1 or 2.")
+
     def run_phase2(self, volume_id: str, chapters: Optional[list] = None, force: bool = False,
                    enable_gap_analysis: bool = False,
-                   enable_multimodal: bool = False) -> bool:
+                   enable_multimodal: bool = False,
+                   phase155_mode: str = "auto",
+                   full_ln_cache_mode: str = "ask",
+                   standalone: bool = False) -> bool:
         """Run Phase 2: Translator (Gemini MT)."""
         self._ui_header(
             "Phase 2 - Translator",
@@ -1418,9 +1581,65 @@ class PipelineController:
             logger.error("  Please run Phase 1 first to extract the EPUB")
             return False
 
-        if not self.ensure_full_ln_cache(volume_id, for_phase="Phase 2 (Translator)", manifest=manifest):
-            return False
-        manifest = self.load_manifest(volume_id) or manifest
+        use_full_ln_cache = self._resolve_full_ln_cache_mode(
+            standalone=standalone,
+            full_ln_cache_mode=full_ln_cache_mode,
+            volume_id=volume_id,
+            manifest=manifest,
+            phase_label="Phase 2 (Translator)",
+        )
+        if use_full_ln_cache:
+            resolved_phase155_mode = self._resolve_phase155_mode_for_phase2(
+                standalone=standalone,
+                phase155_mode=phase155_mode,
+                volume_id=volume_id,
+                manifest=manifest,
+            )
+            if resolved_phase155_mode == "overwrite":
+                logger.info(
+                    "Phase 2 standalone: running Phase 1.55 before translation "
+                    "(overwrite/update requested)."
+                )
+                if not self.run_phase1_55(volume_id):
+                    logger.error("Phase 1.55 failed; cannot continue Phase 2.")
+                    return False
+                manifest = self.load_manifest(volume_id) or manifest
+                refreshed_state = self._check_full_ln_cache_state(manifest)
+                logger.info(
+                    f"Full-LN cache status after overwrite: "
+                    f"{refreshed_state['cached']}/{refreshed_state['expected']} "
+                    f"(ready={refreshed_state['ready']}, reason={refreshed_state['reason']})."
+                )
+            elif resolved_phase155_mode == "skip":
+                logger.info(
+                    "Skipping Phase 1.55 metadata overwrite by user request; "
+                    "preparing full-LN cache path in cache-only mode."
+                )
+                if not self.run_phase1_55_cache_only(volume_id):
+                    logger.error("Phase 1.55 cache-only prep failed; cannot continue Phase 2.")
+                    return False
+                manifest = self.load_manifest(volume_id) or manifest
+                refreshed_state = self._check_full_ln_cache_state(manifest)
+                logger.info(
+                    f"Full-LN cache status after cache-only prep: "
+                    f"{refreshed_state['cached']}/{refreshed_state['expected']} "
+                    f"(ready={refreshed_state['ready']}, reason={refreshed_state['reason']})."
+                )
+                logger.info(
+                    "Continuing with current manifest metadata (rich metadata fields not overwritten)."
+                )
+            else:
+                if not self.ensure_full_ln_cache(
+                    volume_id,
+                    for_phase="Phase 2 (Translator)",
+                    manifest=manifest,
+                ):
+                    return False
+                manifest = self.load_manifest(volume_id) or manifest
+        else:
+            logger.warning("Skipping full-LN cache preparation for Phase 2 by user request.")
+            if phase155_mode and str(phase155_mode).lower() != "ask":
+                logger.info("Ignoring --phase1-55-mode because full-LN cache mode is off.")
 
         if manifest.get("bible_id"):
             logger.info(
@@ -3045,7 +3264,12 @@ def main():
         sys.exit(0 if success else 1)
     
     elif args.command == 'phase1.6':
-        success = controller.run_phase1_6(args.volume_id, standalone=True)
+        full_ln_cache_mode = getattr(args, 'full_ln_cache', 'ask')
+        success = controller.run_phase1_6(
+            args.volume_id,
+            standalone=True,
+            full_ln_cache_mode=full_ln_cache_mode,
+        )
         sys.exit(0 if success else 1)
     
     elif args.command == 'multimodal':
@@ -3055,21 +3279,35 @@ def main():
             "Phase 1.55 (if needed) -> Phase 1.6 (visual analysis) -> Phase 2"
         )
         logger.info("")
+        full_ln_cache_mode = getattr(args, 'full_ln_cache', 'ask')
+        use_full_ln_cache = controller._resolve_full_ln_cache_mode(
+            standalone=True,
+            full_ln_cache_mode=full_ln_cache_mode,
+            volume_id=args.volume_id,
+            manifest=controller.load_manifest(args.volume_id) or {},
+            phase_label="Multimodal (Phase 1.6 + 2)",
+        )
         manifest = controller.load_manifest(args.volume_id)
         rich_state = (
             manifest.get("pipeline_state", {}).get("rich_metadata_cache", {}).get("status", "not run")
             if manifest else "not run"
         )
-        if rich_state != "completed":
+        if use_full_ln_cache and rich_state != "completed":
             logger.info("Step 0: Running Phase 1.55 (Rich Metadata Cache)...")
             success_p155 = controller.run_phase1_55(args.volume_id)
             if not success_p155:
                 logger.error("Phase 1.55 failed. Aborting multimodal translation.")
                 sys.exit(1)
             logger.info("")
+        elif not use_full_ln_cache:
+            logger.warning("Step 0: Skipping full-LN cache preparation by user request.")
 
         logger.info("Step 1: Running Phase 1.6 (Visual Analysis)...")
-        success_p16 = controller.run_phase1_6(args.volume_id, standalone=False)
+        success_p16 = controller.run_phase1_6(
+            args.volume_id,
+            standalone=False,
+            full_ln_cache_mode="off" if not use_full_ln_cache else "on",
+        )
         
         if not success_p16:
             logger.error("Phase 1.6 failed. Aborting multimodal translation.")
@@ -3088,7 +3326,8 @@ def main():
         success_p2 = controller.run_phase2(
             args.volume_id, chapters, force,
             enable_gap_analysis=False,
-            enable_multimodal=True  # Always enable multimodal for this command
+            enable_multimodal=True,  # Always enable multimodal for this command
+            full_ln_cache_mode="off" if not use_full_ln_cache else "on",
         )
         
         if success_p2:
@@ -3127,8 +3366,13 @@ def main():
             )
         enable_gap_analysis = getattr(args, 'enable_gap_analysis', False)
         enable_multimodal = getattr(args, 'enable_multimodal', False)
+        phase155_mode = getattr(args, 'phase155_mode', 'ask')
+        full_ln_cache_mode = getattr(args, 'full_ln_cache', 'ask')
         success = controller.run_phase2(args.volume_id, args.chapters, args.force,
-                                        enable_gap_analysis, enable_multimodal)
+                                        enable_gap_analysis, enable_multimodal,
+                                        phase155_mode=phase155_mode,
+                                        full_ln_cache_mode=full_ln_cache_mode,
+                                        standalone=True)
         sys.exit(0 if success else 1)
     
     elif args.command == 'phase3':

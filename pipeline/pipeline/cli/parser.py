@@ -127,6 +127,12 @@ Metadata Schema Auto-Transform:
         help='Run Phase 1.6: Multimodal Processor (visual analysis for illustrations)'
     )
     phase1_6_parser.add_argument('volume_id', type=str, nargs='?', help='Volume ID (optional - will prompt if not provided)')
+    phase1_6_parser.add_argument(
+        '--full-ln-cache',
+        choices=['ask', 'on', 'off'],
+        default='ask',
+        help='Full-LN cache policy before Phase 1.6: ask (prompt), on (prepare), off (skip)',
+    )
 
     # Multimodal Translator (Phase 1.6 + Phase 2)
     multimodal_parser = subparsers.add_parser(
@@ -137,6 +143,12 @@ Metadata Schema Auto-Transform:
     multimodal_parser.add_argument('volume_id', type=str, nargs='?', help='Volume ID (optional - will prompt if not provided)')
     multimodal_parser.add_argument('--chapters', nargs='+', help='Specific chapters to translate')
     multimodal_parser.add_argument('--force', action='store_true', help='Re-translate completed chapters')
+    multimodal_parser.add_argument(
+        '--full-ln-cache',
+        choices=['ask', 'on', 'off'],
+        default='ask',
+        help='Full-LN cache policy for phase1.6+phase2: ask (prompt), on (prepare), off (skip)',
+    )
 
     # Phase 2
     phase2_parser = subparsers.add_parser('phase2', parents=[parent_parser], help='Run Phase 2: Translator (RAG + Vector + Visual)')
@@ -158,6 +170,23 @@ Metadata Schema Auto-Transform:
         '--enable-multimodal',
         action='store_true',
         help='Enable multimodal visual context injection (requires Phase 1.6)'
+    )
+    phase2_parser.add_argument(
+        '--phase1-55-mode',
+        choices=['ask', 'skip', 'overwrite', 'auto'],
+        default='ask',
+        help=(
+            'Standalone Phase 2 behavior for Phase 1.55: '
+            'ask (prompt), skip (cache-only prep, no metadata overwrite), '
+            'overwrite (run and update metadata), '
+            'auto (run only if cache is missing)'
+        ),
+    )
+    phase2_parser.add_argument(
+        '--full-ln-cache',
+        choices=['ask', 'on', 'off'],
+        default='ask',
+        help='Full-LN cache policy before Phase 2: ask (prompt), on (prepare), off (skip)',
     )
 
     # Phase 3

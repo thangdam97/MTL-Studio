@@ -477,7 +477,8 @@ class LibrarianAgent:
         filename_mapping.update(kuchie_filename_mapping)
         
         # Copy chapter-referenced inline illustrations (gaiji + illustrations from content)
-        # These may not be detected by pattern-based image extractor (e.g., Gagaga Bunko uses numbered filenames)
+        # that were not discovered by pattern-based cataloging.
+        # Keep original filenames to match markdown placeholders.
         import shutil
         illust_dir = assets_dir / "illustrations"
         illust_dir.mkdir(parents=True, exist_ok=True)
@@ -485,6 +486,7 @@ class LibrarianAgent:
         # Exclude kuchie images from inline illustrations
         chapter_illustrations_to_copy = chapter_illustrations - spine_kuchie_originals
         copied_illustrations = []
+        existing_illustrations = {img.filename for img in image_catalog["illustrations"]}
         
         for img_filename in chapter_illustrations_to_copy:
             # Try to find the image in content_dir
@@ -495,14 +497,17 @@ class LibrarianAgent:
                     if not dst_path.exists():  # Avoid overwriting
                         shutil.copy2(src_path, dst_path)
                         copied_illustrations.append(img_filename)
+                    # Keep mapping as identity (no illustration renaming)
+                    filename_mapping[img_filename] = img_filename
+                    if img_filename not in existing_illustrations:
+                        image_catalog["illustrations"].append(
+                            type('obj', (object,), {'filename': img_filename})()
+                        )
+                        existing_illustrations.add(img_filename)
                     break
         
         if copied_illustrations:
             print(f"     Copied {len(copied_illustrations)} inline illustrations to assets")
-            # Add to image catalog for manifest
-            image_catalog["illustrations"].extend([
-                type('obj', (object,), {'filename': f})() for f in copied_illustrations
-            ])
 
         # Update illustration references in markdown files
         if filename_mapping:
@@ -547,7 +552,7 @@ class LibrarianAgent:
             volume_acts=volume_acts
         )
 
-        # Sync manifest filenames with normalized names
+        # Sync manifest filenames with mapped output names
         if filename_mapping:
             print("[POST-PROCESS] Syncing manifest filenames...")
             self._sync_manifest_filenames(manifest, filename_mapping)
@@ -1618,10 +1623,10 @@ class LibrarianAgent:
 
     def _update_markdown_illustrations(self, jp_dir: Path, filename_mapping: Dict[str, str]):
         """
-        Update illustration references in markdown files with normalized filenames.
+        Update illustration references in markdown files using mapped filenames.
         
-        Replaces [ILLUSTRATION: p011.jpg] with [ILLUSTRATION: illust-001.jpg]
-        based on the mapping from original to normalized filenames.
+        This primarily handles cover/kuchie remapping. Illustration entries now
+        keep original EPUB filenames, so most illustration mappings are identity.
         
         Also removes illustration placeholders for filtered files (e.g., m*.jpg stylized titles)
         that were excluded by the image pattern filter.
@@ -1648,9 +1653,9 @@ class LibrarianAgent:
                     
                     # Check if we have a mapping for this filename
                     if original_filename in filename_mapping:
-                        # File was processed - replace with normalized name
-                        normalized_filename = filename_mapping[original_filename]
-                        new_placeholder = f"[ILLUSTRATION: {normalized_filename}]"
+                        # File was processed - replace with mapped output name
+                        mapped_filename = filename_mapping[original_filename]
+                        new_placeholder = f"[ILLUSTRATION: {mapped_filename}]"
                         content = content.replace(old_placeholder, new_placeholder)
                         updated_count += 1
                     else:
@@ -1674,10 +1679,10 @@ class LibrarianAgent:
 
     def _sync_manifest_filenames(self, manifest: Manifest, filename_mapping: Dict[str, str]):
         """
-        Sync manifest asset filenames with normalized names.
+        Sync manifest asset filenames with mapped output names.
 
         Updates both the global assets section and per-chapter illustration lists
-        to use normalized filenames instead of original EPUB filenames.
+        to use output filenames instead of source EPUB filenames.
 
         Args:
             manifest: Manifest object to update (modified in-place)
@@ -2298,10 +2303,14 @@ class LibrarianAgent:
             chapter_entries.append(entry.to_dict())
 
         # Build asset references with spine-based kuchie metadata
+        illustration_assets = [img.filename for img in image_catalog["illustrations"]]
+        # Preserve order while removing duplicates.
+        illustration_assets = list(dict.fromkeys(illustration_assets))
+
         assets = {
             "cover": image_catalog["cover"][0].filename if image_catalog["cover"] else None,
             "kuchie": spine_kuchie,  # Use spine-based kuchie with full metadata
-            "illustrations": [img.filename for img in image_catalog["illustrations"]],
+            "illustrations": illustration_assets,
         }
 
         # Build pipeline state with recovery information

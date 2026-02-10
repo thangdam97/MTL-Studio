@@ -129,7 +129,9 @@ class ImageExtractor:
             original_ext: Original file extension (default: .jpg)
 
         Returns:
-            Normalized filename (e.g., 'kuchie-001.jpg', 'illust-023.jpg')
+            Normalized filename (e.g., 'kuchie-001.jpg', 'illust-023.jpg').
+            Illustration normalization is legacy-only; extraction now preserves
+            original illustration filenames.
         """
         if image_type == "cover":
             return f"cover{original_ext}"
@@ -305,7 +307,7 @@ class ImageExtractor:
         Returns:
             Tuple of:
             - Dictionary mapping image type to output directory
-            - Dictionary mapping original filename to normalized filename
+            - Dictionary mapping original filename to output filename
         """
         if exclude_files is None:
             exclude_files = set()
@@ -365,23 +367,19 @@ class ImageExtractor:
                 print(f"[OK] Copied kuchie: {original_filename} -> {normalized_name}")
             output_paths["kuchie"] = kuchie_dir
 
-        # Copy illustrations with normalized filenames
+        # Copy illustrations with ORIGINAL filenames.
+        # Markdown placeholders now use original filenames, so do not normalize
+        # to illust-XXX anymore.
         if catalog["illustrations"]:
             illust_dir = output_dir / "illustrations"
             illust_dir.mkdir(parents=True, exist_ok=True)
             print(f"[INFO] Processing {len(catalog['illustrations'])} illustrations...")
-            for i, img in enumerate(catalog["illustrations"]):
-                # Store original filename before normalization
+            for img in catalog["illustrations"]:
                 original_filename = img.filename
-                # Normalize filename
-                original_ext = Path(img.filename).suffix
-                normalized_name = self.normalize_filename("illustration", i, original_ext)
-                dest = illust_dir / normalized_name
+                dest = illust_dir / original_filename
                 shutil.copy2(img.filepath, dest)
-                # Track mapping
-                filename_mapping[original_filename] = normalized_name
-                # Update ImageInfo with normalized filename
-                img.filename = normalized_name
+                # Identity mapping keeps placeholders intact and avoids removals.
+                filename_mapping[original_filename] = original_filename
             print(f"[OK] Copied {len(catalog['illustrations'])} illustrations")
             output_paths["illustrations"] = illust_dir
         else:

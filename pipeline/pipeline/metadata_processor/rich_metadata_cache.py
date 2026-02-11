@@ -277,6 +277,9 @@ class RichMetadataCacheUpdater:
         metadata_block = self._get_metadata_block()
         filtered_patch = self._filter_patch_to_placeholders(metadata_block, patch)
         merged_metadata = self._deep_merge_dict(metadata_block, filtered_patch)
+        visual_backfilled = self._backfill_visual_identity_non_color(merged_metadata)
+        if visual_backfilled:
+            logger.info(f"Visual identity backfilled: {visual_backfilled} profile(s)")
         self._set_metadata_block(merged_metadata)
         self._save_metadata_file(merged_metadata)
 
@@ -406,6 +409,8 @@ class RichMetadataCacheUpdater:
             "4) Do NOT modify title_en/author_en/chapter title fields/character_names/glossary.\n"
             "5) Keep unknown values empty instead of guessing.\n"
             "6) Prefer concrete character evidence from cached chapter text.\n"
+            "7) Maintain character_profiles.*.visual_identity_non_color with non-color identity markers:\n"
+            "   hairstyle, outfit silhouette/signature, expression baseline, posture/gesture, accessories.\n"
         )
         if self.schema_spec_path.exists():
             try:
@@ -432,6 +437,7 @@ class RichMetadataCacheUpdater:
             "Refine and expand rich metadata for this volume using the cached full LN text.\n"
             "Focus on character_profiles, localization_notes, dialogue/register behavior,\n"
             "and any semantic guidance that improves Phase 2 translation consistency.\n"
+            "For character_profiles, fill/maintain `visual_identity_non_color` with non-color descriptors.\n"
             "Directive: only fill blank or placeholder values in current metadata_en.\n"
             "Do not overwrite existing populated values.\n"
             "Return only valid JSON in the required output shape.\n\n"
@@ -519,6 +525,44 @@ class RichMetadataCacheUpdater:
             else:
                 result[key] = value
         return result
+
+    def _backfill_visual_identity_non_color(self, metadata_block: Dict[str, Any]) -> int:
+        """
+        Add baseline non-color visual identity payload where missing.
+
+        Uses existing `appearance` text as a safe fallback summary.
+        """
+        profiles = metadata_block.get("character_profiles", {})
+        if not isinstance(profiles, dict):
+            return 0
+
+        updated = 0
+        for _, profile in profiles.items():
+            if not isinstance(profile, dict):
+                continue
+
+            existing = profile.get("visual_identity_non_color")
+            has_existing = False
+            if isinstance(existing, dict):
+                has_existing = any(
+                    isinstance(v, str) and v.strip() or isinstance(v, list) and len(v) > 0
+                    for v in existing.values()
+                )
+            elif isinstance(existing, str):
+                has_existing = bool(existing.strip())
+            elif isinstance(existing, list):
+                has_existing = any(str(v).strip() for v in existing)
+            if has_existing:
+                continue
+
+            appearance = profile.get("appearance")
+            if isinstance(appearance, str) and appearance.strip():
+                profile["visual_identity_non_color"] = {
+                    "identity_summary": appearance.strip()
+                }
+                updated += 1
+
+        return updated
 
     def _parse_json_response(self, content: str) -> Dict[str, Any]:
         text = content.strip()

@@ -1,6 +1,6 @@
 {
   "version": "1.0",
-  "last_updated": "2026-02-11T03:14:59.756222+00:00",
+  "last_updated": "2026-02-11T04:25:26.560440+00:00",
   "series": {
     "madan_no_ou_to_vanadis": {
       "bible_file": "madan_no_ou_to_vanadis.json",
@@ -296,6 +296,18 @@
       ],
       "entry_count": 8,
       "last_updated": "2026-02-11T03:13:54.767276+00:00"
+    },
+    "lv": {
+      "bible_file": "lv.json",
+      "match_patterns": [
+        "ネトゲの嫁は女の子じゃないと思った? Lv.",
+        "And You Thought There Is Never a Girl Online?"
+      ],
+      "volumes": [
+        "0116"
+      ],
+      "entry_count": 0,
+      "last_updated": "2026-02-11T04:25:26.557650+00:00"
     }
   }
 }

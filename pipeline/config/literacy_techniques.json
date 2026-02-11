@@ -10,8 +10,8 @@
       "EN",
       "VN"
     ],
-    "last_updated": "2026-02-03",
-    "version": "1.1",
+    "last_updated": "2026-02-11",
+    "version": "1.2",
     "corpus_integrated": true,
     "corpus_examples_count": {
       "fid": 15,
@@ -589,6 +589,58 @@
             "over_exposition": "I felt a sense of relief, and that relief spread through me.",
             "preferred": "Relief loosened my chest.",
             "reason": "Concrete effect, tighter cadence"
+          }
+        ]
+      }
+    },
+    "scene_profiles": {
+      "mmo_sns_online_chat": {
+        "enabled": true,
+        "applies_when": [
+          "MMO party or guild chat exchanges",
+          "SNS, DM, or text-message style back-and-forth",
+          "Modern romcom banter scenes driven by online culture"
+        ],
+        "primary_objective": "Tighter comedic timing, chat-like authenticity, and youthful voice.",
+        "timing_policy": {
+          "target": "Keep explanatory narration at least 50% leaner than dialogue-driven lines in chat-heavy sequences.",
+          "max_expository_lines_per_10_dialogue_lines": 5,
+          "enforcement": [
+            "Cut explanatory restatements when dialogue already carries the joke or intent",
+            "Prefer one-line reaction beats over multi-clause exposition in rapid exchanges",
+            "Keep turn-taking cadence short in MMO and SNS conversational segments"
+          ]
+        },
+        "voice_policy": {
+          "chat_authenticity": [
+            "Use concise, contemporary phrasing for banter",
+            "Keep gamer and social-media diction natural but controlled",
+            "Avoid stiff textbook connectors in fast dialogue turns"
+          ],
+          "youthful_voice_guardrails": [
+            "Prefer punchy verbs over abstract noun-heavy framing",
+            "Avoid over-formal narration during comedy beats"
+          ]
+        },
+        "emotional_pivot_preservation": {
+          "priority": "high",
+          "instruction": "Preserve Gemini's emotional-pivot strength by allowing slightly longer lines only at emotional turns, confessions, and vulnerability beats.",
+          "preserve": [
+            "emotional transitions",
+            "character sincerity",
+            "relationship stakes"
+          ]
+        },
+        "rewrite_examples": [
+          {
+            "over_exposition": "I explained what she meant in detail, and as a result the joke became clear.",
+            "preferred": "She said it. I got it. Too late.",
+            "reason": "Faster comedic timing and chat-like beat progression"
+          },
+          {
+            "over_flattened": "He typed okay and moved on.",
+            "preferred": "He typed 'ok'... then stared at the screen, jaw tight.",
+            "reason": "Keeps concise rhythm while preserving emotional pivot"
           }
         ]
       }

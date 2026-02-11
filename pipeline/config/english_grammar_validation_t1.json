@@ -328,9 +328,21 @@
             "I think I have": "I thought I had",
             "I feel I've": "I felt I had",
             "It feels like": "It felt like",
+            "it feels like there's": "it felt like there was",
+            "It feels like there's": "It felt like there was",
             "he still is": "he still was",
             "she still is": "she still was"
           },
+          "examples": [
+            {
+              "incorrect": "It feels like the former, but I also have a feeling that pointing it out would just make things complicated...",
+              "correct": "It felt like the former, but I also had a feeling that pointing it out would just make things complicated..."
+            },
+            {
+              "incorrect": "But with her by my side, it feels like there's nothing to fear.",
+              "correct": "But with her by my side, it felt like there was nothing to fear."
+            }
+          ],
           "severity": "high",
           "auto_fix_eligible": true,
           "confidence_threshold": 0.9
@@ -740,14 +752,70 @@
             }
           ],
           "review_required": true
+        },
+        {
+          "id": "chat_register_over_exposition_marker",
+          "pattern": "\\b(in other words|that means(?:\\s+that)?|to put it simply|which means(?:\\s+that)?)\\b",
+          "issue": "Explanatory connector markers can flatten MMO/SNS chat cadence",
+          "fix_suggestions": {
+            "default": "Delete explanation if context already implies it; keep a shorter reaction beat"
+          },
+          "examples": [
+            {
+              "original": "In other words, she was saying we had to party up because that means we'd win.",
+              "preferred": "So she wanted us to party up. We'd win."
+            }
+          ],
+          "review_required": true
+        },
+        {
+          "id": "chat_pacing_multi_clause_drag",
+          "pattern": "\\b(?:because|since)\\b[^.!?]{70,}\\b(?:therefore|as a result|which is why)\\b",
+          "issue": "Causal clause stacking slows comedic timing in dialogue-led scenes",
+          "fix_suggestions": {
+            "default": "Split into shorter lines and keep one causal link at most"
+          },
+          "examples": [
+            {
+              "original": "Because she hesitated for so long and I kept waiting in silence, as a result the whole mood went stale.",
+              "preferred": "She hesitated. I waited. The mood died."
+            }
+          ],
+          "review_required": true
         }
       ],
       "confidence_threshold": 0.78,
       "exceptions": [
         "Deliberate repetition for character voice in dialogue",
         "Intentional stammering, panic loops, or comedic timing",
-        "Rhetorical repetition used for dramatic emphasis in climactic beats"
-      ]
+        "Rhetorical repetition used for dramatic emphasis in climactic beats",
+        "Emotional pivot lines can run longer when preserving confessional sincerity or relational stakes"
+      ],
+      "subculture_profiles": {
+        "mmo_sns_online_chat": {
+          "enabled": true,
+          "applies_when": [
+            "MMO guild or party chat sections",
+            "SNS and message-style scene blocks",
+            "Modern romcom online-culture banter"
+          ],
+          "priority": "high",
+          "style_targets": {
+            "comedic_timing": "tight",
+            "chat_authenticity": "high",
+            "youthful_voice": "high"
+          },
+          "over_exposition_control": {
+            "target": "Explanatory narration should be at least 50% leaner than dialogue-driven lines in chat-heavy scenes.",
+            "max_expository_lines_per_10_dialogue_lines": 5
+          },
+          "preserve_strengths": [
+            "Gemini emotional pivots",
+            "vulnerability beats",
+            "relationship turn points"
+          ]
+        }
+      }
     }
   },
 

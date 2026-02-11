@@ -514,6 +514,9 @@ class MetadataProcessor:
             
             # Add timestamp
             existing_metadata_en["translation_timestamp"] = datetime.datetime.now().isoformat()
+            visual_backfilled = self._backfill_visual_identity_non_color(existing_metadata_en)
+            if visual_backfilled:
+                logger.info(f"   Visual identity backfilled: {visual_backfilled} profile(s)")
             
             self.manifest["metadata_en"] = existing_metadata_en
             
@@ -545,6 +548,9 @@ class MetadataProcessor:
                 "timestamp": datetime.datetime.now().isoformat(),
                 **(extra_fields or {})
             }
+            visual_backfilled = self._backfill_visual_identity_non_color(self.manifest["metadata_en"])
+            if visual_backfilled:
+                logger.info(f"   Visual identity backfilled: {visual_backfilled} profile(s)")
         
         # Also update chapter title_en in manifest chapters list
         for ch_manifest in self.manifest.get("chapters", []):
@@ -561,6 +567,44 @@ class MetadataProcessor:
             "timestamp": datetime.datetime.now().isoformat(),
             "schema_preserved": has_v3_schema
         }
+
+    def _backfill_visual_identity_non_color(self, metadata_block: Dict[str, Any]) -> int:
+        """
+        Ensure character_profiles include non-color visual identity payload.
+
+        This is additive-only and does not overwrite existing explicit values.
+        """
+        profiles = metadata_block.get("character_profiles", {})
+        if not isinstance(profiles, dict):
+            return 0
+
+        updated = 0
+        for _, profile in profiles.items():
+            if not isinstance(profile, dict):
+                continue
+
+            existing = profile.get("visual_identity_non_color")
+            has_existing = False
+            if isinstance(existing, dict):
+                has_existing = any(
+                    isinstance(v, str) and v.strip() or isinstance(v, list) and len(v) > 0
+                    for v in existing.values()
+                )
+            elif isinstance(existing, str):
+                has_existing = bool(existing.strip())
+            elif isinstance(existing, list):
+                has_existing = any(str(v).strip() for v in existing)
+            if has_existing:
+                continue
+
+            appearance = profile.get("appearance", "")
+            if isinstance(appearance, str) and appearance.strip():
+                profile["visual_identity_non_color"] = {
+                    "identity_summary": appearance.strip()
+                }
+                updated += 1
+
+        return updated
         
     def detect_sequel_parent(self) -> Optional[Dict]:
         """

@@ -1,0 +1,30 @@
+{
+  "bible_version": "1.0",
+  "series_id": "lv",
+  "series_title": {
+    "ja": "ネトゲの嫁は女の子じゃないと思った? Lv.",
+    "en": "And You Thought There Is Never a Girl Online?",
+    "romaji": ""
+  },
+  "created_at": "2026-02-11T04:25:26.556472+00:00",
+  "last_updated": "2026-02-11T04:25:26.560295+00:00",
+  "volumes_registered": [
+    {
+      "volume_id": "0116",
+      "title": "ネトゲの嫁は女の子じゃないと思った? Lv.2",
+      "index": 2
+    }
+  ],
+  "world_setting": {},
+  "characters": {},
+  "geography": {
+    "countries": {},
+    "regions": {},
+    "cities": {}
+  },
+  "weapons_artifacts": {},
+  "organizations": {},
+  "cultural_terms": {},
+  "mythology": {},
+  "translation_rules": {}
+}

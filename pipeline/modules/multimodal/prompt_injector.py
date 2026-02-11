@@ -34,6 +34,7 @@ class CanonNameEnforcer:
         self.manifest = manifest or {}
         self.canon_map: Dict[str, str] = {}  # Japanese → English
         self.nickname_map: Dict[str, str] = {}  # Japanese → Nickname
+        self.visual_identity_map: Dict[str, Dict[str, Any]] = {}  # Japanese → non-color visual identity
         self._load_canon_names()
     
     def _load_canon_names(self) -> None:
@@ -55,9 +56,79 @@ class CanonNameEnforcer:
                 self.canon_map[kanji_name] = full_name
             if nickname:
                 self.nickname_map[kanji_name] = nickname
+            visual_identity = self._normalize_visual_identity(
+                profile.get("visual_identity_non_color"),
+                profile.get("appearance", "")
+            )
+            if visual_identity:
+                self.visual_identity_map[kanji_name] = visual_identity
         
         if self.canon_map:
             logger.debug(f"[CANON] Loaded {len(self.canon_map)} character names")
+
+    @staticmethod
+    def _normalize_visual_identity(identity: Any, appearance: str = "") -> Dict[str, Any]:
+        """Normalize visual identity payload to a stable non-color dict shape."""
+        if isinstance(identity, str) and identity.strip():
+            return {"identity_summary": identity.strip()}
+        if isinstance(identity, list):
+            markers = [str(v).strip() for v in identity if str(v).strip()]
+            if markers:
+                return {"non_color_markers": markers[:8]}
+        if isinstance(identity, dict):
+            cleaned: Dict[str, Any] = {}
+            for key in (
+                "hairstyle",
+                "clothing_signature",
+                "expression_signature",
+                "posture_signature",
+                "accessory_signature",
+                "identity_summary",
+                "body_silhouette",
+                "non_color_markers",
+            ):
+                value = identity.get(key)
+                if isinstance(value, str) and value.strip():
+                    cleaned[key] = value.strip()
+                elif isinstance(value, list):
+                    values = [str(v).strip() for v in value if str(v).strip()]
+                    if values:
+                        cleaned[key] = values[:8]
+            if cleaned:
+                return cleaned
+        if isinstance(appearance, str) and appearance.strip():
+            return {"identity_summary": appearance.strip()}
+        return {}
+
+    @staticmethod
+    def _format_visual_identity_short(identity: Dict[str, Any]) -> str:
+        """Format non-color identity to one compact line for prompts."""
+        if not identity:
+            return ""
+        mapping = [
+            ("hair", "hairstyle"),
+            ("outfit", "clothing_signature"),
+            ("expr", "expression_signature"),
+            ("pose", "posture_signature"),
+            ("acc", "accessory_signature"),
+            ("id", "identity_summary"),
+        ]
+        chunks: List[str] = []
+        for label, key in mapping:
+            value = identity.get(key)
+            if isinstance(value, str) and value.strip():
+                chunks.append(f"{label}:{value.strip()}")
+            elif isinstance(value, list):
+                items = [str(v).strip() for v in value if str(v).strip()]
+                if items:
+                    chunks.append(f"{label}:{', '.join(items[:3])}")
+        if not chunks:
+            markers = identity.get("non_color_markers", [])
+            if isinstance(markers, list):
+                items = [str(v).strip() for v in markers if str(v).strip()]
+                if items:
+                    chunks.append("markers:" + ", ".join(items[:4]))
+        return " | ".join(chunks)[:220]
     
     def enforce_in_text(self, text: str) -> str:
         """Replace any Japanese character names with their English canon names."""
@@ -94,14 +165,100 @@ class CanonNameEnforcer:
         lines = ["=== CHARACTER NAME REFERENCE (Canon from Ruby Text) ==="]
         for jp_name, en_name in self.canon_map.items():
             nickname = self.nickname_map.get(jp_name, "")
+            visual_identity = self.visual_identity_map.get(jp_name, {})
+            visual_hint = self._format_visual_identity_short(visual_identity)
             if nickname and nickname != en_name:
                 lines.append(f"  {jp_name} → {en_name} (nickname: {nickname})")
             else:
                 lines.append(f"  {jp_name} → {en_name}")
+            if visual_hint:
+                lines.append(f"    non-color-id: {visual_hint}")
         lines.append("Use these canonical names consistently in all translations.")
         lines.append("=== END CHARACTER REFERENCE ===\n")
         
         return "\n".join(lines)
+
+
+def build_multimodal_identity_lock(
+    manifest: Optional[Dict[str, Any]],
+    max_characters: int = 24,
+    bible_characters: Optional[Dict[str, Any]] = None,
+) -> str:
+    """
+    Build identity lock block for multimodal analysis prompts.
+
+    Includes canonical real names and non-color visual markers to reduce
+    identity guessing in scene analysis.
+    """
+    if not manifest:
+        return ""
+
+    enforcer = CanonNameEnforcer(manifest)
+    identity_records: Dict[str, Dict[str, Any]] = {}
+
+    for jp_name, en_name in enforcer.canon_map.items():
+        identity_records[jp_name] = {
+            "canonical_name": en_name,
+            "nickname": enforcer.nickname_map.get(jp_name, ""),
+            "visual_identity": enforcer.visual_identity_map.get(jp_name, {}),
+        }
+
+    if isinstance(bible_characters, dict):
+        for jp_name, char_data in bible_characters.items():
+            if not isinstance(char_data, dict):
+                continue
+            canonical_name = str(char_data.get("canonical_en", "")).strip()
+            if not canonical_name:
+                continue
+            existing = identity_records.get(jp_name, {})
+            if not existing:
+                identity_records[jp_name] = {
+                    "canonical_name": canonical_name,
+                    "nickname": str(char_data.get("short_name", "")).strip(),
+                    "visual_identity": CanonNameEnforcer._normalize_visual_identity(
+                        char_data.get("visual_identity_non_color"), ""
+                    ),
+                }
+            else:
+                if not existing.get("nickname"):
+                    existing["nickname"] = str(char_data.get("short_name", "")).strip()
+                if not existing.get("visual_identity"):
+                    existing["visual_identity"] = CanonNameEnforcer._normalize_visual_identity(
+                        char_data.get("visual_identity_non_color"), ""
+                    )
+
+    if not identity_records:
+        return ""
+
+    lines = [
+        "=== CHARACTER IDENTITY LOCK (NON-COLOR) ===",
+        "Use this registry before any scene analysis.",
+        "If a visible character matches markers below, use canonical_en immediately.",
+        "Do NOT guess alternate names when a canonical match exists.",
+    ]
+
+    for i, (jp_name, record) in enumerate(identity_records.items()):
+        if i >= max_characters:
+            lines.append(f"... ({len(identity_records) - max_characters} more omitted)")
+            break
+        en_name = str(record.get("canonical_name", "")).strip()
+        if not en_name:
+            continue
+        nickname = str(record.get("nickname", "")).strip()
+        display = f"{en_name} [{jp_name}]"
+        if nickname and nickname != en_name:
+            display += f" / nickname={nickname}"
+        lines.append(f"- {display}")
+        visual_identity = record.get("visual_identity", {})
+        visual_hint = CanonNameEnforcer._format_visual_identity_short(visual_identity)
+        if visual_hint:
+            lines.append(f"  non-color-id: {visual_hint}")
+
+    lines.extend([
+        "If uncertain, mark as unresolved_character and continue scene analysis.",
+        "=== END IDENTITY LOCK ===",
+    ])
+    return "\n".join(lines)
 
 
 # Removed: Global _canon_enforcer state (hygiene pass)

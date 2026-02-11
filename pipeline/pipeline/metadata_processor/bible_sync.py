@@ -655,6 +655,45 @@ class BibleSyncAgent:
                     return jp
         return None
 
+    def _extract_visual_identity_non_color(self, profile_data: dict) -> Dict[str, Any]:
+        """Extract normalized non-color visual identity payload from a profile."""
+        identity = profile_data.get("visual_identity_non_color")
+
+        if isinstance(identity, str) and identity.strip():
+            return {"identity_summary": identity.strip()}
+
+        if isinstance(identity, list):
+            markers = [str(v).strip() for v in identity if str(v).strip()]
+            if markers:
+                return {"non_color_markers": markers[:8]}
+
+        if isinstance(identity, dict):
+            cleaned: Dict[str, Any] = {}
+            for key in (
+                "hairstyle",
+                "clothing_signature",
+                "expression_signature",
+                "posture_signature",
+                "accessory_signature",
+                "identity_summary",
+                "body_silhouette",
+                "non_color_markers",
+            ):
+                value = identity.get(key)
+                if isinstance(value, str) and value.strip():
+                    cleaned[key] = value.strip()
+                elif isinstance(value, list):
+                    items = [str(v).strip() for v in value if str(v).strip()]
+                    if items:
+                        cleaned[key] = items[:8]
+            if cleaned:
+                return cleaned
+
+        appearance = profile_data.get("appearance")
+        if isinstance(appearance, str) and appearance.strip():
+            return {"identity_summary": appearance.strip()}
+        return {}
+
     def _extract_enrichments(self, profile_data: dict) -> Dict[str, Any]:
         """Extract enrichable fields from a character profile."""
         enrichments: Dict[str, Any] = {}
@@ -669,6 +708,9 @@ class BibleSyncAgent:
             profile_data['keigo_switch'], dict
         ):
             enrichments['keigo'] = profile_data['keigo_switch']
+        visual_identity = self._extract_visual_identity_non_color(profile_data)
+        if visual_identity:
+            enrichments['visual_identity_non_color'] = visual_identity
 
         # Build notes from personality_traits
         traits = profile_data.get('personality_traits', [])

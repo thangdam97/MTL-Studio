@@ -46,6 +46,10 @@ Provide a structured analysis as JSON:
    should use this visual context to enhance the translated prose
 5. "spoiler_prevention": Object with "do_not_reveal_before_text" array listing
    plot details visible in the image that the text hasn't confirmed yet
+6. "identity_resolution": Object with:
+   - "recognized_characters": array of objects:
+       {"canonical_name": "...", "japanese_name": "...", "non_color_evidence": ["..."]}
+   - "unresolved_characters": array of brief descriptors if identity remains uncertain
 
 Output ONLY the JSON object. No commentary or explanation.
 """
@@ -81,10 +85,90 @@ class VisualAssetProcessor:
         # Initialize components
         self.cache_manager = VisualCacheManager(volume_path)
         self.thought_logger = ThoughtLogger(volume_path)
-        self.analysis_prompt = VISUAL_ANALYSIS_PROMPT
+        self.identity_lock_status: Dict[str, Any] = {
+            "enabled": False,
+            "manifest_canon": 0,
+            "bible_canon": 0,
+        }
+        self.analysis_prompt = self._build_analysis_prompt()
 
         # Deferred Gemini client initialization
         self._genai_client = None
+
+    def _build_analysis_prompt(self) -> str:
+        """
+        Build visual analysis prompt with identity lock context.
+
+        Identity lock uses canon real names + non-color visual markers so the
+        vision model resolves character identity before scene analysis.
+        """
+        base_prompt = VISUAL_ANALYSIS_PROMPT.strip()
+        try:
+            from modules.multimodal.prompt_injector import build_multimodal_identity_lock
+
+            manifest = self.cache_manager.get_manifest()
+            bible_characters = self._load_bible_characters(manifest)
+            metadata_en = manifest.get("metadata_en", {}) if isinstance(manifest, dict) else {}
+            profiles = metadata_en.get("character_profiles", {}) if isinstance(metadata_en, dict) else {}
+            manifest_canon = 0
+            if isinstance(profiles, dict):
+                manifest_canon = sum(
+                    1 for p in profiles.values()
+                    if isinstance(p, dict) and str(p.get("full_name", "")).strip()
+                )
+            bible_canon = 0
+            if isinstance(bible_characters, dict):
+                bible_canon = sum(
+                    1 for p in bible_characters.values()
+                    if isinstance(p, dict) and str(p.get("canonical_en", "")).strip()
+                )
+            identity_lock = build_multimodal_identity_lock(
+                manifest, bible_characters=bible_characters
+            )
+            if identity_lock:
+                self.identity_lock_status = {
+                    "enabled": True,
+                    "manifest_canon": manifest_canon,
+                    "bible_canon": bible_canon,
+                }
+                return (
+                    f"{base_prompt}\n\n"
+                    f"{identity_lock}\n\n"
+                    "IDENTITY RESOLUTION RULES:\n"
+                    "- Resolve identity with canonical names above before prose directives.\n"
+                    "- Prioritize non-color markers (hairstyle, outfit silhouette, expression, posture, accessories).\n"
+                    "- Do not invent alternate names if a canonical match exists.\n"
+                    "- If uncertain, report unresolved descriptors and continue scene analysis.\n"
+                )
+        except Exception as e:
+            logger.debug(f"[PHASE 1.6] Identity lock prompt build skipped: {e}")
+        self.identity_lock_status = {
+            "enabled": False,
+            "manifest_canon": 0,
+            "bible_canon": 0,
+        }
+        return base_prompt
+
+    def _load_bible_characters(self, manifest: Dict[str, Any]) -> Dict[str, Any]:
+        """Load character registry from linked series bible (if available)."""
+        if not isinstance(manifest, dict):
+            return {}
+        bible_id = str(manifest.get("bible_id", "")).strip()
+        if not bible_id:
+            return {}
+        try:
+            from pipeline.config import PIPELINE_ROOT
+            from pipeline.translator.series_bible import BibleController
+
+            ctrl = BibleController(PIPELINE_ROOT)
+            bible = ctrl.get_bible(bible_id)
+            if bible:
+                chars = bible.get_all_characters()
+                if isinstance(chars, dict):
+                    return chars
+        except Exception as e:
+            logger.debug(f"[PHASE 1.6] Could not load bible identities: {e}")
+        return {}
 
     @property
     def genai_client(self):
@@ -199,6 +283,14 @@ class VisualAssetProcessor:
             return {"total": 0, "cached": 0, "generated": 0, "blocked": 0}
 
         logger.info(f"[PHASE 1.6] Found {len(illustrations)} illustrations to process")
+        if self.identity_lock_status.get("enabled"):
+            logger.info(
+                "[PHASE 1.6] Identity lock active BEFORE analysis: "
+                f"manifest canon={self.identity_lock_status.get('manifest_canon', 0)}, "
+                f"bible canon={self.identity_lock_status.get('bible_canon', 0)}"
+            )
+        else:
+            logger.warning("[PHASE 1.6] Identity lock unavailable before analysis (base prompt fallback)")
         stats = {"total": len(illustrations), "cached": 0, "generated": 0, "blocked": 0}
 
         for img_path in illustrations:
@@ -240,6 +332,7 @@ class VisualAssetProcessor:
                     "thinking_level": self.thinking_level,
                     "visual_ground_truth": analysis.get("visual_ground_truth", {}),
                     "spoiler_prevention": analysis.get("spoiler_prevention", {}),
+                    "identity_resolution": analysis.get("identity_resolution", {}),
                 })
 
                 # Log thoughts
@@ -320,7 +413,10 @@ class VisualAssetProcessor:
             self.cache_manager.cache = updated_cache
             self.cache_manager.save_cache()
             
-            logger.info(f"[PHASE 1.6] Canon names injected from {len(profiles)} character profiles")
+            logger.info(
+                f"[PHASE 1.6] Post-analysis canon reconciliation applied "
+                f"from {len(profiles)} character profiles"
+            )
             
         except Exception as e:
             logger.warning(f"[PHASE 1.6] Failed to inject canon names: {e}")

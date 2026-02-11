@@ -2130,6 +2130,35 @@ class PromptLoader:
                     lines.append(f"- {exc}")
                 lines.append("")
 
+            # Genre/subculture profile: MMO/SNS/online chat rhythm policy
+            subculture_profiles = rhythm.get('subculture_profiles', {})
+            mmo_profile = subculture_profiles.get('mmo_sns_online_chat', {})
+            if mmo_profile and mmo_profile.get('enabled'):
+                lines.append("### MMO/SNS/Online-Chat Scene Profile")
+                priority = mmo_profile.get('priority', '')
+                if priority:
+                    lines.append(f"- Priority: {priority}")
+                style_targets = mmo_profile.get('style_targets', {})
+                if style_targets:
+                    lines.append(
+                        "- Style targets: "
+                        f"comedic_timing={style_targets.get('comedic_timing', 'tight')}, "
+                        f"chat_authenticity={style_targets.get('chat_authenticity', 'high')}, "
+                        f"youthful_voice={style_targets.get('youthful_voice', 'high')}"
+                    )
+                over_exposition = mmo_profile.get('over_exposition_control', {})
+                if over_exposition:
+                    target = over_exposition.get('target', '')
+                    if target:
+                        lines.append(f"- Over-exposition control: {target}")
+                    ratio_cap = over_exposition.get('max_expository_lines_per_10_dialogue_lines')
+                    if ratio_cap is not None:
+                        lines.append(f"- Cap guidance: <= {ratio_cap} expository lines per 10 dialogue lines")
+                preserve_strengths = mmo_profile.get('preserve_strengths', [])
+                if preserve_strengths:
+                    lines.append(f"- Preserve strengths: {', '.join(preserve_strengths[:3])}")
+                lines.append("")
+
         lines.append("## 🔗 INTERLOCK WITH LITERACY TECHNIQUES")
         lines.append("- Use `literacy_techniques.rhythm_first_prose_enforcement` as primary style intent.")
         lines.append("- Use this module's rule IDs as concrete rewrite triggers during drafting.")
@@ -2537,6 +2566,39 @@ class PromptLoader:
                     lines.append(f"- Must preserve: {', '.join(must_preserve)}")
                 lines.append("")
 
+            # Scene profile: MMO/SNS/online chat subculture
+            scene_profiles = rhythm_first.get('scene_profiles', {})
+            mmo_scene = scene_profiles.get('mmo_sns_online_chat', {})
+            if mmo_scene and mmo_scene.get('enabled'):
+                lines.append("### MMO/SNS/Online-Chat Rhythm Profile")
+                objective = mmo_scene.get('primary_objective', '')
+                if objective:
+                    lines.append(f"- Objective: {objective}")
+                timing_policy = mmo_scene.get('timing_policy', {})
+                if timing_policy:
+                    target = timing_policy.get('target', '')
+                    if target:
+                        lines.append(f"- Timing policy: {target}")
+                    ratio_cap = timing_policy.get('max_expository_lines_per_10_dialogue_lines')
+                    if ratio_cap is not None:
+                        lines.append(f"- Cap guidance: <= {ratio_cap} expository lines per 10 dialogue lines")
+                    for rule in timing_policy.get('enforcement', [])[:3]:
+                        lines.append(f"- {rule}")
+                emotional_pivot = mmo_scene.get('emotional_pivot_preservation', {})
+                if emotional_pivot:
+                    pivot_instruction = emotional_pivot.get('instruction', '')
+                    if pivot_instruction:
+                        lines.append(f"- Emotional pivot rule: {pivot_instruction}")
+                rewrite_examples = mmo_scene.get('rewrite_examples', [])
+                if rewrite_examples:
+                    ex = rewrite_examples[0]
+                    original = ex.get('over_exposition') or ex.get('over_flattened')
+                    preferred = ex.get('preferred', '')
+                    if original and preferred:
+                        lines.append(f"  ❌ {original}")
+                        lines.append(f"  ✅ {preferred}")
+                lines.append("")
+
         # Cross-module interlock with english_grammar_validation_t1.json (EN only)
         if english_validation_t1_data:
             validation_categories = english_validation_t1_data.get('validation_categories', {})
@@ -2558,6 +2620,18 @@ class PromptLoader:
                     lines.append("**Rhythm/Emphasis Triggers:**")
                     for pattern in rhythm_patterns[:4]:
                         lines.append(f"- {pattern.get('id', '')}: {pattern.get('issue', '')}")
+                    lines.append("")
+
+                mmo_profile = rhythm_rules.get('subculture_profiles', {}).get('mmo_sns_online_chat', {})
+                if mmo_profile and mmo_profile.get('enabled'):
+                    lines.append("**MMO/SNS Profile Interlock:**")
+                    over_exposition = mmo_profile.get('over_exposition_control', {})
+                    target = over_exposition.get('target', '')
+                    if target:
+                        lines.append(f"- {target}")
+                    preserve_strengths = mmo_profile.get('preserve_strengths', [])
+                    if preserve_strengths:
+                        lines.append(f"- Preserve: {', '.join(preserve_strengths[:3])}")
                     lines.append("")
 
                 lines.append("**Execution Rule:** Keep meaning and voice, then prefer the tightest natural cadence.\n")

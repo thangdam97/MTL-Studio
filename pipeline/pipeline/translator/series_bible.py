@@ -216,6 +216,75 @@ class SeriesBible:
         """Return world_setting block with honorific/name-order rules."""
         return self.world_setting
 
+    @staticmethod
+    def _compact_visual_value(value: Any) -> str:
+        """Compact visual identity values into a single prompt-safe string."""
+        if isinstance(value, str):
+            return value.strip()
+        if isinstance(value, list):
+            parts = [str(v).strip() for v in value if str(v).strip()]
+            return ", ".join(parts[:4])
+        if isinstance(value, dict):
+            parts: List[str] = []
+            for key in (
+                "hairstyle",
+                "clothing_signature",
+                "expression_signature",
+                "posture_signature",
+                "accessory_signature",
+                "identity_summary",
+            ):
+                v = value.get(key)
+                text = SeriesBible._compact_visual_value(v)
+                if text:
+                    parts.append(f"{key}={text}")
+            return " | ".join(parts[:4])
+        return ""
+
+    @staticmethod
+    def _format_visual_identity_for_prompt(char_data: Dict[str, Any]) -> str:
+        """
+        Format non-color visual identity for compact Bible prompt injection.
+
+        Expected source field:
+            character.visual_identity_non_color (dict/list/str)
+        """
+        identity = char_data.get("visual_identity_non_color")
+        if not identity:
+            return ""
+
+        if isinstance(identity, str):
+            text = identity.strip()
+            return text[:180] if text else ""
+
+        if isinstance(identity, list):
+            parts = [str(v).strip() for v in identity if str(v).strip()]
+            if not parts:
+                return ""
+            return ", ".join(parts[:4])[:180]
+
+        if isinstance(identity, dict):
+            mapping = [
+                ("hair", "hairstyle"),
+                ("outfit", "clothing_signature"),
+                ("expr", "expression_signature"),
+                ("pose", "posture_signature"),
+                ("acc", "accessory_signature"),
+                ("id", "identity_summary"),
+            ]
+            chunks: List[str] = []
+            for label, key in mapping:
+                text = SeriesBible._compact_visual_value(identity.get(key))
+                if text:
+                    chunks.append(f"{label}:{text}")
+            if not chunks and isinstance(identity.get("non_color_markers"), list):
+                markers = [str(v).strip() for v in identity["non_color_markers"] if str(v).strip()]
+                if markers:
+                    chunks.append("markers:" + ", ".join(markers[:4]))
+            return " | ".join(chunks)[:220]
+
+        return ""
+
     # ── Prompt Formatting ────────────────────────────────────────
 
     def format_for_prompt(self) -> str:
@@ -287,7 +356,9 @@ class SeriesBible:
                 suffix = f" ({short})" if short and short != en else ""
                 cat = char_data.get('category', '')
                 cat_tag = f" [{cat}]" if cat else ""
-                lines.append(f"  {jp_name} = {en}{suffix}{cat_tag}")
+                visual_tag = self._format_visual_identity_for_prompt(char_data)
+                visual_suffix = f" | visual-id: {visual_tag}" if visual_tag else ""
+                lines.append(f"  {jp_name} = {en}{suffix}{cat_tag}{visual_suffix}")
             lines.append("")
 
         # Geography
@@ -760,6 +831,49 @@ class BibleController:
                 return sid
         return None
 
+    @staticmethod
+    def _extract_visual_identity_non_color(profile_data: Dict[str, Any]) -> Dict[str, Any]:
+        """
+        Extract/normalize non-color visual identity payload from character profile.
+
+        Source preference:
+          1) profile.visual_identity_non_color (already structured)
+          2) profile.appearance (fallback summary seed)
+        """
+        identity = profile_data.get("visual_identity_non_color")
+        if isinstance(identity, str) and identity.strip():
+            return {"identity_summary": identity.strip()}
+        if isinstance(identity, list):
+            markers = [str(v).strip() for v in identity if str(v).strip()]
+            if markers:
+                return {"non_color_markers": markers[:8]}
+        if isinstance(identity, dict):
+            cleaned: Dict[str, Any] = {}
+            for key in (
+                "hairstyle",
+                "clothing_signature",
+                "expression_signature",
+                "posture_signature",
+                "accessory_signature",
+                "identity_summary",
+                "body_silhouette",
+                "non_color_markers",
+            ):
+                value = identity.get(key)
+                if isinstance(value, str) and value.strip():
+                    cleaned[key] = value.strip()
+                elif isinstance(value, list):
+                    items = [str(v).strip() for v in value if str(v).strip()]
+                    if items:
+                        cleaned[key] = items[:8]
+            if cleaned:
+                return cleaned
+
+        appearance = profile_data.get("appearance")
+        if isinstance(appearance, str) and appearance.strip():
+            return {"identity_summary": appearance.strip()}
+        return {}
+
     # ── Import from Manifest ─────────────────────────────────────
 
     def import_from_manifest(
@@ -839,6 +953,9 @@ class BibleController:
                     enrichments['category'] = profile_data['relationship_to_protagonist']
                 if profile_data.get('origin'):
                     enrichments['affiliation'] = profile_data['origin']
+                visual_identity = self._extract_visual_identity_non_color(profile_data)
+                if visual_identity:
+                    enrichments['visual_identity_non_color'] = visual_identity
 
                 # Build notes from personality/traits
                 notes_parts = []

@@ -2,7 +2,7 @@
 
 **Machine Translation Publishing Pipeline for Japanese Light Novels**
 
-Version 5.1 | Production Ready | February 2026
+Version 5.2 | Production Ready | February 2026
 
 > Multi-Language Support: English & Vietnamese | Multimodal Vision + Vector Search | Smart Chunking + Volume Cache | Glossary Lock + Truncation Guardrails
 
@@ -179,7 +179,7 @@ flowchart TB
     - [Architecture: BibleController + SeriesBible](#architecture-biblecontroller--seriesbible)
     - [Bible Auto-Sync in Phase 1.5](#bible-auto-sync-in-phase-15)
     - [World Setting Directive System](#world-setting-directive-system)
-5. [What's New in V5.1](#whats-new-in-v51-current-release)
+5. [What's New in V5.2](#whats-new-in-v52-current-release)
 6. [System Architecture](#system-architecture)
 7. [Pipeline Phases](#pipeline-phases)
 8. [Installation](#installation)
@@ -207,9 +207,9 @@ flowchart TB
 
 MTL Studio is a complete automated pipeline for translating Japanese Light Novel EPUBs to professional multi-language editions. The system leverages Google Gemini AI (2.5 Pro/Flash) with retrieval-augmented generation (RAG) to produce publication-quality translations with consistent character voices, proper typography, and accurate terminology.
 
-### V5.1: Three-Pillar Intelligence
+### V5.2: Three-Pillar Intelligence
 
-V5.1 (February 2026) introduces a **Three-Pillar Translation Architecture** that elevates machine translation from text-only analysis to true multimodal contextual understanding:
+V5.2 (February 2026) introduces a **Three-Pillar Translation Architecture** that elevates machine translation from text-only analysis to true multimodal contextual understanding:
 
 | Pillar | Technology | Role |
 |--------|-----------|------|
@@ -225,10 +225,10 @@ V5.1 (February 2026) introduces a **Three-Pillar Translation Architecture** that
 
 - **Single-command production flow**: `mtl.py run <epub>` executes extraction, metadata translation, multimodal analysis, translation, and EPUB build in sequence.
 - **Modular phase control**: Each stage can run independently (`phase1`, `phase1.5`, `phase1.6`, `phase2`, `phase3`, `phase4`) for iterative workflows and targeted retries.
-- **Backward-compatible operation**: Legacy paths remain supported while v5.1 behavior is standardized around the Three-Pillar architecture.
+- **Backward-compatible operation**: Legacy paths remain supported while v5.2 behavior is standardized around the Three-Pillar architecture.
 - **Manifest-driven state tracking**: `manifest.json` stores pipeline state, chapter status, language outputs, and audit metadata for resumable execution.
 
-#### 2) Three-Pillar Translation Intelligence (v5.1 Core)
+#### 2) Three-Pillar Translation Intelligence (v5.2 Core)
 
 - **RAG + Vector + Multimodal fusion**: Translator prompts combine knowledge-base context, semantic grammar guidance, and optional Art Director notes in one decision frame.
 - **Gemini Embedding semantic matching**: `gemini-embedding-001` (3072D) maps Japanese structures to natural target phrasing using confidence-gated ChromaDB retrieval.
@@ -260,7 +260,7 @@ V5.1 (February 2026) introduces a **Three-Pillar Translation Architecture** that
 - **Echo/proximity detection**: Cluster-level repetition detection reduces local stylistic redundancy and preserves prose variation.
 - **Post-processing hardening**: Format normalization, typography cleanup, and quality audit integration run at translation completion.
 
-#### 6) Modern v5.1 CLI Operations and UX
+#### 6) Modern v5.2 CLI Operations and UX
 
 - **Command-complete operational surface**: `run`, `phase*`, `multimodal`, `cleanup`, `cjk-clean`, `heal`, `cache-inspect`, `visual-thinking`, `status`, `list`, `config`, `metadata`, `schema`.
 - **Interactive volume resolution**: Partial IDs and ambiguity handling with phase-aware selection menus.
@@ -292,7 +292,7 @@ V5.1 (February 2026) introduces a **Three-Pillar Translation Architecture** that
 | Character Voice | FFXVI-Tier | Distinct speech patterns per archetype |
 | Gap Moe Accuracy | 90%+ | Behavioral transition detection and preservation |
 
-**V4.5 Milestone:** MTL Studio achieves higher source fidelity (+2.75 points) than professional publications while matching editorial quality in single automated pass.
+**V5.2 Milestone:** MTL Studio achieves higher source fidelity (+2.75 points) than professional publications while matching editorial quality in single automated pass.
 
 ---
 
@@ -972,7 +972,7 @@ When the translator saves its THINKING log, it includes the Art Director's visua
 - Over-polishing: Teenage male narrator sounds too literary vs 俺 casual tone
 - Cultural westernization: Economic pressure to remove "friction points" for bookstores
 
-**MTL Studio v4.5 Advantage**: No westernization pressure → preserves author's original intent with higher accuracy than traditional editorial pipelines.
+**MTL Studio v5.2 Advantage**: No westernization pressure → preserves author's original intent with higher accuracy than traditional editorial pipelines.
 
 ---
 
@@ -1338,17 +1338,17 @@ Lord Marksman and Vanadis was chosen as the reference series because it exercise
 
 ---
 
-## What's New in V5.1 (Current Release)
+## What's New in V5.2 (Current Release)
 
 This section uses the same capability taxonomy as **Core Capabilities** so the release deltas are easy to map to operational behavior.
 
 ### 1) Full Pipeline Orchestration (Phase 1 → 1.5 → 1.6 → 2 → 3 → 4)
 
-- **Phase model standardized around v5.1**: The production workflow is explicitly structured as Librarian → Schema Agent Autoupdate → Metadata → Art Director → Translator → Critics → Builder.
+- **Phase model standardized around v5.2**: The production workflow is explicitly structured as Librarian → Schema Agent Autoupdate → Metadata → Art Director → Translator → Critics → Builder.
 - **Builder/navigation hardening**: Chapters marked `is_pre_toc_content: true` are excluded from reader navigation generation (`nav.xhtml`) for publisher-correct frontmatter handling.
 - **Image mapping continuity**: Source image naming and normalized image IDs are tracked in manifest-level mapping for reliable downstream packaging.
 
-### 2) Three-Pillar Translation Intelligence (v5.1 Core)
+### 2) Three-Pillar Translation Intelligence (v5.2 Core)
 
 - **Gap Moe semantic layer added**: Behavioral transitions (cute→scary, sweet→interrogation, warmth shifts) are explicitly detected and preserved in translation decisions.
 - **Dual-voice awareness**: Characters with contrasting personas are flagged so tonal flips remain intentional instead of being flattened.
@@ -1383,9 +1383,9 @@ This section uses the same capability taxonomy as **Core Capabilities** so the r
 - **Enhanced structural QA**: Publisher structure validation, image reference integrity, and pre-TOC exclusion checks are included as explicit gates.
 - **Expanded metric surface**: Gap Moe accuracy, transcreation coverage, image mapping integrity, and pre-TOC detection rate are now tracked.
 
-### 6) Modern v5.1 CLI Operations and UX
+### 6) Modern v5.2 CLI Operations and UX
 
-- **Operational command surface unified**: v5.1 documentation and command semantics now align with the full CLI set and phase model.
+- **Operational command surface unified**: v5.2 documentation and command semantics now align with the full CLI set and phase model.
 - **Modern UI mode baseline (v1.1)**: Rich panels, status bars, and live progress tracking complement legacy plain mode for deterministic scriptability.
 - **IDE-centric review loop**: VSCode/Windsurf/Cursor-friendly external agent workflows are treated as first-class QC execution paths.
 - **Config toggles for non-menu workflows**:
@@ -2601,9 +2601,9 @@ gemini -s AUDIT_AGENT.md 'Insert illust-005.jpg in Chapter 3 before "Maria stepp
 
 DISCLAIMER: We cannot distribute copyrighted material. The above link is for internal benchmarking only.
 
-**February 4, 2026** - MTL Studio v4.5 becomes the first automated translation system to achieve **source fidelity parity with professional publications** (95.75/100 vs 93.00/100) while matching editorial quality (93/100) in a **single automated pass** + cleanup.
+**February 4, 2026** - MTL Studio v5.2 becomes the first automated translation system to achieve **source fidelity parity with professional publications** (95.75/100 vs 93.00/100) while matching editorial quality (93/100) in a **single automated pass** + cleanup.
 
-**Benchmark Validation**: Comprehensive analysis of 10,923 lines comparing MTL Studio v4.5 against Yen Press professional publication of *Days with My Stepsister* (義妹生活) demonstrates:
+**Benchmark Validation**: Comprehensive analysis of 10,923 lines comparing MTL Studio v5.2 against Yen Press professional publication of *Days with My Stepsister* (義妹生活) demonstrates:
 - **+2.75 points higher source fidelity** (95.75 vs 93.00)
 - **Cultural authenticity superiority:** +10.5 points (97.5 vs 87.0)
 - **Character voice accuracy:** +2.6 points (95.8 vs 93.2)
@@ -2656,7 +2656,7 @@ character_profiles:
 ```
 **Impact**: Systematic speech differentiation maintained across all chapters (Yuuta's "let me tell you" directness vs Saki's minimalist "...ありがと"), perfect honorific relationship encoding (100% retention = future narrative payoff intact).
 
-**Combined Result**: The three pillars enable MTL Studio v4.5 to make **editorial-level decisions** previously requiring human judgment:
+**Combined Result**: The three pillars enable MTL Studio v5.2 to make **editorial-level decisions** previously requiring human judgment:
 - Rhetorical emphasis (em-dash vs colon)
 - Genre-appropriate verbosity (日常系 overthinking)
 - Character-specific humor preservation
@@ -3210,7 +3210,7 @@ See LICENSE.txt for licensing information.
 
 ## Changelog
 
-### Version 5.1 (February 2026)
+### Version 5.2 (February 2026)
 - **Three-Pillar Translation Architecture**: Unified RAG + Vector Search + Multimodal Vision workflow
 - **Gemini Embedding Vector Search**: Semantic grammar matching pipeline with confidence-gated injection and auto-rebuild
 - **Phase 1.6 Multimodal Processor**: Gemini 3 Pro Vision Art Director's Notes with hash-based visual cache invalidation
@@ -3301,4 +3301,4 @@ See LICENSE.txt for licensing information.
 
 ---
 
-Version 5.1 | February 2026
+Version 5.2 | February 2026

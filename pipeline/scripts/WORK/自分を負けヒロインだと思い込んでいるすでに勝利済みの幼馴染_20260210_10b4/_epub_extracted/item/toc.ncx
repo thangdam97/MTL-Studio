@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ncx xmlns="http://www.daisy.org/z3986/2005/ncx/" version="2005-1">
+    <head><meta name="dtb:uid" content="350618f2-8ca7-47ac-a338-81acaed62fb6"/></head>
+    <docTitle><text>自分を負けヒロインだと思い込んでいるすでに勝利済みの幼馴染</text></docTitle>
+    <navMap>
+        <navPoint>
+            <navLabel><text>表紙</text></navLabel>
+            <content src="xhtml/p-cover.xhtml"/>
+        </navPoint>
+        <navPoint>
+            <navLabel><text>目次</text></navLabel>
+            <content src="xhtml/p-toc.xhtml"/>
+        </navPoint>
+        <navPoint>
+            <navLabel><text>第一章　一人ラブコメレース（二週目）開幕編</text></navLabel>
+            <content src="xhtml/p-007.xhtml#toc-001"/>
+        </navPoint>
+        <navPoint>
+            <navLabel><text>第二章　ファーストキスは譲らない！編</text></navLabel>
+            <content src="xhtml/p-010.xhtml#toc-002"/>
+        </navPoint>
+        <navPoint>
+            <navLabel><text>第三章　公衆面前ラブラブ二人三脚ダービー編</text></navLabel>
+            <content src="xhtml/p-014.xhtml#toc-003"/>
+        </navPoint>
+        <navPoint>
+            <navLabel><text>第四章　ダブルイチャイチャ誕生日　デート編</text></navLabel>
+            <content src="xhtml/p-017.xhtml#toc-004"/>
+        </navPoint>
+        <navPoint>
+            <navLabel><text>第五章　ダブルイチャイチャ誕生日　お泊まり編</text></navLabel>
+            <content src="xhtml/p-020.xhtml#toc-005"/>
+        </navPoint>
+        <navPoint>
+            <navLabel><text>第六章　花火より幼馴染編</text></navLabel>
+            <content src="xhtml/p-025.xhtml#toc-006"/>
+        </navPoint>
+        <navPoint>
+            <navLabel><text>おまけ　プールでいちゃいちゃ</text></navLabel>
+            <content src="xhtml/p-031.xhtml#toc-007"/>
+        </navPoint>
+        <navPoint>
+            <navLabel><text>奥付</text></navLabel>
+            <content src="xhtml/p-colophon.xhtml"/>
+        </navPoint>
+    </navMap>
+</ncx>

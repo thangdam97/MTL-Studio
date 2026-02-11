@@ -1,0 +1,884 @@
+{
+  "version": "1.0",
+  "volume_id": "自分を負けヒロインだと思い込んでいるすでに勝利済みの幼馴染_20260210_10b4",
+  "created_at": "2026-02-10T16:46:52.233057",
+  "metadata": {
+    "title": "自分を負けヒロインだと思い込んでいるすでに勝利済みの幼馴染",
+    "title_sort": "自分を負けヒロインだと思い込んでいるすでに勝利済みの幼馴染",
+    "author": "桜木桜",
+    "author_sort": "桜木桜",
+    "publisher": "SBクリエイティブ株式会社",
+    "source_language": "ja",
+    "target_language": "en",
+    "page_progression_direction": "rtl",
+    "isbn": "",
+    "series": "",
+    "series_index": null,
+    "source_epub": "/Users/damminhthang/Documents/WORK/AI_MODULES/MTL_STUDIO/pipeline/INPUT/自分を負けヒロインだと思い込んでいるすでに勝利済みの幼馴染.epub"
+  },
+  "metadata_en": {
+    "character_profiles": {
+      "Unknown": {
+        "full_name": "",
+        "nickname": "",
+        "age": "",
+        "pronouns": "they/them",
+        "origin": "Japanese",
+        "relationship_to_protagonist": "",
+        "relationship_to_others": "",
+        "personality_traits": "",
+        "speech_pattern": "[TO BE FILLED - describe character's speaking style]",
+        "keigo_switch": {
+          "narration": "casual",
+          "internal_thoughts": "casual",
+          "speaking_to": {},
+          "emotional_shifts": {},
+          "notes": "[TO BE FILLED - context-dependent register notes]"
+        },
+        "key_traits": "",
+        "appearance": "",
+        "character_arc": "",
+        "ruby_base": "",
+        "ruby_reading": "",
+        "occurrences": 0
+      }
+    },
+    "localization_notes": {
+      "british_speech_exception": {
+        "character": "[IDENTIFY BRITISH CHARACTER IF ANY]",
+        "allowed_patterns": [
+          "do not",
+          "cannot",
+          "will not",
+          "I am",
+          "it is",
+          "I have",
+          "one must",
+          "shall"
+        ],
+        "rationale": "British characters maintain formal register as authentic voice",
+        "examples": []
+      },
+      "all_other_characters": {
+        "priority": "SHORT, CONCISE, CONTEMPORARY GRAMMAR",
+        "narrator_voice": "[PROTAGONIST NAME] - Contemporary teen voice",
+        "forbidden_patterns": [
+          "cannot",
+          "do not",
+          "does not",
+          "will not",
+          "would not",
+          "I am",
+          "it is",
+          "there is"
+        ],
+        "preferred_alternatives": {
+          "cannot": "can't",
+          "do not": "don't",
+          "does not": "doesn't",
+          "will not": "won't",
+          "would not": "wouldn't",
+          "I am": "I'm",
+          "it is": "it's",
+          "there is": "there's",
+          "that is": "that's",
+          "I have": "I've",
+          "I will": "I'll",
+          "I would": "I'd",
+          "we are": "we're",
+          "they are": "they're",
+          "he is": "he's",
+          "she is": "she's"
+        },
+        "target_metrics": {
+          "contraction_rate": ">95%",
+          "ai_ism_density": "<0.3 per 1000 words",
+          "sentence_length": "Short and punchy for dialogue",
+          "vocabulary": "Contemporary American teen"
+        }
+      },
+      "name_order": {
+        "western_characters": {
+          "order": "First name first (Western order)",
+          "characters": [],
+          "examples": []
+        },
+        "japanese_characters": {
+          "order": "Family name first (Japanese order)",
+          "characters": [],
+          "examples": []
+        }
+      },
+      "dialogue_guidelines": {
+        "internal_monologue": "Use contractions, casual tone",
+        "formal_speech": "Reserve for British/formal characters only",
+        "casual_speech": "Natural American teen dialogue"
+      },
+      "volume_specific_notes": {}
+    },
+    "chapters": {
+      "chapter_01": {
+        "title_jp": "第一章　一人ラブコメレース（二週目）開幕編",
+        "title_en": [
+          "[TO BE FILLED]"
+        ],
+        "pov_tracking": [
+          {
+            "character": "[TO BE DETERMINED]",
+            "start_line": 1,
+            "end_line": null,
+            "context": "Full chapter - update if POV shifts occur"
+          }
+        ],
+        "setting": "",
+        "themes": [],
+        "key_events": [],
+        "notes": ""
+      },
+      "chapter_02": {
+        "title_jp": "第二章　ファーストキスは譲らない！編",
+        "title_en": [
+          "[TO BE FILLED]"
+        ],
+        "pov_tracking": [
+          {
+            "character": "[TO BE DETERMINED]",
+            "start_line": 1,
+            "end_line": null,
+            "context": "Full chapter - update if POV shifts occur"
+          }
+        ],
+        "setting": "",
+        "themes": [],
+        "key_events": [],
+        "notes": ""
+      },
+      "chapter_03": {
+        "title_jp": "第三章　公衆面前ラブラブ二人三脚ダービー編",
+        "title_en": [
+          "[TO BE FILLED]"
+        ],
+        "pov_tracking": [
+          {
+            "character": "[TO BE DETERMINED]",
+            "start_line": 1,
+            "end_line": null,
+            "context": "Full chapter - update if POV shifts occur"
+          }
+        ],
+        "setting": "",
+        "themes": [],
+        "key_events": [],
+        "notes": ""
+      },
+      "chapter_04": {
+        "title_jp": "第四章　ダブルイチャイチャ誕生日　デート編",
+        "title_en": [
+          "[TO BE FILLED]"
+        ],
+        "pov_tracking": [
+          {
+            "character": "[TO BE DETERMINED]",
+            "start_line": 1,
+            "end_line": null,
+            "context": "Full chapter - update if POV shifts occur"
+          }
+        ],
+        "setting": "",
+        "themes": [],
+        "key_events": [],
+        "notes": ""
+      },
+      "chapter_05": {
+        "title_jp": "第五章　ダブルイチャイチャ誕生日　お泊まり編",
+        "title_en": [
+          "[TO BE FILLED]"
+        ],
+        "pov_tracking": [
+          {
+            "character": "[TO BE DETERMINED]",
+            "start_line": 1,
+            "end_line": null,
+            "context": "Full chapter - update if POV shifts occur"
+          }
+        ],
+        "setting": "",
+        "themes": [],
+        "key_events": [],
+        "notes": ""
+      },
+      "chapter_06": {
+        "title_jp": "第六章　花火より幼馴染編",
+        "title_en": [
+          "[TO BE FILLED]"
+        ],
+        "pov_tracking": [
+          {
+            "character": "[TO BE DETERMINED]",
+            "start_line": 1,
+            "end_line": null,
+            "context": "Full chapter - update if POV shifts occur"
+          }
+        ],
+        "setting": "",
+        "themes": [],
+        "key_events": [],
+        "notes": ""
+      },
+      "chapter_07": {
+        "title_jp": "おまけ　プールでいちゃいちゃ",
+        "title_en": [
+          "[TO BE FILLED]"
+        ],
+        "pov_tracking": [
+          {
+            "character": "[TO BE DETERMINED]",
+            "start_line": 1,
+            "end_line": null,
+            "context": "Full chapter - update if POV shifts occur"
+          }
+        ],
+        "setting": "",
+        "themes": [],
+        "key_events": [],
+        "notes": ""
+      }
+    },
+    "schema_version": "v3_enhanced",
+    "schema_note": "Auto-generated by Librarian. Fill in [TO BE FILLED] placeholders before translation."
+  },
+  "pipeline_state": {
+    "librarian": {
+      "status": "completed",
+      "timestamp": "2026-02-10T16:46:52.233057",
+      "chapters_completed": 7,
+      "chapters_total": 7
+    },
+    "translator": {
+      "status": "pending",
+      "chapters_completed": 0,
+      "chapters_total": 7
+    },
+    "critics": {
+      "status": "pending",
+      "chapters_completed": 0,
+      "chapters_total": 0
+    },
+    "builder": {
+      "status": "pending",
+      "chapters_completed": 0,
+      "chapters_total": 0
+    }
+  },
+  "chapters": [
+    {
+      "id": "chapter_01",
+      "source_file": "CHAPTER_01.md",
+      "translated_file": "CHAPTER_01_EN.md",
+      "title": "第一章　一人ラブコメレース（二週目）開幕編",
+      "word_count": 560,
+      "toc_order": 0,
+      "toc_level": 0,
+      "illustrations": [
+        "P017.jpg"
+      ],
+      "translation_status": "pending",
+      "qc_status": "pending",
+      "is_pre_toc_content": false
+    },
+    {
+      "id": "chapter_02",
+      "source_file": "CHAPTER_02.md",
+      "translated_file": "CHAPTER_02_EN.md",
+      "title": "第二章　ファーストキスは譲らない！編",
+      "word_count": 536,
+      "toc_order": 1,
+      "toc_level": 0,
+      "illustrations": [
+        "P049.jpg",
+        "P074.jpg"
+      ],
+      "translation_status": "pending",
+      "qc_status": "pending",
+      "is_pre_toc_content": false
+    },
+    {
+      "id": "chapter_03",
+      "source_file": "CHAPTER_03.md",
+      "translated_file": "CHAPTER_03_EN.md",
+      "title": "第三章　公衆面前ラブラブ二人三脚ダービー編",
+      "word_count": 738,
+      "toc_order": 2,
+      "toc_level": 0,
+      "illustrations": [
+        "P105.jpg"
+      ],
+      "translation_status": "pending",
+      "qc_status": "pending",
+      "is_pre_toc_content": false
+    },
+    {
+      "id": "chapter_04",
+      "source_file": "CHAPTER_04.md",
+      "translated_file": "CHAPTER_04_EN.md",
+      "title": "第四章　ダブルイチャイチャ誕生日　デート編",
+      "word_count": 762,
+      "toc_order": 3,
+      "toc_level": 0,
+      "illustrations": [
+        "P165.jpg"
+      ],
+      "translation_status": "pending",
+      "qc_status": "pending",
+      "is_pre_toc_content": false
+    },
+    {
+      "id": "chapter_05",
+      "source_file": "CHAPTER_05.md",
+      "translated_file": "CHAPTER_05_EN.md",
+      "title": "第五章　ダブルイチャイチャ誕生日　お泊まり編",
+      "word_count": 1084,
+      "toc_order": 4,
+      "toc_level": 0,
+      "illustrations": [
+        "P191.jpg",
+        "P215.jpg"
+      ],
+      "translation_status": "pending",
+      "qc_status": "pending",
+      "is_pre_toc_content": false
+    },
+    {
+      "id": "chapter_06",
+      "source_file": "CHAPTER_06.md",
+      "translated_file": "CHAPTER_06_EN.md",
+      "title": "第六章　花火より幼馴染編",
+      "word_count": 855,
+      "toc_order": 5,
+      "toc_level": 0,
+      "illustrations": [
+        "P245.jpg",
+        "P282.jpg",
+        "P290.jpg"
+      ],
+      "translation_status": "pending",
+      "qc_status": "pending",
+      "is_pre_toc_content": false
+    },
+    {
+      "id": "chapter_07",
+      "source_file": "CHAPTER_07.md",
+      "translated_file": "CHAPTER_07_EN.md",
+      "title": "おまけ　プールでいちゃいちゃ",
+      "word_count": 154,
+      "toc_order": 6,
+      "toc_level": 0,
+      "illustrations": [
+        "P301.jpg"
+      ],
+      "translation_status": "pending",
+      "qc_status": "pending",
+      "is_pre_toc_content": false
+    }
+  ],
+  "assets": {
+    "cover": "kuchie-002.jpg",
+    "kuchie": [
+      {
+        "file": "kuchie-001.jpg",
+        "original": "cover.jpg",
+        "spine_index": 0,
+        "spine_href": "xhtml/p-cover.xhtml",
+        "image_path": "image/cover.jpg"
+      },
+      {
+        "file": "kuchie-002.jpg",
+        "original": "P000a.jpg",
+        "spine_index": 2,
+        "spine_href": "xhtml/p-002.xhtml",
+        "image_path": "image/P000a.jpg"
+      },
+      {
+        "file": "kuchie-003.jpg",
+        "original": "P000b.jpg",
+        "spine_index": 3,
+        "spine_href": "xhtml/p-003.xhtml",
+        "image_path": "image/P000b.jpg"
+      },
+      {
+        "file": "kuchie-004.jpg",
+        "original": "P000c.jpg",
+        "spine_index": 4,
+        "spine_href": "xhtml/p-004.xhtml",
+        "image_path": "image/P000c.jpg"
+      },
+      {
+        "file": "kuchie-005.jpg",
+        "original": "P000d.jpg",
+        "spine_index": 5,
+        "spine_href": "xhtml/p-005.xhtml",
+        "image_path": "image/P000d.jpg"
+      }
+    ],
+    "illustrations": [
+      "P017.jpg",
+      "P040.jpg",
+      "P049.jpg",
+      "P074.jpg",
+      "P075.jpg",
+      "P105.jpg",
+      "P121.jpg",
+      "P165.jpg",
+      "P168.jpg",
+      "P191.jpg",
+      "P215.jpg",
+      "P236.jpg",
+      "P245.jpg",
+      "P282.jpg",
+      "P290.jpg",
+      "P291.jpg",
+      "P301.jpg"
+    ]
+  },
+  "toc": {
+    "title": "もくじ",
+    "format": "nav",
+    "source_file": "/Users/damminhthang/Documents/WORK/AI_MODULES/MTL_STUDIO/pipeline/scripts/WORK/自分を負けヒロインだと思い込んでいるすでに勝利済みの幼馴染_20260210_10b4/_epub_extracted/item/navigation-documents.xhtml",
+    "nav_points": [
+      {
+        "id": "nav_1",
+        "label": "表紙",
+        "content_src": "xhtml/p-cover.xhtml",
+        "play_order": 1,
+        "level": 0,
+        "children": []
+      },
+      {
+        "id": "nav_2",
+        "label": "目次",
+        "content_src": "xhtml/p-toc.xhtml",
+        "play_order": 2,
+        "level": 0,
+        "children": []
+      },
+      {
+        "id": "nav_3",
+        "label": "第一章　一人ラブコメレース（二週目）開幕編",
+        "content_src": "xhtml/p-007.xhtml#toc-001",
+        "play_order": 3,
+        "level": 0,
+        "children": []
+      },
+      {
+        "id": "nav_4",
+        "label": "第二章　ファーストキスは譲らない！編",
+        "content_src": "xhtml/p-010.xhtml#toc-002",
+        "play_order": 4,
+        "level": 0,
+        "children": []
+      },
+      {
+        "id": "nav_5",
+        "label": "第三章　公衆面前ラブラブ二人三脚ダービー編",
+        "content_src": "xhtml/p-014.xhtml#toc-003",
+        "play_order": 5,
+        "level": 0,
+        "children": []
+      },
+      {
+        "id": "nav_6",
+        "label": "第四章　ダブルイチャイチャ誕生日　デート編",
+        "content_src": "xhtml/p-017.xhtml#toc-004",
+        "play_order": 6,
+        "level": 0,
+        "children": []
+      },
+      {
+        "id": "nav_7",
+        "label": "第五章　ダブルイチャイチャ誕生日　お泊まり編",
+        "content_src": "xhtml/p-020.xhtml#toc-005",
+        "play_order": 7,
+        "level": 0,
+        "children": []
+      },
+      {
+        "id": "nav_8",
+        "label": "第六章　花火より幼馴染編",
+        "content_src": "xhtml/p-025.xhtml#toc-006",
+        "play_order": 8,
+        "level": 0,
+        "children": []
+      },
+      {
+        "id": "nav_9",
+        "label": "おまけ　プールでいちゃいちゃ",
+        "content_src": "xhtml/p-031.xhtml#toc-007",
+        "play_order": 9,
+        "level": 0,
+        "children": []
+      },
+      {
+        "id": "nav_10",
+        "label": "奥付",
+        "content_src": "xhtml/p-colophon.xhtml",
+        "play_order": 10,
+        "level": 0,
+        "children": []
+      }
+    ]
+  },
+  "ruby_names": [
+    {
+      "kanji": "奏汰",
+      "ruby": "かなた",
+      "context": "「あーあ、奏汰君のせいでまた電車、遅れちゃった」",
+      "source_file": "p-007.xhtml",
+      "confidence": 0.98,
+      "name_type": "standard",
+      "notes": ""
+    },
+    {
+      "kanji": "文句",
+      "ruby": "もんく",
+      "context": "俺──鷹羽奏汰に対し、金髪碧眼の少女が頰を膨らませ、文句を言った。",
+      "source_file": "p-007.xhtml",
+      "confidence": 0.95,
+      "name_type": "standard",
+      "notes": ""
+    },
+    {
+      "kanji": "所以",
+      "ruby": "ゆえん",
+      "context": "もっとも、次の電車に乗れば遅刻しないし、責められる所以はない。",
+      "source_file": "p-007.xhtml",
+      "confidence": 0.95,
+      "name_type": "standard",
+      "notes": ""
+    },
+    {
+      "kanji": "天沢",
+      "ruby": "あまさわ",
+      "context": "「──から、来ました。天沢小百合です」",
+      "source_file": "p-007.xhtml",
+      "confidence": 0.7499999999999999,
+      "name_type": "standard",
+      "notes": ""
+    },
+    {
+      "kanji": "猶予",
+      "ruby": "ゆうよ",
+      "context": "同じ大学に行けるとは限らないし、もう猶予は一年しかないのだけれど。",
+      "source_file": "p-007.xhtml",
+      "confidence": 0.95,
+      "name_type": "standard",
+      "notes": ""
+    },
+    {
+      "kanji": "女狐",
+      "ruby": "めぎつね",
+      "context": "泥棒猫！　女狐！",
+      "source_file": "p-009.xhtml",
+      "confidence": 0.7499999999999999,
+      "name_type": "standard",
+      "notes": ""
+    },
+    {
+      "kanji": "暗闇",
+      "ruby": "くらやみ",
+      "context": "薄暗い暗闇の中、愛歌は恥ずかしそうに俺を見上げた。",
+      "source_file": "p-009.xhtml",
+      "confidence": 0.95,
+      "name_type": "standard",
+      "notes": ""
+    },
+    {
+      "kanji": "愛歌",
+      "ruby": "まなか",
+      "context": "その日も俺は愛歌と一緒に〝えっちの練習〟をしていた。",
+      "source_file": "p-010.xhtml",
+      "confidence": 0.95,
+      "name_type": "standard",
+      "notes": ""
+    },
+    {
+      "kanji": "悪戯",
+      "ruby": "いたずら",
+      "context": "でも、俺のこと好きじゃないって言ってるし、ただのスキンシップや悪戯のつもりなんだろう。",
+      "source_file": "p-010.xhtml",
+      "confidence": 0.95,
+      "name_type": "standard",
+      "notes": ""
+    },
+    {
+      "kanji": "姫宮",
+      "ruby": "ひめみや",
+      "context": "私、姫宮愛歌は朝からとても気分が良かった。",
+      "source_file": "p-010.xhtml",
+      "confidence": 0.95,
+      "name_type": "standard",
+      "notes": ""
+    },
+    {
+      "kanji": "怖気",
+      "ruby": "おじけ",
+      "context": "「怖気づいただけじゃない？」",
+      "source_file": "p-012.xhtml",
+      "confidence": 0.7499999999999999,
+      "name_type": "standard",
+      "notes": ""
+    },
+    {
+      "kanji": "恍惚",
+      "ruby": "こうこつ",
+      "context": "ビクっと愛歌は背筋を伸ばし、恍惚とした声を上げた。",
+      "source_file": "p-012.xhtml",
+      "confidence": 0.7,
+      "name_type": "standard",
+      "notes": ""
+    },
+    {
+      "kanji": "雛鳥",
+      "ruby": "ひなどり",
+      "context": "唇を上に向け、雛鳥のようにキスをせがまれる。",
+      "source_file": "p-012.xhtml",
+      "confidence": 0.95,
+      "name_type": "standard",
+      "notes": ""
+    },
+    {
+      "kanji": "鷹羽",
+      "ruby": "たかばね",
+      "context": "「じゃあ、鷹羽君と姫宮さん、出たら？　ラブラブだし、ちょうど良いでしょ？」",
+      "source_file": "p-014.xhtml",
+      "confidence": 0.98,
+      "name_type": "standard",
+      "notes": ""
+    },
+    {
+      "kanji": "痴漢",
+      "ruby": "ちかん",
+      "context": "愛歌のことは信用しているので「痴漢」とか騒がれることはないと思うけど、天沢が何を言うのかは分からない。",
+      "source_file": "p-014.xhtml",
+      "confidence": 0.7499999999999999,
+      "name_type": "standard",
+      "notes": ""
+    },
+    {
+      "kanji": "痴女",
+      "ruby": "ちじょ",
+      "context": "そ、それじゃあ、私、痴女じゃん。",
+      "source_file": "p-016.xhtml",
+      "confidence": 0.95,
+      "name_type": "standard",
+      "notes": ""
+    },
+    {
+      "kanji": "小百合",
+      "ruby": "さゆり",
+      "context": "私、天沢小百合は常日頃、思っていた。",
+      "source_file": "p-017.xhtml",
+      "confidence": 0.95,
+      "name_type": "standard",
+      "notes": ""
+    },
+    {
+      "kanji": "夫婦",
+      "ruby": "ふうふ",
+      "context": "そんな校内一のラブラブオシドリ夫婦の片割れである鷹羽君から、ある日メールが届いた。",
+      "source_file": "p-017.xhtml",
+      "confidence": 0.7,
+      "name_type": "standard",
+      "notes": ""
+    },
+    {
+      "kanji": "丁度",
+      "ruby": "ちょうど",
+      "context": "「泊まり、か。ま、まあ……今日は母さんいないし。丁度いいって言ったらいいけど」",
+      "source_file": "p-020.xhtml",
+      "confidence": 0.7499999999999999,
+      "name_type": "standard",
+      "notes": ""
+    },
+    {
+      "kanji": "天秤",
+      "ruby": "てんびん",
+      "context": "その庇護欲をくすぐる表情に、天秤が欲望の方へと一気に傾く。",
+      "source_file": "p-020.xhtml",
+      "confidence": 0.95,
+      "name_type": "standard",
+      "notes": ""
+    },
+    {
+      "kanji": "片想",
+      "ruby": "かたおも",
+      "context": "そして俺は片想い中の幼馴染に抱きつかれ、理性が飛びそうだった。",
+      "source_file": "p-020.xhtml",
+      "confidence": 0.95,
+      "name_type": "standard",
+      "notes": ""
+    },
+    {
+      "kanji": "膝枕",
+      "ruby": "ひざまくら",
+      "context": "「膝枕、なんてどう？」",
+      "source_file": "p-020.xhtml",
+      "confidence": 0.7499999999999999,
+      "name_type": "standard",
+      "notes": ""
+    },
+    {
+      "kanji": "洋菓子",
+      "ruby": "ようがし",
+      "context": "俺は冷蔵庫を開けて、中から洋菓子の箱を取り出した。",
+      "source_file": "p-022.xhtml",
+      "confidence": 0.7,
+      "name_type": "standard",
+      "notes": ""
+    },
+    {
+      "kanji": "嬌声",
+      "ruby": "きょうせい",
+      "context": "愛歌が俺の耳元で嬌声を上げる。",
+      "source_file": "p-022.xhtml",
+      "confidence": 0.95,
+      "name_type": "standard",
+      "notes": ""
+    },
+    {
+      "kanji": "素敵",
+      "ruby": "すてき",
+      "context": "「そうなんだ。素敵だね！」",
+      "source_file": "p-024.xhtml",
+      "confidence": 0.7499999999999999,
+      "name_type": "standard",
+      "notes": ""
+    },
+    {
+      "kanji": "屋内",
+      "ruby": "おくない",
+      "context": "「うちは屋内だから、そんなに寒くないよ」",
+      "source_file": "p-024.xhtml",
+      "confidence": 0.95,
+      "name_type": "standard",
+      "notes": ""
+    },
+    {
+      "kanji": "高嶺",
+      "ruby": "たかね",
+      "context": "そんなこと言われなくとも、俺にとって愛歌は高嶺の花だ。",
+      "source_file": "p-025.xhtml",
+      "confidence": 0.95,
+      "name_type": "standard",
+      "notes": ""
+    },
+    {
+      "kanji": "紫陽花",
+      "ruby": "あじさい",
+      "context": "紫陽花が描かれた上品な浴衣を身に纏っている。",
+      "source_file": "p-025.xhtml",
+      "confidence": 0.95,
+      "name_type": "standard",
+      "notes": ""
+    },
+    {
+      "kanji": "綿菓子",
+      "ruby": "わたがし",
+      "context": "「うーん、せっかくのお祭りだし。綿菓子とか食べたいのだけれど……」",
+      "source_file": "p-025.xhtml",
+      "confidence": 1.0,
+      "name_type": "standard",
+      "notes": ""
+    },
+    {
+      "kanji": "愚痴",
+      "ruby": "ぐち",
+      "context": "そこから天沢さんは後輩に対する愚痴を話し始めた。",
+      "source_file": "p-029.xhtml",
+      "confidence": 0.95,
+      "name_type": "standard",
+      "notes": ""
+    },
+    {
+      "kanji": "図星",
+      "ruby": "ずぼし",
+      "context": "「やだぁ、動揺し過ぎ！　図星なんだぁ」",
+      "source_file": "p-031.xhtml",
+      "confidence": 0.7499999999999999,
+      "name_type": "standard",
+      "notes": ""
+    },
+    {
+      "kanji": "桜木",
+      "ruby": "さくらぎ",
+      "context": "久しぶりのＧＡ文庫様からの出版となりました。桜木桜です。",
+      "source_file": "p-032.xhtml",
+      "confidence": 0.7499999999999999,
+      "name_type": "standard",
+      "notes": ""
+    },
+    {
+      "kanji": "妖艶",
+      "ruby": "ようえん",
+      "context": "その笑みはいつもよりも、妖艶に見えた。",
+      "source_file": "p-007.xhtml",
+      "confidence": 0.75,
+      "name_type": "fragmented",
+      "notes": "Possible name fragment"
+    },
+    {
+      "kanji": "蠱惑的",
+      "ruby": "こわくてき",
+      "context": "チラチラと覗く白い清楚な下着と、蠱惑的な谷間が俺を誘っているように見えた。",
+      "source_file": "p-016.xhtml",
+      "confidence": 0.75,
+      "name_type": "fragmented",
+      "notes": "Possible name fragment"
+    },
+    {
+      "kanji": "強引",
+      "ruby": "ごういん",
+      "context": "そう思って、強引に愛歌にキスを迫ってしまった。",
+      "source_file": "p-027.xhtml",
+      "confidence": 0.75,
+      "name_type": "fragmented",
+      "notes": "Possible name fragment"
+    },
+    {
+      "kanji": "不味",
+      "ruby": "まず",
+      "context": "ま、不味い……このままだと本当にキスする流れになってしまう。",
+      "source_file": "p-017.xhtml",
+      "confidence": 0.75,
+      "name_type": "fragmented",
+      "notes": "Possible name fragment"
+    },
+    {
+      "kanji": "名残",
+      "ruby": "なごり",
+      "context": "そう言って愛歌はゆっくりと、名残惜しむように俺から離れた。",
+      "source_file": "p-012.xhtml",
+      "confidence": 0.75,
+      "name_type": "fragmented",
+      "notes": "Possible name fragment"
+    },
+    {
+      "kanji": "洒落",
+      "ruby": "しゃれ",
+      "context": "我が校の体操服はそこそこお洒落だ。",
+      "source_file": "p-017.xhtml",
+      "confidence": 0.75,
+      "name_type": "fragmented",
+      "notes": "Possible name fragment"
+    },
+    {
+      "kanji": "砂糖",
+      "ruby": "さとう",
+      "context": "見ているだけで口の中が砂糖でジャリジャリしそうなほどのイチャイチャっぷりだ。",
+      "source_file": "p-017.xhtml",
+      "confidence": 0.75,
+      "name_type": "fragmented",
+      "notes": "Possible name fragment"
+    }
+  ],
+  "volume_structure": {}
+}

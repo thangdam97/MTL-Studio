@@ -115,7 +115,9 @@ import hashlib
 import time
 
 # Import CJK validator for quality control
-sys.path.insert(0, str(Path(__file__).parent))
+SCRIPT_DIR = Path(__file__).resolve().parent
+PROJECT_ROOT = SCRIPT_DIR.parent
+sys.path.insert(0, str(PROJECT_ROOT))
 from scripts.cjk_validator import CJKValidator
 from pipeline.cli.ui import ModernCLIUI
 
@@ -127,7 +129,6 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 # Project paths
-PROJECT_ROOT = Path(__file__).parent
 INPUT_DIR = PROJECT_ROOT / "INPUT"
 WORK_DIR = PROJECT_ROOT / "WORK"
 OUTPUT_DIR = PROJECT_ROOT / "OUTPUT"
@@ -2422,7 +2423,7 @@ class PipelineController:
                     # Check config
                     try:
                         import yaml
-                        config_path = Path(__file__).parent / "config.yaml"
+                        config_path = PROJECT_ROOT / "config.yaml"
                         if config_path.exists():
                             with open(config_path) as f:
                                 cfg = yaml.safe_load(f)
@@ -2435,7 +2436,7 @@ class PipelineController:
             logger.info(f"Target language: {target_language.upper()}")
             
             agent = AntiAIismAgent(
-                config_dir=Path(__file__).parent / "config",
+                config_dir=PROJECT_ROOT / "config",
                 auto_heal=not dry_run,
                 dry_run=dry_run,
                 target_language=target_language,
@@ -2936,16 +2937,18 @@ class PipelineController:
     def handle_config(self, toggle_pre_toc: bool = False, show: bool = False,
                      model: Optional[str] = None, temperature: Optional[float] = None,
                      top_p: Optional[float] = None, top_k: Optional[int] = None,
+                     backend: Optional[str] = None,
                      language: Optional[str] = None, show_language: bool = False,
                      toggle_multimodal: bool = False,
                      toggle_smart_chunking: bool = False) -> None:
         """Handle configuration commands."""
         import yaml
+        import os
         import sys
         from pathlib import Path
         
         # Ensure pipeline module can be imported
-        pipeline_root = Path(__file__).parent.resolve()
+        pipeline_root = PROJECT_ROOT.resolve()
         sys.path.insert(0, str(pipeline_root))
         
         # Import after path is set
@@ -2965,6 +2968,13 @@ class PipelineController:
             config = yaml.safe_load(f)
 
         changes_made = []
+
+        backend_aliases = {
+            'auto': 'auto',
+            'genai': 'developer',
+            'developer': 'developer',
+            'vertex': 'vertex',
+        }
 
         # Language switching
         if language:
@@ -3072,6 +3082,37 @@ class PipelineController:
             old_top_k = config['gemini']['generation'].get('top_k', 'N/A')
             config['gemini']['generation']['top_k'] = top_k
             changes_made.append(f"top_k: {old_top_k} → {top_k}")
+
+        # Backend switching
+        if backend:
+            requested_backend = backend_aliases.get(backend.strip().lower())
+            if not requested_backend:
+                logger.error("Invalid backend. Use one of: auto, genai, vertex")
+                return
+
+            if 'gemini' not in config:
+                config['gemini'] = {}
+            if 'vertex' not in config['gemini']:
+                config['gemini']['vertex'] = {}
+
+            old_backend = str(config['gemini'].get('backend', 'auto'))
+
+            if requested_backend == 'vertex':
+                env_project = (os.getenv("GOOGLE_CLOUD_PROJECT") or "").strip()
+                cfg_project = str(config['gemini']['vertex'].get('project', '') or '').strip()
+                if not env_project and not cfg_project:
+                    # Graceful fallback: keep runtime healthy even when Vertex is requested.
+                    config['gemini']['backend'] = 'developer'
+                    changes_made.append(
+                        f"Backend: {old_backend} → developer (GenAI fallback; GOOGLE_CLOUD_PROJECT / gemini.vertex.project not detected)"
+                    )
+                else:
+                    config['gemini']['backend'] = 'vertex'
+                    changes_made.append(f"Backend: {old_backend} → vertex")
+            else:
+                config['gemini']['backend'] = requested_backend
+                display_backend = 'genai' if requested_backend == 'developer' else requested_backend
+                changes_made.append(f"Backend: {old_backend} → {display_backend}")
         
         # Show current settings
         if show or (
@@ -3082,6 +3123,7 @@ class PipelineController:
             and temperature is None
             and top_p is None
             and top_k is None
+            and not backend
             and not language
         ):
             self._ui_header("Pipeline Configuration", "MTL Studio v5.2 runtime settings")
@@ -3110,8 +3152,19 @@ class PipelineController:
             # Translation model and parameters
             gemini = config.get('gemini', {})
             generation = gemini.get('generation', {})
+            vertex_cfg = gemini.get('vertex', {}) if isinstance(gemini.get('vertex', {}), dict) else {}
 
             logger.info(f"\nTranslation Model & Parameters:")
+            current_backend = str(gemini.get('backend', 'auto')).strip().lower()
+            backend_display = 'genai' if current_backend == 'developer' else current_backend
+            logger.info(f"  Backend: {backend_display}")
+            if current_backend in {'auto', 'vertex'}:
+                active_vertex_project = (os.getenv("GOOGLE_CLOUD_PROJECT") or str(vertex_cfg.get('project', '')).strip())
+                if active_vertex_project:
+                    logger.info(f"  Vertex Project: {active_vertex_project}")
+                    logger.info(f"  Vertex Location: {vertex_cfg.get('location', 'us-central1')}")
+                else:
+                    logger.info("  Vertex Project: not detected (will fallback to GenAI)")
             current_model = gemini.get('model', 'N/A')
             logger.info(f"  Model: {current_model}")
             logger.info(f"  Temperature: {generation.get('temperature', 'N/A')}")
@@ -3212,6 +3265,7 @@ class PipelineController:
             logger.info("  --show-language              Show current language details")
             logger.info("  --model pro|flash|2.5-pro|2.5-flash")
             logger.info("                              Switch translation model")
+            logger.info("  --backend auto|genai|vertex Set LLM backend mode")
             logger.info("  --temperature 0.6            Adjust creativity (0.0-2.0)")
             logger.info("  --top-p 0.95                 Adjust nucleus sampling")
             logger.info("  --top-k 40                   Adjust top-k sampling")
@@ -3468,7 +3522,7 @@ def main():
     elif args.command == 'schema':
         # Invoke schema manipulator agent
         import subprocess
-        script_path = Path(__file__).parent / "scripts" / "schema_manipulator.py"
+        script_path = PROJECT_ROOT / "scripts" / "schema_manipulator.py"
         
         # Build command
         cmd = [sys.executable, str(script_path), '--volume', args.volume_id]

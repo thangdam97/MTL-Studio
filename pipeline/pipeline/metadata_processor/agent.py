@@ -386,6 +386,16 @@ class MetadataProcessor:
                 # Best-effort status write only.
                 pass
 
+    def _ensure_ruby_names(self) -> List[Dict[str, Any]]:
+        """
+        Ruby name extraction is intentionally disabled in MetadataProcessor.
+
+        Canon character metadata is sourced from grounding/canonical pipelines
+        (Google Search + bible sync), not ruby extraction fallback.
+        """
+        logger.debug("Ruby extraction/recording disabled in MetadataProcessor")
+        return []
+
     def _apply_official_localization_overrides(self, metadata_translated: Dict[str, Any]) -> Dict[str, Any]:
         """
         Prefer official localized metadata discovered by schema autoupdate.
@@ -1286,8 +1296,7 @@ class MetadataProcessor:
         # Get ruby-extracted character names (skip in sequel_mode)
         ruby_names = []
         if not sequel_mode:
-            ruby_names = self.manifest.get("ruby_names", [])
-            logger.info(f"Ruby entries: {len(ruby_names)} character names")
+            ruby_names = self._ensure_ruby_names()
         else:
             logger.info("🔄 SEQUEL MODE: Skipping ruby name extraction (will inherit from prequel)")
 
@@ -1331,6 +1340,9 @@ class MetadataProcessor:
             if bible_sync.resolve(self.manifest):
                 if bible_sync.series_id and self.manifest.get("bible_id") != bible_sync.series_id:
                     self.manifest["bible_id"] = bible_sync.series_id
+                    # Persist immediately so bible linkage survives mid-phase failures.
+                    with open(self.manifest_path, "w", encoding="utf-8") as f:
+                        json.dump(self.manifest, f, indent=2, ensure_ascii=False)
                     logger.info(f"📖 Linked manifest to bible_id: {bible_sync.series_id}")
                 bible_pull = bible_sync.pull(self.manifest)
                 bible_known_names = bible_pull.known_characters

@@ -2,11 +2,15 @@
 Cache management utilities for the CLI.
 """
 
-import os
 import shutil
 from pathlib import Path
 from typing import Tuple, Dict
 from rich.console import Console
+
+try:
+    from pipeline.common.genai_factory import create_genai_client
+except ImportError:
+    create_genai_client = None
 
 console = Console()
 
@@ -58,17 +62,13 @@ def purge_gemini_cache() -> Dict[str, any]:
         Dictionary with cache purge results
     """
     try:
-        from google import genai
-
-        api_key = os.getenv('GOOGLE_API_KEY')
-        if not api_key:
+        if create_genai_client is None:
             return {
                 "success": False,
-                "error": "GOOGLE_API_KEY not found in environment",
+                "error": "google-genai package not available",
                 "caches_removed": 0
             }
-
-        client = genai.Client(api_key=api_key)
+        client = create_genai_client()
         caches = list(client.caches.list())
 
         if caches:
@@ -84,12 +84,6 @@ def purge_gemini_cache() -> Dict[str, any]:
             "error": None
         }
 
-    except ImportError:
-        return {
-            "success": False,
-            "error": "google-genai package not available",
-            "caches_removed": 0
-        }
     except Exception as e:
         return {
             "success": False,

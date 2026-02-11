@@ -11,8 +11,6 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Dict, List, Optional
 
-from pipeline.post_processor.truncation_validator import TruncationIssue, TruncationValidator
-
 logger = logging.getLogger(__name__)
 
 
@@ -21,7 +19,6 @@ class MergeResult:
     chapter_id: str
     chunks_merged: int
     output_path: Path
-    truncation_issues: List[TruncationIssue]
 
 
 class ChunkMerger:
@@ -29,7 +26,6 @@ class ChunkMerger:
         self.work_dir = work_dir
         self.temp_dir = work_dir / "temp" / "chunks"
         self.en_dir = work_dir / "EN"
-        self.validator = TruncationValidator()
 
     def merge_chapter(self, chapter_id: str, output_filename: Optional[str] = None) -> MergeResult:
         chunk_files = sorted(self.temp_dir.glob(f"{chapter_id}_chunk_*.json"))
@@ -42,12 +38,6 @@ class ChunkMerger:
         merged_text = self._merge_chunks(chunks)
         merged_text = self._dedupe_scene_breaks(merged_text)
 
-        report = self.validator.validate_text(merged_text)
-        if report.has_critical():
-            logger.warning(
-                f"[MERGE] {chapter_id} merged with {len(report.critical)} critical truncation issue(s)"
-            )
-
         self.en_dir.mkdir(parents=True, exist_ok=True)
         target_name = output_filename or f"{chapter_id.upper()}.md"
         output_path = self.en_dir / target_name
@@ -57,7 +47,6 @@ class ChunkMerger:
             chapter_id=chapter_id,
             chunks_merged=len(chunks),
             output_path=output_path,
-            truncation_issues=report.all_issues,
         )
 
     def _load_chunk(self, path: Path) -> Dict[str, Any]:

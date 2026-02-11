@@ -264,6 +264,12 @@ Metadata Schema Auto-Transform:
     config_parser.add_argument('--language', type=str, choices=['en', 'vn'], help='Switch target language (en=English, vn=Vietnamese)')
     config_parser.add_argument('--show-language', action='store_true', help='Show current target language details')
     config_parser.add_argument(
+        '--backend',
+        type=str,
+        choices=['auto', 'genai', 'vertex', 'developer'],
+        help='Switch GenAI backend (auto=detect, genai=Developer API key, vertex=Vertex AI)',
+    )
+    config_parser.add_argument(
         '--model',
         type=str,
         choices=[

@@ -290,6 +290,16 @@
             "regex": "needless to say",
             "display": "needless to say",
             "fix": "If needless, don't say it"
+          },
+          {
+            "id": "im_sure",
+            "regex": "\\b[Ii]['']?m sure\\b",
+            "display": "I'm sure",
+            "fix": "Creates artificial uncertainty. Use direct statement or stronger conviction: 'I know' / 'Obviously' / 'No doubt'",
+            "proximity_penalty": {
+              "window": 100,
+              "severity": "MAJOR"
+            }
           }
         ]
       }

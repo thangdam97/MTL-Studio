@@ -199,16 +199,38 @@ class RTASCalculator:
                 break
         
         # 5. Calculate contraction rate from RTAS tier
-        contraction_tiers = self.config.get("contraction_tiers", {})
-        base_rate = 60  # default
-        for tier_range, tier_config in contraction_tiers.items():
-            if not tier_range.startswith("_"):
-                low, high = map(float, tier_range.split("-"))
-                if low <= rtas <= high:
-                    base_rate = tier_config.get("base_rate", 60)
-                    break
-        
-        final_contraction = max(0, min(100, base_rate + contraction_shift))
+        # Check for explicit contraction_rate structure first (new format)
+        contraction_rate_data = profile.get("contraction_rate")
+        if contraction_rate_data and isinstance(contraction_rate_data, dict):
+            # New format: {"baseline": 0.75, "narration": 0.75, ...}
+            baseline = contraction_rate_data.get("baseline", contraction_rate_data.get("narration", 0.95))
+            # Convert from 0.0-1.0 to 0-100 percentage
+            final_contraction = int(baseline * 100)
+            logger.debug(f"[RTAS] {char_id}: Using contraction_rate.baseline = {final_contraction}%")
+        elif "contraction_rate_override" in profile:
+            # Legacy override format
+            override = profile["contraction_rate_override"]
+            # Handle both "90-95" string format and numeric format
+            if isinstance(override, str) and "-" in override:
+                # Take midpoint of range (e.g., "90-95" → 92.5 → 92)
+                low, high = map(int, override.split("-"))
+                final_contraction = int((low + high) / 2)
+            else:
+                # Direct numeric value
+                final_contraction = int(override) if isinstance(override, (int, float)) else 60
+            logger.debug(f"[RTAS] {char_id}: Using contraction_rate_override = {final_contraction}%")
+        else:
+            # Calculate from RTAS tier (fallback) - Default to 95% baseline
+            contraction_tiers = self.config.get("contraction_tiers", {})
+            base_rate = 95  # default 95% baseline for contemporary speech
+            for tier_range, tier_config in contraction_tiers.items():
+                if not tier_range.startswith("_"):
+                    low, high = map(float, tier_range.split("-"))
+                    if low <= rtas <= high:
+                        base_rate = tier_config.get("base_rate", 95)
+                        break
+
+            final_contraction = max(0, min(100, base_rate + contraction_shift))
         
         return VoiceSettings(
             character_id=char_id,

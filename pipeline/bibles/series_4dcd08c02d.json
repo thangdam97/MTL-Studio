@@ -1,0 +1,513 @@
+{
+  "bible_version": "1.0",
+  "series_id": "series_4dcd08c02d",
+  "series_title": {
+    "ja": "俺の母さんは最強の魔法少女です",
+    "en": "俺の母さんは最強の魔法少女です",
+    "romaji": ""
+  },
+  "created_at": "2026-02-11T03:13:54.766355+00:00",
+  "last_updated": "2026-02-11T03:14:59.755450+00:00",
+  "volumes_registered": [
+    {
+      "volume_id": "1991",
+      "title": "俺の母さんは最強の魔法少女です",
+      "index": 2
+    }
+  ],
+  "world_setting": {},
+  "characters": {
+    "一ノ瀬翔太郎": {
+      "short_name": "Sho-chan (by mother), Sho-kun (by Haruna)",
+      "category": "protagonist",
+      "affiliation": "Japanese",
+      "notes": "observant, protective, intelligent, mama's_boy, determined, self-deprecating",
+      "keigo": {
+        "narration": "casual",
+        "internal_thoughts": "casual",
+        "speaking_to": {
+          "一ノ瀬いづみ": "casual_affectionate",
+          "百野春菜": "casual_bro",
+          "三条凪": "polite_casual",
+          "屋根田久美子": "polite",
+          "strangers": "polite"
+        },
+        "emotional_shifts": {
+          "with_mother": "overly affectionate, loses composure",
+          "serious": "direct, firm"
+        }
+      },
+      "volume_events": {
+        "1991": {
+          "keigo_switch": {
+            "narration": "casual",
+            "internal_thoughts": "casual",
+            "speaking_to": {
+              "一ノ瀬いづみ": "casual_affectionate",
+              "百野春菜": "casual_bro",
+              "三条凪": "polite_casual",
+              "屋根田久美子": "polite",
+              "strangers": "polite"
+            },
+            "emotional_shifts": {
+              "with_mother": "overly affectionate, loses composure",
+              "serious": "direct, firm"
+            },
+            "notes": "[TO BE FILLED - context-dependent register notes]"
+          },
+          "relationship_to_protagonist": "protagonist",
+          "relationship_to_others": "茂田先輩 (Shigeta-senpai) - senior, baseball club ace; 小谷 (Kotani), 海本 (Umimoto), 佐々井 (Sasai) - classmates, gyaru group; 阿久津哲夫 (Akutsu Tetsuo) - male friend; ローズちゃん (Rose-chan) - school principal's pet cat; 池田さん (Ikeda-san) - Cherry Diamond fan club vice-chairman; 怪人たち (Kaijin) - enemies",
+          "rtas_relationships": [
+            {
+              "target": "一ノ瀬いづみ",
+              "relationship_type": "mother",
+              "rtas_score": 4.8,
+              "contraction_rate_override": 95,
+              "notes": "Deeply affectionate and doting towards his mother, but also serious about her retirement. Very casual in private, slightly more reserved in public."
+            },
+            {
+              "target": "百野春菜",
+              "relationship_type": "childhood_friend",
+              "rtas_score": 4.0,
+              "contraction_rate_override": 95,
+              "notes": "Close childhood friend, often teases her but is also protective and concerned for her well-being."
+            },
+            {
+              "target": "三条凪",
+              "relationship_type": "classmate, magical_girl_partner, romantic_interest",
+              "rtas_score": 3.5,
+              "contraction_rate_override": 85,
+              "notes": "Initially formal, develops a teasing and supportive relationship, with growing romantic interest."
+            },
+            {
+              "target": "屋根田久美子",
+              "relationship_type": "teacher",
+              "rtas_score": 2.8,
+              "contraction_rate_override": 70,
+              "notes": "Respectful but also somewhat exasperated by her laid-back attitude."
+            }
+          ],
+          "how_character_refers_to_others": {
+            "一ノ瀬いづみ": "母さん (Kaasan)",
+            "百野春菜": "春菜 (Haruna)",
+            "三条凪": "三条 (Sanjou) -> 凪 (Nagi)"
+          },
+          "contraction_rate": {
+            "baseline": 0.95,
+            "narration": 0.95,
+            "speaking_to": {
+              "一ノ瀬いづみ": 0.95,
+              "百野春菜": 0.95,
+              "三条凪": 0.85,
+              "屋根田久美子": 0.7,
+              "adults": 0.8
+            },
+            "notes": "Contemporary teen voice; more formal with adults and initially with Nagi."
+          },
+          "character_arc": "Initially driven solely by the desire to free his mother from her magical girl duties by finding a successor. This leads him to create the Magical Girl Selection Project and recruit Nagi. He struggles with guilt when his actions (falsifying Haruna's aptitude test) inadvertently lead to her becoming a Dark Magical Girl. Through a confrontation, he realizes the importance of all his relationships and confesses his true feelings for Haruna as a cherished 'sister', leading to her purification. He evolves to support multiple magical girls while still aiming for his mother's retirement, with a broader understanding of his relationships."
+        }
+      }
+    },
+    "一ノ瀬いづみ": {
+      "short_name": "Cherry Diamond (Magical Girl name), Mama (by Shoutarou in internal thoughts)",
+      "category": "mother",
+      "affiliation": "Japanese",
+      "notes": "kind-hearted, strong-willed, playful, doting, confident, powerful, a_bit_ditzy",
+      "keigo": {
+        "narration": "casual",
+        "internal_thoughts": "casual",
+        "speaking_to": {
+          "一ノ瀬翔太郎": "casual_affectionate",
+          "百野春菜": "casual_affectionate",
+          "三条凪": "polite_supportive",
+          "怪人": "firm_heroic"
+        },
+        "emotional_shifts": {
+          "as_Cherry_Diamond": "heroic, confident",
+          "with_son": "sweet, slightly teasing"
+        }
+      },
+      "volume_events": {
+        "1991": {
+          "relationship_to_protagonist": "mother",
+          "relationship_to_others": "百野春菜の母親 (Momono Haruna's Mother) - neighbor, friend; 池田さん (Ikeda-san) - Cherry Diamond fan club vice-chairman; 怪人たち (Kaijin) - enemies; シャドウネクサス幹部 (Shadow Nexus Executives) - primary antagonists.",
+          "rtas_relationships": [
+            {
+              "target": "一ノ瀬翔太郎",
+              "relationship_type": "son",
+              "rtas_score": 5.0,
+              "contraction_rate_override": 95,
+              "notes": "Extremely doting and affectionate towards her son, very playful."
+            },
+            {
+              "target": "百野春菜",
+              "relationship_type": "daughter-like",
+              "rtas_score": 4.5,
+              "contraction_rate_override": 90,
+              "notes": "Treats Haruna like a second daughter, affectionate and encouraging."
+            },
+            {
+              "target": "三条凪",
+              "relationship_type": "junior_magical_girl",
+              "rtas_score": 4.0,
+              "contraction_rate_override": 85,
+              "notes": "Supportive and encouraging as a senior magical girl, but also playful."
+            }
+          ],
+          "how_character_refers_to_others": {
+            "一ノ瀬翔太郎": "翔ちゃん (Sho-chan)",
+            "百野春菜": "春菜ちゃん (Haruna-chan)",
+            "三条凪": "凪ちゃん (Nagi-chan)"
+          },
+          "keigo_switch": {
+            "narration": "casual",
+            "internal_thoughts": "casual",
+            "speaking_to": {
+              "一ノ瀬翔太郎": "casual_affectionate",
+              "百野春菜": "casual_affectionate",
+              "三条凪": "polite_supportive",
+              "怪人": "firm_heroic"
+            },
+            "emotional_shifts": {
+              "as_Cherry_Diamond": "heroic, confident",
+              "with_son": "sweet, slightly teasing"
+            }
+          },
+          "contraction_rate": {
+            "baseline": 0.9,
+            "narration": 0.9,
+            "speaking_to": {
+              "一ノ瀬翔太郎": 0.95,
+              "百野春菜": 0.9,
+              "三条凪": 0.85,
+              "strangers": 0.75
+            },
+            "notes": "Generally casual and warm, very high contraction rate with family."
+          },
+          "character_arc": "Has been the world's strongest magical girl, Cherry Diamond, for over two decades, balancing her heroic duties with being a single mother. She carries the burden of protecting the world while also feeling guilt over leaving her son alone. Despite Shoutarou's efforts to make her retire, her strong sense of responsibility keeps her fighting. She acts as a wise mentor and emotional anchor for both Nagi and Haruna, guiding them through their struggles and demonstrating true heroism and compassion. Her overwhelming strength is a recurring theme, often comically resolving conflicts before others can."
+        }
+      }
+    },
+    "百野春菜": {
+      "short_name": "Peach Ruby (Magical Girl name), Abyss Peach (Dark Magical Girl name)",
+      "category": "childhood_friend",
+      "affiliation": "Japanese",
+      "notes": "energetic, naive, persistent, easily_flustered, devoted, secretly_jealous",
+      "keigo": {
+        "narration": "casual",
+        "internal_thoughts": "casual",
+        "speaking_to": {
+          "一ノ瀬翔太郎": "casual_affectionate",
+          "一ノ瀬いづみ": "polite_affectionate",
+          "三条凪": "casual_rivalrous"
+        },
+        "emotional_shifts": {
+          "flustered": "stammering, high-pitched",
+          "as_Abyss_Peach": "dark, determined, lightless eyes"
+        }
+      },
+      "volume_events": {
+        "1991": {
+          "relationship_to_protagonist": "childhood_friend",
+          "relationship_to_others": "一ノ瀬翔太郎の母親 (Ichinose Shoutarou's Mother) - neighbor, mother-figure; メルルーク (Merlruuk) - Kaijin who gave her dark magiplas.",
+          "rtas_relationships": [
+            {
+              "target": "一ノ瀬翔太郎",
+              "relationship_type": "childhood_friend, romantic_interest",
+              "rtas_score": 4.5,
+              "contraction_rate_override": 95,
+              "notes": "Deeply in love with Shoutarou, often teases him, can be possessive. Becomes a Dark Magical Girl to fulfill his dream."
+            },
+            {
+              "target": "一ノ瀬いづみ",
+              "relationship_type": "mother-figure, admired",
+              "rtas_score": 4.0,
+              "contraction_rate_override": 90,
+              "notes": "Admires Izumi as a magical girl and as a mother-figure."
+            },
+            {
+              "target": "三条凪",
+              "relationship_type": "rival, fellow_magical_girl",
+              "rtas_score": 2.5,
+              "contraction_rate_override": 90,
+              "notes": "Rivalry over Shoutarou, but also works with her as a magical girl."
+            }
+          ],
+          "how_character_refers_to_others": {
+            "一ノ瀬翔太郎": "翔くん (Sho-kun)",
+            "一ノ瀬いづみ": "いづみさん (Izumi-san), いづみお義母様 (Izumi Okaa-sama)",
+            "三条凪": "凪ちゃん (Nagi-chan)"
+          },
+          "keigo_switch": {
+            "narration": "casual",
+            "internal_thoughts": "casual",
+            "speaking_to": {
+              "一ノ瀬翔太郎": "casual_affectionate",
+              "一ノ瀬いづみ": "polite_affectionate",
+              "三条凪": "casual_rivalrous"
+            },
+            "emotional_shifts": {
+              "flustered": "stammering, high-pitched",
+              "as_Abyss_Peach": "dark, determined, lightless eyes"
+            }
+          },
+          "contraction_rate": {
+            "baseline": 0.95,
+            "narration": 0.95,
+            "speaking_to": {
+              "一ノ瀬翔太郎": 0.95,
+              "一ノ瀬いづみ": 0.9,
+              "三条凪": 0.9
+            },
+            "notes": "Very casual, contemporary teen voice."
+          },
+          "character_arc": "Shoutarou's childhood friend who harbors deep romantic feelings for him. Her desire to fulfill his dream of finding a successor for his mother, combined with her low aptitude test results (falsified by Shoutarou), leads her to despair. She is manipulated by Merlruuk and transforms into Dark Magical Girl Abyss Peach, seeking power to achieve Shoutarou's dream through destructive means. Confronted by Shoutarou's sincere confession of valuing her as a 'sister', she is purified and re-awakens as Magical Girl Peach Ruby. She then fights alongside Nagi and Shoutarou, maintaining her rivalry with Nagi for Shoutarou's affection while embracing her new role."
+        }
+      }
+    },
+    "三条凪": {
+      "short_name": "Plum Sapphire (Magical Girl name)",
+      "category": "classmate, magical_girl_partner",
+      "affiliation": "Japanese",
+      "notes": "elegant, composed, intelligent, strong-willed, tsundere, easily_embarrassed",
+      "keigo": {
+        "narration": "polite",
+        "internal_thoughts": "polite",
+        "speaking_to": {
+          "一ノ瀬翔太郎": "polite_casual",
+          "一ノ瀬いづみ": "polite_formal",
+          "百野春菜": "polite_rivalrous",
+          "屋根田久美子": "polite"
+        },
+        "emotional_shifts": {
+          "embarrassed": "flustered, raises voice",
+          "as_Plum_Sapphire": "cool, confident"
+        }
+      },
+      "volume_events": {
+        "1991": {
+          "relationship_to_protagonist": "classmate, magical_girl_partner",
+          "relationship_to_others": "屋根田久美子 (Yaneda Kumiko) - teacher; 長篠咲 (Nagashino Saki) - popular idol at her previous school, caused her family's company crisis; メルルーク (Merlruuk) - antagonist, Kaijin.",
+          "rtas_relationships": [
+            {
+              "target": "一ノ瀬翔太郎",
+              "relationship_type": "romantic_interest",
+              "rtas_score": 3.8,
+              "contraction_rate_override": 85,
+              "notes": "Initially formal and cool, gradually becomes more open, teasing, and shows romantic interest."
+            },
+            {
+              "target": "一ノ瀬いづみ",
+              "relationship_type": "admired_senior_magical_girl",
+              "rtas_score": 4.0,
+              "contraction_rate_override": 75,
+              "notes": "Respects Izumi as the strongest magical girl."
+            },
+            {
+              "target": "百野春菜",
+              "relationship_type": "rival, fellow_magical_girl",
+              "rtas_score": 2.5,
+              "contraction_rate_override": 85,
+              "notes": "Rivalry over Shoutarou, but also works with her as a magical girl."
+            }
+          ],
+          "how_character_refers_to_others": {
+            "一ノ瀬翔太郎": "一ノ瀬 (Ichinose) -> アンタ (Anta) -> 翔太郎 (Shoutarou)",
+            "一ノ瀬いづみ": "いづみさん (Izumi-san)",
+            "百野春菜": "百野さん (Momono-san) -> 春菜 (Haruna) -> ピーチルビー (Peach Ruby)"
+          },
+          "keigo_switch": {
+            "narration": "polite",
+            "internal_thoughts": "polite",
+            "speaking_to": {
+              "一ノ瀬翔太郎": "polite_casual",
+              "一ノ瀬いづみ": "polite_formal",
+              "百野春菜": "polite_rivalrous",
+              "屋根田久美子": "polite"
+            },
+            "emotional_shifts": {
+              "embarrassed": "flustered, raises voice",
+              "as_Plum_Sapphire": "cool, confident"
+            }
+          },
+          "contraction_rate": {
+            "baseline": 0.85,
+            "narration": 0.85,
+            "speaking_to": {
+              "一ノ瀬翔太郎": 0.85,
+              "一ノ瀬いづみ": 0.75,
+              "百野春菜": 0.85,
+              "teachers": 0.7
+            },
+            "notes": "Generally polite and refined, with some casual slips when flustered or with close friends."
+          },
+          "character_arc": "A transfer student from an elite girls' academy, forced to move due to her family's company facing bankruptcy, caused by an idol's malicious actions. Initially cold and guarded, she gradually opens up to Shoutarou after he helps resolve her family's crisis. She accepts the role of a magical girl (Plum Sapphire) out of gratitude and a desire to protect her family. She displays immense magical talent, quickly mastering spells, but struggles with her severe entomophobia in her debut battle. She eventually overcomes her fear and becomes a capable magical girl, forming a partnership with Shoutarou and later Haruna, while also developing romantic feelings for Shoutarou and entering a rivalry with Haruna."
+        }
+      }
+    },
+    "屋根田久美子": {
+      "short_name": "Kumi-chi Sensei",
+      "category": "teacher",
+      "affiliation": "Japanese",
+      "notes": "laid-back, unmotivated, sarcastic, surprisingly_sharp",
+      "keigo": {
+        "narration": "casual",
+        "internal_thoughts": "casual",
+        "speaking_to": {
+          "students": "casual_familiar",
+          "一ノ瀬翔太郎": "casual_familiar"
+        },
+        "emotional_shifts": {}
+      },
+      "volume_events": {
+        "1991": {
+          "relationship_to_protagonist": "teacher",
+          "relationship_to_others": "一ノ瀬翔太郎 (Ichinose Shoutarou) - class committee chairman; 三条凪 (Sanjou Nagi) - transfer student; 小谷 (Kotani), 海本 (Umimoto), 佐々井 (Sasai) - classmates, gyaru group.",
+          "how_character_refers_to_others": {
+            "一ノ瀬翔太郎": "一ノ瀬 (Ichinose)",
+            "三条凪": "三条 (Sanjou)"
+          },
+          "keigo_switch": {
+            "narration": "casual",
+            "internal_thoughts": "casual",
+            "speaking_to": {
+              "students": "casual_familiar",
+              "一ノ瀬翔太郎": "casual_familiar"
+            },
+            "emotional_shifts": {}
+          },
+          "contraction_rate": {
+            "baseline": 0.85,
+            "narration": 0.85,
+            "speaking_to": {
+              "students": 0.85
+            },
+            "notes": "Casual and familiar with students, reflecting her unmotivated personality."
+          },
+          "character_arc": "Serves primarily as a comedic relief character and a plot device, facilitating Shoutarou's plans (e.g., making him Nagi's caretaker). Her unmotivated and unconventional teaching style contrasts with the serious undertones of the magical girl world, providing lighthearted moments."
+        }
+      }
+    },
+    "下原勇人": {
+      "category": "antagonist (indirect)",
+      "affiliation": "Japanese",
+      "notes": "arrogant, critical, disrespectful",
+      "keigo": {
+        "narration": "formal",
+        "internal_thoughts": "formal",
+        "speaking_to": {
+          "public": "formal_critical"
+        },
+        "emotional_shifts": {}
+      },
+      "volume_events": {
+        "1991": {
+          "relationship_to_protagonist": "antagonist (indirect)",
+          "relationship_to_others": "一ノ瀬翔太郎 (Ichinose Shoutarou) - target of Shoutarou's 'education'.",
+          "keigo_switch": {
+            "narration": "formal",
+            "internal_thoughts": "formal",
+            "speaking_to": {
+              "public": "formal_critical"
+            },
+            "emotional_shifts": {}
+          },
+          "contraction_rate": {
+            "baseline": 0.6,
+            "narration": 0.6,
+            "speaking_to": {},
+            "notes": "Formal and critical, reflecting his public persona."
+          },
+          "character_arc": "Introduced as a public critic of Cherry Diamond, representing potential societal negativity towards heroes. He becomes the first victim of Shoutarou's 'justice' and is 'converted' into an ardent fan. This event highlights Shoutarou's intense devotion and willingness to go to morally ambiguous lengths for his mother."
+        }
+      }
+    },
+    "メルルーク": {
+      "category": "antagonist",
+      "affiliation": "Shadow Nexus (another dimension)",
+      "notes": "deceptive, cruel, powerful, monstrous",
+      "keigo": {
+        "narration": "formal",
+        "internal_thoughts": "formal",
+        "speaking_to": {
+          "Lilimra": "polite_subservient",
+          "enemies": "threatening"
+        },
+        "emotional_shifts": {
+          "transformed": "monstrous roars"
+        }
+      },
+      "volume_events": {
+        "1991": {
+          "relationship_to_protagonist": "antagonist",
+          "relationship_to_others": "リリムラ (Lilimra) - older sister, Shadow Nexus executive; 百野春菜 (Momono Haruna) - manipulated into becoming a Dark Magical Girl; 一ノ瀬いづみ (Ichinose Izumi) - enemy; 三条凪 (Sanjou Nagi) - enemy.",
+          "keigo_switch": {
+            "narration": "formal",
+            "internal_thoughts": "formal",
+            "speaking_to": {
+              "Lilimra": "polite_subservient",
+              "enemies": "threatening"
+            },
+            "emotional_shifts": {
+              "transformed": "monstrous roars"
+            }
+          },
+          "contraction_rate": {
+            "baseline": 0.4,
+            "narration": 0.4,
+            "speaking_to": {},
+            "notes": "Generally formal and sinister, becoming primal when transformed."
+          },
+          "character_arc": "Lilimra's younger sister, tasked with executing the Dark Magical Girl plan. She successfully manipulates Haruna into becoming Abyss Peach, but her overconfidence leads to her being easily defeated and humiliated by Haruna's unexpected power. She later orchestrates the trap for Cherry Diamond and confronts Plum Sapphire, but is ultimately defeated and obliterated by Cherry Diamond's overwhelming strength."
+        }
+      }
+    },
+    "リリムラ": {
+      "short_name": "Abyss Peach",
+      "category": "antagonist",
+      "affiliation": "Shadow Nexus (another dimension)",
+      "notes": "manipulative, seductive, cunning, evil",
+      "keigo": {
+        "narration": "casual",
+        "internal_thoughts": "casual",
+        "speaking_to": {
+          "subordinates": "casual_condescending",
+          "enemies": "mocking"
+        },
+        "emotional_shifts": {}
+      },
+      "volume_events": {
+        "1991": {
+          "relationship_to_protagonist": "antagonist",
+          "relationship_to_others": "メルルーク (Merlruuk) - younger sister; シャドウネクサス幹部 (Shadow Nexus Executives) - colleagues; 一ノ瀬いづみ (Ichinose Izumi) - primary target/rival; 三条凪 (Sanjou Nagi) - target; 百野春菜 (Momono Haruna) - pawn in her plan.",
+          "keigo_switch": {
+            "narration": "casual",
+            "internal_thoughts": "casual",
+            "speaking_to": {
+              "subordinates": "casual_condescending",
+              "enemies": "mocking"
+            },
+            "emotional_shifts": {}
+          },
+          "contraction_rate": {
+            "baseline": 0.6,
+            "narration": 0.6,
+            "speaking_to": {},
+            "notes": "Playfully evil, with a seductive undertone."
+          },
+          "character_arc": "A Shadow Nexus executive and the mastermind behind the plan to create a Dark Magical Girl to sow despair and accelerate the decline of Maginal. She manipulates her younger sister Merlruuk to execute the plan, which initially succeeds in transforming Haruna into Abyss Peach. Her ultimate goal is to use a Dark Magical Girl to defeat Cherry Diamond, thereby shattering humanity's hope. While her plan is sophisticated, it is ultimately thwarted by the combined efforts of the magical girls and Shoutarou, though she remains a significant threat for future volumes."
+        }
+      }
+    }
+  },
+  "geography": {
+    "countries": {},
+    "regions": {},
+    "cities": {}
+  },
+  "weapons_artifacts": {},
+  "organizations": {},
+  "cultural_terms": {},
+  "mythology": {},
+  "translation_rules": {}
+}

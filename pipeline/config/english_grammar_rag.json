@@ -1,7 +1,7 @@
 {
   "version": "2.0",
   "description": "RAG Database for English Grammar Restructuring - Natural Idiom Patterns for JP→EN Translation (Extended via 148-EPUB corpus analysis)",
-  "last_updated": "2026-02-10",
+  "last_updated": "2026-02-11",
   "pattern_categories": {
     "contrastive_comparison": {
       "description": "Comparing two subjects where both share a quality, but one is notable/surprising",
@@ -195,8 +195,137 @@
       ]
     },
     "high_frequency_transcreations": {
-      "description": "Most common Japanese expressions needing context-aware transcreation (based on 400K lines corpus analysis)",
+      "description": "Most common Japanese expressions needing context-aware transcreation (based on 400K lines corpus analysis) Includes explicit contraction ICL for past-tense narrative and dialogue register alignment.",
       "patterns": [
+        {
+          "id": "narration_contract_past_auxiliaries",
+          "japanese_structure": "Past-tense narrative introspection with contractable auxiliaries (〜ていた / 〜だった / 推量)",
+          "japanese_indicators": [
+            "モノローグ",
+            "〜ていた",
+            "〜だった",
+            "〜はず",
+            "〜だろう"
+          ],
+          "english_pattern": "In past-tense narration, contract auxiliaries when natural: I'd / he'd / she'd / we'd / they'd, would've, must've, could've, should've",
+          "examples": [
+            {
+              "jp": "あのとき、私はそうするべきだったと思った。",
+              "literal": "At that time, I thought I should have done that.",
+              "natural": "Back then, I thought I should’ve done that.",
+              "context": "Past-tense introspection; auxiliary is contractable"
+            },
+            {
+              "jp": "きっと彼は気づいていたはずだ。",
+              "literal": "Surely he must have noticed.",
+              "natural": "Surely he must’ve noticed.",
+              "context": "Narrative inference in close POV"
+            }
+          ],
+          "usage_rules": [
+            "Prefer contractions in introspective first-person/close-third narration unless emphasis or formal register requires full forms.",
+            "High-confidence narration contractions: I'd been, I'd seen, would've, must've, couldn't, didn't.",
+            "Keep readability: do not stack excessive contractions in one short clause."
+          ],
+          "priority": "high",
+          "corpus_frequency": 9100
+        },
+        {
+          "id": "narration_keep_uncontractable_was_were",
+          "japanese_structure": "Past-state description with copula (〜だった / 〜でいた)",
+          "japanese_indicators": [
+            "〜だった",
+            "〜でいた",
+            "状態描写",
+            "地の文"
+          ],
+          "english_pattern": "Do NOT force contractions where none exist: I was / you were / he was / they were remain full forms",
+          "examples": [
+            {
+              "jp": "そのとき私は不安だった。",
+              "literal": "At that time I was anxious.",
+              "natural": "At that time, I was anxious.",
+              "context": "Correct full form in past narrative"
+            },
+            {
+              "jp": "彼らはその場にいた。",
+              "literal": "They were there.",
+              "natural": "They were there.",
+              "context": "No valid contraction for were"
+            }
+          ],
+          "usage_rules": [
+            "Never invent non-forms like *I's or *they's for past be-verbs.",
+            "If a clause uses was/were as main copula, keep full form and contract surrounding auxiliaries instead.",
+            "Do not treat valid was/were as contraction failures during style optimization."
+          ],
+          "priority": "high",
+          "corpus_frequency": 9050
+        },
+        {
+          "id": "dialogue_present_tense_contraction_default",
+          "japanese_structure": "Casual spoken dialogue in present tense (会話体)",
+          "japanese_indicators": [
+            "会話",
+            "〜だよ",
+            "〜じゃない",
+            "〜できない",
+            "〜しない"
+          ],
+          "english_pattern": "In casual dialogue, default to present-tense contractions: I'm, you're, it's, don't, can't, won't",
+          "examples": [
+            {
+              "jp": "今は行けないよ。",
+              "literal": "I cannot go now.",
+              "natural": "I can’t go right now.",
+              "context": "Contemporary teen dialogue"
+            },
+            {
+              "jp": "私は大丈夫だよ。",
+              "literal": "I am fine.",
+              "natural": "I’m fine.",
+              "context": "Casual reassurance in dialogue"
+            }
+          ],
+          "usage_rules": [
+            "Dialogue-first rule: contract by default unless character profile requires formal speech.",
+            "Character exceptions are valid (e.g., ojou-sama/formal upbringing), but must be deliberate and consistent.",
+            "When uncertain, choose the spoken form a native teen would say aloud."
+          ],
+          "priority": "high",
+          "corpus_frequency": 9000
+        },
+        {
+          "id": "avoid_double_contraction_stack",
+          "japanese_structure": "Over-compressed English output from mechanical contraction pass",
+          "japanese_indicators": [
+            "過収縮",
+            "機械的短縮",
+            "スタイル調整"
+          ],
+          "english_pattern": "Prefer natural contraction boundaries: I'd have / he'd have (avoid stacked forms like I'd've in narrative prose)",
+          "examples": [
+            {
+              "jp": "そうしていたら、私は手伝っていただろう。",
+              "literal": "In that case, I would have helped.",
+              "natural": "In that case, I’d have helped.",
+              "context": "Natural contraction boundary in narration"
+            },
+            {
+              "jp": "彼はすぐに気づいただろう。",
+              "literal": "He would have noticed quickly.",
+              "natural": "He’d have noticed quickly.",
+              "context": "Avoid over-compressed stacked apostrophes"
+            }
+          ],
+          "usage_rules": [
+            "Use 'd + have as the safe default in narration polish.",
+            "Avoid stacked contractions when they reduce readability or look machine-generated.",
+            "Prioritize natural prose flow over maximizing contraction count."
+          ],
+          "priority": "medium",
+          "corpus_frequency": 8950
+        },
         {
           "id": "yappari_transcreation",
           "japanese_structure": "やっぱり / やはり / やっぱ (confirmed expectation/reversion)",

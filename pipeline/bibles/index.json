@@ -1,6 +1,6 @@
 {
   "version": "1.0",
-  "last_updated": "2026-02-09T10:38:24.356985+00:00",
+  "last_updated": "2026-02-11T03:14:59.756222+00:00",
   "series": {
     "madan_no_ou_to_vanadis": {
       "bible_file": "madan_no_ou_to_vanadis.json",
@@ -273,6 +273,29 @@
       ],
       "entry_count": 24,
       "last_updated": "2026-02-09T08:16:46Z"
+    },
+    "series_b2005b51ab": {
+      "bible_file": "series_b2005b51ab.json",
+      "match_patterns": [
+        "弓道部の美人な先輩が、俺の部屋でお腹出して寝てる",
+        "My Cool, Beautiful Senpai from the Archery Club is an Absolute Mess When She Sleeps Over!"
+      ],
+      "volumes": [
+        "165c"
+      ],
+      "entry_count": 17,
+      "last_updated": "2026-02-11T03:02:33.537113+00:00"
+    },
+    "series_4dcd08c02d": {
+      "bible_file": "series_4dcd08c02d.json",
+      "match_patterns": [
+        "俺の母さんは最強の魔法少女です"
+      ],
+      "volumes": [
+        "1991"
+      ],
+      "entry_count": 8,
+      "last_updated": "2026-02-11T03:13:54.767276+00:00"
     }
   }
 }

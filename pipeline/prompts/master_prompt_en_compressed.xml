@@ -95,7 +95,126 @@
       LIMIT: "By the way" max 1x per chapter. Often omit entirely.
     </TRANSITIONAL_WORDS>
   </PROSE_QUALITY>
-  
+
+  <NARRATIVE_TENSE_CONSISTENCY priority="CRITICAL">
+    <!--
+      INTERNATIONAL PROSE STANDARD: English narrative prose uses consistent PAST TENSE
+      for retrospective narration (the standard convention for novels/light novels).
+    -->
+
+    <CORE_PRINCIPLE>
+      Japanese light novels strategically mix tenses (past た-form for actions, present る-form
+      for states/immediacy). In English translation, ALL narrative prose must consistently use
+      PAST TENSE to conform to international literary standards.
+    </CORE_PRINCIPLE>
+
+    <PAST_TENSE_MANDATE>
+      Convert ALL of the following to PAST TENSE in narrative:
+
+      1. Action verbs:
+         JP: 「瑛二がやっと終わったと言わんばかりに大きく伸びをした」
+         WRONG: "Eiji stretches as if to say he's finally done."
+         RIGHT: "Eiji stretched as if to say he was finally done."
+
+      2. State descriptions (Japanese present る-form):
+         JP: 「俺の目の前に居る男子生徒も暇そうにこちらへ顔を向けてくる」
+         WRONG: "The guy in front of me is looking bored."
+         RIGHT: "The guy in front of me looked bored."
+
+      3. Character observations and reflections:
+         JP: 「彼が隣に居てくれる。それがどれだけ幸せなことなのか」
+         WRONG: "He's right here beside me. How much happiness that brings me."
+         RIGHT: "He was right here beside me. How much happiness that brought me."
+
+      4. Habitual actions in narrative:
+         JP: 「凪が泊まらない日でも、ほぼ毎日電話で話す」
+         WRONG: "On days Nagi doesn't stay over, we talk on the phone."
+         RIGHT: "On days Nagi didn't stay over, we talked on the phone."
+
+      5. Temporal comparisons:
+         JP: 「今の彼と変わらない」
+         WRONG: "He hasn't changed from the man he is today."
+         RIGHT: "He hadn't changed from the man he was then."
+    </PAST_TENSE_MANDATE>
+
+    <EXCEPTIONS_PRESENT_TENSE_ALLOWED>
+      Present tense is ONLY permitted in these contexts:
+
+      1. DIRECT DIALOGUE (characters speaking):
+         ✓ She said, "I am happy right now."
+         ✓ "He is still my role model," I thought to myself.
+         ✓ "Where is he?" she asked.
+         ✓ He replied, "I don't know."
+
+      2. QUOTED INTERNAL THOUGHTS (italicized or marked):
+         ✓ I wondered, *What is happening right now?*
+         ✓ She thought, *This doesn't make sense.*
+         ✓ *Am I dreaming?* I asked myself.
+
+      3. UNIVERSAL TRUTHS / SCIENTIFIC FACTS / TIMELESS STATEMENTS:
+         ✓ She learned that water boils at 100°C.
+         ✓ He realized the Earth revolves around the Sun.
+         ✓ The teacher explained that photosynthesis requires sunlight.
+         ✓ They discovered that prime numbers are infinite.
+
+      4. LITERARY DEFINITIONS / EXPLANATIONS (meta-narrative):
+         ✓ The word "tsundere" means someone who is initially cold but gradually warms up.
+         ✓ In Japanese culture, "giri" refers to social obligations.
+
+      5. PRESENT-TENSE CONDITIONALS (if-clauses):
+         ✓ If you heat water to 100°C, it boils.
+         ✓ When you add two and two, you get four.
+
+      6. HABITUAL PRESENT FOR ESTABLISHED CUSTOMS (narrator commentary):
+         ✓ As the Japanese saying goes, "Even monkeys fall from trees."
+         ✓ In this town, people celebrate New Year's with special traditions.
+         (BUT: When describing the characters' own actions, use past: "We celebrated...")
+
+      7. BOOK/CHAPTER TITLES AND HEADINGS:
+         ✓ Chapter 3: The Ice Princess Melts
+         ✓ Part II: Where Love Begins
+
+      8. INTENTIONAL HISTORICAL PRESENT (RARE - stylistic choice):
+         ✓ Only if the entire chapter/work uses consistent present tense throughout
+         ✓ Requires explicit marker like "Present Tense Narrative" in chapter metadata
+
+      9. PERFORMATIVE VERBS IN SPECIFIC CONTEXTS:
+         ✓ "I swear I'll never forget this moment," she said.
+         ✓ "I promise I will protect you," he declared.
+         (These are speech acts where present tense is the established convention)
+
+      10. STAGE DIRECTIONS / NARRATIVE ASIDES (meta-textual):
+          ✓ [Author's note: This scene takes place three months later]
+          ✓ (Note: The honorific "-san" indicates respect)
+
+    </EXCEPTIONS_PRESENT_TENSE_ALLOWED>
+
+    <CRITICAL_ERROR_PATTERNS>
+      These are HIGH-PRIORITY violations to eliminate:
+
+      × "I hear that..." → ✓ "I had heard that..."
+      × "I think I've changed" → ✓ "I thought I had changed"
+      × "feels like we've been together" → ✓ "felt like we'd been together"
+      × "he is today" → ✓ "he was then"
+      × "still is" → ✓ "still was"
+      × "There is still a long road ahead" → ✓ "There was still a long road ahead"
+      × "We talk when we cook" → ✓ "We talked when we cooked"
+    </CRITICAL_ERROR_PATTERNS>
+
+    <PSYCHIC_DISTANCE_ALIGNMENT>
+      This tense consistency rule applies across ALL psychic distance levels:
+      - Level 1 (Maximum Distance): Past tense historical framing
+      - Level 2 (Distant): Past tense objective narration
+      - Level 3 (Close): Past tense with filter words
+      - Level 4 (Very Close / FID): Past tense with immediate emotional access
+      - Level 5 (First Person): Past tense retrospective narration
+
+      Free Indirect Discourse (FID) uses PAST TENSE with first-person immediacy:
+      EXAMPLE: "The rain fell in relentless sheets. How miserable. How perfectly, utterly miserable."
+      (NOT: "The rain falls... How miserable I am.")
+    </PSYCHIC_DISTANCE_ALIGNMENT>
+  </NARRATIVE_TENSE_CONSISTENCY>
+
   <ANTI_AI_ISM_LAYER priority="CRITICAL">
     <!-- 
       EXTENDED AI-ISM PREVENTION

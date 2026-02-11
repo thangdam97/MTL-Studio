@@ -15,7 +15,6 @@ Architecture:
   - Multimodal Processor: Uses validated canon names in visual_cache.json
 """
 
-import os
 import re
 import json
 import logging
@@ -23,6 +22,7 @@ from pathlib import Path
 from typing import Dict, Any, Optional, List, Tuple
 from dataclasses import dataclass, field, asdict
 from datetime import datetime
+from pipeline.common.genai_factory import create_genai_client, resolve_api_key, resolve_genai_backend
 
 logger = logging.getLogger(__name__)
 
@@ -108,7 +108,8 @@ Example output:
     ):
         self.volume_path = volume_path
         self.manifest = manifest or self._load_manifest()
-        self.api_key = api_key or os.getenv("GEMINI_API_KEY")
+        self.api_key = resolve_api_key(api_key=api_key, required=False)
+        self.backend = resolve_genai_backend()
         
         # Canon names from Librarian's ruby extraction
         self.canon_names: Dict[str, RubyCanonEntry] = {}
@@ -196,15 +197,14 @@ Example output:
         Returns:
             List of KuchieCharacter objects, or None on error
         """
-        if not self.api_key:
-            logger.warning("[KUCHIE] No API key available, skipping OCR")
+        if not self.api_key and self.backend == "developer":
+            logger.warning("[KUCHIE] No API key available in developer mode, skipping OCR")
             return None
-        
-        from google import genai
+
         from google.genai import types
         
         try:
-            client = genai.Client(api_key=self.api_key)
+            client = create_genai_client(api_key=self.api_key, backend=self.backend)
             
             # Load image
             image_bytes = kuchie_path.read_bytes()
@@ -212,7 +212,7 @@ Example output:
             image_part = types.Part.from_bytes(data=image_bytes, mime_type=mime_type)
             
             response = client.models.generate_content(
-                model="gemini-3-pro-preview",
+                model="gemini-2.5-pro",
                 contents=[self.KUCHIE_OCR_PROMPT, image_part],
                 config=types.GenerateContentConfig(
                     temperature=0.2,

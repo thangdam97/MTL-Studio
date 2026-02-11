@@ -4,10 +4,10 @@ Gemini API Client - Wrapper with retry logic and rate limiting.
 Handles Gemini API communication for the Translator agent.
 """
 
-import os
 import time
 from dataclasses import dataclass
 from typing import Optional, Dict, Any, List
+from pipeline.common.genai_factory import create_genai_client, resolve_api_key, resolve_genai_backend
 
 from .config import (
     get_model_name,
@@ -56,18 +56,27 @@ class GeminiClient:
     - Content caching for RAG modules
     """
 
-    def __init__(self, api_key: Optional[str] = None):
+    def __init__(
+        self,
+        api_key: Optional[str] = None,
+        backend: Optional[str] = None,
+        project: Optional[str] = None,
+        location: Optional[str] = None,
+    ):
         """
         Initialize Gemini client.
 
         Args:
-            api_key: Gemini API key. If not provided, reads from GEMINI_API_KEY env var.
+            api_key: API key override. If not provided, resolves GOOGLE_API_KEY
+                    then GEMINI_API_KEY (legacy fallback).
         """
-        self.api_key = api_key or os.environ.get('GEMINI_API_KEY')
-        if not self.api_key:
-            raise GeminiClientError(
-                "GEMINI_API_KEY not found. Set environment variable or pass api_key parameter."
-            )
+        self.backend = resolve_genai_backend(backend)
+        try:
+            self.api_key = resolve_api_key(api_key=api_key, required=(self.backend == "developer"))
+        except ValueError as e:
+            raise GeminiClientError(str(e))
+        self._project = project
+        self._location = location
 
         self.model_name = get_model_name()
         self.generation_params = get_generation_params()
@@ -90,10 +99,14 @@ class GeminiClient:
     def _initialize_client(self):
         """Initialize the Gemini client and model."""
         try:
-            from google import genai
             from google.genai import types
 
-            self._client = genai.Client(api_key=self.api_key)
+            self._client = create_genai_client(
+                api_key=self.api_key,
+                backend=self.backend,
+                project=self._project,
+                location=self._location,
+            )
             self._types = types
             print(f"[GEMINI] Initialized with model: {self.model_name}")
         except ImportError:

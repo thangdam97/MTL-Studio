@@ -9,6 +9,7 @@ from .format_normalizer import FormatNormalizer
 from .vn_cjk_cleaner import VietnameseCJKCleaner, format_cleaner_report
 from .truncation_validator import TruncationValidator, TruncationIssue, TruncationReport
 from .pov_validator import POVValidator, POVIssue, POVReport
+from .tense_validator import TenseConsistencyValidator, TenseViolation, TenseReport
 
 # Keep package import resilient when legacy cjk_cleaner.py is absent.
 try:
@@ -27,4 +28,7 @@ __all__ = [
     'POVValidator',
     'POVIssue',
     'POVReport',
+    'TenseConsistencyValidator',
+    'TenseViolation',
+    'TenseReport',
 ]

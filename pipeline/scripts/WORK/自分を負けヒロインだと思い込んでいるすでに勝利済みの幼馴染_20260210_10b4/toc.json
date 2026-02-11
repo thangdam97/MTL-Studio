@@ -1,0 +1,87 @@
+{
+  "title": "もくじ",
+  "format": "nav",
+  "source_file": "/Users/damminhthang/Documents/WORK/AI_MODULES/MTL_STUDIO/pipeline/scripts/WORK/自分を負けヒロインだと思い込んでいるすでに勝利済みの幼馴染_20260210_10b4/_epub_extracted/item/navigation-documents.xhtml",
+  "nav_points": [
+    {
+      "id": "nav_1",
+      "label": "表紙",
+      "content_src": "xhtml/p-cover.xhtml",
+      "play_order": 1,
+      "level": 0,
+      "children": []
+    },
+    {
+      "id": "nav_2",
+      "label": "目次",
+      "content_src": "xhtml/p-toc.xhtml",
+      "play_order": 2,
+      "level": 0,
+      "children": []
+    },
+    {
+      "id": "nav_3",
+      "label": "第一章　一人ラブコメレース（二週目）開幕編",
+      "content_src": "xhtml/p-007.xhtml#toc-001",
+      "play_order": 3,
+      "level": 0,
+      "children": []
+    },
+    {
+      "id": "nav_4",
+      "label": "第二章　ファーストキスは譲らない！編",
+      "content_src": "xhtml/p-010.xhtml#toc-002",
+      "play_order": 4,
+      "level": 0,
+      "children": []
+    },
+    {
+      "id": "nav_5",
+      "label": "第三章　公衆面前ラブラブ二人三脚ダービー編",
+      "content_src": "xhtml/p-014.xhtml#toc-003",
+      "play_order": 5,
+      "level": 0,
+      "children": []
+    },
+    {
+      "id": "nav_6",
+      "label": "第四章　ダブルイチャイチャ誕生日　デート編",
+      "content_src": "xhtml/p-017.xhtml#toc-004",
+      "play_order": 6,
+      "level": 0,
+      "children": []
+    },
+    {
+      "id": "nav_7",
+      "label": "第五章　ダブルイチャイチャ誕生日　お泊まり編",
+      "content_src": "xhtml/p-020.xhtml#toc-005",
+      "play_order": 7,
+      "level": 0,
+      "children": []
+    },
+    {
+      "id": "nav_8",
+      "label": "第六章　花火より幼馴染編",
+      "content_src": "xhtml/p-025.xhtml#toc-006",
+      "play_order": 8,
+      "level": 0,
+      "children": []
+    },
+    {
+      "id": "nav_9",
+      "label": "おまけ　プールでいちゃいちゃ",
+      "content_src": "xhtml/p-031.xhtml#toc-007",
+      "play_order": 9,
+      "level": 0,
+      "children": []
+    },
+    {
+      "id": "nav_10",
+      "label": "奥付",
+      "content_src": "xhtml/p-colophon.xhtml",
+      "play_order": 10,
+      "level": 0,
+      "children": []
+    }
+  ]
+}

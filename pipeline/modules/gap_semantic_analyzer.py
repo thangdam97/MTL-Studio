@@ -15,14 +15,13 @@ Version: 2.0
 """
 
 import json
-import os
 import re
 from dataclasses import dataclass, field
 from enum import Enum
 from pathlib import Path
 from typing import Optional, List, Dict, Any
-from google import genai
 from google.genai import types
+from pipeline.common.genai_factory import create_genai_client, resolve_api_key
 
 # Load curated patterns
 PATTERNS_FILE = Path(__file__).parent.parent / "config" / "gap_patterns_curated.json"
@@ -97,11 +96,11 @@ class GapSemanticAnalyzer:
         self.patterns = self._load_patterns()
         
         # Configure API client
-        api_key = api_key or os.getenv('GEMINI_API_KEY')
+        api_key = resolve_api_key(api_key=api_key, required=False)
         if not api_key:
-            raise ValueError("GEMINI_API_KEY not found in environment")
+            raise ValueError("GOOGLE_API_KEY (or GEMINI_API_KEY) not found in environment")
         
-        self.client = genai.Client(api_key=api_key)
+        self.client = create_genai_client(api_key=api_key)
         self.model_name = 'gemini-2.5-pro'
         
         # Generation configs for different gaps

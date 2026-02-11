@@ -11,11 +11,11 @@ Collection per volume: manga_panels_{volume_id}
 🧪 EXPERIMENTAL — Phase 1.8b
 """
 
-import os
 import logging
 from pathlib import Path
 from typing import Dict, List, Optional, Any, Tuple
 from dataclasses import dataclass
+from pipeline.common.genai_factory import create_genai_client, resolve_api_key
 
 logger = logging.getLogger(__name__)
 
@@ -29,12 +29,7 @@ except ImportError:
     CHROMADB_AVAILABLE = False
 
 # Gemini embeddings
-try:
-    from google import genai
-
-    GEMINI_AVAILABLE = True
-except ImportError:
-    GEMINI_AVAILABLE = False
+GEMINI_AVAILABLE = True
 
 
 @dataclass
@@ -102,9 +97,9 @@ class MangaVectorStore:
         )
 
         # Gemini embedding client
-        api_key = gemini_api_key or os.getenv("GEMINI_API_KEY")
+        api_key = resolve_api_key(api_key=gemini_api_key, required=False) if GEMINI_AVAILABLE else None
         if GEMINI_AVAILABLE and api_key:
-            self.gemini_client = genai.Client(api_key=api_key)
+            self.gemini_client = create_genai_client(api_key=api_key)
             self._embedding_model = "gemini-embedding-001"
         else:
             self.gemini_client = None

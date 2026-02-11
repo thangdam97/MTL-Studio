@@ -1,0 +1,266 @@
+{
+  "schema_version": "1.0",
+  "schema_name": "Common Grammar Checklist (Tier 1 RAG)",
+  "description": "High-confidence checklist for recurrent EN output errors detected in production runs. Optimized for deterministic spot-checking and safe auto-fix.",
+  "last_updated": "2026-02-10",
+  "tier": "tier_1_common_grammar_checklist",
+  "language": "en",
+  "scope": {
+    "target_paths": [
+      "WORK/*/EN/*.md"
+    ],
+    "source": "Gemini output post-translation",
+    "intent": "fast mechanical checks before manual prose review"
+  },
+  "checklist": [
+    {
+      "id": "cjk_leak_known_mapping",
+      "label": "CJK leak using known mapped terms",
+      "severity": "high",
+      "confidence": 0.99,
+      "detect_pattern": "[\\u3400-\\u4DBF\\u4E00-\\u9FFF\\u3040-\\u30FF\\uAC00-\\uD7AF]+",
+      "autofix": {
+        "strategy": "exact_dictionary_substitution_only",
+        "dictionary_sources": [
+          "config/cjk_validation_rules.json#replacement_mappings",
+          "prompts/modules/rag/cjk_prevention_schema_en.json#common_substitutions"
+        ],
+        "notes": [
+          "Only replace exact terms with known mappings.",
+          "Unknown CJK sequences must be flagged, not guessed."
+        ]
+      },
+      "review_gate": "Any unresolved CJK sequence remains HIGH priority for manual review."
+    },
+    {
+      "id": "malformed_modal_would_of",
+      "label": "Malformed modal phrase: would of",
+      "severity": "medium",
+      "confidence": 0.99,
+      "detect_pattern": "\\bwould\\s+of\\b",
+      "autofix": {
+        "strategy": "direct_replace",
+        "replace_with": "would have"
+      },
+      "examples": [
+        {
+          "incorrect": "I would of told you.",
+          "correct": "I would have told you."
+        }
+      ]
+    },
+    {
+      "id": "a_vs_an_obvious_vowel",
+      "label": "Obvious article mismatch: a + vowel-initial word",
+      "severity": "medium",
+      "confidence": 0.93,
+      "detect_pattern": "\\b([Aa])\\s+([aeiouAEIOU][A-Za-z'-]*)\\b",
+      "autofix": {
+        "strategy": "conditional_replace",
+        "replace_rule": "a/an based on first word sound heuristic",
+        "exceptions_prefix": [
+          "user",
+          "use",
+          "util",
+          "usual",
+          "uni",
+          "unanim",
+          "one",
+          "once",
+          "euro",
+          "ewe",
+          "ufo",
+          "uk",
+          "u-sh",
+          "usb",
+          "usage"
+        ]
+      },
+      "examples": [
+        {
+          "incorrect": "a abandoned building",
+          "correct": "an abandoned building"
+        },
+        {
+          "incorrect": "a octopus",
+          "correct": "an octopus"
+        }
+      ]
+    },
+    {
+      "id": "name_smile_voice_possessive",
+      "label": "Missing possessive for Name + smile/voice",
+      "severity": "high",
+      "confidence": 0.95,
+      "detect_pattern": "\\b([A-Z][a-z]+)\\s+(smile|voice)\\b",
+      "autofix": {
+        "strategy": "template_replace",
+        "template": "$1's $2",
+        "exclude_names": [
+          "Her",
+          "His",
+          "My",
+          "Your",
+          "Our",
+          "Their",
+          "Its",
+          "The",
+          "This",
+          "That",
+          "These",
+          "Those",
+          "A",
+          "An"
+        ],
+        "exclude_line_starts": [
+          "\"",
+          "'",
+          "*",
+          "“",
+          "”",
+          "‘",
+          "’"
+        ]
+      },
+      "examples": [
+        {
+          "incorrect": "Nagi smile softened.",
+          "correct": "Nagi's smile softened."
+        },
+        {
+          "incorrect": "Emma voice trembled.",
+          "correct": "Emma's voice trembled."
+        }
+      ]
+    },
+    {
+      "id": "name_bodypart_possessive_missing",
+      "label": "Missing possessive for Name + body-part/perception noun (JP no-transfer)",
+      "severity": "high",
+      "confidence": 0.94,
+      "detect_pattern": "\\b([A-Z][a-z]+)\\s+(eyes|face|hand|expression|heart|mind|body|hair|skin|lips|arms|legs|feet|shoulders|gaze|cheeks|jaw|fingers|wrist|posture|breath)\\b",
+      "autofix": {
+        "strategy": "template_replace",
+        "template": "$1's $2",
+        "exclude_names": [
+          "Her",
+          "His",
+          "My",
+          "Your",
+          "Our",
+          "Their",
+          "Its",
+          "The",
+          "This",
+          "That",
+          "These",
+          "Those",
+          "A",
+          "An",
+          "In",
+          "On",
+          "At",
+          "To",
+          "From",
+          "For",
+          "By",
+          "With",
+          "Without"
+        ],
+        "exclude_line_starts": [
+          "\"",
+          "'",
+          "*",
+          "“",
+          "”",
+          "‘",
+          "’"
+        ]
+      },
+      "examples": [
+        {
+          "incorrect": "Shinonome gaze shifted to me.",
+          "correct": "Shinonome's gaze shifted to me."
+        },
+        {
+          "incorrect": "Yuzuki body shook.",
+          "correct": "Yuzuki's body shook."
+        }
+      ]
+    },
+    {
+      "id": "honorific_name_possessive_missing",
+      "label": "Missing possessive for honorific name + noun (JP no-transfer)",
+      "severity": "high",
+      "confidence": 0.95,
+      "detect_pattern": "\\b([A-Z][a-z]+-(?:kun|chan|san|sama|senpai))\\s+(voice|smile|eyes|face|hand|expression|heart|mind|body|hair|gaze|cheeks)\\b",
+      "autofix": {
+        "strategy": "template_replace",
+        "template": "$1's $2",
+        "exclude_line_starts": [
+          "\"",
+          "'",
+          "*",
+          "“",
+          "”",
+          "‘",
+          "’"
+        ]
+      },
+      "examples": [
+        {
+          "incorrect": "Souta-kun voice dropped.",
+          "correct": "Souta-kun's voice dropped."
+        },
+        {
+          "incorrect": "Nagi-chan smile widened.",
+          "correct": "Nagi-chan's smile widened."
+        }
+      ]
+    },
+    {
+      "id": "family_relation_no_particle_transfer",
+      "label": "Possible JP no-particle noun stack in family relation",
+      "severity": "medium",
+      "confidence": 0.8,
+      "detect_pattern": "\\b([A-Z][a-z]+)\\s+(mother-daughter|father-son|father-daughter|mother-son|mother|father|sister|brother|daughter|son|family)\\b",
+      "autofix": {
+        "strategy": "flag_for_review",
+        "notes": [
+          "May require either possessive ('Name's mother') or attributive form ('the Name family').",
+          "Do not auto-rewrite blindly due context/style ambiguity."
+        ]
+      },
+      "examples": [
+        {
+          "candidate": "Asanagi mother-daughter duo",
+          "review_suggestions": [
+            "the Asanagi mother-daughter duo",
+            "Asanagi's mother-daughter duo"
+          ]
+        }
+      ]
+    }
+  ],
+  "execution_order": [
+    "cjk_leak_known_mapping",
+    "malformed_modal_would_of",
+    "a_vs_an_obvious_vowel",
+    "name_smile_voice_possessive",
+    "name_bodypart_possessive_missing",
+    "honorific_name_possessive_missing",
+    "family_relation_no_particle_transfer"
+  ],
+  "output_contract": {
+    "report_fields": [
+      "files_scanned",
+      "files_modified",
+      "fix_count_by_rule",
+      "top_modified_files",
+      "unresolved_cjk_sequences"
+    ],
+    "must_flag": [
+      "unresolved CJK after known substitutions"
+    ]
+  }
+}

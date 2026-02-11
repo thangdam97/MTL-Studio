@@ -10,9 +10,9 @@ from typing import Optional, Dict
 from datetime import datetime, timedelta
 
 try:
-    from google import genai
+    from pipeline.common.genai_factory import create_genai_client
 except ImportError:
-    genai = None
+    create_genai_client = None
 
 from pipeline.translator.schema_extractor import ChapterSnapshot
 
@@ -35,12 +35,8 @@ class SchemaCacheManager:
     
     def _ensure_client(self):
         """Ensure Gemini client is initialized."""
-        if self.client is None and genai:
-            import os
-            api_key = os.getenv('GOOGLE_API_KEY')
-            if not api_key:
-                raise ValueError("GOOGLE_API_KEY not set")
-            self.client = genai.Client(api_key=api_key)
+        if self.client is None and create_genai_client:
+            self.client = create_genai_client()
     
     def cache_schema(
         self,
@@ -61,7 +57,7 @@ class SchemaCacheManager:
         Returns:
             Cache name if successful, None otherwise
         """
-        if genai is None:
+        if create_genai_client is None:
             logger.warning("google-genai not available, skipping cache")
             return None
         

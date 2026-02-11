@@ -337,7 +337,12 @@ class LibrarianAgent:
         
         # Check 2: Does TOC cover spine content files?
         toc_coverage, missing_files = self._validate_toc_completeness(toc, spine)
-        is_incomplete_toc = toc_coverage < 0.5
+        toc_alignment, toc_missing_in_spine = self._validate_toc_alignment(toc, spine)
+        # A low spine-coverage ratio can be normal when TOC lists chapter boundaries
+        # but chapters span multiple continuation XHTML files.
+        # Treat TOC as incomplete only when both signals are weak:
+        # 1) low spine coverage AND 2) TOC entries themselves do not align to spine.
+        is_incomplete_toc = (toc_coverage < 0.5) and (toc_alignment < 0.9)
         
         # Check 3: Publisher-specific config
         is_publisher_minimal = profile_manager.should_use_spine_fallback(publisher_name, toc_entry_count)
@@ -357,6 +362,17 @@ class LibrarianAgent:
                 print(f"     [WARNING] Missing from TOC: {sorted(missing_files)}")
             else:
                 print(f"     [WARNING] Missing from TOC: {sorted(list(missing_files)[:5])} ... and {len(missing_files)-5} more")
+        elif toc_coverage < 0.5 and toc_alignment >= 0.9:
+            print(
+                f"     [INFO] TOC uses chapter-boundary entries "
+                f"(spine coverage {toc_coverage:.0%}, TOC alignment {toc_alignment:.0%}); "
+                f"keeping TOC-based extraction."
+            )
+        if toc_missing_in_spine:
+            print(
+                f"     [WARNING] {len(toc_missing_in_spine)} TOC entries not present in spine: "
+                f"{sorted(list(toc_missing_in_spine)[:5])}"
+            )
         if is_publisher_minimal:
             recovery_reasons.append("publisher_config")
             print(f"     [INFO] Publisher {publisher_name} uses minimal TOC pattern")
@@ -547,6 +563,7 @@ class LibrarianAgent:
                 "toc_entries": toc_entry_count,
                 "spine_content_files": len([i for i in spine.items if i.linear and not i.is_illustration]),
                 "toc_coverage": toc_coverage,
+                "toc_alignment": toc_alignment,
                 "missing_from_toc": sorted(list(missing_files)) if missing_files else []
             },
             volume_acts=volume_acts
@@ -1962,6 +1979,51 @@ class LibrarianAgent:
         coverage = len(covered_files) / len(spine_content)
         
         return coverage, missing_files
+
+    def _validate_toc_alignment(self, toc: TableOfContents, spine: Spine) -> tuple[float, set]:
+        """
+        Validate whether TOC entries themselves map to spine content files.
+
+        This catches genuinely broken TOCs while allowing chapter-boundary TOCs
+        where continuation XHTML files are intentionally absent from TOC.
+
+        Returns:
+            Tuple of (alignment_ratio, toc_missing_in_spine)
+            - alignment_ratio: 0.0 to 1.0 coverage of TOC content files in spine
+            - toc_missing_in_spine: TOC files that do not exist in spine content
+        """
+        # Normalize TOC files
+        toc_files = set()
+        for np in toc.get_flat_list():
+            filename = np.content_src.split('#')[0]
+            if '/' in filename:
+                filename = filename.split('/')[-1]
+            toc_files.add(filename)
+
+        skip_patterns = ['cover', 'nav', 'toc', 'colophon', 'copyright', 'titlepage']
+        toc_content = set()
+        for filename in toc_files:
+            lower_name = filename.lower()
+            if any(skip in lower_name for skip in skip_patterns):
+                continue
+            toc_content.add(filename)
+
+        spine_content = set()
+        for item in spine.items:
+            if not item.linear or item.is_illustration:
+                continue
+            filename = item.href.split('/')[-1] if '/' in item.href else item.href
+            lower_name = filename.lower()
+            if any(skip in lower_name for skip in skip_patterns):
+                continue
+            spine_content.add(filename)
+
+        if not toc_content:
+            return 0.0, set()
+
+        aligned = toc_content & spine_content
+        missing = toc_content - spine_content
+        return len(aligned) / len(toc_content), missing
 
     def _detect_volume_acts(
         self,

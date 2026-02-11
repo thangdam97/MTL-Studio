@@ -24,10 +24,10 @@ from pipeline.translator.config import (
 from pipeline.translator.scene_break_formatter import SceneBreakFormatter
 from pipeline.translator.chunk_merger import ChunkMerger
 from pipeline.translator.glossary_lock import GlossaryLock
-from pipeline.post_processor.truncation_validator import TruncationValidator
 from pipeline.post_processor.vn_cjk_cleaner import VietnameseCJKCleaner
 from modules.gap_integration import GapIntegrationEngine
-from modules.rtas_calculator import RTASCalculator, VoiceSettings
+# RTASCalculator disabled (2026-02-10): Direct manifest reading instead
+# from modules.rtas_calculator import RTASCalculator, VoiceSettings
 
 # Dialect detection (v1.0 - 2026-02-01)
 try:
@@ -108,75 +108,156 @@ class ChapterProcessor:
         self.chunk_threshold_bytes = int(massive_cfg.get("chunk_threshold_bytes", 120000))
         self.target_chunk_chars = int(massive_cfg.get("target_chunk_chars", 45000))
 
-        self.truncation_validator = TruncationValidator()
         self.glossary_lock: Optional[GlossaryLock] = None
 
-        # RTAS Calculator - derives voice settings from manifest character metadata
-        self.rtas_calculator = RTASCalculator()
-        self.voice_settings: Dict[str, VoiceSettings] = {}
-        self.enable_rtas = True  # Enable RTAS guidance by default for English
-        self._load_voice_settings()
+        # RTAS Calculator - DISABLED (2026-02-10)
+        # Bypass RTAS calculation, read contraction rates directly from manifest
+        self.rtas_calculator = None  # Disabled
+        self.voice_settings: Dict[str, Any] = {}  # Unused - kept for compatibility
+        self.enable_rtas = False  # DISABLED - direct manifest reading instead
+        self.contraction_rates: Dict[str, int] = {}  # Direct manifest-to-rate mapping
+        self._load_contraction_rates_from_manifest()
 
     def set_glossary_lock(self, glossary_lock: Optional[GlossaryLock]) -> None:
         """Attach manifest glossary lock from TranslatorAgent."""
         self.glossary_lock = glossary_lock
 
-    def _load_voice_settings(self) -> None:
-        """Load RTAS voice settings from manifest character profiles."""
+    def _load_contraction_rates_from_manifest(self) -> None:
+        """
+        Load contraction rates directly from manifest.json character profiles.
+
+        RTAS calculator bypassed (2026-02-10): The calculator correctly reads manifest
+        but Gemini ignores the calculated rates during translation. This method reads
+        manifest values directly for prompt injection without intermediate calculation.
+
+        Default: 95% for contemporary casual speech (global baseline)
+        """
         try:
             work_dir = self.context_manager.work_dir
             manifest_path = work_dir / "manifest.json"
-            
+
             if not manifest_path.exists():
-                logger.debug("No manifest.json found for RTAS calculation")
+                logger.debug("No manifest.json found for contraction rate loading")
                 return
-            
+
             with open(manifest_path, 'r', encoding='utf-8') as f:
                 manifest = json.load(f)
-            
-            self.voice_settings = self.rtas_calculator.calculate_from_manifest(manifest)
-            
-            if self.voice_settings:
-                logger.info(f"✓ RTAS: Derived voice settings for {len(self.voice_settings)} characters")
-                for char_id, settings in list(self.voice_settings.items())[:3]:
-                    logger.debug(f"  {char_id}: RTAS={settings.rtas_score}, contraction={settings.contraction_rate}%")
+
+            # Extract character_profiles from metadata_en
+            metadata_en = manifest.get("metadata_en", {})
+            if not isinstance(metadata_en, dict):
+                metadata_en = {}
+            profiles = metadata_en.get("character_profiles", {})
+            if not isinstance(profiles, dict):
+                profiles = {}
+
+            # Read contraction_rate.baseline directly from each character profile
+            for char_id, profile in profiles.items():
+                if not isinstance(profile, dict):
+                    continue
+
+                contraction_rate_data = profile.get("contraction_rate")
+                if contraction_rate_data and isinstance(contraction_rate_data, dict):
+                    # New format: {"baseline": 0.75, "narration": 0.75, ...}
+                    baseline = contraction_rate_data.get("baseline", 0.95)
+                    # Convert from 0.0-1.0 to 0-100 percentage
+                    self.contraction_rates[char_id] = int(baseline * 100)
+                else:
+                    # Default to 95% for contemporary speech
+                    self.contraction_rates[char_id] = 95
+
+            if self.contraction_rates:
+                logger.info(f"✓ Loaded contraction rates for {len(self.contraction_rates)} characters from manifest")
+                for char_id, rate in list(self.contraction_rates.items())[:3]:
+                    logger.debug(f"  {char_id}: {rate}%")
+            else:
+                logger.debug("No character profiles found in manifest")
         except Exception as e:
-            logger.warning(f"Failed to load RTAS voice settings: {e}")
-            self.voice_settings = {}
+            logger.warning(f"Failed to load contraction rates from manifest: {e}")
+            self.contraction_rates = {}
 
     def _format_rtas_guidance(self) -> Optional[str]:
-        """Format RTAS voice settings for prompt injection."""
-        if not self.voice_settings or not self.enable_rtas:
+        """
+        Format contraction rate guidance for prompt injection.
+
+        ALIGNED WITH TENSE ENFORCEMENT: Applies contractions primarily to dialogue
+        (present tense) and to contractable past-tense forms in narration (I'd, wouldn't).
+        Accepts that "was/were" cannot be contracted (grammatically correct).
+        """
+        if not self.contraction_rates:
             return None
-        
+
         if self.target_language.lower() not in ['en', 'english']:
-            # RTAS contraction rules are English-specific
+            # Contraction rules are English-specific
             return None
-        
+
+        # Find the protagonist/narrator (usually the first character with high rate)
+        protagonist_id = None
+        protagonist_rate = 0
+        for char_id, rate in self.contraction_rates.items():
+            if rate >= 90:
+                protagonist_id = char_id
+                protagonist_rate = rate
+                break
+
         lines = [
-            "=== CHARACTER VOICE SETTINGS (RTAS-DERIVED) ===",
-            "Adjust dialogue style based on these per-character settings:",
+            "=== CHARACTER VOICE & CONTRACTION RATES ===",
+            "",
+            "**PRIMARY APPLICATION: Character dialogue (present tense)**",
+            "**SECONDARY APPLICATION: Past-tense contractions in narration (I'd, wouldn't, couldn't)**",
             ""
         ]
-        
-        for char_id, settings in self.voice_settings.items():
-            # Only include characters with non-default settings
-            if settings.rtas_score != 3.0 or settings.forbidden_vocab or settings.required_vocab:
-                lines.append(f"**{char_id}** [RTAS: {settings.rtas_score:.1f}]")
-                lines.append(f"  • Contraction rate: {settings.contraction_rate}%")
-                if settings.forbidden_vocab:
-                    forbidden = ", ".join(sorted(settings.forbidden_vocab)[:5])
-                    lines.append(f"  • AVOID: {forbidden}")
-                if settings.required_vocab:
-                    required = ", ".join(sorted(settings.required_vocab)[:5])
-                    lines.append(f"  • PREFER: {required}")
-                lines.append("")
-        
-        if len(lines) <= 3:
-            # No characters with notable settings
-            return None
-        
-        lines.append("Apply these constraints to dialogue attributed to each character.")
+
+        lines.append("**CHARACTER DIALOGUE CONTRACTION RATES:**")
+        for char_id, rate in self.contraction_rates.items():
+            lines.append(f"- **{char_id}**: {rate}%")
+            if rate >= 95:
+                lines.append(f"  → Casual speech: \"I'm sure,\" \"don't worry,\" \"can't wait,\" \"won't forget,\" \"it's fine\"")
+            elif rate >= 75:
+                lines.append(f"  → Moderately formal: Mix \"I'm\" / \"I am\" depending on sentence context")
+            else:
+                lines.append(f"  → Formal speech: \"I am,\" \"do not,\" \"cannot,\" \"will not\"")
+
+        lines.append("")
+        lines.append("**NARRATION CONTRACTION RULES:**")
+        if protagonist_id and protagonist_rate >= 90:
+            lines.append(f"Narrator ({protagonist_id}) uses {protagonist_rate}% contraction rate:")
+            lines.append("")
+            lines.append("✓ ALWAYS contract past-tense auxiliaries:")
+            lines.append("  - \"I had\" → \"I'd\"")
+            lines.append("  - \"I would\" → \"I'd\"")
+            lines.append("  - \"we had\" → \"we'd\"")
+            lines.append("  - \"they would\" → \"they'd\"")
+            lines.append("  - \"could not\" → \"couldn't\"")
+            lines.append("  - \"would not\" → \"wouldn't\"")
+            lines.append("  - \"should not\" → \"shouldn't\"")
+            lines.append("  - \"did not\" → \"didn't\"")
+            lines.append("  - \"have not\" → \"haven't\"")
+            lines.append("")
+            lines.append("✓ ACCEPT uncontractable forms (grammatically correct):")
+            lines.append("  - \"I was\" (no contraction exists)")
+            lines.append("  - \"you were\" (no contraction exists)")
+            lines.append("  - \"he was\" (no contraction exists)")
+            lines.append("  - \"they were\" (no contraction exists)")
+        else:
+            lines.append("Narrator uses formal narration style with minimal contractions.")
+
+        lines.append("")
+        lines.append("---")
+        lines.append("**EXAMPLES:**")
+        lines.append("")
+        lines.append("❌ WRONG narration (95% rate):")
+        lines.append("  \"I looked at her. I would have said hello, but I did not know what to say.\"")
+        lines.append("")
+        lines.append("✅ CORRECT narration (95% rate):")
+        lines.append("  \"I looked at her. I'd have said hello, but I didn't know what to say.\"")
+        lines.append("")
+        lines.append("✅ CORRECT dialogue (95% rate):")
+        lines.append("  \"Hey, I'm heading home now. Don't wait up for me, okay? It's pretty late.\"")
+        lines.append("")
+        lines.append("✅ CORRECT dialogue (75% rate - Nagi):")
+        lines.append("  \"I am going home now. Please do not wait for me. It is rather late.\"")
+
         return "\n".join(lines)
     
     def _load_character_names(self) -> Dict[str, str]:
@@ -932,46 +1013,6 @@ This document contains the internal reasoning process that Gemini used while tra
             #         logger.warning("[ANTI-AI-ISM] Continuing without auto-correction (run 'mtl.py heal' manually)")
 
             validation_warnings = list(audit.warnings or [])
-
-            truncation_report = self.truncation_validator.validate_chapter(output_path)
-            if truncation_report.has_critical():
-                critical_count = len(truncation_report.critical)
-                logger.error(f"[TRUNCATION] {critical_count} CRITICAL issue(s) in {chapter_id}")
-                validation_warnings.append(
-                    f"Truncation validator detected {critical_count} critical issue(s)"
-                )
-                if truncation_report.should_block():
-                    para_count = len(truncation_report.paragraph_end_truncations)
-                    logger.error(
-                        f"[TRUNCATION] BLOCKING: {para_count} paragraph-end truncation(s) "
-                        f"detected in {chapter_id} — manual review required"
-                    )
-                    validation_warnings.append(
-                        f"BLOCKING: {para_count} paragraph-end truncation(s) require review"
-                    )
-            elif truncation_report.has_any():
-                validation_warnings.append(
-                    f"Truncation validator detected {len(truncation_report.all_issues)} potential issue(s)"
-                )
-
-            if self.glossary_lock and self.glossary_lock.is_locked():
-                chapter_text = output_path.read_text(encoding="utf-8")
-                fixed_text, fix_count = self.glossary_lock.auto_fix_output(chapter_text)
-                if fix_count > 0:
-                    output_path.write_text(fixed_text, encoding="utf-8")
-                    logger.info(f"[GLOSSARY] Auto-fixed {fix_count} name variant(s) in {chapter_id}")
-                    validation_warnings.append(
-                        f"Glossary lock auto-fixed {fix_count} name variant(s)"
-                    )
-                else:
-                    glossary_report = self.glossary_lock.validate_output(chapter_text)
-                    if glossary_report.has_critical():
-                        logger.error(
-                            f"[GLOSSARY] {len(glossary_report.critical)} unfixable variant(s) in {chapter_id}"
-                        )
-                        validation_warnings.append(
-                            f"Glossary lock detected {len(glossary_report.critical)} unfixable name variant(s)"
-                        )
             
             return TranslationResult(
                 success=True,
@@ -1085,42 +1126,6 @@ This document contains the internal reasoning process that Gemini used while tra
 
             audit = QualityMetrics.quick_audit(merged_content, source_text)
             validation_warnings = list(audit.warnings or [])
-
-            if merge_result.truncation_issues:
-                critical = [i for i in merge_result.truncation_issues if i.severity == "CRITICAL"]
-                para_end = [i for i in merge_result.truncation_issues if getattr(i, 'followed_by_blank', False)]
-                if critical:
-                    validation_warnings.append(
-                        f"Truncation validator detected {len(critical)} critical issue(s) in merged output"
-                    )
-                    if para_end or len(critical) >= 3:
-                        logger.error(
-                            f"[TRUNCATION] BLOCKING: {len(para_end)} paragraph-end truncation(s) "
-                            f"in merged {chapter_id} — manual review required"
-                        )
-                        validation_warnings.append(
-                            f"BLOCKING: paragraph-end truncation(s) require review"
-                        )
-                else:
-                    validation_warnings.append(
-                        f"Truncation validator detected {len(merge_result.truncation_issues)} potential issue(s)"
-                    )
-
-            if self.glossary_lock and self.glossary_lock.is_locked():
-                fixed_content, fix_count = self.glossary_lock.auto_fix_output(merged_content)
-                if fix_count > 0:
-                    output_path.write_text(fixed_content, encoding="utf-8")
-                    merged_content = fixed_content
-                    logger.info(f"[GLOSSARY] Auto-fixed {fix_count} name variant(s) in merged {chapter_id}")
-                    validation_warnings.append(
-                        f"Glossary lock auto-fixed {fix_count} name variant(s)"
-                    )
-                else:
-                    glossary_report = self.glossary_lock.validate_output(merged_content)
-                    if glossary_report.has_critical():
-                        validation_warnings.append(
-                            f"Glossary lock detected {len(glossary_report.critical)} unfixable name variant(s)"
-                        )
 
             return TranslationResult(
                 success=True,

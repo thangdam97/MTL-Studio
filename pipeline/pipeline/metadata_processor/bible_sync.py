@@ -30,6 +30,7 @@ Usage in MetadataProcessor.process_metadata():
 from __future__ import annotations
 
 import datetime
+import hashlib
 import json
 import logging
 import re
@@ -144,7 +145,7 @@ class BibleSyncAgent:
         """Resolve a bible for this manifest.
 
         Checks bible_id, volume_id, series metadata, and fuzzy match.
-        Returns True if a bible was found and loaded.
+        Returns True if a bible was found (or bootstrapped) and loaded.
         """
         try:
             bible = self.bible_ctrl.load(manifest, self.work_dir)
@@ -157,8 +158,234 @@ class BibleSyncAgent:
         except Exception as e:
             logger.warning(f"Bible resolution failed: {e}")
 
+        # Auto-bootstrap flow:
+        # For a brand-new series with no pre-existing bible, seed a new bible
+        # from the current (base) manifest so this run and all subsequent runs
+        # stay on the same continuity source of truth.
+        if self._bootstrap_from_manifest(manifest):
+            return True
+
         logger.info("📖 No bible found for this volume — sync skipped")
         return False
+
+    def _bootstrap_from_manifest(self, manifest: dict) -> bool:
+        """Create/seed a new bible from the current manifest when missing."""
+        seed = self._derive_bootstrap_seed(manifest)
+        if not seed:
+            return False
+
+        series_id = seed["series_id"]
+        series_title = seed["series_title"]
+        match_patterns = seed["match_patterns"]
+        world_setting = seed["world_setting"]
+
+        # If entry already exists but wasn't resolved earlier, try direct load once.
+        # This handles stale pattern/volume links while preserving existing canon data.
+        if self.bible_ctrl.index.get("series", {}).get(series_id):
+            try:
+                bible = self.bible_ctrl.get_bible(series_id)
+                if bible:
+                    self.bible = bible
+                    self.series_id = series_id
+                    manifest["bible_id"] = series_id
+                    logger.info(
+                        f"📖 Bible bootstrap recovered existing series: {series_id} "
+                        f"({bible.entry_count()} entries)"
+                    )
+                    return True
+            except Exception as e:
+                logger.warning(f"Existing bible entry for {series_id} could not be loaded: {e}")
+
+        try:
+            self.bible_ctrl.create_bible(
+                series_id=series_id,
+                series_title=series_title,
+                match_patterns=match_patterns,
+                world_setting=world_setting,
+            )
+            logger.info(
+                f"📖 Auto-created new bible: {series_id} "
+                f"(patterns={len(match_patterns)})"
+            )
+        except FileExistsError:
+            # Race-safe fallback: file appeared after checks.
+            pass
+        except Exception as e:
+            logger.warning(f"Bible bootstrap create failed for {series_id}: {e}")
+            return False
+
+        try:
+            summary = self.bible_ctrl.import_from_manifest(manifest, series_id)
+            logger.info(f"📖 Seeded bible from base manifest: {summary}")
+        except Exception as e:
+            logger.warning(f"Bible bootstrap import failed for {series_id}: {e}")
+
+        try:
+            bible = self.bible_ctrl.get_bible(series_id)
+        except Exception as e:
+            logger.warning(f"Bible bootstrap load failed for {series_id}: {e}")
+            return False
+
+        if not bible:
+            return False
+
+        self.bible = bible
+        self.series_id = series_id
+        manifest["bible_id"] = series_id
+        logger.info(
+            f"📖 Bible bootstrapped: {series_id} "
+            f"({bible.entry_count()} entries, volumes={len(bible.volumes_registered)})"
+        )
+        return True
+
+    def _derive_bootstrap_seed(self, manifest: dict) -> Optional[Dict[str, Any]]:
+        """Derive minimal deterministic bible seed data from a volume manifest."""
+        if not isinstance(manifest, dict):
+            return None
+
+        metadata = manifest.get("metadata", {})
+        if not isinstance(metadata, dict):
+            metadata = {}
+        metadata_en = manifest.get("metadata_en", {})
+        if not isinstance(metadata_en, dict):
+            metadata_en = {}
+
+        explicit_bible_id = str(manifest.get("bible_id", "") or "").strip()
+        volume_id = str(manifest.get("volume_id", "") or "").strip()
+
+        series_raw = metadata.get("series", "")
+        series_ja = ""
+        series_en = ""
+        series_base = ""
+        if isinstance(series_raw, dict):
+            # Common variants:
+            # 1) {"ja": "...", "en": "..."}
+            # 2) {"title": "...", "title_english": "..."}
+            # 3) {"title": {"japanese": "...", "english": "...", ...}, ...}
+            series_ja = str(
+                series_raw.get("ja", "")
+                or series_raw.get("japanese", "")
+                or ""
+            ).strip()
+            series_en = str(
+                series_raw.get("en", "")
+                or series_raw.get("english", "")
+                or series_raw.get("title_english", "")
+                or ""
+            ).strip()
+
+            series_title_block = series_raw.get("title", "")
+            if isinstance(series_title_block, dict):
+                series_ja = series_ja or str(
+                    series_title_block.get("ja", "")
+                    or series_title_block.get("japanese", "")
+                    or ""
+                ).strip()
+                series_en = series_en or str(
+                    series_title_block.get("en", "")
+                    or series_title_block.get("english", "")
+                    or ""
+                ).strip()
+            elif isinstance(series_title_block, str):
+                series_ja = series_ja or series_title_block.strip()
+
+            series_base = series_en or series_ja
+        else:
+            series_base = str(series_raw or "").strip()
+            series_ja = series_base
+            series_en = ""
+
+        title_ja = str(metadata.get("title", "") or "").strip()
+        title_en = str(metadata_en.get("title_en", "") or metadata.get("title_en", "") or "").strip()
+        series_title_en = str(
+            metadata_en.get("series_title_en", "")
+            or metadata_en.get("series_en", "")
+            or series_en
+            or ""
+        ).strip()
+
+        canonical_series_ja = self._strip_volume_suffix(series_ja or title_ja)
+        canonical_series_en = self._strip_volume_suffix(series_title_en or title_en)
+
+        base_name = (
+            explicit_bible_id
+            or canonical_series_ja
+            or canonical_series_en
+            or self._strip_volume_suffix(title_en)
+            or self._strip_volume_suffix(title_ja)
+        )
+        if not base_name:
+            return None
+
+        if explicit_bible_id:
+            series_id = explicit_bible_id
+        else:
+            series_id = self._build_series_id(base_name, volume_id)
+
+        series_title = {
+            "ja": canonical_series_ja or canonical_series_en or base_name,
+            "en": canonical_series_en or canonical_series_ja or base_name,
+            "romaji": "",
+        }
+
+        match_patterns: List[str] = []
+        for candidate in [
+            canonical_series_ja,
+            canonical_series_en,
+            self._strip_volume_suffix(title_ja),
+            self._strip_volume_suffix(title_en),
+            series_base,
+        ]:
+            text = str(candidate or "").strip()
+            if text and text not in match_patterns:
+                match_patterns.append(text)
+        if not match_patterns:
+            match_patterns = [base_name]
+
+        world_setting = {}
+        ws = metadata_en.get("world_setting", {})
+        if isinstance(ws, dict):
+            world_setting = ws
+
+        return {
+            "series_id": series_id,
+            "series_title": series_title,
+            "match_patterns": match_patterns,
+            "world_setting": world_setting,
+        }
+
+    def _build_series_id(self, base_name: str, volume_id: str) -> str:
+        """Build a deterministic series_id from series/title text."""
+        normalized = re.sub(r"\s+", " ", str(base_name).strip().lower())
+        ascii_slug = re.sub(r"[^a-z0-9]+", "_", normalized).strip("_")
+        if ascii_slug:
+            return ascii_slug[:80]
+
+        # For non-ASCII titles, generate stable ID from content hash so
+        # all volumes in the same series resolve to the same bible_id.
+        if normalized:
+            digest = hashlib.sha1(normalized.encode("utf-8")).hexdigest()[:10]
+            return f"series_{digest}"
+
+        fallback = self.bible_ctrl._extract_short_id(volume_id) or "unknown"
+        return f"series_{fallback}"
+
+    def _strip_volume_suffix(self, text: str) -> str:
+        """Best-effort removal of trailing volume markers for stable series matching."""
+        cleaned = str(text or "").strip()
+        if not cleaned:
+            return ""
+
+        patterns = [
+            r"\s*(?:Vol(?:ume)?\.?|VOL\.?)\s*[0-9０-９]+$",
+            r"\s*[Vv]\s*[0-9０-９]+$",
+            r"\s*第\s*[0-9０-９一二三四五六七八九十百千]+(?:巻|話|章)$",
+            r"\s*[0-9０-９]+$",
+            r"\s*[（(][0-9０-９]+[）)]$",
+        ]
+        for pat in patterns:
+            cleaned = re.sub(pat, "", cleaned).strip()
+        return cleaned
 
     # ── PULL: Bible → Manifest ───────────────────────────────────
 

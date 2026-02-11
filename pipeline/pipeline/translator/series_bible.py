@@ -876,6 +876,10 @@ class BibleController:
 
         # Update index entry count
         entry = self.index.get('series', {}).get(series_id, {})
+        short_id = self._extract_short_id(volume_id) or volume_id
+        volumes = entry.setdefault('volumes', [])
+        if short_id and short_id not in volumes:
+            volumes.append(short_id)
         entry['entry_count'] = bible.entry_count()
         entry['last_updated'] = datetime.now(timezone.utc).isoformat()
 

@@ -29,6 +29,7 @@ def handle_config(args: Any, controller: Any) -> CommandResult:
         temperature=args.temperature if hasattr(args, 'temperature') else None,
         top_p=args.top_p if hasattr(args, 'top_p') else None,
         top_k=args.top_k if hasattr(args, 'top_k') else None,
+        backend=args.backend if hasattr(args, 'backend') else None,
         language=args.language if hasattr(args, 'language') else None,
         show_language=args.show_language if hasattr(args, 'show_language') else False,
         toggle_multimodal=args.toggle_multimodal if hasattr(args, 'toggle_multimodal') else False,

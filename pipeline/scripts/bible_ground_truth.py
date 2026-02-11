@@ -28,6 +28,7 @@ from datetime import datetime, timezone
 from google import genai
 from google.genai import types
 from dotenv import load_dotenv
+from pipeline.common.genai_factory import create_genai_client, resolve_api_key
 
 # ---------------------------------------------------------------------------
 # Paths
@@ -52,11 +53,11 @@ RATE_SLEEP  = 2.0       # seconds between calls (respect quota)
 # Gemini client
 # ---------------------------------------------------------------------------
 def get_client() -> genai.Client:
-    api_key = os.getenv("GEMINI_API_KEY")
+    api_key = resolve_api_key(required=False)
     if not api_key:
-        print("ERROR: GEMINI_API_KEY not set. Add it to pipeline/.env or export it.")
+        print("ERROR: GOOGLE_API_KEY (or GEMINI_API_KEY) not set. Add it to pipeline/.env or export it.")
         sys.exit(1)
-    return genai.Client(api_key=api_key)
+    return create_genai_client(api_key=api_key)
 
 
 # ---------------------------------------------------------------------------

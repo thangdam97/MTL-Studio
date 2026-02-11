@@ -42,6 +42,7 @@ class PromptLoader:
         self.cjk_prevention_path = None  # Initialize for all languages
         self.anti_ai_ism_path = None  # Anti-AI-ism pattern library (v3.5)
         self.english_grammar_rag_path = None  # English Grammar RAG (Tier 1) - EN only
+        self.english_grammar_validation_t1_path = None  # EN Grammar Validation T1 (Tier 1) - EN only
         self.literacy_techniques_path = None  # Literary techniques (Tier 1) - language-agnostic
 
         # Setup Three-Tier RAG paths for VN
@@ -70,6 +71,8 @@ class PromptLoader:
             self.anti_ai_ism_path = config_dir / 'anti_ai_ism_patterns.json'
             # English Grammar RAG (Tier 1) - Natural idiom patterns for JP→EN
             self.english_grammar_rag_path = config_dir / 'english_grammar_rag.json'
+            # English Grammar Validation T1 (Tier 1) - rhythm/literal/repetition guardrails
+            self.english_grammar_validation_t1_path = config_dir / 'english_grammar_validation_t1.json'
 
         # Literacy Techniques (Tier 1 - language-agnostic, applies to both EN and VN)
         config_dir = PIPELINE_ROOT / 'config'
@@ -82,6 +85,7 @@ class PromptLoader:
         self._cjk_prevention = None  # CJK prevention schema with substitution patterns
         self._anti_ai_ism = None  # Anti-AI-ism pattern library (v3.5)
         self._english_grammar_rag = None  # English Grammar RAG (Tier 1) - natural idioms
+        self._english_grammar_validation_t1 = None  # EN Grammar Validation T1 (Tier 1)
         self._vietnamese_grammar_rag = None  # Vietnamese Grammar RAG (Tier 1) - anti-AI-ism + particle system
         self._literacy_techniques = None  # Literary techniques (Tier 1) - language-agnostic narrative techniques
         self._continuity_pack = None  # Continuity pack from previous volume
@@ -131,6 +135,11 @@ class PromptLoader:
     
     def set_semantic_metadata(self, semantic_metadata: Dict[str, Any]):
         """Set full semantic metadata for injection into system instruction (Enhanced v2.1)."""
+        if not isinstance(semantic_metadata, dict):
+            logger.warning(
+                f"Semantic metadata has invalid type {type(semantic_metadata).__name__}; using empty dict"
+            )
+            semantic_metadata = {}
         self._semantic_metadata = semantic_metadata
         char_count = len(semantic_metadata.get('characters', []))
         pattern_count = len(semantic_metadata.get('dialogue_patterns', {}))
@@ -489,6 +498,40 @@ class PromptLoader:
             logger.warning(f"Failed to load English Grammar RAG: {e}")
             return None
 
+    def load_english_grammar_validation_t1(self) -> Optional[Dict[str, Any]]:
+        """Load english_grammar_validation_t1.json (Tier 1) - EN rhythm/literal/repetition guardrails."""
+        if self._english_grammar_validation_t1:
+            return self._english_grammar_validation_t1
+
+        # Check for path attribute (only set for EN translations)
+        if not hasattr(self, 'english_grammar_validation_t1_path') or not self.english_grammar_validation_t1_path:
+            logger.debug("English Grammar Validation T1 not configured for this language")
+            return None
+
+        if not self.english_grammar_validation_t1_path.exists():
+            logger.debug(f"English Grammar Validation T1 not found: {self.english_grammar_validation_t1_path}")
+            return None
+
+        try:
+            with open(self.english_grammar_validation_t1_path, 'r', encoding='utf-8') as f:
+                self._english_grammar_validation_t1 = json.load(f)
+            size_kb = self.english_grammar_validation_t1_path.stat().st_size / 1024
+
+            validation_categories = self._english_grammar_validation_t1.get('validation_categories', {})
+            rhythm_rules = len(validation_categories.get('rhythm_and_emphasis', {}).get('patterns', []))
+            literal_rules = len(validation_categories.get('literal_phrasing', {}).get('patterns', []))
+
+            logger.info(
+                f"✓ Loaded english_grammar_validation_t1.json: "
+                f"{len(validation_categories)} categories "
+                f"({rhythm_rules} rhythm/emphasis, {literal_rules} literal-phrasing rules) "
+                f"({size_kb:.1f}KB)"
+            )
+            return self._english_grammar_validation_t1
+        except Exception as e:
+            logger.warning(f"Failed to load English Grammar Validation T1: {e}")
+            return None
+
     def load_vietnamese_grammar_rag(self) -> Optional[Dict[str, Any]]:
         """Load vietnamese_grammar_rag.json (Tier 1) - Anti-AI-ism + particle system for JP→VN translation."""
         if self._vietnamese_grammar_rag:
@@ -578,6 +621,30 @@ class PromptLoader:
         except Exception as e:
             logger.warning(f"Failed to load literacy techniques: {e}")
             return None
+
+    def load_narrative_tense_standards(self) -> Optional[Dict[str, Any]]:
+        """
+        Load narrative tense consistency standards from literacy_techniques.json.
+
+        Returns:
+            Dict containing tense standards or None if not found
+        """
+        if not hasattr(self, '_literacy_techniques') or not self._literacy_techniques:
+            self._literacy_techniques = self.load_literacy_techniques()
+
+        if not self._literacy_techniques:
+            return None
+
+        # Check both at root level and under narrative_techniques
+        tense_standards = self._literacy_techniques.get('narrative_tense_standards', {})
+        if not tense_standards:
+            # Try nested under narrative_techniques
+            narrative_techniques = self._literacy_techniques.get('narrative_techniques', {})
+            tense_standards = narrative_techniques.get('narrative_tense_standards', {})
+
+        if tense_standards:
+            logger.debug(f"Loaded narrative tense standards with {len(tense_standards.get('allowed_present_tense_contexts', []))} whitelist contexts")
+        return tense_standards if tense_standards else None
 
     def load_reference_index(self) -> Optional[Dict[str, Any]]:
         """Load reference_index.json (Three-Tier RAG metadata)."""
@@ -714,6 +781,7 @@ class PromptLoader:
           - cjk_prevention_schema_*.json (language-specific)
           - anti_ai_ism_patterns.json (EN only)
           - english_grammar_rag.json (EN only)
+          - english_grammar_validation_t1.json (EN only)
           - vietnamese_grammar_rag.json (VN only)
           - literacy_techniques.json (language-agnostic)
 
@@ -757,6 +825,10 @@ class PromptLoader:
         # Load Tier 1: english_grammar_rag.json (EN only - natural idiom patterns)
         logger.debug("[VERBOSE] Loading Tier 1: english_grammar_rag.json...")
         english_grammar_rag_data = self.load_english_grammar_rag()
+
+        # Load Tier 1: english_grammar_validation_t1.json (EN only - rhythm/literal/repetition guardrails)
+        logger.debug("[VERBOSE] Loading Tier 1: english_grammar_validation_t1.json...")
+        english_grammar_validation_t1_data = self.load_english_grammar_validation_t1()
         
         # Load Tier 1: vietnamese_grammar_rag.json (VN only - anti-AI-ism + particle system)
         logger.debug("[VERBOSE] Loading Tier 1: vietnamese_grammar_rag.json...")
@@ -865,6 +937,51 @@ class PromptLoader:
             injected_count += 1
             anti_ai_ism_injected.append('english_grammar_rag.json (Tier 1, auto-appended)')
 
+        # Inject english_grammar_validation_t1.json (Tier 1 - EN only, rhythm/literal/repetition guardrails)
+        if english_grammar_validation_t1_data and "english_grammar_validation_t1.json" in final_prompt:
+            english_validation_formatted = self._format_english_grammar_validation_t1_for_injection(
+                english_grammar_validation_t1_data
+            )
+            validation_size_kb = len(english_validation_formatted.encode('utf-8')) / 1024
+
+            categories = english_grammar_validation_t1_data.get('validation_categories', {})
+            rhythm_rules = len(categories.get('rhythm_and_emphasis', {}).get('patterns', []))
+            literal_rules = len(categories.get('literal_phrasing', {}).get('patterns', []))
+
+            logger.info(
+                f"Injecting english_grammar_validation_t1.json: "
+                f"{rhythm_rules} rhythm/emphasis + {literal_rules} literal-phrasing rules "
+                f"({validation_size_kb:.1f}KB)"
+            )
+            validation_injection = (
+                "\n<!-- START MODULE: english_grammar_validation_t1.json -->\n"
+                f"{english_validation_formatted}\n"
+                "<!-- END MODULE: english_grammar_validation_t1.json -->\n"
+            )
+            final_prompt = final_prompt.replace("english_grammar_validation_t1.json", validation_injection)
+            injected_count += 1
+            anti_ai_ism_injected.append('english_grammar_validation_t1.json (Tier 1)')
+        elif english_grammar_validation_t1_data:
+            # Auto-append if placeholder not found (fallback for prompts without placeholder)
+            english_validation_formatted = self._format_english_grammar_validation_t1_for_injection(
+                english_grammar_validation_t1_data
+            )
+            validation_size_kb = len(english_validation_formatted.encode('utf-8')) / 1024
+            categories = english_grammar_validation_t1_data.get('validation_categories', {})
+            rhythm_rules = len(categories.get('rhythm_and_emphasis', {}).get('patterns', []))
+
+            logger.info(
+                f"Appending english_grammar_validation_t1.json (no placeholder found): "
+                f"{rhythm_rules} rhythm/emphasis rules ({validation_size_kb:.1f}KB)"
+            )
+            final_prompt += (
+                "\n\n<!-- START MODULE: english_grammar_validation_t1.json (AUTO-APPENDED) -->\n"
+                f"{english_validation_formatted}\n"
+                "<!-- END MODULE: english_grammar_validation_t1.json -->\n"
+            )
+            injected_count += 1
+            anti_ai_ism_injected.append('english_grammar_validation_t1.json (Tier 1, auto-appended)')
+
         # Inject vietnamese_grammar_rag.json (Tier 1 - VN only, anti-AI-ism + particle system)
         if vietnamese_grammar_rag_data and "vietnamese_grammar_rag.json" in final_prompt:
             vietnamese_grammar_formatted = self._format_vietnamese_grammar_rag_for_injection(vietnamese_grammar_rag_data)
@@ -902,7 +1019,10 @@ class PromptLoader:
 
         # Inject literacy_techniques.json (Tier 1 - language-agnostic narrative techniques)
         if literacy_techniques_data and "literacy_techniques.json" in final_prompt:
-            literacy_formatted = self._format_literacy_techniques_for_injection(literacy_techniques_data)
+            literacy_formatted = self._format_literacy_techniques_for_injection(
+                literacy_techniques_data,
+                english_grammar_validation_t1_data
+            )
             literacy_size_kb = len(literacy_formatted.encode('utf-8')) / 1024
 
             # Count techniques
@@ -918,7 +1038,10 @@ class PromptLoader:
             injected_count += 1
         elif literacy_techniques_data:
             # Auto-append if placeholder not found (fallback for prompts without placeholder)
-            literacy_formatted = self._format_literacy_techniques_for_injection(literacy_techniques_data)
+            literacy_formatted = self._format_literacy_techniques_for_injection(
+                literacy_techniques_data,
+                english_grammar_validation_t1_data
+            )
             literacy_size_kb = len(literacy_formatted.encode('utf-8')) / 1024
 
             first_person = len(literacy_techniques_data.get('narrative_techniques', {}).get('first_person', {}).get('subtechniques', {}))
@@ -1037,13 +1160,23 @@ class PromptLoader:
         - Emotional pronoun shifts state machines
         - Translation guidelines priority system
         """
+        if not isinstance(metadata, dict):
+            logger.warning(
+                f"Skipping semantic metadata injection due to invalid type: {type(metadata).__name__}"
+            )
+            return ""
+
         lines = []
         
         # 1. CHARACTER PROFILES
         characters = metadata.get('characters', [])
+        if not isinstance(characters, list):
+            characters = []
         if characters:
             lines.append("=== CHARACTER PROFILES (Full Semantic Data) ===\n")
             for char in characters:
+                if not isinstance(char, dict):
+                    continue
                 # Handle both v2.1 format and transformed legacy format
                 name_display = char.get('name_kanji') or char.get('name_en', 'Unknown')
                 name_target = char.get('name_vn') or char.get('name_en', 'Unknown')
@@ -1146,9 +1279,16 @@ class PromptLoader:
         
         # 2. DIALOGUE PATTERNS
         dialogue_patterns = metadata.get('dialogue_patterns', {})
+        if not isinstance(dialogue_patterns, dict):
+            dialogue_patterns = {}
         if dialogue_patterns:
             lines.append("\n=== DIALOGUE PATTERNS (Speech Fingerprints) ===\n")
             for char_name, pattern in dialogue_patterns.items():
+                if not isinstance(pattern, dict):
+                    lines.append(f"【{char_name}】")
+                    lines.append(f"  Speech Style: {pattern}")
+                    lines.append("")
+                    continue
                 lines.append(f"【{char_name}】")
                 lines.append(f"  Speech Style: {pattern.get('speech_style', 'N/A')}")
                 
@@ -1172,9 +1312,16 @@ class PromptLoader:
         
         # 3. SCENE CONTEXTS
         scene_contexts = metadata.get('scene_contexts', {})
+        if not isinstance(scene_contexts, dict):
+            scene_contexts = {}
         if scene_contexts:
             lines.append("\n=== SCENE CONTEXTS (Location-Based Guidance) ===\n")
             for location, context in scene_contexts.items():
+                if not isinstance(context, dict):
+                    lines.append(f"【{location}】")
+                    lines.append(f"  Context: {context}")
+                    lines.append("")
+                    continue
                 lines.append(f"【{location}】")
                 lines.append(f"  Privacy: {context.get('privacy', 'N/A')}, Formality: {context.get('formality', 'N/A')}")
                 if 'pronoun_guidance' in context:
@@ -1185,6 +1332,8 @@ class PromptLoader:
         
         # 4. EMOTIONAL PRONOUN SHIFTS
         emotional_shifts = metadata.get('emotional_pronoun_shifts', {})
+        if not isinstance(emotional_shifts, dict):
+            emotional_shifts = {}
         if emotional_shifts:
             lines.append("\n=== EMOTIONAL PRONOUN SHIFTS (State Machines) ===\n")
             for char_states_key, states_data in emotional_shifts.items():
@@ -1203,6 +1352,8 @@ class PromptLoader:
         
         # 5. TRANSLATION GUIDELINES (Priority System) - Handles both v2.1 and transformed legacy
         guidelines = metadata.get('translation_guidelines', {})
+        if not isinstance(guidelines, dict):
+            guidelines = {}
         if guidelines:
             lines.append("\n=== TRANSLATION GUIDELINES (Priority System) ===\n")
             
@@ -1215,9 +1366,15 @@ class PromptLoader:
             
             # Legacy transformed: character_exceptions (from british_speech_exception)
             char_exceptions = guidelines.get('character_exceptions', {})
+            if not isinstance(char_exceptions, dict):
+                char_exceptions = {}
             if char_exceptions:
                 lines.append("\n⚠ Character Speech Exceptions:")
                 for char_name, exception in char_exceptions.items():
+                    if not isinstance(exception, dict):
+                        lines.append(f"  【{char_name}】")
+                        lines.append(f"    Exception: {exception}")
+                        continue
                     lines.append(f"  【{char_name}】")
                     allowed = exception.get('allowed_patterns', [])
                     if allowed:
@@ -1232,6 +1389,8 @@ class PromptLoader:
             
             # Legacy transformed: preferred_alternatives
             alternatives = guidelines.get('preferred_alternatives', {})
+            if not isinstance(alternatives, dict):
+                alternatives = {}
             if alternatives:
                 lines.append("\n✓ Preferred Alternatives:")
                 for forbidden_word, replacements in alternatives.items():
@@ -1239,6 +1398,8 @@ class PromptLoader:
             
             # Legacy transformed: target_metrics
             metrics = guidelines.get('target_metrics', {})
+            if not isinstance(metrics, dict):
+                metrics = {}
             if metrics:
                 lines.append("\n📊 Target Metrics:")
                 for metric_name, target_val in metrics.items():
@@ -1251,6 +1412,8 @@ class PromptLoader:
             
             # Legacy transformed: dialogue_rules
             dialogue_rules = guidelines.get('dialogue_rules', {})
+            if not isinstance(dialogue_rules, dict):
+                dialogue_rules = {}
             if dialogue_rules:
                 lines.append("\n💬 Dialogue Rules (per character):")
                 for char_name, rule in dialogue_rules.items():
@@ -1258,6 +1421,8 @@ class PromptLoader:
             
             # Legacy transformed: naming_conventions
             naming = guidelines.get('naming_conventions', {})
+            if not isinstance(naming, dict):
+                naming = {}
             if naming:
                 lines.append("\n📛 Naming Conventions:")
                 for category, info in naming.items():
@@ -1273,11 +1438,16 @@ class PromptLoader:
             volume_ctx = guidelines.get('volume_context', {})
             if volume_ctx:
                 lines.append("\n📖 Volume-Specific Context:")
-                for key, val in volume_ctx.items():
-                    lines.append(f"  {key}: {val}")
+                if isinstance(volume_ctx, dict):
+                    for key, val in volume_ctx.items():
+                        lines.append(f"  {key}: {val}")
+                else:
+                    lines.append(f"  {volume_ctx}")
             
             # v2.1 format: consistency_rules
             consistency = guidelines.get('consistency_rules', {})
+            if not isinstance(consistency, dict):
+                consistency = {}
             if consistency:
                 lines.append("\nConsistency Rules:")
                 for rule_key, rule_desc in list(consistency.items())[:3]:
@@ -1285,6 +1455,8 @@ class PromptLoader:
             
             # v2.1 format: quality_markers
             quality = guidelines.get('quality_markers', {})
+            if not isinstance(quality, dict):
+                quality = {}
             if 'good_translation' in quality:
                 lines.append("\n✓ Good Translation Markers:")
                 for marker in quality['good_translation'][:3]:
@@ -1895,6 +2067,79 @@ class PromptLoader:
         
         return "\n".join(lines)
 
+    def _format_english_grammar_validation_t1_for_injection(self, validation_data: Dict[str, Any]) -> str:
+        """
+        Format english_grammar_validation_t1.json for prompt injection (EN Tier 1).
+
+        Emits only high-signal prose guardrails to keep prompt size controlled:
+        - literal_phrasing
+        - rhythm_and_emphasis
+        """
+        lines = ["# ENGLISH GRAMMAR VALIDATION T1: RHYTHM-FIRST PROSE GUARDRAILS (Tier 1)\n"]
+        lines.append("## ✂️ Prioritize Sharp Rhythm Over Over-Exposition\n")
+        lines.append("Use these as live rewrite checks during generation, not post-hoc fixes.\n")
+
+        categories = validation_data.get('validation_categories', {})
+
+        literal_phrasing = categories.get('literal_phrasing', {})
+        if literal_phrasing:
+            lines.append("## 🧭 AVOID LITERAL TRANSLATION")
+            lines.append("If both options are accurate, choose the more idiomatic, scene-natural line.")
+            patterns = literal_phrasing.get('patterns', [])
+            for pattern in patterns[:4]:
+                issue = pattern.get('issue', '')
+                if issue:
+                    lines.append(f"- {issue}")
+                examples = pattern.get('examples', [])
+                if examples:
+                    ex = examples[0]
+                    incorrect = ex.get('incorrect') or ex.get('original')
+                    correct = ex.get('correct') or ex.get('preferred')
+                    if incorrect and correct:
+                        lines.append(f"  ❌ {incorrect}")
+                        lines.append(f"  ✅ {correct}")
+            lines.append("")
+
+        rhythm = categories.get('rhythm_and_emphasis', {})
+        if rhythm:
+            lines.append("## ⚡ RHYTHM & EMPHASIS CONTROL")
+            policy = rhythm.get('enforcement_policy', '')
+            if policy:
+                lines.append(f"- Policy: {policy}")
+
+            patterns = rhythm.get('patterns', [])
+            for pattern in patterns:
+                rule_id = pattern.get('id', '')
+                issue = pattern.get('issue', '')
+                if rule_id:
+                    lines.append(f"- **{rule_id}**: {issue}")
+                examples = pattern.get('examples', [])
+                if examples:
+                    ex = examples[0]
+                    original = ex.get('original') or ex.get('incorrect') or ex.get('over_emphasis')
+                    preferred = ex.get('preferred') or ex.get('correct')
+                    if original and preferred:
+                        lines.append(f"  ❌ {original}")
+                        lines.append(f"  ✅ {preferred}")
+            lines.append("")
+
+            exceptions = rhythm.get('exceptions', [])
+            if exceptions:
+                lines.append("### Allowed Exceptions")
+                for exc in exceptions[:3]:
+                    lines.append(f"- {exc}")
+                lines.append("")
+
+        lines.append("## 🔗 INTERLOCK WITH LITERACY TECHNIQUES")
+        lines.append("- Use `literacy_techniques.rhythm_first_prose_enforcement` as primary style intent.")
+        lines.append("- Use this module's rule IDs as concrete rewrite triggers during drafting.")
+        lines.append("- If conflict occurs: preserve plot facts + character intent, then choose tighter cadence.\n")
+
+        lines.append("**Success Metric:** Reads like native contemporary prose, not a translated paraphrase.")
+        lines.append("**Failure:** Repetitive emphasis loops, noun-heavy literalness, or explanatory drag.\n")
+
+        return "\n".join(lines)
+
     def _format_vietnamese_grammar_rag_for_injection(self, grammar_rag_data: Dict[str, Any]) -> str:
         """
         Format Vietnamese Grammar RAG for prompt injection (Tier 1).
@@ -2100,7 +2345,11 @@ class PromptLoader:
         
         return "\n".join(lines)
 
-    def _format_literacy_techniques_for_injection(self, literacy_data: Dict[str, Any]) -> str:
+    def _format_literacy_techniques_for_injection(
+        self,
+        literacy_data: Dict[str, Any],
+        english_validation_t1_data: Optional[Dict[str, Any]] = None
+    ) -> str:
         """
         Format Literary Techniques for prompt injection (Tier 1).
 
@@ -2113,6 +2362,7 @@ class PromptLoader:
 
         Args:
             literacy_data: Literary techniques dictionary with narrative_techniques, psychic_distance_levels, etc.
+            english_validation_t1_data: Optional EN validation config for cross-module rhythm interlock.
 
         Returns:
             Formatted literary technique guidance for prompt injection
@@ -2225,6 +2475,92 @@ class PromptLoader:
                 for tell, show in list(show_alternatives.items())[:3]:
                     lines.append(f"- **{tell}** → \"{show}\"")
                 lines.append("")
+
+        # RHYTHM-FIRST PROSE ENFORCEMENT (new Tier 1 block)
+        rhythm_first = literacy_data.get('rhythm_first_prose_enforcement', {})
+        if rhythm_first and rhythm_first.get('enabled'):
+            lines.append("## ⚡ RHYTHM-FIRST PROSE ENFORCEMENT\n")
+            principle = rhythm_first.get('principle', '')
+            instruction = rhythm_first.get('instruction', '')
+            if principle:
+                lines.append(f"**Principle:** {principle}")
+            if instruction:
+                lines.append(f"**Instruction:** {instruction}")
+            lines.append("")
+
+            rules = rhythm_first.get('rules', {})
+
+            avoid_literal = rules.get('avoid_literal_translation', {})
+            if avoid_literal:
+                lines.append("### Avoid Literal Translation")
+                if avoid_literal.get('description'):
+                    lines.append(f"- {avoid_literal.get('description')}")
+                for enforcement in avoid_literal.get('enforcement', [])[:3]:
+                    lines.append(f"- {enforcement}")
+                rewrite_examples = avoid_literal.get('rewrite_examples', [])
+                if rewrite_examples:
+                    ex = rewrite_examples[0]
+                    literal = ex.get('literal', '')
+                    preferred = ex.get('preferred', '')
+                    if literal and preferred:
+                        lines.append(f"  ❌ {literal}")
+                        lines.append(f"  ✅ {preferred}")
+                lines.append("")
+
+            avoid_repetition = rules.get('avoid_repetition_and_over_emphasis', {})
+            if avoid_repetition:
+                lines.append("### Avoid Repetition & Over-Emphasis")
+                if avoid_repetition.get('description'):
+                    lines.append(f"- {avoid_repetition.get('description')}")
+                for enforcement in avoid_repetition.get('enforcement', [])[:3]:
+                    lines.append(f"- {enforcement}")
+                markers = avoid_repetition.get('intensity_stack_markers', [])
+                if markers:
+                    lines.append(f"- Intensity stack markers to minimize: {', '.join(markers[:6])}")
+                rewrite_examples = avoid_repetition.get('rewrite_examples', [])
+                if rewrite_examples:
+                    ex = rewrite_examples[0]
+                    original = ex.get('over_emphasis', '')
+                    preferred = ex.get('preferred', '')
+                    if original and preferred:
+                        lines.append(f"  ❌ {original}")
+                        lines.append(f"  ✅ {preferred}")
+                lines.append("")
+
+            tie_breaker = rhythm_first.get('tie_breaker_policy', {})
+            if tie_breaker:
+                lines.append("### Tie-Breaker")
+                if tie_breaker.get('if_conflict'):
+                    lines.append(f"- {tie_breaker.get('if_conflict')}")
+                must_preserve = tie_breaker.get('must_preserve', [])
+                if must_preserve:
+                    lines.append(f"- Must preserve: {', '.join(must_preserve)}")
+                lines.append("")
+
+        # Cross-module interlock with english_grammar_validation_t1.json (EN only)
+        if english_validation_t1_data:
+            validation_categories = english_validation_t1_data.get('validation_categories', {})
+            rhythm_rules = validation_categories.get('rhythm_and_emphasis', {})
+            literal_rules = validation_categories.get('literal_phrasing', {})
+            if rhythm_rules or literal_rules:
+                lines.append("## 🔗 CROSS-MODULE INTERLOCK (Literacy + EN Grammar T1)\n")
+                lines.append("Apply style intent from `rhythm_first_prose_enforcement` using concrete rule triggers below:\n")
+
+                literal_patterns = literal_rules.get('patterns', [])
+                if literal_patterns:
+                    lines.append("**Literal Translation Triggers:**")
+                    for pattern in literal_patterns[:2]:
+                        lines.append(f"- {pattern.get('id', '')}: {pattern.get('issue', '')}")
+                    lines.append("")
+
+                rhythm_patterns = rhythm_rules.get('patterns', [])
+                if rhythm_patterns:
+                    lines.append("**Rhythm/Emphasis Triggers:**")
+                    for pattern in rhythm_patterns[:4]:
+                        lines.append(f"- {pattern.get('id', '')}: {pattern.get('issue', '')}")
+                    lines.append("")
+
+                lines.append("**Execution Rule:** Keep meaning and voice, then prefer the tightest natural cadence.\n")
 
         # GENRE-SPECIFIC PRESETS
         genre_presets = literacy_data.get('genre_specific_presets', {})

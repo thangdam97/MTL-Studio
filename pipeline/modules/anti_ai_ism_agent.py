@@ -25,7 +25,6 @@ Version: 1.0
 Date: 2026-02-07
 """
 
-import os
 import re
 import sys
 import json
@@ -35,6 +34,7 @@ from pathlib import Path
 from typing import List, Dict, Optional, Tuple, Any
 from dataclasses import dataclass, field, asdict
 from datetime import datetime
+from pipeline.common.genai_factory import create_genai_client, resolve_api_key
 
 # Add parent paths for imports
 sys.path.insert(0, str(Path(__file__).parent.parent))
@@ -50,7 +50,6 @@ except ImportError:
 
 # Gemini for embeddings + LLM correction
 try:
-    from google import genai
     from google.genai import types
     GEMINI_AVAILABLE = True
 except ImportError:
@@ -245,11 +244,11 @@ class AntiAIismAgent:
         # ── Layer 2: Initialize Vector Bad Prose DB ──
         self.vector_store = None
         self.gemini_client = None
-        api_key = gemini_api_key or os.getenv("GEMINI_API_KEY")
+        api_key = resolve_api_key(api_key=gemini_api_key, required=False)
         
         if self.use_vector and CHROMADB_AVAILABLE and GEMINI_AVAILABLE and api_key:
             try:
-                self.gemini_client = genai.Client(api_key=api_key)
+                self.gemini_client = create_genai_client(api_key=api_key)
                 self._embedding_model = "gemini-embedding-001"
                 
                 db_client = chromadb.PersistentClient(
@@ -276,14 +275,14 @@ class AntiAIismAgent:
             if not GEMINI_AVAILABLE:
                 missing.append("google-genai")
             if not api_key:
-                missing.append("GEMINI_API_KEY")
+                missing.append("GOOGLE_API_KEY (or GEMINI_API_KEY)")
             logger.warning(f"[HEAL] Layer 2 disabled (missing: {', '.join(missing)})")
         
         # ── Layer 3: LLM client for psychic distance + healing ──
         self.llm_client = None
         if GEMINI_AVAILABLE and api_key and auto_heal:
             try:
-                self.llm_client = genai.Client(api_key=api_key)
+                self.llm_client = create_genai_client(api_key=api_key)
                 self._flash_model = "gemini-2.5-flash"
                 logger.info(f"[HEAL] Layer 3 + Self-Healing: Gemini Flash active ({self._flash_model})")
             except Exception as e:

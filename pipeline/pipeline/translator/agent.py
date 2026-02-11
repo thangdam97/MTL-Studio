@@ -1194,7 +1194,7 @@ class TranslatorAgent:
             self.manifest["pipeline_state"]["translator"]["status"] = "completed"
             logger.info("Volume translation COMPLETED")
             logger.info("Post-processing stages are disabled (Gemini's native quality is excellent).")
-            logger.info("Only CJK validator remains active (Vietnamese translations only).")
+            logger.info("Only CJK checks remain active.")
             logger.info("Grammar validator REMOVED (inverted logic damaged 1a60 output).")
             logger.info("Anti-AI-ism agent DISABLED (over-correction damages natural prose).")
             

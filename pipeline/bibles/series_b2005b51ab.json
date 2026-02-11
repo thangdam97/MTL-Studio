@@ -1,0 +1,99 @@
+{
+  "bible_version": "1.0",
+  "series_id": "series_b2005b51ab",
+  "series_title": {
+    "ja": "弓道部の美人な先輩が、俺の部屋でお腹出して寝てる",
+    "en": "My Cool, Beautiful Senpai from the Archery Club is an Absolute Mess When She Sleeps Over!",
+    "romaji": ""
+  },
+  "created_at": "2026-02-11T03:02:33.535200+00:00",
+  "last_updated": "2026-02-11T03:12:40.516839+00:00",
+  "volumes_registered": [
+    {
+      "volume_id": "165c",
+      "title": "弓道部の美人な先輩が、俺の部屋でお腹出して寝てる",
+      "index": 2
+    }
+  ],
+  "world_setting": {},
+  "characters": {
+    "飴本透也《あめもととうや》": {
+      "canonical_en": "Amemoto Touya",
+      "source": "manifest_import"
+    },
+    "飴本芽衣《あめもとめい》": {
+      "canonical_en": "Amemoto Mei",
+      "source": "manifest_import"
+    },
+    "飴本《あめもと》": {
+      "canonical_en": "Amemoto",
+      "source": "manifest_import"
+    },
+    "透也《とうや》": {
+      "canonical_en": "Touya",
+      "source": "manifest_import"
+    },
+    "芽衣《めい》": {
+      "canonical_en": "Mei",
+      "source": "manifest_import"
+    },
+    "綿貫璃乃《わたぬきりの》": {
+      "canonical_en": "Watanuki Rino",
+      "source": "manifest_import"
+    },
+    "綿貫紫音《わたぬきしおん》": {
+      "canonical_en": "Watanuki Shion",
+      "source": "manifest_import"
+    },
+    "綿貫先輩《わたぬきせんぱい》": {
+      "canonical_en": "Watanuki-senpai",
+      "source": "manifest_import"
+    },
+    "綿貫姉妹《わたぬきしまい》": {
+      "canonical_en": "Watanuki Shimai",
+      "source": "manifest_import"
+    },
+    "綿貫《わたぬき》": {
+      "canonical_en": "Watanuki",
+      "source": "manifest_import"
+    },
+    "璃乃《りの》": {
+      "canonical_en": "Rino",
+      "source": "manifest_import"
+    },
+    "紫音《しおん》": {
+      "canonical_en": "Shion",
+      "source": "manifest_import"
+    },
+    "漆原康太《うるしばらこうた》": {
+      "canonical_en": "Urushibara Kouta",
+      "source": "manifest_import"
+    },
+    "漆原《うるしばら》": {
+      "canonical_en": "Urushibara",
+      "source": "manifest_import"
+    },
+    "彩森先輩《あやもりせんぱい》": {
+      "canonical_en": "Ayamori-senpai",
+      "source": "manifest_import"
+    },
+    "彩森《あやもり》": {
+      "canonical_en": "Ayamori",
+      "source": "manifest_import"
+    },
+    "メロリル《》": {
+      "canonical_en": "Melodrill",
+      "source": "manifest_import"
+    }
+  },
+  "geography": {
+    "countries": {},
+    "regions": {},
+    "cities": {}
+  },
+  "weapons_artifacts": {},
+  "organizations": {},
+  "cultural_terms": {},
+  "mythology": {},
+  "translation_rules": {}
+}

@@ -2,7 +2,7 @@
   "version": "1.0",
   "tier": "tier_1_mechanical_correctness",
   "description": "Tier 1 English Grammar Validation Rules - Mechanical correctness checks for possessives, articles, tense, agreement, and basic syntax. Used for post-translation QC.",
-  "last_updated": "2026-02-09",
+  "last_updated": "2026-02-11",
   "priority": "blocking",
   "usage": "Apply after translation to catch mechanical grammar errors before human review",
 
@@ -13,7 +13,7 @@
       "patterns": [
         {
           "id": "missing_possessive_noun",
-          "pattern": "\\b([A-Z][a-z]+)\\s+(eyes|face|hand|voice|expression|smile|heart|mind|mother|father|brother|sister|friend|family|home|room|book|bag|phone|car|body|hair|skin|lips|arms|legs|feet|words|question|answer|response|reaction|gesture|movement|action|decision|choice|thought|memory|dream|hope|wish|fear|anger|sadness|happiness|joy|pain|suffering|death|life|love|hate)\\b",
+          "pattern": "\\b([A-Z][a-z]+)\\s+(eyes|face|hand|voice|expression|smile|heart|mind|mother|father|brother|sister|friend|family|home|room|book|bag|phone|car|body|hair|skin|lips|arms|legs|feet|shoulders|gaze|cheeks|jaw|fingers|wrist|posture|breath|words|question|answer|response|reaction|gesture|movement|action|decision|choice|thought|memory|dream|hope|wish|fear|anger|sadness|happiness|joy|pain|suffering|death|life|love|hate)\\b",
           "requires": "'s",
           "fix_template": "$1's $2",
           "examples": [
@@ -36,6 +36,37 @@
           "exceptions": [
             "Pattern at start of sentence may be intentional fragment",
             "Dialogue tags: 'Maria said' vs 'Maria's voice'"
+          ]
+        },
+        {
+          "id": "missing_possessive_honorific_noun",
+          "pattern": "\\b([A-Z][a-z]+-(?:kun|chan|san|sama|senpai))\\s+(voice|smile|eyes|face|hand|expression|heart|mind|body|hair|gaze|cheeks)\\b",
+          "requires": "'s",
+          "fix_template": "$1's $2",
+          "examples": [
+            {
+              "incorrect": "Souta-kun voice dropped",
+              "correct": "Souta-kun's voice dropped"
+            },
+            {
+              "incorrect": "Nagi-chan smile widened",
+              "correct": "Nagi-chan's smile widened"
+            }
+          ]
+        },
+        {
+          "id": "possible_no_particle_family_relation",
+          "pattern": "\\b([A-Z][a-z]+)\\s+(mother-daughter|father-son|father-daughter|mother-son|mother|father|sister|brother|daughter|son|family)\\b",
+          "issue": "Likely JP 'no' transfer causing ambiguous noun stack",
+          "review_required": true,
+          "examples": [
+            {
+              "candidate": "Asanagi mother-daughter duo",
+              "review": "Choose context-appropriate form: 'the Asanagi mother-daughter duo' or 'Asanagi's mother-daughter duo'"
+            }
+          ],
+          "exceptions": [
+            "Attributive family names that are already idiomatic in context may be acceptable"
           ]
         },
         {
@@ -206,30 +237,260 @@
     },
 
     "tense_consistency": {
-      "description": "Detect tense shifts within paragraphs (past vs present)",
-      "severity": "medium",
+      "description": "Comprehensive tense consistency validation for narrative prose",
+      "severity": "high",
+      "confidence_threshold": 0.7,
       "patterns": [
         {
-          "id": "paragraph_tense_shift",
-          "description": "Check for unintentional tense changes within same paragraph",
+          "id": "present_in_past_narrative",
+          "description": "Present tense verb in predominantly past-tense paragraph",
           "scope": "paragraph_level",
-          "check": "If paragraph starts with past tense verbs, flag present tense verbs (unless dialogue/thoughts)",
+          "detection_method": "statistical",
+          "threshold": "If >70% of verbs in paragraph are past tense, flag present tense verbs",
+          "exceptions": [
+            "Dialogue: 'She said, \"I am happy\"'",
+            "Italicized thoughts: '*What is happening?*'",
+            "Universal truths: 'water boils at 100°C'"
+          ],
+          "severity": "high",
+          "auto_fix_eligible": false
+        },
+        {
+          "id": "temporal_anchor_present",
+          "description": "Present-tense temporal references in past narrative",
+          "patterns": [
+            "\\bhe is today\\b",
+            "\\bshe is now\\b",
+            "\\bthey are currently\\b",
+            "\\bas it is today\\b",
+            "\\bin the present moment\\b"
+          ],
+          "fixes": {
+            "he is today": "he was then",
+            "she is now": "she was then",
+            "they are currently": "they were at that time",
+            "as it is today": "as it was then",
+            "in the present moment": "in that moment"
+          },
+          "severity": "high",
+          "auto_fix_eligible": true,
+          "confidence_threshold": 0.9
+        },
+        {
+          "id": "habitual_action_present",
+          "description": "Present tense for habitual past actions",
+          "patterns": [
+            "\\bOn (the )?days? [^.!?]+ (doesn't|don't|isn't|aren't) [^.!?]+, (we|they|I) (talk|speak|meet|cook|eat|walk)\\b"
+          ],
+          "explanation": "Habitual actions in past narrative should use 'would + verb' or simple past",
           "examples": [
             {
-              "incorrect": "I walked to school. The morning was cold. Suddenly, someone calls my name.",
-              "correct": "I walked to school. The morning was cold. Suddenly, someone called my name.",
-              "issue": "Shift from past (walked, was) to present (calls)"
+              "incorrect": "We talk every day when we cook together",
+              "correct": "We talked every day when we cooked together"
+            },
+            {
+              "incorrect": "On days Nagi doesn't stay over, we talk on the phone",
+              "correct": "On days Nagi didn't stay over, we talked on the phone"
             }
           ],
-          "exceptions": [
-            "Dialogue uses present: 'She said, \"I am happy\"' - OK",
-            "Internal thoughts in present: 'I wondered, *What is happening?*' - OK",
-            "Historical present for vividness - intentional stylistic choice",
-            "Universal truths: 'She learned that water boils at 100°C' - OK"
-          ]
+          "severity": "high",
+          "auto_fix_eligible": false
+        },
+        {
+          "id": "state_description_present",
+          "description": "Present tense in character/scene state descriptions",
+          "patterns": [
+            "\\b(is|are|am)\\s+(beautiful|tall|short|happy|sad|angry|cold|warm|bright|dark|quiet|loud)\\b",
+            "\\bgives off\\b.*(aura|vibe|feeling)",
+            "\\bhas earned\\b.*(nickname|reputation|title)"
+          ],
+          "fixes": {
+            "is beautiful": "was beautiful",
+            "are happy": "were happy",
+            "gives off": "gave off",
+            "has earned": "had earned"
+          },
+          "severity": "medium",
+          "auto_fix_eligible": true,
+          "confidence_threshold": 0.85
+        },
+        {
+          "id": "internal_thought_present",
+          "description": "Present tense in character internal realizations",
+          "patterns": [
+            "\\bI think (I've|I have|we've|we have)\\b",
+            "\\bI feel (like )?I('ve| have)\\b",
+            "\\bIt feels like\\b",
+            "\\b(he|she|it) still is\\b"
+          ],
+          "fixes": {
+            "I think I've": "I thought I had",
+            "I think I have": "I thought I had",
+            "I feel I've": "I felt I had",
+            "It feels like": "It felt like",
+            "he still is": "he still was",
+            "she still is": "she still was"
+          },
+          "severity": "high",
+          "auto_fix_eligible": true,
+          "confidence_threshold": 0.9
+        },
+        {
+          "id": "perception_verb_present",
+          "description": "Present tense perception verbs in narrative",
+          "patterns": [
+            "\\bI (hear|see|notice) that\\b(?! he said| she said)",
+            "\\b(seems|appears) to be\\b"
+          ],
+          "note": "Excludes 'realize' and 'understand' which can be internal realizations",
+          "fixes": {
+            "I hear that": "I had heard that",
+            "I see that": "I saw that",
+            "I notice that": "I noticed that",
+            "I realize that": "I realized that",
+            "seems to be": "seemed to be",
+            "appears to be": "appeared to be"
+          },
+          "severity": "medium",
+          "auto_fix_eligible": true,
+          "confidence_threshold": 0.85
+        },
+        {
+          "id": "future_in_past_incorrect",
+          "description": "Future tense that should be conditional in past narrative",
+          "patterns": [
+            "\\bThere is still\\b.*(ahead|to come|remaining)",
+            "\\bI will never\\b(?! (forget|let go|give up))\\s+[a-z]"
+          ],
+          "explanation": "Future projections in past narrative should use past tense or conditional",
+          "examples": [
+            {
+              "incorrect": "There is still a long road ahead of us",
+              "correct": "There was still a long road ahead of us"
+            }
+          ],
+          "severity": "medium",
+          "auto_fix_eligible": false
+        },
+        {
+          "id": "dialogue_attribution_present",
+          "description": "Present tense in dialogue tags/attributions",
+          "patterns": [
+            "(?<=(\\.|!|\\?)\")\\s+[A-Z][a-z]+\\s+(says|asks|replies|responds|answers|shouts|whispers)\\b"
+          ],
+          "fixes": {
+            "says": "said",
+            "asks": "asked",
+            "replies": "replied",
+            "responds": "responded",
+            "answers": "answered",
+            "shouts": "shouted",
+            "whispers": "whispered"
+          },
+          "severity": "high",
+          "auto_fix_eligible": true,
+          "confidence_threshold": 0.95
         }
       ],
-      "confidence_threshold": 0.6
+      "exception_rules": {
+        "dialogue_content": {
+          "description": "Content within quotation marks is exempt",
+          "pattern": "\"[^\"]*\"",
+          "priority": 1
+        },
+        "italicized_thoughts": {
+          "description": "Italicized internal thoughts can use present tense",
+          "pattern": "\\*[^*]+\\*|_[^_]+_",
+          "priority": 1
+        },
+        "universal_truths": {
+          "description": "Scientific/mathematical/timeless facts remain present",
+          "pattern": "\\b(learned|realized|discovered|understood|explained|demonstrated|proved|showed|found out|knew|recognized) that .+\\b(is|are|has|have|does|do|boils|freezes|melts|equals|means|refers to|indicates|signifies)\\b",
+          "keywords": ["boils", "freezes", "equals", "theorem", "law of", "principle of", "theory of"],
+          "priority": 2
+        },
+        "definitions": {
+          "description": "Literary and linguistic definitions use present tense",
+          "pattern": "\\b(means|refers to|indicates|signifies|denotes|represents|defines as)\\b",
+          "priority": 2
+        },
+        "conditionals": {
+          "description": "Present tense in conditional clauses",
+          "pattern": "\\b(if|when|whenever|unless|provided that|as long as|in case) [^,.]+ \\b(is|are|has|have|does|do)\\b",
+          "priority": 2
+        },
+        "cultural_notes": {
+          "description": "Cultural/contextual explanations to reader",
+          "pattern": "\\b(In Japanese|In Japan|In this culture|Traditionally|Culturally|As the saying goes|According to tradition)\\b[^.!?]*\\b(is|are|means|refers)\\b",
+          "priority": 2
+        },
+        "performative_verbs": {
+          "description": "Speech acts in dialogue with conventional present tense",
+          "pattern": "\"[^\"]*\\b(swear|promise|vow|pledge|guarantee|declare|proclaim|bet|wager|testify)\\b",
+          "priority": 1
+        },
+        "headings": {
+          "description": "Chapter titles and section headings",
+          "pattern": "^#+\\s+.*",
+          "priority": 1
+        },
+        "meta_narrative": {
+          "description": "Bracketed/parenthetical meta-commentary",
+          "pattern": "\\[.*\\]|\\(Note:.*\\)|\\(Author's note:.*\\)",
+          "priority": 1
+        },
+        "present_tense_chapter": {
+          "description": "Entire chapter designated as present-tense narrative",
+          "detection": "Check chapter metadata for 'present_tense_narrative' flag",
+          "priority": 0
+        },
+        "modal_perfects": {
+          "description": "Modal perfect constructions (must have, would have, could have, etc.)",
+          "pattern": "\\b(must|would|wouldn't|could|couldn't|should|shouldn't|may|might|can't|cannot)\\s+have\\b",
+          "priority": 1,
+          "note": "These are past tense constructions, not present tense violations"
+        },
+        "infinitive_constructions": {
+          "description": "Infinitive verb phrases (to do, to have, to be, etc.)",
+          "pattern": "\\bto\\s+(do|have|be|go|come|see|say|get|make|know|think|take|give|use|find|tell|ask|work|seem|feel|try|leave|call)\\b",
+          "priority": 1,
+          "note": "Infinitives are not conjugated for tense"
+        },
+        "quoted_internal_monologue": {
+          "description": "Internal monologue in ellipsis or thought markers",
+          "pattern": "\\.\\.\\.[^.!?]*\\b(I|we)\\s+(understand|realize|know|think|feel|want|need|hope)\\b[^.!?]*\\.\\.\\.",
+          "priority": 1,
+          "note": "Ellipsis-marked thoughts can use present tense for immediacy"
+        },
+        "timeless_character_traits": {
+          "description": "Timeless character descriptions (gives off vibes, has a way of, tends to)",
+          "pattern": "\\b(gives off|has a way of|tends to|seems to)\\b",
+          "priority": 2,
+          "note": "Describing inherent character traits can use present tense as timeless statements"
+        }
+      },
+      "whitelist_priority_order": [
+        "Priority 0: Chapter-level present tense flag (entire chapter exempt)",
+        "Priority 1: Structural exemptions (dialogue, thoughts, headings, meta-text)",
+        "Priority 2: Semantic exemptions (universal truths, definitions, conditionals, cultural notes)"
+      ],
+      "validation_strategy": {
+        "paragraph_analysis": {
+          "description": "Analyze tense distribution within each paragraph",
+          "steps": [
+            "1. Extract all verbs from paragraph (excluding dialogue)",
+            "2. Calculate past_tense_ratio = past_verbs / total_verbs",
+            "3. If past_tense_ratio > 0.7, flag all present tense verbs",
+            "4. Apply exception rules",
+            "5. Generate violation reports with context"
+          ]
+        },
+        "confidence_scoring": {
+          "high_confidence": "Regex match + not in exception context = 0.9",
+          "medium_confidence": "Pattern match + ambiguous context = 0.7",
+          "low_confidence": "Borderline case or edge pattern = 0.5"
+        }
+      }
     },
 
     "pronoun_errors": {
@@ -407,6 +668,86 @@
         }
       ],
       "confidence_threshold": 0.8
+    },
+
+    "rhythm_and_emphasis": {
+      "description": "Tier-1 prose guardrails for rhythm-first readability in EN output",
+      "severity": "medium",
+      "enforcement_policy": "Prioritize sharp rhythm over over-exposition while preserving meaning and tone.",
+      "patterns": [
+        {
+          "id": "literal_nominalization_sense_of",
+          "pattern": "\\ba\\s+sense\\s+of\\s+(relief|nostalgia|superiority|anxiety|sadness|joy|fear)\\b",
+          "issue": "Nominalized literal phrasing can read flat in narrative prose",
+          "fix_suggestions": {
+            "a sense of relief": "felt relieved",
+            "a sense of nostalgia": "felt nostalgic",
+            "a sense of superiority": "felt superior"
+          },
+          "examples": [
+            {
+              "original": "I finally felt a sense of relief.",
+              "preferred": "I finally felt relieved."
+            },
+            {
+              "original": "That gave me a sense of superiority.",
+              "preferred": "That made me feel superior."
+            }
+          ],
+          "review_required": true
+        },
+        {
+          "id": "literal_in_a_manner",
+          "pattern": "\\bin\\s+a\\s+(?:really|very|quite|terribly|extremely\\s+)?[A-Za-z'-]+\\s+manner\\b",
+          "issue": "Literal adverbial framing weakens rhythm versus direct phrasing",
+          "fix_suggestions": {
+            "default": "Rewrite to direct adverb or concrete verb phrase"
+          },
+          "examples": [
+            {
+              "original": "She spoke in a terribly arrogant manner.",
+              "preferred": "She spoke with real arrogance."
+            }
+          ],
+          "review_required": true
+        },
+        {
+          "id": "intensifier_stack",
+          "pattern": "\\b(really|very|so|totally|absolutely|completely)\\s+(really|very|so|totally|absolutely|completely)\\b",
+          "issue": "Stacked intensifiers are often over-emphasis and reduce prose precision",
+          "fix_suggestions": {
+            "default": "Use one intensifier or replace with a stronger concrete verb/image"
+          },
+          "examples": [
+            {
+              "original": "It was really really strange.",
+              "preferred": "It was strange."
+            }
+          ],
+          "review_required": true
+        },
+        {
+          "id": "adjacent_repetition_same_claim",
+          "pattern": "\\b(It (?:was|is) weird\\.)\\s+\\b(It (?:was|is) (?:really\\s+)?weird\\.)\\b",
+          "issue": "Back-to-back claim repetition slows narrative rhythm",
+          "fix_suggestions": {
+            "default": "Collapse to one sharper sentence"
+          },
+          "examples": [
+            {
+              "original": "It was weird. It was really weird.",
+              "preferred": "It was bizarre."
+            }
+          ],
+          "review_required": true
+        }
+      ],
+      "confidence_threshold": 0.78,
+      "exceptions": [
+        "Deliberate repetition for character voice in dialogue",
+        "Intentional stammering, panic loops, or comedic timing",
+        "Rhetorical repetition used for dramatic emphasis in climactic beats"
+      ]
     }
   },
 
@@ -415,6 +756,7 @@
       "description": "Patterns that can be automatically corrected with high confidence",
       "categories": [
         "possessive_errors.missing_possessive_noun",
+        "possessive_errors.missing_possessive_honorific_noun",
         "article_errors.a_vs_an_vowel_sound",
         "contraction_errors.malformed_contraction",
         "double_negatives.double_negative_standard"
@@ -427,6 +769,11 @@
         "tense_consistency.paragraph_tense_shift",
         "sentence_fragments.missing_subject",
         "literal_phrasing.words_surprise_my_heart",
+        "rhythm_and_emphasis.literal_nominalization_sense_of",
+        "rhythm_and_emphasis.literal_in_a_manner",
+        "rhythm_and_emphasis.intensifier_stack",
+        "rhythm_and_emphasis.adjacent_repetition_same_claim",
+        "possessive_errors.possible_no_particle_family_relation",
         "subject_verb_agreement (if in dialogue)"
       ],
       "confidence_required": 0.7

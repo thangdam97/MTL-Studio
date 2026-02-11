@@ -94,6 +94,7 @@ class RichMetadataCacheUpdater:
             return False
 
         self.manifest = self._load_manifest()
+        self._ensure_ruby_names()
         volume_id = self.manifest.get("volume_id", self.work_dir.name)
 
         logger.info("Starting Phase 1.55 rich metadata cache update")
@@ -111,6 +112,8 @@ class RichMetadataCacheUpdater:
             if bible_sync.resolve(self.manifest):
                 if bible_sync.series_id and self.manifest.get("bible_id") != bible_sync.series_id:
                     self.manifest["bible_id"] = bible_sync.series_id
+                    # Persist immediately so linkage survives downstream API failures.
+                    self._save_manifest()
                     logger.info(f"Linked manifest to bible_id: {bible_sync.series_id}")
                 pull_result = bible_sync.pull(self.manifest)
                 logger.info(f"Bible continuity loaded: {pull_result.summary()}")
@@ -310,6 +313,15 @@ class RichMetadataCacheUpdater:
             f"({len(filtered_patch)} top-level keys, cache_used={used_external_cache})"
         )
         return True
+
+    def _ensure_ruby_names(self) -> None:
+        """
+        Ruby name extraction is intentionally disabled in Phase 1.55.
+
+        Canon character metadata should come from grounding/bible sync flows,
+        not ruby extraction fallback.
+        """
+        logger.debug("Ruby extraction/recording disabled in RichMetadataCache")
 
     def _load_manifest(self) -> Dict[str, Any]:
         with open(self.manifest_path, "r", encoding="utf-8") as f:

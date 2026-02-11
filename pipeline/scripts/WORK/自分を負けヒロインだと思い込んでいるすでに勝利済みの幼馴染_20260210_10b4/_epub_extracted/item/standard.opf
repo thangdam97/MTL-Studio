@@ -1,0 +1,164 @@
+<?xml version="1.0" encoding="UTF-8"?><package xmlns="http://www.idpf.org/2007/opf" version="3.0" xml:lang="ja" unique-identifier="unique-id" prefix="rendition: http://www.idpf.org/vocab/rendition/#         ebpaj: http://www.ebpaj.jp/         fixed-layout-jp: http://www.digital-comic.jp/         ibooks: http://vocabulary.itunes.apple.com/rdf/ibooks/vocabulary-extensions-1.0/">
+
+<metadata xmlns:dc="http://purl.org/dc/elements/1.1/">
+
+<!-- 作品名 -->
+<dc:title id="title">自分を負けヒロインだと思い込んでいるすでに勝利済みの幼馴染</dc:title>
+<meta refines="#title" property="file-as">ジブンヲマケヒロインダトオモイコンデイルスデニショウリズミノオサナナジミ01</meta>
+
+<!-- 著者名 -->
+<dc:creator id="creator01">桜木桜</dc:creator>
+<meta refines="#creator01" property="role" scheme="marc:relators">aut</meta>
+<meta refines="#creator01" property="file-as">サクラギサクラ</meta>
+<meta refines="#creator01" property="display-seq">1</meta>
+
+<!-- 出版社名 -->
+<dc:publisher id="publisher">SBクリエイティブ株式会社</dc:publisher>
+<meta refines="#publisher" property="file-as">エスビークリエイティブカブシキガイシャ</meta>
+
+<!-- 言語 -->
+<dc:language>ja</dc:language>
+
+<!-- ファイルid -->
+<!-- 更新日 --><meta property="dcterms:modified">2025-12-25T00:00:00Z</meta>
+
+<!-- etc. -->
+<meta property="ebpaj:guide-version">1.1.3</meta>
+<meta property="rendition:layout">reflowable</meta>
+<meta property="ibooks:specified-fonts">true</meta>
+<meta property="ibooks:version">1.0.0</meta>
+<meta name="cover" content="cover"/>
+
+<dc:identifier xmlns:dc="http://purl.org/dc/elements/1.1/" id="unique-id">urn:uuid:15667f4c-fd51-4f8d-b743-223faf7b18dd</dc:identifier></metadata>
+
+<manifest>
+
+<!-- navigation -->
+<item media-type="application/xhtml+xml" id="toc" href="navigation-documents.xhtml" properties="nav"/>
+
+<!-- style -->
+<item media-type="text/css" id="fixed-layout-jp" href="style/fixed-layout-jp.css"/>
+<item media-type="text/css" id="book-style" href="style/book-style.css"/>
+<item media-type="text/css" id="style-reset" href="style/style-reset.css"/>
+<item media-type="text/css" id="style-standard" href="style/style-standard.css"/>
+<item media-type="text/css" id="style-advance" href="style/style-advance.css"/>
+<item media-type="text/css" id="style-check" href="style/style-check.css"/>
+
+<!-- image -->
+<item media-type="image/jpeg" id="cover" href="image/cover.jpg" properties="cover-image"/>
+<item media-type="image/png" id="logo" href="image/logo.png"/>
+<item media-type="image/jpeg" id="P000a" href="image/P000a.jpg"/>
+<item media-type="image/jpeg" id="P000b" href="image/P000b.jpg"/>
+<item media-type="image/jpeg" id="P000c" href="image/P000c.jpg"/>
+<item media-type="image/jpeg" id="P000d" href="image/P000d.jpg"/>
+<item media-type="image/jpeg" id="P003" href="image/P003.jpg"/>
+<item media-type="image/jpeg" id="P017" href="image/P017.jpg"/>
+<item media-type="image/jpeg" id="P040" href="image/P040.jpg"/>
+<item media-type="image/jpeg" id="P049" href="image/P049.jpg"/>
+<item media-type="image/jpeg" id="P074" href="image/P074.jpg"/>
+<item media-type="image/jpeg" id="P075" href="image/P075.jpg"/>
+<item media-type="image/jpeg" id="P105" href="image/P105.jpg"/>
+<item media-type="image/jpeg" id="P121" href="image/P121.jpg"/>
+<item media-type="image/jpeg" id="P165" href="image/P165.jpg"/>
+<item media-type="image/jpeg" id="P168" href="image/P168.jpg"/>
+<item media-type="image/jpeg" id="P191" href="image/P191.jpg"/>
+<item media-type="image/jpeg" id="P215" href="image/P215.jpg"/>
+<item media-type="image/jpeg" id="P236" href="image/P236.jpg"/>
+<item media-type="image/jpeg" id="P245" href="image/P245.jpg"/>
+<item media-type="image/jpeg" id="P282" href="image/P282.jpg"/>
+<item media-type="image/jpeg" id="P290" href="image/P290.jpg"/>
+<item media-type="image/jpeg" id="P291" href="image/P291.jpg"/>
+<item media-type="image/jpeg" id="P301" href="image/P301.jpg"/>
+<item media-type="image/png" id="QRcode" href="image/QRcode.png"/>
+<item media-type="image/jpeg" id="white" href="image/white.jpg"/>
+
+<!-- xhtml -->
+<item media-type="application/xhtml+xml" id="p-cover" href="xhtml/p-cover.xhtml" properties="svg"/>
+<item media-type="application/xhtml+xml" id="p-001" href="xhtml/p-001.xhtml" properties="svg"/>
+<item media-type="application/xhtml+xml" id="p-002" href="xhtml/p-002.xhtml" properties="svg"/>
+<item media-type="application/xhtml+xml" id="p-003" href="xhtml/p-003.xhtml" properties="svg"/>
+<item media-type="application/xhtml+xml" id="p-004" href="xhtml/p-004.xhtml" properties="svg"/>
+<item media-type="application/xhtml+xml" id="p-005" href="xhtml/p-005.xhtml" properties="svg"/>
+<item media-type="application/xhtml+xml" id="p-titlepage" href="xhtml/p-titlepage.xhtml"/>
+<item media-type="application/xhtml+xml" id="p-caution" href="xhtml/p-caution.xhtml"/>
+<item media-type="application/xhtml+xml" id="p-006" href="xhtml/p-006.xhtml"/>
+<item media-type="application/xhtml+xml" id="p-toc" href="xhtml/p-toc.xhtml"/>
+<item media-type="application/xhtml+xml" id="p-007" href="xhtml/p-007.xhtml"/>
+<item media-type="application/xhtml+xml" id="p-008" href="xhtml/p-008.xhtml" properties="svg"/>
+<item media-type="application/xhtml+xml" id="p-009" href="xhtml/p-009.xhtml"/>
+<item media-type="application/xhtml+xml" id="p-010" href="xhtml/p-010.xhtml"/>
+<item media-type="application/xhtml+xml" id="p-011" href="xhtml/p-011.xhtml" properties="svg"/>
+<item media-type="application/xhtml+xml" id="p-012" href="xhtml/p-012.xhtml"/>
+<item media-type="application/xhtml+xml" id="p-013" href="xhtml/p-013.xhtml" properties="svg"/>
+<item media-type="application/xhtml+xml" id="p-014" href="xhtml/p-014.xhtml"/>
+<item media-type="application/xhtml+xml" id="p-015" href="xhtml/p-015.xhtml" properties="svg"/>
+<item media-type="application/xhtml+xml" id="p-016" href="xhtml/p-016.xhtml"/>
+<item media-type="application/xhtml+xml" id="p-017" href="xhtml/p-017.xhtml"/>
+<item media-type="application/xhtml+xml" id="p-018" href="xhtml/p-018.xhtml" properties="svg"/>
+<item media-type="application/xhtml+xml" id="p-019" href="xhtml/p-019.xhtml"/>
+<item media-type="application/xhtml+xml" id="p-020" href="xhtml/p-020.xhtml"/>
+<item media-type="application/xhtml+xml" id="p-021" href="xhtml/p-021.xhtml" properties="svg"/>
+<item media-type="application/xhtml+xml" id="p-022" href="xhtml/p-022.xhtml"/>
+<item media-type="application/xhtml+xml" id="p-023" href="xhtml/p-023.xhtml" properties="svg"/>
+<item media-type="application/xhtml+xml" id="p-024" href="xhtml/p-024.xhtml"/>
+<item media-type="application/xhtml+xml" id="p-025" href="xhtml/p-025.xhtml"/>
+<item media-type="application/xhtml+xml" id="p-026" href="xhtml/p-026.xhtml" properties="svg"/>
+<item media-type="application/xhtml+xml" id="p-027" href="xhtml/p-027.xhtml"/>
+<item media-type="application/xhtml+xml" id="p-028" href="xhtml/p-028.xhtml" properties="svg"/>
+<item media-type="application/xhtml+xml" id="p-029" href="xhtml/p-029.xhtml"/>
+<item media-type="application/xhtml+xml" id="p-030" href="xhtml/p-030.xhtml" properties="svg"/>
+<item media-type="application/xhtml+xml" id="p-031" href="xhtml/p-031.xhtml"/>
+<item media-type="application/xhtml+xml" id="p-032" href="xhtml/p-032.xhtml"/>
+<item media-type="application/xhtml+xml" id="p-033" href="xhtml/p-033.xhtml" properties="svg"/>
+<item media-type="application/xhtml+xml" id="p-998" href="xhtml/p-998.xhtml"/>
+<item media-type="application/xhtml+xml" id="p-999" href="xhtml/p-999.xhtml"/>
+<item media-type="application/xhtml+xml" id="p-colophon" href="xhtml/p-colophon.xhtml"/>
+
+<item id="toc.ncx" href="toc.ncx" media-type="application/x-dtbncx+xml"/><item id="js-kobo.js" href="../js/kobo.js" media-type="application/javascript"/></manifest>
+
+<spine page-progression-direction="rtl">
+
+<itemref linear="yes" idref="p-cover" properties="rendition:layout-pre-paginated rendition:spread-none rendition:page-spread-center"/>
+<itemref linear="yes" idref="p-001" properties="rendition:layout-pre-paginated page-spread-right"/>
+<itemref linear="yes" idref="p-002" properties="rendition:layout-pre-paginated page-spread-left"/>
+<itemref linear="yes" idref="p-003" properties="rendition:layout-pre-paginated rendition:spread-none rendition:page-spread-center"/>
+<itemref linear="yes" idref="p-004" properties="rendition:layout-pre-paginated rendition:spread-none rendition:page-spread-center"/>
+<itemref linear="yes" idref="p-005" properties="rendition:layout-pre-paginated rendition:spread-none rendition:page-spread-center"/>
+<itemref linear="yes" idref="p-titlepage" properties="page-spread-left"/>
+<itemref linear="yes" idref="p-caution" properties="page-spread-right"/>
+<itemref linear="yes" idref="p-006" properties="page-spread-left"/>
+<itemref linear="yes" idref="p-toc" properties="page-spread-right"/>
+<itemref linear="yes" idref="p-007" properties="page-spread-left"/>
+<itemref linear="yes" idref="p-008" properties="rendition:layout-pre-paginated"/>
+<itemref linear="yes" idref="p-009"/>
+<itemref linear="yes" idref="p-010"/>
+<itemref linear="yes" idref="p-011" properties="rendition:layout-pre-paginated"/>
+<itemref linear="yes" idref="p-012"/>
+<itemref linear="yes" idref="p-013" properties="rendition:layout-pre-paginated"/>
+<itemref linear="yes" idref="p-014"/>
+<itemref linear="yes" idref="p-015" properties="rendition:layout-pre-paginated"/>
+<itemref linear="yes" idref="p-016"/>
+<itemref linear="yes" idref="p-017"/>
+<itemref linear="yes" idref="p-018" properties="rendition:layout-pre-paginated"/>
+<itemref linear="yes" idref="p-019"/>
+<itemref linear="yes" idref="p-020"/>
+<itemref linear="yes" idref="p-021" properties="rendition:layout-pre-paginated"/>
+<itemref linear="yes" idref="p-022"/>
+<itemref linear="yes" idref="p-023" properties="rendition:layout-pre-paginated"/>
+<itemref linear="yes" idref="p-024"/>
+<itemref linear="yes" idref="p-025"/>
+<itemref linear="yes" idref="p-026" properties="rendition:layout-pre-paginated"/>
+<itemref linear="yes" idref="p-027"/>
+<itemref linear="yes" idref="p-028" properties="rendition:layout-pre-paginated"/>
+<itemref linear="yes" idref="p-029"/>
+<itemref linear="yes" idref="p-030" properties="rendition:layout-pre-paginated"/>
+<itemref linear="yes" idref="p-031"/>
+<itemref linear="yes" idref="p-032" properties="page-spread-right"/>
+<itemref linear="yes" idref="p-033" properties="rendition:layout-pre-paginated"/>
+<itemref linear="yes" idref="p-998"/>
+<itemref linear="yes" idref="p-999" properties="page-spread-right"/>
+<itemref linear="yes" idref="p-colophon"/>
+
+</spine>
+
+</package>

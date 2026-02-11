@@ -12,7 +12,6 @@ Each page produces:
   - Page-level: summary, narrative beat classification
 """
 
-import os
 import json
 import time
 import base64
@@ -20,6 +19,7 @@ import logging
 from pathlib import Path
 from datetime import datetime
 from typing import Dict, Any, Optional, List
+from pipeline.common.genai_factory import create_genai_client
 
 logger = logging.getLogger(__name__)
 
@@ -89,11 +89,7 @@ class MangaPanelAnalyzer:
         """Lazy-init Gemini client."""
         if self._client is None:
             try:
-                from google import genai
-                api_key = os.environ.get("GEMINI_API_KEY") or os.environ.get("GOOGLE_API_KEY")
-                if not api_key:
-                    raise ValueError("Set GEMINI_API_KEY or GOOGLE_API_KEY environment variable")
-                self._client = genai.Client(api_key=api_key)
+                self._client = create_genai_client()
             except ImportError:
                 raise ImportError("Install google-genai: pip install google-genai")
         return self._client

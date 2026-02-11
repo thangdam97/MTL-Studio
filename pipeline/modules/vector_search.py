@@ -16,7 +16,6 @@ Version: 1.0 (Experimental)
 Date: 2026-01-31
 """
 
-import os
 import json
 import logging
 from pathlib import Path
@@ -34,7 +33,7 @@ except ImportError:
 
 # Gemini for embeddings
 try:
-    from google import genai
+    from pipeline.common.genai_factory import create_genai_client, resolve_api_key
     GEMINI_AVAILABLE = True
 except ImportError:
     GEMINI_AVAILABLE = False
@@ -111,9 +110,9 @@ class PatternVectorStore:
         )
         
         # Initialize Gemini client for embeddings
-        api_key = gemini_api_key or os.getenv("GEMINI_API_KEY")
+        api_key = resolve_api_key(api_key=gemini_api_key, required=False) if GEMINI_AVAILABLE else None
         if GEMINI_AVAILABLE and api_key:
-            self.gemini_client = genai.Client(api_key=api_key)
+            self.gemini_client = create_genai_client(api_key=api_key)
             self._embedding_model = "gemini-embedding-001"
         else:
             self.gemini_client = None
@@ -133,7 +132,7 @@ class PatternVectorStore:
             768-dimensional embedding vector
         """
         if not self.gemini_client:
-            raise RuntimeError("Gemini client not initialized. Set GEMINI_API_KEY.")
+            raise RuntimeError("Gemini client not initialized. Set GOOGLE_API_KEY (or GEMINI_API_KEY).")
         
         import time
         max_retries = 3
@@ -167,7 +166,7 @@ class PatternVectorStore:
             List of 768-dimensional embedding vectors (one per input text)
         """
         if not self.gemini_client:
-            raise RuntimeError("Gemini client not initialized. Set GEMINI_API_KEY.")
+            raise RuntimeError("Gemini client not initialized. Set GOOGLE_API_KEY (or GEMINI_API_KEY).")
 
         if not texts:
             return []

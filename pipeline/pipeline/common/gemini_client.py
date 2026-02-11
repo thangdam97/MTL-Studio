@@ -3,14 +3,13 @@ Gemini API Client for MT Publishing Pipeline.
 Shared between Translator and Critics agents.
 """
 
-import os
 import time
 import logging
 import backoff
 from typing import Optional, List, Dict, Any
 from dataclasses import dataclass
-from google import genai
 from google.genai import types
+from pipeline.common.genai_factory import create_genai_client, resolve_api_key, resolve_genai_backend
 
 logger = logging.getLogger(__name__)
 
@@ -25,14 +24,26 @@ class GeminiResponse:
     thinking_content: Optional[str] = None  # CoT/thinking parts from model
 
 class GeminiClient:
-    def __init__(self, api_key: str = None, model: str = "gemini-2.5-pro", enable_caching: bool = True):
+    def __init__(
+        self,
+        api_key: str = None,
+        model: str = "gemini-2.5-pro",
+        enable_caching: bool = True,
+        backend: Optional[str] = None,
+        project: Optional[str] = None,
+        location: Optional[str] = None,
+    ):
         """Initialize Gemini client with optional context caching."""
-        self.api_key = api_key or os.getenv("GEMINI_API_KEY")
-        if not self.api_key:
-            raise ValueError("GEMINI_API_KEY not found in environment")
+        self.backend = resolve_genai_backend(backend)
+        self.api_key = resolve_api_key(api_key=api_key, required=(self.backend == "developer"))
 
         self.model = model
-        self.client = genai.Client(api_key=self.api_key)
+        self.client = create_genai_client(
+            api_key=self.api_key,
+            backend=self.backend,
+            project=project,
+            location=location,
+        )
         self._last_request_time = 0
         self._rate_limit_delay = 6.0  # ~10 requests/min default
 

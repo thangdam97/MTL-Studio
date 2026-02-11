@@ -177,6 +177,217 @@
         }
       }
     },
+    "narrative_tense_standards": {
+      "description": "International prose convention for tense consistency in narrative fiction",
+      "default_narrative_tense": "past",
+      "rationale": "English-language novels use past tense for retrospective narration as the universal standard. Present tense narration exists but is rare and requires intentional commitment throughout the entire work.",
+      "tense_by_pov": {
+        "first_person_retrospective": {
+          "narrative_tense": "past",
+          "explanation": "Character recounting events that already happened",
+          "example_correct": "I walked to the store. The morning was cold.",
+          "example_incorrect": "I walk to the store. The morning is cold."
+        },
+        "third_person_limited": {
+          "narrative_tense": "past",
+          "explanation": "Standard narration showing character perspective in past tense",
+          "example_correct": "She opened the door. Her heart raced.",
+          "example_incorrect": "She opens the door. Her heart races."
+        },
+        "third_person_omniscient": {
+          "narrative_tense": "past",
+          "explanation": "Historical narrative voice describing completed events",
+          "example_correct": "The war began in winter. Nations mobilized their forces.",
+          "example_incorrect": "The war begins in winter. Nations mobilize their forces."
+        }
+      },
+      "japanese_to_english_tense_mapping": {
+        "description": "How to convert Japanese strategic tense usage to English consistency",
+        "rules": [
+          {
+            "japanese_form": "た-form (past tense)",
+            "english_target": "past tense",
+            "example_jp": "歩いた (walked)",
+            "example_en": "walked"
+          },
+          {
+            "japanese_form": "る-form (present/state)",
+            "japanese_usage": "Ongoing state, immediate description",
+            "english_target": "past tense (convert for consistency)",
+            "example_jp": "凪が隣に居る (Nagi is beside me)",
+            "example_en_wrong": "Nagi is beside me",
+            "example_en_correct": "Nagi was beside me",
+            "rationale": "Japanese present-form creates immediacy; English past tense achieves same effect in retrospective narration"
+          },
+          {
+            "japanese_form": "ている-form (progressive/resultative)",
+            "japanese_usage": "Ongoing action or resultative state",
+            "english_target": "past progressive or past simple",
+            "example_jp": "眠っている (is sleeping)",
+            "example_en_wrong": "is sleeping",
+            "example_en_correct": "was sleeping",
+            "note": "Japanese progressive state → English past progressive"
+          }
+        ]
+      },
+      "common_violation_patterns": {
+        "temporal_anchor_errors": [
+          {
+            "violation": "the man he is today",
+            "fix": "the man he was then",
+            "explanation": "Temporal reference must align with narrative past timeframe"
+          },
+          {
+            "violation": "right now in this moment",
+            "fix": "right then in that moment",
+            "explanation": "Deictic expressions (now/here/today) must shift to past frame (then/there/that day)"
+          }
+        ],
+        "habitual_action_errors": [
+          {
+            "violation": "We talk every day when we cook together",
+            "fix": "We talked every day when we cooked together",
+            "explanation": "Habitual past actions use simple past or 'would' + verb"
+          }
+        ],
+        "state_description_errors": [
+          {
+            "violation": "She is beautiful, her hair gleaming in the light",
+            "fix": "She was beautiful, her hair gleaming in the light",
+            "explanation": "Character state descriptions in past tense narrative"
+          }
+        ],
+        "internal_thought_errors": [
+          {
+            "violation": "I think I've changed quite a bit since meeting her",
+            "fix": "I thought I had changed quite a bit since meeting her",
+            "explanation": "Character's internal realizations shift to past tense with past perfect for prior events"
+          }
+        ]
+      },
+      "allowed_present_tense_contexts": [
+        {
+          "context": "direct_dialogue",
+          "example": "She said, \"I am happy right now.\"",
+          "note": "Characters speak in present about their current state",
+          "detection": "Content within quotation marks"
+        },
+        {
+          "context": "quoted_internal_thoughts",
+          "example": "I wondered, *What is happening right now?*",
+          "note": "Italicized or marked internal dialogue uses present",
+          "detection": "Content within asterisks or underscores"
+        },
+        {
+          "context": "universal_truths",
+          "example": "He learned that water boils at 100 degrees Celsius.",
+          "note": "Scientific/mathematical/timeless facts remain present tense",
+          "detection": "Subordinate clauses after verbs like 'learned that', 'realized that'"
+        },
+        {
+          "context": "literary_definitions",
+          "example": "The word 'tsundere' means someone who is initially cold.",
+          "note": "Meta-linguistic explanations of terms",
+          "detection": "Verbs: means, refers to, indicates, signifies"
+        },
+        {
+          "context": "conditional_clauses",
+          "example": "If you heat water to 100°C, it boils.",
+          "note": "Present tense in if/when conditional statements",
+          "detection": "Clauses starting with: if, when, whenever, unless"
+        },
+        {
+          "context": "cultural_explanations",
+          "example": "In Japanese culture, 'giri' refers to social obligations.",
+          "note": "Narrator explaining cultural context to reader",
+          "detection": "Phrases: 'In Japanese', 'In Japan', 'Traditionally', 'As the saying goes'"
+        },
+        {
+          "context": "performative_speech_acts",
+          "example": "\"I swear I will protect you,\" he said.",
+          "note": "Speech acts where present tense is conventional (swear, promise, vow)",
+          "detection": "Dialogue with verbs: swear, promise, vow, pledge, declare"
+        },
+        {
+          "context": "headings_and_titles",
+          "example": "Chapter 3: The Ice Princess Melts",
+          "note": "Chapter titles and section headings can use present",
+          "detection": "Lines starting with # markdown headers"
+        },
+        {
+          "context": "meta_narrative_asides",
+          "example": "[Author's note: This scene takes place three months later]",
+          "note": "Parenthetical or bracketed narrator commentary",
+          "detection": "Content within brackets [] or parentheses ()"
+        },
+        {
+          "context": "historical_present_stylistic",
+          "example": "Present tense throughout entire narrative (rare, requires full commitment)",
+          "note": "Only if source Japanese uses consistent present throughout for stylistic effect",
+          "detection": "Chapter metadata flag: 'present_tense_narrative': true"
+        }
+      ],
+      "whitelist_implementation": {
+        "regex_patterns": [
+          {
+            "pattern": "\"[^\"]*\\b(is|are|am|has|have|does|do)\\b[^\"]*\"",
+            "type": "dialogue",
+            "action": "skip_validation"
+          },
+          {
+            "pattern": "\\*[^*]*\\b(is|are|am|has|have|does|do)\\b[^*]*\\*",
+            "type": "italicized_thoughts",
+            "action": "skip_validation"
+          },
+          {
+            "pattern": "_[^_]*\\b(is|are|am|has|have|does|do)\\b[^_]*_",
+            "type": "italicized_thoughts_alt",
+            "action": "skip_validation"
+          },
+          {
+            "pattern": "\\b(learned|realized|discovered|understood|explained|demonstrated|proved|showed|found out) that .+\\b(is|are|has|have|does|do|boils|freezes|melts|equals|means|refers to|indicates)\\b",
+            "type": "universal_truth",
+            "action": "skip_validation"
+          },
+          {
+            "pattern": "\\b(means|refers to|indicates|signifies|denotes|represents)\\b",
+            "type": "definition",
+            "action": "skip_validation"
+          },
+          {
+            "pattern": "\\b(if|when|whenever|unless|provided that) [^,.]+ \\b(is|are|has|have|does|do)\\b",
+            "type": "conditional",
+            "action": "skip_validation"
+          },
+          {
+            "pattern": "\\b(In Japanese|In Japan|Traditionally|Culturally|As the saying goes)\\b[^.!?]*\\b(is|are|means|refers)\\b",
+            "type": "cultural_note",
+            "action": "skip_validation"
+          },
+          {
+            "pattern": "\"[^\"]*\\b(swear|promise|vow|pledge|guarantee|declare|proclaim)\\b[^\"]*\"",
+            "type": "performative",
+            "action": "skip_validation"
+          },
+          {
+            "pattern": "^#+\\s+.+\\b(is|are|has|have)\\b",
+            "type": "heading",
+            "action": "skip_validation"
+          },
+          {
+            "pattern": "\\[.*\\b(is|are|has|have|does|do|takes place|occurs|happens|means|refers)\\b.*\\]",
+            "type": "meta_bracket",
+            "action": "skip_validation"
+          },
+          {
+            "pattern": "\\(.*\\b(is|are|has|have|does|do|indicates|means|refers)\\b.*\\)",
+            "type": "meta_parenthesis",
+            "action": "skip_validation"
+          }
+        ],
+        "validation_strategy": "Before flagging any present tense verb, check if it matches any whitelist pattern. If match found, skip flagging and continue."
+      }
+    },
     "free_indirect_discourse": {
       "label": "Free Indirect Discourse",
       "label_vn": "Gián tiếp tự do",
@@ -324,6 +535,73 @@
       "She was in love": "Her heart leapt every time his name appeared on her phone."
     },
     "instruction": "When translating emotional states, default to showing through physical reactions, internal sensations, or behavioral cues unless the source material explicitly tells."
+  },
+  "rhythm_first_prose_enforcement": {
+    "enabled": true,
+    "priority": "high",
+    "principle": "Prioritize sharp rhythm and scene momentum over over-exposition.",
+    "instruction": "When two phrasings are both accurate, choose the tighter and more natural sentence that preserves intent, tone, and character voice.",
+    "rules": {
+      "avoid_literal_translation": {
+        "description": "Do not preserve JP structure when it produces stiff or translated-sounding English.",
+        "enforcement": [
+          "Prefer idiomatic English verbs over noun-heavy calques",
+          "Prefer active, image-bearing phrasing over explanatory scaffolding",
+          "Delete redundant setup clauses when the next sentence already conveys the same point"
+        ],
+        "rewrite_examples": [
+          {
+            "literal": "Her words surprise my heart.",
+            "preferred": "Her words made my heart leap.",
+            "reason": "Natural idiom, stronger emotional immediacy"
+          },
+          {
+            "literal": "He spoke in a terribly arrogant manner.",
+            "preferred": "He spoke with real arrogance.",
+            "reason": "Cleaner rhythm, less translationese"
+          }
+        ]
+      },
+      "avoid_repetition_and_over_emphasis": {
+        "description": "Trim repetitive wording and intensity stacking that weakens prose rhythm.",
+        "repetition_window": "2-3 consecutive sentences",
+        "max_repeated_idea_per_window": 1,
+        "intensity_stack_markers": [
+          "really",
+          "very",
+          "so",
+          "totally",
+          "absolutely",
+          "completely"
+        ],
+        "enforcement": [
+          "Avoid repeating the same emotional claim in adjacent lines",
+          "Collapse doubled emphasis words unless used for deliberate voice",
+          "Prefer one precise image over multiple abstract restatements"
+        ],
+        "rewrite_examples": [
+          {
+            "over_emphasis": "This is weird. It's really, really weird.",
+            "preferred": "This was bizarre.",
+            "reason": "Sharper impact, less drag"
+          },
+          {
+            "over_exposition": "I felt a sense of relief, and that relief spread through me.",
+            "preferred": "Relief loosened my chest.",
+            "reason": "Concrete effect, tighter cadence"
+          }
+        ]
+      }
+    },
+    "tie_breaker_policy": {
+      "if_conflict": "Choose rhythm and readability over literal completeness.",
+      "must_preserve": [
+        "plot facts",
+        "speaker intent",
+        "honorific relationship cues",
+        "named entities"
+      ]
+    }
   },
   "genre_specific_presets": {
     "shoujo_romance": {

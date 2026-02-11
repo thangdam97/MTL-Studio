@@ -19,7 +19,6 @@ Usage:
     mtl.py phase1.6 <volume_id>
 """
 
-import os
 import json
 import time
 import base64
@@ -30,6 +29,7 @@ from typing import Dict, Any, Optional, List
 
 from modules.multimodal.cache_manager import VisualCacheManager
 from modules.multimodal.thought_logger import ThoughtLogger, VisualAnalysisLog
+from pipeline.common.genai_factory import create_genai_client, resolve_api_key, resolve_genai_backend
 
 logger = logging.getLogger(__name__)
 
@@ -57,8 +57,8 @@ class VisualAssetProcessor:
     def __init__(
         self,
         volume_path: Path,
-        model: str = "gemini-3-pro-preview",
-        thinking_level: str = "HIGH",
+        model: str = "gemini-3-flash-preview",
+        thinking_level: str = "medium",
         api_key: Optional[str] = None,
         rate_limit_seconds: float = 3.0,
         max_retries: int = 3,
@@ -67,13 +67,16 @@ class VisualAssetProcessor:
         self.volume_path = volume_path
         self.model = model
         self.thinking_level = thinking_level
-        self.api_key = api_key or os.getenv("GEMINI_API_KEY")
+        self.api_key = resolve_api_key(api_key=api_key, required=False)
+        self.backend = resolve_genai_backend()
         self.rate_limit_seconds = rate_limit_seconds
         self.max_retries = max_retries
         self.timeout_seconds = timeout_seconds
 
-        if not self.api_key:
-            raise ValueError("GEMINI_API_KEY not found in environment")
+        if not self.api_key and self.backend == "developer":
+            raise ValueError(
+                "API key missing for developer mode. Set GOOGLE_API_KEY (or GEMINI_API_KEY)."
+            )
 
         # Initialize components
         self.cache_manager = VisualCacheManager(volume_path)
@@ -87,8 +90,10 @@ class VisualAssetProcessor:
     def genai_client(self):
         """Lazy initialization of Gemini client."""
         if self._genai_client is None:
-            from google import genai
-            self._genai_client = genai.Client(api_key=self.api_key)
+            self._genai_client = create_genai_client(
+                api_key=self.api_key,
+                backend=self.backend,
+            )
         return self._genai_client
 
     def process_volume(self) -> Dict[str, Any]:

@@ -247,7 +247,7 @@ V5.2 (February 2026) introduces a **Three-Pillar Translation Architecture** that
 - **LN Bible & Lore Manager**: Series-level canonical metadata store (`pipeline/bibles/`) manages characters, geography, weapons, cultural terms, mythology, and organizations across all volumes of a series. One truth per series — eliminates cross-volume naming drift.
 - **Bible Auto-Sync (Phase 1.5)**: Two-way sync during metadata processing — PULL inherits 130+ canonical terms from the bible before ruby translation; PUSH exports newly discovered terms back to the bible after processing. Fully automatic, non-fatal on failure.
 - **World Setting Directives**: Per-series honorific policy (localize/retain), name order (given-family/family-given), and per-character exceptions injected at the TOP of the system instruction.
-- **Schema Agent auto-update with Google Search grounding**: After Librarian extraction, Gemini 2.5 Flash enriches schema metadata with always-on Google Search — prioritizing existing anime/manga/publisher canon over heuristic inference.
+- **Schema Agent auto-update with Google Search grounding**: After Librarian extraction, Gemini 2.5 Flash enriches schema metadata with always-on Google Search using two fixed hierarchies: `Official Localization -> AniDB (public API) -> MyAnimeList -> Ranobe-Mori (JP) -> Fan Translation -> Heuristic Inference` (applied for both Series/Volume and Character/Term resolution).
 - **Phase 1.5 safe metadata processing**: Translates title/author/chapter fields while preserving deeper semantic configuration assets, schema-agent enrichments, and bible canonical terms.
 - **Sequel-aware continuity**: Character names, glossary, and series conventions inherited from both bible (canonical source) and predecessor volumes (fallback).
 - **Bible CLI tooling**: `mtl bible` provides 9 subcommands for managing bibles: `list`, `show`, `validate`, `import`, `link`, `unlink`, `orphans`, `prompt`, `sync`.
@@ -1366,7 +1366,7 @@ This section uses the same capability taxonomy as **Core Capabilities** so the r
 - **LN Bible & Lore Manager**: Series-level canonical metadata store at `pipeline/bibles/` — 136+ entries per series covering characters, geography, weapons, organizations, cultural terms, and mythology. Eliminates cross-volume naming drift ("Zxtat" incident).
 - **Bible Auto-Sync (Phase 1.5)**: Two-way sync — PULL inherits 133 canonical terms before translation; PUSH exports newly discovered terms back to bible after processing. Fully automatic, non-fatal on failure.
 - **World Setting Directive**: Per-series honorific policy (localize/retain), name order, and per-character exceptions injected at TOP of system instruction.
-- **Schema Agent with Google Search grounding**: Always-on Google Search in Gemini 2.5 Flash — prioritizes existing anime/manga/publisher canon (MAL, AniList, official publisher data) over heuristic inference.
+- **Schema Agent with Google Search grounding**: Always-on Google Search in Gemini 2.5 Flash with two fixed priority chains: `Official Localization -> AniDB (public API) -> MyAnimeList -> Ranobe-Mori (JP) -> Fan Translation -> Heuristic Inference` for both localization metadata and canonical term resolution.
 - **Schema v3.6 enrichment**: Metadata now includes `gap_moe_markers`, `dual_voice_analysis`, and `transcreation_notes`.
 - **Schema Agent v3.6 auto-run in Phase 1.5**: Flow is now `Librarian → Schema Agent autoupdate → Bible PULL → Title/Chapter translation → Bible PUSH → Phase 2`.
 - **Official localization preference**: When a series has an established localized title, schema auto-update prioritizes official localization metadata over literal fallback naming.
@@ -1444,6 +1444,14 @@ METADATA PROCESSOR    → manifest.json (metadata_processor.status = "completed"
 BIBLE SYNC — PUSH     → New characters pushed to bible (add only, never overwrite)
  (Phase 1.5 post)     → Existing characters enriched (nickname, keigo, affiliation)
                       → Volume registered in bible + index updated
+
+RICH METADATA CACHE   → Full-LN JP cache created (Gemini cache, 2h TTL)
+ (Phase 1.55)         → Autonomous metadata refinement on cached full-volume context
+                      → Placeholder-only merge (never overwrite populated fields)
+                      → visual_identity_non_color backfill (from appearance fallback)
+                      → rich_metadata_cache_patch.json artifact written
+                      → Bible event metadata sync (volume-scoped only)
+                      → Grounding chain: consumes Phase 1.5 always-on Google-grounded canon
 
 ART DIRECTOR          → Gemini 3 Pro Vision analyzes all illustrations
  (Phase 1.6)          → Builds IDENTITY LOCK from manifest + bible before analysis
@@ -1528,10 +1536,38 @@ WORK/[volume_id]/
 - Prioritize official localized series naming when available
 - **Bible PUSH**: Compare final manifest vs bible → push new characters, enrich existing entries, register volume
 
+**Google Search Grounding Priority Hierarchies**:
+1. **Hierarchy A (Series/Volume localization)**: Official Localization -> AniDB (with public API) -> MyAnimeList -> Ranobe-Mori (JP) -> Fan Translation -> Heuristic Inference
+2. **Hierarchy B (Character/Term canonicalization)**: Official Localization -> AniDB (with public API) -> MyAnimeList -> Ranobe-Mori (JP) -> Fan Translation -> Heuristic Inference
+
 **Output**:
 - `metadata_en.json` - Localized metadata configuration
 - Updated `manifest.json` with English titles + merged schema-agent enrichments + bible terms
 - Updated `bibles/*.json` - New terms pushed back to series bible (if linked)
+
+### Phase 1.55: Autonomous Rich Metadata Processor
+
+**Purpose**: Build a full-volume JP cache and autonomously refine rich metadata continuity before multimodal and translation phases.
+
+**Core behavior (code-scanned)**:
+- Runs as a standalone phase (`pipeline.metadata_processor.rich_metadata_cache`) and can also run in `--cache-only` mode.
+- Builds one full-LN payload from all `JP/*.md` chapters and creates external Gemini cache (`display_name=*richmeta*`, TTL 7200s).
+- Uses Gemini 2.5 Flash to generate `metadata_en_patch` against full-volume context.
+- Applies **placeholder-only updates**: populated fields are not overwritten.
+- Protects translation-critical fields (`title_en`, `author_en`, chapter titles, glossary, etc.) via allow/protect filters.
+- Maintains/backs-fills `character_profiles.*.visual_identity_non_color` when possible.
+- Pushes only **volume-scoped event metadata** to bible (relationship dynamics, keigo shifts, arcs), not canonical naming fields.
+- Writes patch artifact: `WORK/<volume>/rich_metadata_cache_patch.json`.
+
+**Always-on Google Search Grounding (notable point)**:
+- Grounding is enforced upstream in Phase 1.5 Schema Auto-Update (always passes Google Search tool and records localization provenance).
+- Phase 1.55 then operates autonomously on top of that grounded metadata + bible continuity + full-LN JP cache.
+- Net effect: canon terms are grounded first, then deepened with full-volume context before Phase 1.6/2.
+
+**Output**:
+- Updated `manifest.json` (`pipeline_state.rich_metadata_cache`)
+- Updated `metadata_<lang>.json` (typically `metadata_en.json`) with safe rich-field refinements
+- `rich_metadata_cache_patch.json` (audit artifact of applied patch scope)
 
 ### Phase 1.6: Art Director (Multimodal)
 

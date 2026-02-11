@@ -605,8 +605,8 @@ The system splits visual understanding from translation into two specialized pha
 │  Phase 1 — "Librarian" (caches entire LN)                          │
 │                                                                     │
 │  OUTPUT: manifest.json with:                                       │
-│    • character_profiles (ruby-extracted names + kanji)              │
-│    • name_registry.json (JP → EN character mappings)               │
+│    • metadata_en.character_profiles (canon names + profile context)│
+│    • visual_identity_non_color (non-color identity markers)        │
 │    • bible_id → links to series bible (130+ canonical terms)       │
 │                                                                     │
 │  ★ Character names are KNOWN before any illustration is analyzed   │
@@ -619,15 +619,15 @@ The system splits visual understanding from translation into two specialized pha
 │  Model: Gemini 3 Pro Vision + ThinkingConfig(HIGH)                 │
 │                                                                     │
 │  INPUT:  _assets/illustrations/*.jpg  (raw images)                 │
-│          + CHARACTER NAME REFERENCE from manifest/bible             │
-│  OUTPUT: visual_cache.json            (structured analysis)        │
+│          + CHARACTER IDENTITY LOCK from manifest + bible            │
+│  OUTPUT: visual_cache.json            (structured analysis + canon) │
 │                                                                     │
 │  For each illustration:                                            │
-│    1. Build prompt with canon character names from manifest + bible │
+│    1. Build prompt with canon names + non-color identity markers    │
 │    2. Send image + name-enriched prompt to Gemini 3 Pro Vision     │
 │    3. Model identifies characters BY NAME (not generic description)│
 │    4. Output: JSON with narrative_directives + spoiler_prevention   │
-│    5. Post-process: CanonNameEnforcer cleans any remaining generics│
+│    5. Post-analysis canon reconciliation + label normalization      │
 │    6. Cache with hash-based invalidation (prompt + image + model)  │
 └──────────────────────────────┬──────────────────────────────────────┘
                                │
@@ -654,7 +654,7 @@ Gemini 2.5 Pro never sees the image. It receives a structured JSON interpretatio
 
 ### What the Visual Cache Contains
 
-Each illustration entry in `visual_cache.json` provides five structured fields:
+Each illustration entry in `visual_cache.json` provides structured visual guidance plus identity metadata:
 
 ```json
 {
@@ -680,6 +680,10 @@ Each illustration entry in `visual_cache.json` provides five structured fields:
         "Describe the specific hand gestures to ground the character's physical presence."
       ]
     },
+    "identity_resolution": {
+      "resolved_characters": [],
+      "unresolved_characters": []
+    },
     "spoiler_prevention": {
       "do_not_reveal_before_text": [
         "The act of sharing food if it signifies a relationship milestone not yet reached"
@@ -691,11 +695,13 @@ Each illustration entry in `visual_cache.json` provides five structured fields:
 
 | Field | Purpose |
 |-------|---------|
-| `composition` | Panel layout, framing, focal points — tells the translator *how* the scene is staged |
-| `emotional_delta` | Emotional contrasts and mood — calibrates vocabulary (e.g., "frozen" vs generic "sad") |
-| `key_details` | Character expressions, actions, atmosphere — grounds prose in physical specifics |
-| `narrative_directives` | 3-5 explicit instructions for how visual context should influence translation choices |
+| `visual_ground_truth.composition` | Panel layout, framing, focal points — tells the translator *how* the scene is staged |
+| `visual_ground_truth.emotional_delta` | Emotional contrasts and mood — calibrates vocabulary |
+| `visual_ground_truth.key_details` | Character expressions, actions, atmosphere — grounds prose in physical specifics |
+| `visual_ground_truth.narrative_directives` | Explicit instructions for how visual context should influence translation choices |
+| `identity_resolution` | Per-image identity resolution payload (present in cache schema for disambiguation flow) |
 | `spoiler_prevention` | Plot details visible in the image that the text hasn't confirmed yet — **do not translate** |
+| `_canon_names` (cache-level) | Canon JP→EN label map injected after analysis for stable downstream references |
 
 ### Art Director's Notes: How the Translator Receives Visual Context
 
@@ -729,26 +735,123 @@ SPOILER PREVENTION: Do not mention: The act of sharing food if it signifies...
 
 The Canon Event Fidelity directive ensures the translator uses illustrations as **vocabulary calibration**, not content invention. The illustration shows what the scene *looks* like; the source text determines what *happens*.
 
-### Canon Name Enforcement
+### Canon Name Enforcement & Metadata Handoff
 
-Since Phase 1 (Librarian) caches the entire LN and extracts all character names into `manifest.json` before Phase 1.6 runs, the Art Director has **full access to the canon character roster** from the start. When a series bible is linked, 130+ canonical terms (names, locations, weapons) are also available.
+Since Phase 1 (Librarian + metadata pipeline) completes before Phase 1.6, the Art Director has **full access to canon roster metadata** from the start:
+- `manifest.json` → `metadata_en.character_profiles` (`full_name`, `nickname`, `relationship_to_protagonist`)
+- `manifest.json` → `character_profiles.*.visual_identity_non_color` (non-color identity markers)
+- Series bible (when linked) → canonical character registry and cross-volume consistency
 
-The system uses a **two-layer** approach — pre-injection into the vision prompt, and post-processing cleanup:
+#### Bible → Multimodal Handoff Contract
 
-#### Layer 1: Pre-Injection (Vision Prompt Enrichment)
+The multimodal identity lock and post-analysis canon reconciliation rely on the following JSON contract.
 
-Before sending each illustration to Gemini 3 Pro Vision, the `asset_processor` builds a name-enriched prompt that includes a `CHARACTER NAME REFERENCE` block from `manifest.json` character profiles + bible canonical names:
+| JSON Key | Type | Required | Producer | Consumer | Notes |
+|---|---|---|---|---|---|
+| `manifest.json.bible_id` | `string` | Optional | Bible resolution (Phase 1.5) | `asset_processor` | If present, loads series bible character registry. |
+| `manifest.json.metadata_en.character_profiles` | `object` (`Record<string, object>`) | Yes | Librarian + Metadata Processor | `prompt_injector`, `kuchie_visualizer`, `asset_processor` | Key is JP character label (usually kanji). |
+| `manifest.json.metadata_en.character_profiles.<jp>.full_name` | `string` | Recommended | Metadata Processor / Schema Agent | `CanonNameEnforcer` | Canon EN label baseline. |
+| `manifest.json.metadata_en.character_profiles.<jp>.nickname` | `string` | Optional | Metadata Processor | `CanonNameEnforcer` | First token may be used as short display label. |
+| `manifest.json.metadata_en.character_profiles.<jp>.relationship_to_protagonist` | `string` | Optional | Metadata Processor | `CanonNameEnforcer` | Used for relation-aware labels (e.g., `Ako's Mother`). |
+| `manifest.json.metadata_en.character_profiles.<jp>.visual_identity_non_color` | `object` | Recommended | Metadata Processor / Schema Agent | `build_multimodal_identity_lock` | Non-color identity anchors for prompt-time disambiguation. |
+| `manifest.json.metadata_en.character_profiles.<jp>.visual_identity_non_color.hair_shape_texture` | `array<string>` | Optional | Metadata pipeline | Identity Lock | New structured field. |
+| `manifest.json.metadata_en.character_profiles.<jp>.visual_identity_non_color.silhouette_build` | `array<string>` | Optional | Metadata pipeline | Identity Lock | New structured field. |
+| `manifest.json.metadata_en.character_profiles.<jp>.visual_identity_non_color.face_markers` | `array<string>` | Optional | Metadata pipeline | Identity Lock | New structured field. |
+| `manifest.json.metadata_en.character_profiles.<jp>.visual_identity_non_color.habitual_expression_pose` | `array<string>` | Optional | Metadata pipeline | Identity Lock | New structured field. |
+| `manifest.json.metadata_en.character_profiles.<jp>.visual_identity_non_color.signature_items` | `array<string>` | Optional | Metadata pipeline | Identity Lock | New structured field. |
+| `manifest.json.metadata_en.character_profiles.<jp>.visual_identity_non_color.uniform_accessories` | `array<string>` | Optional | Metadata pipeline | Identity Lock | New structured field. |
+| `manifest.json.metadata_en.character_profiles.<jp>.visual_identity_non_color.voice_register` | `string` | Optional | Metadata pipeline | Identity Lock | New structured field. |
+| `manifest.json.metadata_en.character_profiles.<jp>.visual_identity_non_color.identity_anchor` | `string` | Optional | Metadata pipeline | Identity Lock | New structured field. |
+| `pipeline/bibles/<id>.json.characters.<jp>.canonical_en` | `string` | Optional | Series Bible | `build_multimodal_identity_lock` | Fallback/override canonical source when bible linked. |
+| `pipeline/bibles/<id>.json.characters.<jp>.short_name` | `string` | Optional | Series Bible | `build_multimodal_identity_lock` | Display nickname if manifest nickname missing. |
+| `pipeline/bibles/<id>.json.characters.<jp>.visual_identity_non_color` | `object \| array \| string` | Optional | Series Bible | `build_multimodal_identity_lock` | Normalized before prompt injection. |
+| `visual_cache.json.<asset>.visual_ground_truth` | `object` | Yes | Multimodal Phase 1.6 | Translator prompt injector | Must contain `composition`, `emotional_delta`, `key_details`, `narrative_directives`. |
+| `visual_cache.json.<asset>.identity_resolution` | `object` | Yes (may be empty) | Multimodal Phase 1.6 | QA / downstream tooling | Current schema key exists even when payload is `{}`. |
+| `visual_cache.json._canon_names.<jp>.english` | `string` | Yes | Post-analysis canon reconciliation | Translator + audits | Final canonical label exported for stable downstream reference. |
+| `visual_cache.json._canon_names.<jp>.nickname` | `string` | Optional | Post-analysis canon reconciliation | Translator + audits | Human-friendly alias. |
+| `visual_cache.json._canon_names.<jp>.reading` | `string` | Optional | Post-analysis canon reconciliation | QA tooling | Furigana reading when available. |
+
+**Minimal Required Payload (copy/paste validation)**
+
+```json
+{
+  "manifest.json": {
+    "bible_id": "series_id",
+    "metadata_en": {
+      "character_profiles": {
+        "西村英騎": {
+          "full_name": "Nishimura Hideki",
+          "nickname": "Rusian",
+          "relationship_to_protagonist": "protagonist",
+          "visual_identity_non_color": {
+            "hair_shape_texture": ["short, tousled"],
+            "silhouette_build": ["average male student build"],
+            "face_markers": ["frequent flustered look"],
+            "habitual_expression_pose": ["defensive lean-back"],
+            "signature_items": ["school bag"],
+            "uniform_accessories": ["male school uniform silhouette"],
+            "voice_register": "casual_masculine",
+            "identity_anchor": "Male POV lead"
+          }
+        }
+      }
+    }
+  },
+  "pipeline/bibles/<id>.json": {
+    "characters": {
+      "西村英騎": {
+        "canonical_en": "Nishimura Hideki",
+        "short_name": "Rusian",
+        "visual_identity_non_color": {
+          "hairstyle": ["short, tousled"]
+        }
+      }
+    }
+  },
+  "visual_cache.json": {
+    "p027": {
+      "status": "cached",
+      "visual_ground_truth": {
+        "composition": "string",
+        "emotional_delta": "string",
+        "key_details": {},
+        "narrative_directives": []
+      },
+      "identity_resolution": {},
+      "spoiler_prevention": {}
+    },
+    "_canon_names": {
+      "西村英騎": {
+        "english": "Nishimura Hideki",
+        "nickname": "Rusian",
+        "reading": "にしむらひでき"
+      }
+    }
+  }
+}
+```
+
+**Contract guarantees**
+- Phase 1.6 can always run with manifest-only data.
+- If bible is present, identity lock merges manifest + bible records.
+- Canon labels are relation-aware and normalized before `_canon_names` is written.
+
+The system uses a **two-layer handoff** — pre-analysis identity lock plus post-analysis canon reconciliation:
+
+#### Layer 1: Pre-Analysis Identity Lock (Vision Prompt Enrichment)
+
+Before sending each illustration to Gemini 3 Pro Vision, `asset_processor` builds a `CHARACTER IDENTITY LOCK (NON-COLOR)` block from manifest + bible:
 
 ```
-=== CHARACTER NAME REFERENCE (from manifest + bible) ===
-ティグルヴルムド＝ヴォルン → Tigrevurmud Vorn (Tigre)
-  Role: protagonist | Male, 16 | Brune/Alsace
-エレオノーラ＝ヴィルターリア → Eleonora Viltaria (Elen)
-  Role: heroine | Female | Zhcted/Leitmeritz
-リュドミラ＝ルリエ → Ludmila Lourie (Mila)
-  Role: ally | Female | Zhcted/Olmutz
+=== CHARACTER IDENTITY LOCK (NON-COLOR) ===
+- Nishimura Hideki [西村英騎] / nickname=Rusian
+  non-color-id: hair:short, tousled | outfit:male school uniform silhouette | expr:exasperated stare
+- Tamaki Ako [玉置亜子] / nickname=Ako
+  non-color-id: hair:long flowing | outfit:petite schoolgirl silhouette | expr:blushing lovestruck smile
+- Ako's Mother [玉置の母親] / nickname=Okaasan
+  non-color-id: pose:calm hosting posture | id:maternal domestic presence
 ...
-=== END CHARACTER REFERENCE ===
+=== END IDENTITY LOCK ===
 ```
 
 With this context, Gemini 3 Pro Vision can identify characters **by name** in its output:
@@ -757,15 +860,16 @@ With this context, Gemini 3 Pro Vision can identify characters **by name** in it
 
 This eliminates the fundamental limitation of a name-blind vision prompt — the model no longer produces generic descriptions that downstream string-replacement cannot fix.
 
-#### Layer 2: Post-Processing (CanonNameEnforcer)
+#### Layer 2: Post-Analysis Canon Reconciliation
 
-After Gemini 3 Pro Vision returns its analysis, `CanonNameEnforcer` (`prompt_injector.py`) runs a cleanup pass:
+After Gemini 3 Pro Vision returns its analysis, `KuchieVisualizer.inject_canon_into_visual_cache()` applies `CanonNameEnforcer` across the cache and writes `_canon_names`:
 
-1. **JP → EN replacement**: Any Japanese kanji names that the vision model OCR'd from the image are replaced with their canonical English equivalents
-2. **Nickname normalization**: Full names are supplemented with nicknames where appropriate ("Tigrevurmud Vorn" → "Tigre")
-3. **Recursive enforcement**: Walks the entire visual cache dict structure, enforcing names in every string field
+1. **JP → EN replacement**: Any Japanese names in visual output are replaced with canonical English labels
+2. **Relation-aware canonical labels**: Ambiguous labels are normalized (example: `玉置の母親` → `Ako's Mother`, not just `Tamaki`)
+3. **Recursive enforcement**: Entire cache dict is traversed so canon labels stay consistent in all text fields
+4. **Cache-level registry**: `_canon_names` is refreshed for downstream prompt consumers
 
-This two-layer approach ensures Art Director's Notes arrive at the Translator with **zero name ambiguity** — every character reference uses the exact same names that appear in the bible glossary, the manifest character profiles, and the translation system prompt.
+This two-layer handoff ensures Art Director's Notes arrive at the Translator with stable naming and low identity ambiguity across manifest, bible, and translation prompts.
 
 #### Kuchie (Color Plate) Special Handling
 
@@ -820,9 +924,9 @@ When the translator saves its THINKING log, it includes the Art Director's visua
 
 | File | Purpose |
 |------|---------|
-| `modules/multimodal/asset_processor.py` | Phase 1.6 orchestrator — analyzes all illustrations with Gemini 3 Pro Vision; loads manifest + bible for name-enriched prompts |
+| `modules/multimodal/asset_processor.py` | Phase 1.6 orchestrator — analyzes all illustrations with Gemini 3 Pro Vision; builds pre-analysis identity lock from manifest + bible |
 | `modules/multimodal/cache_manager.py` | Loads, saves, and queries `visual_cache.json` with hash-based invalidation; provides `get_character_profiles()` and `get_canon_name()` helpers |
-| `modules/multimodal/prompt_injector.py` | `CanonNameEnforcer` class for post-processing + `build_chapter_visual_guidance()` for translation prompt formatting |
+| `modules/multimodal/prompt_injector.py` | `CanonNameEnforcer` + `build_multimodal_identity_lock()` for canonical label normalization and identity-lock prompt assembly |
 | `modules/multimodal/segment_classifier.py` | Extracts `[ILLUSTRATION: ...]` markers from chapter source text |
 | `modules/multimodal/integrity_checker.py` | Pre-flight validation: JP tags ↔ asset files ↔ manifest mapping |
 | `modules/multimodal/kuchie_visualizer.py` | Kuchie OCR → canon name cross-reference + color plate visualization |
@@ -1329,9 +1433,10 @@ SCHEMA AGENT AUTO-UPDATE
                       → Google Search grounding (always-on, media canon priority)
 
 BIBLE SYNC — PULL     → BibleController.load(manifest) resolves series bible
- (Phase 1.5)          → 133 canonical terms inherited (characters, geography, etc.)
-                      → name_registry pre-populated (ruby translation skip list)
-                      → Bible context block injected into Gemini prompt
+ (Phase 1.5)          → Canon terms inherited (characters, geography, etc.)
+                      → metadata_en.character_profiles enriched with bible continuity
+                      → visual_identity_non_color available for multimodal identity lock
+                      → Bible context block injected into Gemini metadata prompt
 
 METADATA PROCESSOR    → manifest.json (metadata_processor.status = "completed")
                       → metadata_en.json created/updated
@@ -1341,7 +1446,9 @@ BIBLE SYNC — PUSH     → New characters pushed to bible (add only, never over
                       → Volume registered in bible + index updated
 
 ART DIRECTOR          → Gemini 3 Pro Vision analyzes all illustrations
- (Phase 1.6)          → visual_cache.json created (hash-based invalidation)
+ (Phase 1.6)          → Builds IDENTITY LOCK from manifest + bible before analysis
+                      → visual_cache.json created (visual_ground_truth + _canon_names)
+                      → post-analysis canon reconciliation applied to cache entries
                       → cache/thoughts/*.json (reasoning traces)
 
 VECTOR SEARCH INIT    → EnglishPatternStore auto-rebuilds if empty

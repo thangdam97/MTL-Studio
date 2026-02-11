@@ -16,6 +16,7 @@ Canon Name Enforcement:
 
 import json
 import logging
+import re
 from pathlib import Path
 from typing import Dict, Any, List, Optional
 
@@ -36,6 +37,105 @@ class CanonNameEnforcer:
         self.nickname_map: Dict[str, str] = {}  # Japanese → Nickname
         self.visual_identity_map: Dict[str, Dict[str, Any]] = {}  # Japanese → non-color visual identity
         self._load_canon_names()
+
+    @staticmethod
+    def _first_nickname(nickname: str) -> str:
+        """Return first nickname token from a comma-separated nickname field."""
+        if not isinstance(nickname, str):
+            return ""
+        primary = nickname.split(",", 1)[0].strip()
+        return primary
+
+    @staticmethod
+    def _extract_relation_label(
+        japanese_name: str,
+        relationship_to_protagonist: str,
+    ) -> str:
+        """
+        Infer familial relation label from JP key and/or relationship text.
+
+        Returns values like "Mother", "Father", "Older Sister", etc.
+        """
+        jp = japanese_name or ""
+        rel = relationship_to_protagonist or ""
+        rel_l = rel.lower()
+
+        suffix_map = [
+            ("母親", "Mother"),
+            ("父親", "Father"),
+            ("祖母", "Grandmother"),
+            ("祖父", "Grandfather"),
+            ("姉", "Older Sister"),
+            ("兄", "Older Brother"),
+            ("妹", "Younger Sister"),
+            ("弟", "Younger Brother"),
+            ("先生", "Teacher"),
+        ]
+        for suffix, label in suffix_map:
+            if jp.endswith(f"の{suffix}") or jp.endswith(suffix):
+                return label
+
+        text_map = [
+            ("mother", "Mother"),
+            ("father", "Father"),
+            ("grandmother", "Grandmother"),
+            ("grandfather", "Grandfather"),
+            ("older sister", "Older Sister"),
+            ("older brother", "Older Brother"),
+            ("younger sister", "Younger Sister"),
+            ("younger brother", "Younger Brother"),
+            ("sister", "Sister"),
+            ("brother", "Brother"),
+            ("teacher", "Teacher"),
+        ]
+        for token, label in text_map:
+            if token in rel_l:
+                return label
+        return ""
+
+    @classmethod
+    def build_canonical_label(
+        cls,
+        japanese_name: str,
+        profile: Dict[str, Any],
+    ) -> str:
+        """
+        Build a stable canonical label for prompt/cache use.
+
+        Improves ambiguous one-token names for relation roles, e.g.:
+        - "玉置の母親" + "Tamaki" + "Ako's mother" -> "Ako's Mother"
+        """
+        if not isinstance(profile, dict):
+            return ""
+
+        full_name = str(profile.get("full_name", "")).strip()
+        nickname = cls._first_nickname(str(profile.get("nickname", "")))
+        rel_to_protag = str(profile.get("relationship_to_protagonist", "")).strip()
+
+        relation_label = cls._extract_relation_label(japanese_name, rel_to_protag)
+        if relation_label:
+            # Preferred: explicit "<Name>'s <Relation>" from relationship text.
+            # Example: "Ako's mother" -> "Ako's Mother"
+            rel_match = re.search(
+                r"([A-Za-z][A-Za-z -]{0,40})'s\s+(mother|father|sister|brother|grandmother|grandfather|teacher)",
+                rel_to_protag,
+                flags=re.IGNORECASE,
+            )
+            if rel_match:
+                owner = rel_match.group(1).strip()
+                return f"{owner}'s {relation_label}"
+
+            if full_name:
+                suffix = "'" if full_name.endswith("s") else "'s"
+                return f"{full_name}{suffix} {relation_label}"
+            if nickname:
+                suffix = "'" if nickname.endswith("s") else "'s"
+                return f"{nickname}{suffix} {relation_label}"
+            return relation_label
+
+        if full_name:
+            return full_name
+        return nickname
     
     def _load_canon_names(self) -> None:
         """Load canon names from manifest character_profiles."""
@@ -49,7 +149,7 @@ class CanonNameEnforcer:
         for kanji_name, profile in profiles.items():
             if not isinstance(profile, dict):
                 continue
-            full_name = profile.get("full_name", "")
+            full_name = self.build_canonical_label(kanji_name, profile)
             nickname = profile.get("nickname", "")
             
             if full_name:

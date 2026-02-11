@@ -133,12 +133,27 @@ Example output:
         from ruby annotations in the source text.
         """
         profiles = self.manifest.get("metadata_en", {}).get("character_profiles", {})
+        canonical_label_builder = None
+        try:
+            from modules.multimodal.prompt_injector import CanonNameEnforcer
+
+            canonical_label_builder = CanonNameEnforcer.build_canonical_label
+        except Exception:
+            canonical_label_builder = None
         
         for kanji_name, profile in profiles.items():
+            full_name = profile.get("full_name", "")
+            if callable(canonical_label_builder):
+                try:
+                    labeled = canonical_label_builder(kanji_name, profile)
+                    if labeled:
+                        full_name = labeled
+                except Exception:
+                    pass
             self.canon_names[kanji_name] = RubyCanonEntry(
                 kanji=kanji_name,
                 reading=profile.get("ruby_reading", ""),
-                full_name_en=profile.get("full_name", ""),
+                full_name_en=full_name,
                 nickname=profile.get("nickname", ""),
                 occurrences=profile.get("occurrences", 0)
             )

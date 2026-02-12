@@ -9,7 +9,12 @@ Workflow:
 2. Build one full-volume JP cache (all chapter source markdown).
 3. Call Gemini 2.5 Flash (temperature 0.5) with cached volume context.
 4. Merge returned rich metadata patch into manifest metadata_<lang>.
-5. Push enriched profile data back to the series bible when available.
+5. Run context offload co-processors and write .context caches:
+   - character_registry.json
+   - cultural_glossary.json
+   - timeline_map.json
+   - idiom_transcreation_cache.json (with Google Search grounding)
+6. Push enriched profile data back to the series bible when available.
 """
 
 import argparse
@@ -20,6 +25,11 @@ import re
 import sys
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple
+
+try:
+    from google.genai import types
+except Exception:
+    types = None
 
 from pipeline.common.gemini_client import GeminiClient
 from pipeline.config import PIPELINE_ROOT, WORK_DIR, get_target_language
@@ -38,6 +48,14 @@ class RichMetadataCacheUpdater:
     MODEL_NAME = "gemini-2.5-flash"
     TEMPERATURE = 0.5
     CACHE_TTL_SECONDS = 7200
+    PROCESSOR_MAX_OUTPUT_TOKENS = 24576
+    CONTEXT_DIR = ".context"
+    CONTEXT_PROCESSOR_FILES = {
+        "character_context": "character_registry.json",
+        "cultural_context": "cultural_glossary.json",
+        "temporal_context": "timeline_map.json",
+        "idiom_transcreation": "idiom_transcreation_cache.json",
+    }
 
     # Keep translation outputs untouched in this phase.
     PROTECTED_FIELDS = {
@@ -141,6 +159,12 @@ class RichMetadataCacheUpdater:
             return False
 
         system_instruction = self._build_system_instruction()
+        scene_plan_index = self._load_scene_plan_index()
+        context_processor_stats: Dict[str, Any] = {
+            "status": "not_started",
+            "processors": {},
+            "output_files": [],
+        }
 
         if self.cache_only:
             cache_name = None
@@ -172,6 +196,14 @@ class RichMetadataCacheUpdater:
                 if cache_name:
                     self.client.delete_cache(cache_name)
 
+            metadata_snapshot = self._get_metadata_block()
+            context_processor_stats = self._run_context_processors(
+                full_volume_text=full_volume_text,
+                metadata_en=metadata_snapshot,
+                cache_stats=cache_stats,
+                scene_plan_index=scene_plan_index,
+            )
+
             if not used_external_cache:
                 fallback_reason = (
                     cache_error
@@ -188,6 +220,7 @@ class RichMetadataCacheUpdater:
                     cache_stats=cache_stats,
                     used_external_cache=False,
                     mode="cache_only",
+                    context_processor_stats=context_processor_stats,
                 )
                 self._save_manifest()
                 logger.info(
@@ -204,6 +237,7 @@ class RichMetadataCacheUpdater:
                 output_tokens=0,
                 patch_keys=[],
                 mode="cache_only",
+                context_processor_stats=context_processor_stats,
             )
             self._save_manifest()
             logger.info(
@@ -318,6 +352,13 @@ class RichMetadataCacheUpdater:
             except Exception as e:
                 logger.warning(f"Bible PUSH after rich update failed (non-fatal): {e}")
 
+        context_processor_stats = self._run_context_processors(
+            full_volume_text=full_volume_text,
+            metadata_en=merged_metadata,
+            cache_stats=cache_stats,
+            scene_plan_index=scene_plan_index,
+        )
+
         self._mark_pipeline_state(
             status="completed",
             cache_stats=cache_stats,
@@ -325,6 +366,7 @@ class RichMetadataCacheUpdater:
             output_tokens=getattr(response, "output_tokens", 0),
             patch_keys=sorted(list(filtered_patch.keys())),
             mode="full",
+            context_processor_stats=context_processor_stats,
         )
         self._save_manifest()
 
@@ -718,6 +760,543 @@ class RichMetadataCacheUpdater:
 
         return {"updated": updated, "skipped": skipped, "missing_in_bible": missing_in_bible}
 
+    def _context_dir_path(self) -> Path:
+        context_dir = self.work_dir / self.CONTEXT_DIR
+        context_dir.mkdir(parents=True, exist_ok=True)
+        return context_dir
+
+    def _context_output_path(self, processor_id: str) -> Path:
+        filename = self.CONTEXT_PROCESSOR_FILES.get(processor_id, f"{processor_id}.json")
+        return self._context_dir_path() / filename
+
+    def _normalize_chapter_key(self, value: Any) -> str:
+        raw = str(value or "").strip()
+        if not raw:
+            return ""
+        match = re.search(r"chapter[_\-\s]*0*(\d+)", raw, re.IGNORECASE)
+        if not match:
+            match = re.search(r"\bch[_\-\s]*0*(\d+)\b", raw, re.IGNORECASE)
+        if not match:
+            match = re.search(r"\b0*(\d{1,3})\b", raw)
+        if not match:
+            return ""
+        return f"chapter_{int(match.group(1)):02d}"
+
+    def _load_scene_plan_index(self) -> Dict[str, Dict[str, Any]]:
+        plans_dir = self.work_dir / "PLANS"
+        index: Dict[str, Dict[str, Any]] = {}
+        if not plans_dir.exists():
+            return index
+
+        for path in sorted(plans_dir.glob("*_scene_plan.json")):
+            try:
+                payload = json.loads(path.read_text(encoding="utf-8"))
+            except Exception:
+                continue
+            if not isinstance(payload, dict):
+                continue
+
+            chapter_key = self._normalize_chapter_key(payload.get("chapter_id") or path.stem)
+            if not chapter_key:
+                continue
+
+            scenes: List[Dict[str, Any]] = []
+            raw_scenes = payload.get("scenes", [])
+            if isinstance(raw_scenes, list):
+                for scene in raw_scenes:
+                    if not isinstance(scene, dict):
+                        continue
+                    scenes.append(
+                        {
+                            "id": str(scene.get("id") or "").strip(),
+                            "beat_type": str(scene.get("beat_type") or "").strip(),
+                            "emotional_arc": str(scene.get("emotional_arc") or "").strip(),
+                            "dialogue_register": str(scene.get("dialogue_register") or "").strip(),
+                            "target_rhythm": str(scene.get("target_rhythm") or "").strip(),
+                            "start_paragraph": scene.get("start_paragraph"),
+                            "end_paragraph": scene.get("end_paragraph"),
+                            "illustration_anchor": bool(scene.get("illustration_anchor")),
+                        }
+                    )
+
+            index[chapter_key] = {
+                "chapter_id": chapter_key,
+                "overall_tone": str(payload.get("overall_tone") or "").strip(),
+                "pacing_strategy": str(payload.get("pacing_strategy") or "").strip(),
+                "scenes": scenes,
+            }
+
+        return index
+
+    def _build_processor_context_payload(
+        self,
+        metadata_en: Dict[str, Any],
+        cache_stats: Dict[str, Any],
+        scene_plan_index: Dict[str, Dict[str, Any]],
+    ) -> Dict[str, Any]:
+        metadata = self.manifest.get("metadata", {})
+        char_names = metadata_en.get("character_names", {})
+        profiles = metadata_en.get("character_profiles", {})
+
+        profile_summary: Dict[str, Dict[str, Any]] = {}
+        if isinstance(profiles, dict):
+            for key, value in list(profiles.items())[:40]:
+                if not isinstance(value, dict):
+                    continue
+                profile_summary[key] = {
+                    "name_en": value.get("name_en", ""),
+                    "role": value.get("role", ""),
+                    "archetype": value.get("archetype", ""),
+                    "speech_pattern": value.get("speech_pattern", ""),
+                    "personality": value.get("personality", ""),
+                }
+
+        scene_summary: Dict[str, Dict[str, Any]] = {}
+        for chapter_key, plan in scene_plan_index.items():
+            scenes = plan.get("scenes", [])
+            compact_scenes = []
+            if isinstance(scenes, list):
+                for scene in scenes[:24]:
+                    if not isinstance(scene, dict):
+                        continue
+                    compact_scenes.append(
+                        {
+                            "id": scene.get("id"),
+                            "beat_type": scene.get("beat_type"),
+                            "dialogue_register": scene.get("dialogue_register"),
+                            "target_rhythm": scene.get("target_rhythm"),
+                            "start_paragraph": scene.get("start_paragraph"),
+                            "end_paragraph": scene.get("end_paragraph"),
+                        }
+                    )
+            scene_summary[chapter_key] = {
+                "overall_tone": plan.get("overall_tone", ""),
+                "pacing_strategy": plan.get("pacing_strategy", ""),
+                "scene_count": len(scenes) if isinstance(scenes, list) else 0,
+                "scenes": compact_scenes,
+            }
+
+        return {
+            "volume_id": self.manifest.get("volume_id", self.work_dir.name),
+            "book_title_jp": metadata.get("title", ""),
+            "book_author_jp": metadata.get("author", ""),
+            "book_genre": metadata.get("genre", ""),
+            "target_language": self.target_language,
+            "cache_stats": cache_stats,
+            "character_names": char_names if isinstance(char_names, dict) else {},
+            "character_profiles_summary": profile_summary,
+            "scene_plan_summary": scene_summary,
+            "existing_cultural_terms": metadata_en.get("cultural_terms", {}),
+            "existing_localization_notes": metadata_en.get("localization_notes", {}),
+        }
+
+    def _generate_with_optional_cache(
+        self,
+        *,
+        prompt: str,
+        system_instruction: str,
+        full_volume_text: str,
+        display_name: str,
+        tools: Optional[List[Any]] = None,
+    ) -> Optional[Dict[str, Any]]:
+        response = None
+        cache_name = None
+        try:
+            cache_name = self.client.create_cache(
+                model=self.MODEL_NAME,
+                system_instruction=system_instruction,
+                contents=[full_volume_text],
+                ttl_seconds=self.CACHE_TTL_SECONDS,
+                display_name=display_name,
+                tools=tools,
+            )
+            if cache_name:
+                response = self.client.generate(
+                    prompt=prompt,
+                    temperature=self.TEMPERATURE,
+                    max_output_tokens=self.PROCESSOR_MAX_OUTPUT_TOKENS,
+                    model=self.MODEL_NAME,
+                    cached_content=cache_name,
+                )
+            else:
+                response = self.client.generate(
+                    prompt=prompt,
+                    system_instruction=system_instruction,
+                    temperature=self.TEMPERATURE,
+                    max_output_tokens=self.PROCESSOR_MAX_OUTPUT_TOKENS,
+                    model=self.MODEL_NAME,
+                    tools=tools,
+                )
+        except Exception as e:
+            logger.warning(f"[P1.55] Processor call failed ({display_name}): {e}")
+            return None
+        finally:
+            if cache_name:
+                self.client.delete_cache(cache_name)
+
+        if not response or not response.content:
+            return None
+        try:
+            payload = self._parse_json_response(response.content)
+        except Exception as e:
+            logger.warning(f"[P1.55] Processor JSON parse failed ({display_name}): {e}")
+            return None
+        return payload if isinstance(payload, dict) else None
+
+    def _fallback_character_registry(self, metadata_en: Dict[str, Any]) -> Dict[str, Any]:
+        characters: List[Dict[str, Any]] = []
+        profiles = metadata_en.get("character_profiles", {})
+        if isinstance(profiles, dict):
+            for idx, (key, value) in enumerate(profiles.items(), start=1):
+                if not isinstance(value, dict):
+                    continue
+                characters.append(
+                    {
+                        "id": f"char_{idx:03d}",
+                        "key": key,
+                        "canonical_name": value.get("name_en") or key,
+                        "japanese_name": value.get("name_jp") or key,
+                        "role": value.get("role", ""),
+                        "archetype": value.get("archetype", ""),
+                    }
+                )
+
+        return {
+            "volume_id": self.manifest.get("volume_id", self.work_dir.name),
+            "generated_at": datetime.datetime.now().isoformat(),
+            "processor_version": "1.0",
+            "characters": characters,
+            "relationship_graph": {},
+            "pronoun_resolution_hints": [],
+            "summary": {
+                "total_characters": len(characters),
+                "total_relationship_edges": 0,
+            },
+        }
+
+    def _fallback_cultural_glossary(self, metadata_en: Dict[str, Any]) -> Dict[str, Any]:
+        terms: List[Dict[str, Any]] = []
+        source_terms = metadata_en.get("cultural_terms", {})
+        if isinstance(source_terms, dict):
+            for key, value in list(source_terms.items())[:60]:
+                if isinstance(value, dict):
+                    meaning = value.get("meaning_en") or value.get("translation") or ""
+                    notes = value.get("notes") or value.get("context") or ""
+                else:
+                    meaning = str(value)
+                    notes = ""
+                terms.append(
+                    {
+                        "term_jp": key,
+                        "preferred_en": meaning,
+                        "notes": notes,
+                    }
+                )
+
+        return {
+            "volume_id": self.manifest.get("volume_id", self.work_dir.name),
+            "generated_at": datetime.datetime.now().isoformat(),
+            "processor_version": "1.0",
+            "terms": terms,
+            "idioms": [],
+            "honorific_policies": [],
+            "location_terms": [],
+            "summary": {
+                "total_terms": len(terms),
+                "total_idioms": 0,
+            },
+        }
+
+    def _fallback_timeline_map(self, scene_plan_index: Dict[str, Dict[str, Any]]) -> Dict[str, Any]:
+        timeline: List[Dict[str, Any]] = []
+        for chapter_key in sorted(scene_plan_index.keys()):
+            plan = scene_plan_index.get(chapter_key, {})
+            scenes = plan.get("scenes", [])
+            timeline.append(
+                {
+                    "chapter_id": chapter_key,
+                    "sequence_index": int(chapter_key.split("_")[-1]) if "_" in chapter_key else 0,
+                    "scene_count": len(scenes) if isinstance(scenes, list) else 0,
+                    "scenes": scenes if isinstance(scenes, list) else [],
+                    "temporal_markers": [],
+                    "continuity_constraints": [],
+                }
+            )
+
+        return {
+            "volume_id": self.manifest.get("volume_id", self.work_dir.name),
+            "generated_at": datetime.datetime.now().isoformat(),
+            "processor_version": "1.0",
+            "chapter_timeline": timeline,
+            "global_continuity_rules": [],
+            "summary": {
+                "chapter_count": len(timeline),
+                "event_count": sum(item.get("scene_count", 0) for item in timeline),
+            },
+        }
+
+    def _fallback_idiom_transcreation(self) -> Dict[str, Any]:
+        return {
+            "volume_id": self.manifest.get("volume_id", self.work_dir.name),
+            "generated_at": datetime.datetime.now().isoformat(),
+            "processor_version": "1.0",
+            "transcreation_opportunities": [],
+            "wordplay_transcreations": [],
+            "summary": {
+                "total_opportunities": 0,
+                "by_priority": {"critical": 0, "high": 0, "medium": 0, "low": 0},
+                "avg_confidence": 0.0,
+            },
+        }
+
+    def _estimate_processor_items(self, processor_id: str, payload: Dict[str, Any]) -> int:
+        if processor_id == "character_context":
+            return len(payload.get("characters", []))
+        if processor_id == "cultural_context":
+            return len(payload.get("terms", [])) + len(payload.get("idioms", []))
+        if processor_id == "temporal_context":
+            return len(payload.get("chapter_timeline", []))
+        if processor_id == "idiom_transcreation":
+            return len(payload.get("transcreation_opportunities", [])) + len(payload.get("wordplay_transcreations", []))
+        return 0
+
+    def _run_context_processors(
+        self,
+        *,
+        full_volume_text: str,
+        metadata_en: Dict[str, Any],
+        cache_stats: Dict[str, Any],
+        scene_plan_index: Dict[str, Dict[str, Any]],
+    ) -> Dict[str, Any]:
+        context_payload = self._build_processor_context_payload(
+            metadata_en=metadata_en,
+            cache_stats=cache_stats,
+            scene_plan_index=scene_plan_index,
+        )
+        if types is None:
+            logger.warning(
+                "[P1.55] google.genai.types unavailable; idiom transcreation processor "
+                "will run without Google Search grounding."
+            )
+        volume_id = self.manifest.get("volume_id", self.work_dir.name)
+        self._context_dir_path()
+
+        processor_specs: List[Dict[str, Any]] = [
+            {
+                "id": "character_context",
+                "display_name": f"{volume_id}_p155_character_ctx",
+                "system_instruction": (
+                    "You are Processor 1: Character Context Processor.\n"
+                    "Return JSON only.\n"
+                    "Task: Use full cached LN text + input context payload to build a chapter-agnostic character registry.\n"
+                    "Do not invent characters not in source.\n"
+                    "Output schema:\n"
+                    "{\n"
+                    '  "volume_id": "...",\n'
+                    '  "generated_at": "...",\n'
+                    '  "processor_version": "1.0",\n'
+                    '  "characters": [\n'
+                    "    {\n"
+                    '      "id": "char_001",\n'
+                    '      "canonical_name": "string",\n'
+                    '      "japanese_name": "string",\n'
+                    '      "aliases": ["..."],\n'
+                    '      "role": "string",\n'
+                    '      "voice_register": "string",\n'
+                    '      "relationship_edges": [{"with":"char_002","type":"string","status":"string"}],\n'
+                    '      "pronoun_hints_en": ["..."]\n'
+                    "    }\n"
+                    "  ],\n"
+                    '  "relationship_graph": {"char_001_char_002":{"type":"string","status":"string"}},\n'
+                    '  "pronoun_resolution_hints": [{"pattern":"string","likely_character":"char_001"}],\n'
+                    '  "summary": {"total_characters": 0, "total_relationship_edges": 0}\n'
+                    "}\n"
+                ),
+                "prompt": (
+                    "Generate character context registry for Phase 1.55.\n"
+                    "Use robust canonical naming, aliases, relationships, and pronoun disambiguation hints.\n"
+                    "Prefer source-grounded evidence from full cached LN.\n"
+                    f"INPUT:\n{json.dumps(context_payload, ensure_ascii=False, indent=2)}"
+                ),
+                "fallback_builder": self._fallback_character_registry,
+                "tools": None,
+            },
+            {
+                "id": "cultural_context",
+                "display_name": f"{volume_id}_p155_cultural_ctx",
+                "system_instruction": (
+                    "You are Processor 2: Cultural Context Processor.\n"
+                    "Return JSON only.\n"
+                    "Task: Pre-resolve cultural terms, honorific handling, idioms, and location-specific context.\n"
+                    "Do not force transcreation; preserve clarity and narrative flow.\n"
+                    "Output schema:\n"
+                    "{\n"
+                    '  "volume_id": "...",\n'
+                    '  "generated_at": "...",\n'
+                    '  "processor_version": "1.0",\n'
+                    '  "terms": [{"term_jp":"string","preferred_en":"string","notes":"string","confidence":0.0}],\n'
+                    '  "idioms": [{"japanese":"string","meaning":"string","preferred_rendering":"string","confidence":0.0}],\n'
+                    '  "honorific_policies": [{"pattern":"-san","strategy":"retain_or_adapt","rule":"string"}],\n'
+                    '  "location_terms": [{"jp":"string","en":"string","notes":"string"}],\n'
+                    '  "summary": {"total_terms":0,"total_idioms":0}\n'
+                    "}\n"
+                ),
+                "prompt": (
+                    "Generate cultural context glossary for Phase 1.55.\n"
+                    "Capture terms that Stage 2 repeatedly needs.\n"
+                    f"INPUT:\n{json.dumps(context_payload, ensure_ascii=False, indent=2)}"
+                ),
+                "fallback_builder": self._fallback_cultural_glossary,
+                "tools": None,
+            },
+            {
+                "id": "temporal_context",
+                "display_name": f"{volume_id}_p155_temporal_ctx",
+                "system_instruction": (
+                    "You are Processor 3: Temporal Context Processor.\n"
+                    "Return JSON only.\n"
+                    "Task: Build chapter/scenes timeline map and continuity constraints from cached LN + scene plans.\n"
+                    "Output schema:\n"
+                    "{\n"
+                    '  "volume_id": "...",\n'
+                    '  "generated_at": "...",\n'
+                    '  "processor_version": "1.0",\n'
+                    '  "chapter_timeline": [\n'
+                    "    {\n"
+                    '      "chapter_id":"chapter_01",\n'
+                    '      "sequence_index":1,\n'
+                    '      "scenes":[{"id":"S01","beat_type":"setup","summary":"string","start_paragraph":0,"end_paragraph":0}],\n'
+                    '      "temporal_markers":["string"],\n'
+                    '      "continuity_constraints":["string"]\n'
+                    "    }\n"
+                    "  ],\n"
+                    '  "global_continuity_rules": ["string"],\n'
+                    '  "summary": {"chapter_count":0,"event_count":0}\n'
+                    "}\n"
+                ),
+                "prompt": (
+                    "Generate temporal continuity map for Phase 1.55.\n"
+                    "Align with chapter scene plans when available.\n"
+                    f"INPUT:\n{json.dumps(context_payload, ensure_ascii=False, indent=2)}"
+                ),
+                "fallback_builder": lambda data: self._fallback_timeline_map(scene_plan_index),
+                "tools": None,
+            },
+            {
+                "id": "idiom_transcreation",
+                "display_name": f"{volume_id}_p155_idiom_transcreation",
+                "system_instruction": (
+                    "You are Processor 4: Opportunistic Idiom Transcreation Processor.\n"
+                    "Return JSON only.\n"
+                    "Goal: detect high-impact JP idiom/subtext/wordplay opportunities where literal EN may lose literary impact.\n"
+                    "Opportunistic means: suggest options, do NOT force transcreation when literal works.\n"
+                    "Grounding directive: use Google Search for idiom/proverb/cultural-subtext verification and English equivalence checks.\n"
+                    "Source priority for grounding: Official Localization -> AniDB -> MyAnimeList -> Ranobe-Mori -> Fan Translation -> Heuristic Inference.\n"
+                    "Output schema:\n"
+                    "{\n"
+                    '  "volume_id":"...",\n'
+                    '  "generated_at":"...",\n'
+                    '  "processor_version":"1.0",\n'
+                    '  "transcreation_opportunities":[\n'
+                    "    {\n"
+                    '      "id":"trans_001",\n'
+                    '      "location":"CHAPTER_01_LINE_123",\n'
+                    '      "japanese":"string",\n'
+                    '      "literal":"string",\n'
+                    '      "meaning":"string",\n'
+                    '      "category":"proverb|onomatopoeia|cultural_subtext|wordplay|metaphorical_imagery|body_part_idiom|set_phrase",\n'
+                    '      "context":{"scene":"CH01_SC01","character_speaking":"string","emotional_tone":"string","beat_type":"string"},\n'
+                    '      "transcreation_priority":"critical|high|medium|low",\n'
+                    '      "confidence":0.0,\n'
+                    '      "options":[\n'
+                    '        {"rank":1,"text":"string","type":"english_equivalent|creative_transcreation|literal|hybrid","confidence":0.0,"reasoning":"string","register":"string","preserves_imagery":true,"preserves_meaning":true,"literary_impact":"high|medium|low"}\n'
+                    "      ],\n"
+                    '      "stage_2_guidance":"string"\n'
+                    "    }\n"
+                    "  ],\n"
+                    '  "wordplay_transcreations":[\n'
+                    '    {"id":"wordplay_001","location":"CHAPTER_02_LINE_210","japanese":"string","meaning":"string","transcreation_priority":"critical|high|medium|low","confidence":0.0,"options":[{"rank":1,"text":"string","confidence":0.0}]}\n'
+                    "  ],\n"
+                    '  "summary":{"total_opportunities":0,"by_priority":{"critical":0,"high":0,"medium":0,"low":0},"avg_confidence":0.0}\n'
+                    "}\n"
+                    "Constraints:\n"
+                    "- Max 140 opportunities total.\n"
+                    "- Keep options concise, stage-usable, and voice-aware.\n"
+                    "- For low priority opportunities, literal can be rank 1.\n"
+                ),
+                "prompt": (
+                    "Generate idiom transcreation cache for Stage 2.\n"
+                    "Include confidence-ranked options and guidance, filtered for literary impact.\n"
+                    "Do not over-transcreate low-priority items.\n"
+                    f"INPUT:\n{json.dumps(context_payload, ensure_ascii=False, indent=2)}"
+                ),
+                "fallback_builder": lambda data: self._fallback_idiom_transcreation(),
+                "tools": [types.Tool(google_search=types.GoogleSearch())] if types else None,
+            },
+        ]
+
+        results: Dict[str, Any] = {
+            "status": "completed",
+            "processors": {},
+            "output_files": [],
+        }
+
+        for spec in processor_specs:
+            processor_id = spec["id"]
+            output_path = self._context_output_path(processor_id)
+            payload = self._generate_with_optional_cache(
+                prompt=spec["prompt"],
+                system_instruction=spec["system_instruction"],
+                full_volume_text=full_volume_text,
+                display_name=spec["display_name"],
+                tools=spec.get("tools"),
+            )
+            if not isinstance(payload, dict):
+                payload = spec["fallback_builder"](metadata_en)
+                status = "fallback"
+            else:
+                status = "completed"
+
+            if "volume_id" not in payload:
+                payload["volume_id"] = self.manifest.get("volume_id", self.work_dir.name)
+            if "generated_at" not in payload:
+                payload["generated_at"] = datetime.datetime.now().isoformat()
+            if "processor_version" not in payload:
+                payload["processor_version"] = "1.0"
+
+            try:
+                output_path.write_text(
+                    json.dumps(payload, ensure_ascii=False, indent=2),
+                    encoding="utf-8",
+                )
+                item_count = self._estimate_processor_items(processor_id, payload)
+                results["processors"][processor_id] = {
+                    "status": status,
+                    "file": str(output_path.relative_to(self.work_dir)),
+                    "items": item_count,
+                    "used_grounding": bool(spec.get("tools")),
+                }
+                results["output_files"].append(str(output_path.relative_to(self.work_dir)))
+                logger.info(
+                    f"[P1.55] {processor_id}: {status} -> {output_path.name} ({item_count} items)"
+                )
+            except Exception as e:
+                results["processors"][processor_id] = {
+                    "status": "failed",
+                    "error": str(e)[:240],
+                    "file": str(output_path.relative_to(self.work_dir)),
+                }
+                results["status"] = "partial"
+                logger.warning(f"[P1.55] Failed writing {output_path.name}: {e}")
+
+        has_failure = any(v.get("status") == "failed" for v in results["processors"].values())
+        has_fallback = any(v.get("status") == "fallback" for v in results["processors"].values())
+        if has_failure:
+            results["status"] = "partial"
+        elif has_fallback:
+            results["status"] = "fallback"
+        return results
+
     def _mark_pipeline_state(
         self,
         *,
@@ -728,6 +1307,7 @@ class RichMetadataCacheUpdater:
         patch_keys: Optional[List[str]] = None,
         error: Optional[str] = None,
         mode: str = "full",
+        context_processor_stats: Optional[Dict[str, Any]] = None,
     ) -> None:
         pipeline_state = self.manifest.setdefault("pipeline_state", {})
         state = {
@@ -741,6 +1321,8 @@ class RichMetadataCacheUpdater:
             "patch_keys": patch_keys or [],
             "mode": mode,
         }
+        if context_processor_stats:
+            state["context_processors"] = context_processor_stats
         if error:
             state["error"] = error
         pipeline_state["rich_metadata_cache"] = state

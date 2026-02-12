@@ -984,28 +984,99 @@ class VisualAssetProcessor:
                 }
             raise
 
-    def _parse_analysis_json(self, text: str) -> Dict[str, Any]:
-        """Parse the JSON response from visual analysis, handling markdown fences."""
-        import re
+    def _extract_first_json_object(self, text: str) -> Optional[str]:
+        """
+        Extract first balanced JSON object from mixed text.
 
+        Handles prose wrappers around JSON and ignores braces inside quoted strings.
+        """
+        start = text.find("{")
+        if start < 0:
+            return None
+
+        depth = 0
+        in_string = False
+        escaped = False
+
+        for idx in range(start, len(text)):
+            ch = text[idx]
+
+            if in_string:
+                if escaped:
+                    escaped = False
+                elif ch == "\\":
+                    escaped = True
+                elif ch == "\"":
+                    in_string = False
+                continue
+
+            if ch == "\"":
+                in_string = True
+                continue
+
+            if ch == "{":
+                depth += 1
+            elif ch == "}":
+                depth -= 1
+                if depth == 0:
+                    return text[start:idx + 1]
+
+        return None
+
+    def _repair_json_text(self, raw: str) -> str:
+        """
+        Apply conservative JSON repairs for common model-formatting issues.
+
+        - Normalize smart quotes to ASCII
+        - Remove trailing commas before } or ]
+        """
+        repaired = raw
+        repaired = repaired.replace("\u201c", "\"").replace("\u201d", "\"")
+        repaired = repaired.replace("\u2018", "'").replace("\u2019", "'")
+        repaired = re.sub(r",(\s*[}\]])", r"\1", repaired)
+        return repaired
+
+    def _parse_analysis_json(self, text: str) -> Dict[str, Any]:
+        """Parse visual analysis JSON with resilient fallback/repair passes."""
         # Strip markdown code fences if present
         cleaned = text.strip()
         cleaned = re.sub(r'^```(?:json)?\s*\n?', '', cleaned)
         cleaned = re.sub(r'\n?```\s*$', '', cleaned)
         cleaned = cleaned.strip()
 
-        try:
-            return json.loads(cleaned)
-        except json.JSONDecodeError as e:
-            logger.warning(f"[PHASE 1.6] Failed to parse analysis JSON: {e}")
-            logger.debug(f"[PHASE 1.6] Raw response: {text[:200]}...")
-            # Return a best-effort fallback
-            return {
-                "composition": cleaned[:200] if cleaned else "Parse error",
-                "emotional_delta": "Analysis produced non-JSON output",
-                "key_details": {},
-                "narrative_directives": ["Raw analysis available in thought logs"],
-                "spoiler_prevention": {},
-                "identity_resolution": {"recognized_characters": [], "unresolved_characters": []},
-                "_parse_failed": True,
-            }
+        candidates: List[str] = []
+        if cleaned:
+            candidates.append(cleaned)
+
+        extracted = self._extract_first_json_object(cleaned)
+        if extracted and extracted not in candidates:
+            candidates.append(extracted)
+
+        last_error: Optional[Exception] = None
+        for candidate in candidates:
+            # Pass 1: strict
+            try:
+                return json.loads(candidate)
+            except json.JSONDecodeError as e:
+                last_error = e
+
+            # Pass 2: conservative repair (trailing commas, smart quotes)
+            repaired = self._repair_json_text(candidate)
+            if repaired != candidate:
+                try:
+                    return json.loads(repaired)
+                except json.JSONDecodeError as e:
+                    last_error = e
+
+        logger.warning(f"[PHASE 1.6] Failed to parse analysis JSON: {last_error}")
+        logger.debug(f"[PHASE 1.6] Raw response: {text[:200]}...")
+        # Return a best-effort fallback
+        return {
+            "composition": cleaned[:200] if cleaned else "Parse error",
+            "emotional_delta": "Analysis produced non-JSON output",
+            "key_details": {},
+            "narrative_directives": ["Raw analysis available in thought logs"],
+            "spoiler_prevention": {},
+            "identity_resolution": {"recognized_characters": [], "unresolved_characters": []},
+            "_parse_failed": True,
+        }

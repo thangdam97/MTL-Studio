@@ -120,6 +120,7 @@ class ChapterProcessor:
         self._load_contraction_rates_from_manifest()
         self._stage2_registers = self._load_stage2_registers()
         self._stage2_rhythm_targets = self._load_stage2_rhythm_targets()
+        self._phase155_context = self._load_phase155_context_offload()
 
     def set_glossary_lock(self, glossary_lock: Optional[GlossaryLock]) -> None:
         """Attach manifest glossary lock from TranslatorAgent."""
@@ -1497,6 +1498,260 @@ This document contains the internal reasoning process that Gemini used while tra
 
         return "\n".join(lines).strip()
 
+    def _normalize_chapter_key(self, value: Any) -> str:
+        raw = str(value or "").strip()
+        if not raw:
+            return ""
+        match = re.search(r"chapter[_\-\s]*0*(\d+)", raw, re.IGNORECASE)
+        if not match:
+            match = re.search(r"\bch[_\-\s]*0*(\d+)\b", raw, re.IGNORECASE)
+        if not match:
+            match = re.search(r"\b0*(\d{1,3})\b", raw)
+        if not match:
+            return ""
+        return f"chapter_{int(match.group(1)):02d}"
+
+    def _extract_chapter_key_from_location(self, location: str, scene_hint: str = "") -> str:
+        if location:
+            match = re.search(r"CHAPTER[_\-\s]*0*(\d+)", location, re.IGNORECASE)
+            if match:
+                return f"chapter_{int(match.group(1)):02d}"
+        if scene_hint:
+            match = re.search(r"CH(?:APTER)?[_\-\s]*0*(\d+)", scene_hint, re.IGNORECASE)
+            if match:
+                return f"chapter_{int(match.group(1)):02d}"
+        return ""
+
+    def _load_phase155_context_offload(self) -> Dict[str, Any]:
+        """
+        Load Phase 1.55 context offload caches from .context.
+
+        Files are optional and translation remains functional when missing.
+        """
+        context_dir = self.context_manager.work_dir / ".context"
+        cache_files = {
+            "character_registry": context_dir / "character_registry.json",
+            "cultural_glossary": context_dir / "cultural_glossary.json",
+            "timeline_map": context_dir / "timeline_map.json",
+            "idiom_transcreation_cache": context_dir / "idiom_transcreation_cache.json",
+        }
+
+        payload: Dict[str, Any] = {"_idiom_by_chapter": {}}
+        loaded = 0
+        for key, path in cache_files.items():
+            if not path.exists():
+                continue
+            try:
+                with path.open("r", encoding="utf-8") as f:
+                    data = json.load(f)
+                if isinstance(data, dict):
+                    payload[key] = data
+                    loaded += 1
+            except Exception as e:
+                logger.warning(f"[P1.55] Failed loading {path.name}: {e}")
+
+        idiom_index: Dict[str, List[Dict[str, Any]]] = {}
+        idiom_cache = payload.get("idiom_transcreation_cache", {})
+        if isinstance(idiom_cache, dict):
+            for key in ("transcreation_opportunities", "wordplay_transcreations"):
+                records = idiom_cache.get(key, [])
+                if not isinstance(records, list):
+                    continue
+                for item in records:
+                    if not isinstance(item, dict):
+                        continue
+                    context = item.get("context", {})
+                    chapter_key = self._extract_chapter_key_from_location(
+                        str(item.get("location", "")),
+                        str(context.get("scene", "")) if isinstance(context, dict) else "",
+                    )
+                    if not chapter_key:
+                        continue
+                    idiom_index.setdefault(chapter_key, []).append(item)
+        payload["_idiom_by_chapter"] = idiom_index
+
+        if loaded:
+            logger.info(
+                f"✓ Loaded Phase 1.55 context caches: {loaded}/4 "
+                f"(idiom entries indexed: {sum(len(v) for v in idiom_index.values())})"
+            )
+        return payload
+
+    def _select_idiom_opportunities(
+        self,
+        chapter_key: str,
+        scene_plan: Optional[Dict[str, Any]],
+    ) -> List[Dict[str, Any]]:
+        idiom_by_chapter = self._phase155_context.get("_idiom_by_chapter", {})
+        if not isinstance(idiom_by_chapter, dict):
+            return []
+        candidates = idiom_by_chapter.get(chapter_key, [])
+        if not isinstance(candidates, list) or not candidates:
+            return []
+
+        scene_ids = set()
+        if isinstance(scene_plan, dict):
+            scenes = scene_plan.get("scenes", [])
+            if isinstance(scenes, list):
+                for scene in scenes:
+                    if isinstance(scene, dict):
+                        sid = str(scene.get("id") or "").strip()
+                        if sid:
+                            scene_ids.add(sid.lower())
+                            scene_ids.add(sid.upper())
+
+        scoped: List[Dict[str, Any]] = []
+        fallback: List[Dict[str, Any]] = []
+        for item in candidates:
+            if not isinstance(item, dict):
+                continue
+            ctx = item.get("context", {})
+            scene_hint = ""
+            if isinstance(ctx, dict):
+                scene_hint = str(ctx.get("scene", "")).strip()
+            if scene_hint and scene_ids:
+                if scene_hint in scene_ids or scene_hint.upper() in scene_ids or scene_hint.lower() in scene_ids:
+                    scoped.append(item)
+                else:
+                    fallback.append(item)
+            else:
+                fallback.append(item)
+
+        ranked = scoped or fallback
+
+        priority_rank = {"critical": 0, "high": 1, "medium": 2, "low": 3}
+
+        def _score(item: Dict[str, Any]) -> tuple:
+            priority = str(item.get("transcreation_priority", "medium")).lower()
+            confidence = float(item.get("confidence", 0.0) or 0.0)
+            return (priority_rank.get(priority, 4), -confidence)
+
+        return sorted(ranked, key=_score)[:10]
+
+    def _format_phase155_context_guidance(
+        self,
+        chapter_id: str,
+        scene_plan: Optional[Dict[str, Any]],
+    ) -> str:
+        """
+        Inject context offload outputs generated by Phase 1.55 co-processors.
+
+        Focus: concise, stage-usable guidance without forcing rewrites.
+        """
+        if self.target_language.lower() not in {"en", "english"}:
+            return ""
+        if not isinstance(self._phase155_context, dict) or len(self._phase155_context) <= 1:
+            return ""
+
+        chapter_key = self._normalize_chapter_key(chapter_id)
+        if not chapter_key:
+            return ""
+
+        lines: List[str] = [
+            "## PHASE 1.55 CONTEXT OFFLOAD (CO-PROCESSORS)",
+            "",
+            "Use this as optional precision guidance. Japanese source text remains authoritative.",
+            "Do not force transcreation where literal rendering is already natural.",
+            "",
+        ]
+
+        char_registry = self._phase155_context.get("character_registry", {})
+        if isinstance(char_registry, dict):
+            chars = char_registry.get("characters", [])
+            if isinstance(chars, list) and chars:
+                lines.append("Character context (identity + relationships):")
+                for char in chars[:6]:
+                    if not isinstance(char, dict):
+                        continue
+                    name = str(
+                        char.get("canonical_name")
+                        or char.get("english_name")
+                        or char.get("japanese_name")
+                        or char.get("id")
+                        or "character"
+                    ).strip()
+                    role = str(char.get("role") or "").strip()
+                    register = str(char.get("voice_register") or "").strip()
+                    snippet = f"- {name}"
+                    if role:
+                        snippet += f" | role={role}"
+                    if register:
+                        snippet += f" | voice={register}"
+                    lines.append(snippet)
+                lines.append("")
+
+        cultural = self._phase155_context.get("cultural_glossary", {})
+        if isinstance(cultural, dict):
+            terms = cultural.get("terms", [])
+            if isinstance(terms, list) and terms:
+                lines.append("Cultural glossary (preferred renderings):")
+                for term in terms[:8]:
+                    if not isinstance(term, dict):
+                        continue
+                    jp = str(term.get("term_jp") or term.get("jp") or "").strip()
+                    en = str(term.get("preferred_en") or term.get("en") or term.get("translation") or "").strip()
+                    if not jp or not en:
+                        continue
+                    lines.append(f"- {jp} -> {en}")
+                lines.append("")
+
+        timeline_map = self._phase155_context.get("timeline_map", {})
+        if isinstance(timeline_map, dict):
+            chapter_timeline = timeline_map.get("chapter_timeline", [])
+            if isinstance(chapter_timeline, list):
+                matched = None
+                for item in chapter_timeline:
+                    if not isinstance(item, dict):
+                        continue
+                    if self._normalize_chapter_key(item.get("chapter_id")) == chapter_key:
+                        matched = item
+                        break
+                if matched:
+                    continuity = matched.get("continuity_constraints", [])
+                    markers = matched.get("temporal_markers", [])
+                    if isinstance(markers, list) and markers:
+                        lines.append("Temporal markers for this chapter:")
+                        for marker in markers[:4]:
+                            lines.append(f"- {self._shorten_stage2_text(marker, 100)}")
+                    if isinstance(continuity, list) and continuity:
+                        lines.append("Continuity constraints:")
+                        for note in continuity[:4]:
+                            lines.append(f"- {self._shorten_stage2_text(note, 100)}")
+                    if (isinstance(markers, list) and markers) or (isinstance(continuity, list) and continuity):
+                        lines.append("")
+
+        idiom_items = self._select_idiom_opportunities(chapter_key, scene_plan)
+        if idiom_items:
+            lines.append("Opportunistic idiom transcreation candidates:")
+            lines.append("Apply only when it improves natural literary impact for this scene.")
+            for item in idiom_items:
+                if not isinstance(item, dict):
+                    continue
+                priority = str(item.get("transcreation_priority", "medium")).lower()
+                confidence = float(item.get("confidence", 0.0) or 0.0)
+                jp = self._shorten_stage2_text(item.get("japanese", ""), 80)
+                meaning = self._shorten_stage2_text(item.get("meaning", ""), 90)
+                location = self._shorten_stage2_text(item.get("location", ""), 40)
+                lines.append(
+                    f"- {location} | priority={priority} | conf={confidence:.2f} | jp=\"{jp}\" | meaning=\"{meaning}\""
+                )
+                options = item.get("options", [])
+                if isinstance(options, list):
+                    for option in options[:2]:
+                        if not isinstance(option, dict):
+                            continue
+                        text = self._shorten_stage2_text(option.get("text", ""), 90)
+                        o_conf = float(option.get("confidence", 0.0) or 0.0)
+                        lines.append(f"  option: {text} (conf={o_conf:.2f})")
+                guidance = str(item.get("stage_2_guidance", "")).strip()
+                if guidance:
+                    lines.append(f"  guidance: {self._shorten_stage2_text(guidance, 120)}")
+            lines.append("")
+
+        if len(lines) <= 4:
+            return ""
+        return "\n".join(lines).strip()
+
     def _extract_last_sentence(self, text: str) -> str:
         normalized = re.sub(r"\s+", " ", text.strip())
         if not normalized:
@@ -1577,6 +1832,19 @@ This document contains the internal reasoning process that Gemini used while tra
                 )
             else:
                 base_prompt = f"{stage2_scene_guidance}\n\n{base_prompt}"
+
+        # Inject Phase 1.55 context offload co-processor guidance.
+        p155_context_guidance = self._format_phase155_context_guidance(chapter_id, scene_plan)
+        if p155_context_guidance:
+            marker = "<!-- SOURCE TEXT TO TRANSLATE -->"
+            if marker in base_prompt:
+                base_prompt = base_prompt.replace(
+                    marker,
+                    f"<!-- PHASE 1.55 CONTEXT OFFLOAD -->\n{p155_context_guidance}\n\n{marker}",
+                    1,
+                )
+            else:
+                base_prompt = f"{p155_context_guidance}\n\n{base_prompt}"
 
         # Inject RTAS character voice settings (English translations only)
         rtas_guidance = self._format_rtas_guidance()

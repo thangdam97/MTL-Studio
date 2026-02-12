@@ -131,6 +131,24 @@ class LibrarianAgent:
         Returns:
             metadata_en dict with proper schema structure
         """
+        first_person_distancing_banlist = [
+            "I couldn't help but",
+            "I could not help but",
+            "couldn't help but",
+            "could not help but"
+        ]
+        nominalized_emotion_banlist = [
+            "a sense of [emotion] (except idiomatic: humor/direction/purpose/belonging/urgency/duty/self)"
+        ]
+        discourse_preface_banlist = [
+            "to be honest",
+            "to tell you the truth"
+        ]
+        filter_phrase_banlist = [
+            "eyes welled up with tears",
+            "seemed to [verb]"
+        ]
+
         # Character profile template with keigo_switch
         def create_character_profile(name_data: Dict[str, Any]) -> Dict[str, Any]:
             """Create a character profile from ruby name data."""
@@ -204,7 +222,11 @@ class LibrarianAgent:
                 "narrator_voice": "[PROTAGONIST NAME] - Contemporary teen voice",
                 "forbidden_patterns": [
                     "cannot", "do not", "does not", "will not", "would not",
-                    "I am", "it is", "there is"
+                    "I am", "it is", "there is",
+                    *first_person_distancing_banlist,
+                    *nominalized_emotion_banlist,
+                    *discourse_preface_banlist,
+                    *filter_phrase_banlist
                 ],
                 "preferred_alternatives": {
                     "cannot": "can't",
@@ -222,7 +244,14 @@ class LibrarianAgent:
                     "we are": "we're",
                     "they are": "they're",
                     "he is": "he's",
-                    "she is": "she's"
+                    "she is": "she's",
+                    "I couldn't help but [verb]": "Use direct action in first-person POV (e.g., 'I flinched', 'I laughed', 'I asked').",
+                    "I could not help but [verb]": "Use direct action in first-person POV (e.g., 'I flinched', 'I laughed', 'I asked').",
+                    "a sense of [emotion]": "Use direct emotion/action (e.g., 'relief washed over me', 'I felt relieved').",
+                    "to be honest": "Remove preface and state line directly unless voice-critical.",
+                    "to tell you the truth": "Remove preface unless rhetorical contrast is structurally required.",
+                    "eyes welled up with tears": "Use direct image: 'tears gathered in [name]'s eyes' / '[name]'s eyes stung'.",
+                    "seemed to [verb]": "Prefer direct action/observation over filter phrasing."
                 },
                 "target_metrics": {
                     "contraction_rate": ">95%",
@@ -250,10 +279,38 @@ class LibrarianAgent:
             },
             "volume_specific_notes": {}
         }
+
+        translation_guidelines = {
+            "tone_consistency": "Maintain natural, contemporary light-novel prose with consistent character voice.",
+            "character_voice_fidelity": "Preserve each character's distinct register while avoiding filtered narration in 1st-person POV.",
+            "pacing_and_flow": "Prefer concise, direct phrasing and avoid over-exposition.",
+            "forbidden_patterns": (
+                first_person_distancing_banlist
+                + nominalized_emotion_banlist
+                + discourse_preface_banlist
+                + filter_phrase_banlist
+            ),
+            "preferred_alternatives": {
+                "I couldn't help but [verb]": "Use direct action in first-person POV (e.g., 'I flinched', 'I laughed', 'I asked').",
+                "I could not help but [verb]": "Use direct action in first-person POV (e.g., 'I flinched', 'I laughed', 'I asked').",
+                "a sense of [emotion]": "Use direct emotion/action (e.g., 'relief washed over me', 'I felt relieved').",
+                "to be honest": "Remove preface and state line directly unless voice-critical.",
+                "to tell you the truth": "Remove preface unless rhetorical contrast is structurally required.",
+                "eyes welled up with tears": "Use direct image: 'tears gathered in [name]'s eyes' / '[name]'s eyes stung'.",
+                "seemed to [verb]": "Prefer direct action/observation over filter phrasing."
+            },
+            "consistency_rules": {
+                "first_person_distancing_ai_ism": "Treat 'couldn't help (but)' as a distancing AI-ism in 1st-person narration. Use direct actions/reactions instead of filtered phrasing.",
+                "nominalized_emotion_ai_ism": "Avoid 'a sense of [emotion]' in active narrative lines except idiomatic uses (humor/direction/purpose/belonging/urgency/duty/self).",
+                "preface_crutch_ai_ism": "Avoid discourse-preface crutches like 'to be honest' and 'to tell you the truth' in close 1st-person lines.",
+                "filter_verb_density": "Limit repeated 'seemed to' filters in contiguous narration; prefer direct assertions where confidence is high."
+            }
+        }
         
         return {
             "character_profiles": character_profiles,
             "localization_notes": localization_notes,
+            "translation_guidelines": translation_guidelines,
             "chapters": chapters_meta,
             "schema_version": "v3_enhanced",
             "schema_note": "Auto-generated by Librarian. Fill in [TO BE FILLED] placeholders before translation."

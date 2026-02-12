@@ -1081,7 +1081,7 @@
       "patterns": [
         {
           "id": "couldnt_help_but",
-          "pattern": "\\bI couldn't help but\\b",
+          "pattern": "\\bI (?:couldn't|could not) help(?: but)?\\b",
           "issue": "Common AI-ism that adds unnecessary filter - violates show-don't-tell",
           "fix_suggestions": {
             "I couldn't help but flinch": "I flinched",
@@ -1091,7 +1091,9 @@
             "I couldn't help but think": "I thought",
             "I couldn't help but wonder": "I wondered",
             "I couldn't help but be thrilled": "thrilled, I—",
-            "I couldn't help but retort": "I shot back"
+            "I couldn't help but retort": "I shot back",
+            "I could not help but ask": "I asked",
+            "I could not help but laugh": "I laughed"
           },
           "examples": [
             {
@@ -1108,6 +1110,30 @@
           "severity": "high",
           "auto_fix_eligible": true,
           "confidence_threshold": 0.95
+        },
+        {
+          "id": "truth_preface_crutch",
+          "pattern": "\\b(?:[Tt]o be honest|[Tt]o tell you the truth),?\\b",
+          "issue": "Discourse-preface AI-ism that weakens immediacy in 1st-person narration",
+          "fix_suggestions": {
+            "To be honest,": "Remove preface and state line directly",
+            "to tell you the truth,": "Remove preface unless contrast is structurally necessary"
+          },
+          "examples": [
+            {
+              "incorrect": "To be honest, this was the moment I'd been waiting for.",
+              "correct": "This was the moment I'd been waiting for.",
+              "reason": "Direct line is tighter and more immediate"
+            },
+            {
+              "incorrect": "But to tell you the truth, nothing had changed.",
+              "correct": "But nothing had changed.",
+              "reason": "Remove rhetorical padding in close POV"
+            }
+          ],
+          "severity": "medium",
+          "auto_fix_eligible": false,
+          "confidence_threshold": 0.9
         },
         {
           "id": "heavy_with_sultry",
@@ -1188,19 +1214,25 @@
         },
         {
           "id": "welled_up_emotion",
-          "pattern": "\\b(emotion|feeling|warmth|tears|anger|frustration|joy|sadness) welled up\\b",
+          "pattern": "\\b(?:emotion|feeling|warmth|tears|anger|frustration|joy|sadness|(?:my|his|her|their|[A-Z][a-z]+['’]s) eyes|eyes) welled up(?: with tears)?\\b",
           "issue": "Overused AI-ism for emotional reactions - filter instead of direct action",
           "fix_suggestions": {
             "emotion welled up": "I felt—",
             "warmth welled up": "warmth spread / I felt warm",
             "tears welled up": "tears formed / my eyes stung",
-            "frustration welled up": "frustration rose / I felt frustrated"
+            "frustration welled up": "frustration rose / I felt frustrated",
+            "his eyes welled up with tears": "tears gathered in his eyes / his eyes stung"
           },
           "examples": [
             {
               "incorrect": "Warmth welled up in my chest as she spoke.",
               "correct": "Warmth spread through my chest. / Her words warmed me.",
               "reason": "Direct description or active cause-effect stronger"
+            },
+            {
+              "incorrect": "Akira's eyes welled up with tears.",
+              "correct": "Tears gathered in Akira's eyes.",
+              "reason": "Less clichéd and more natural in prose"
             }
           ],
           "severity": "medium",
@@ -1209,7 +1241,7 @@
         },
         {
           "id": "a_sense_of_except_idiomatic",
-          "pattern": "\\ba sense of ([a-z]+)\\b(?! humor|direction|purpose|belonging|urgency|duty|self)",
+          "pattern": "\\ba sense of (?!humor\\b|direction\\b|purpose\\b|belonging\\b|urgency\\b|duty\\b|self\\b)([a-z]+)\\b",
           "issue": "Nominalized construction weakens prose - exception for idiomatic usage",
           "fix_suggestions": {
             "a sense of relief": "relief / felt relieved",
@@ -1240,6 +1272,7 @@
           "couldnt_help_but (0.95 threshold)"
         ],
         "flag_for_review": [
+          "truth_preface_crutch",
           "heavy_with_sultry",
           "drilling_into_metaphor",
           "locked_in_volley",

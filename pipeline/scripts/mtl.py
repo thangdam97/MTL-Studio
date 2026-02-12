@@ -507,6 +507,8 @@ class PipelineController:
         total = int(cache_stats.get("target_chapters", 0))
         cache_used = bool(state.get("used_external_cache", False)) if isinstance(state, dict) else False
         patch_keys = state.get("patch_keys", []) if isinstance(state, dict) else []
+        context_processors = state.get("context_processors", {}) if isinstance(state, dict) else {}
+        processor_map = context_processors.get("processors", {}) if isinstance(context_processors, dict) else {}
 
         profiles = metadata.get("character_profiles", {})
         dialogue_patterns = metadata.get("dialogue_patterns", {})
@@ -526,6 +528,16 @@ class PipelineController:
         logger.info(f"│  Dialogue Patterns: {len(dialogue_patterns):<5}                                    │")
         logger.info(f"│  Scene Contexts:    {len(scene_contexts):<5}                                    │")
         logger.info(f"│  Guidelines:        {len(guidelines):<5}                                    │")
+        if processor_map:
+            char_items = int(processor_map.get("character_context", {}).get("items", 0))
+            cultural_items = int(processor_map.get("cultural_context", {}).get("items", 0))
+            temporal_items = int(processor_map.get("temporal_context", {}).get("items", 0))
+            idiom_items = int(processor_map.get("idiom_transcreation", {}).get("items", 0))
+            logger.info("├─────────────────────────────────────────────────────────────┤")
+            logger.info(f"│  P1 Character Ctx:  {char_items:<5}                                    │")
+            logger.info(f"│  P2 Cultural Ctx:   {cultural_items:<5}                                    │")
+            logger.info(f"│  P3 Temporal Ctx:   {temporal_items:<5}                                    │")
+            logger.info(f"│  P4 Idiom Cache:    {idiom_items:<5}                                    │")
         logger.info("└─────────────────────────────────────────────────────────────┘")
 
         if patch_keys:

@@ -51,8 +51,10 @@ flowchart TB
         P155A["RichMetadataCache\nrich_metadata_cache.py"]
         P155S1["Full-LN cache prep\nGemini cache TTL 7200s"]
         P155S2["Placeholder-safe patch merge\npreserve populated fields"]
-        P155S3["visual_identity_non_color backfill\n+ volume-scoped bible event sync"]
-        P155A --> P155S1 --> P155S2 --> P155S3
+        P155S3["Context offload co-processors (x4)\ncharacter · cultural · timeline · idiom"]
+        P155S4["Idiom grounding mode\nGoogle Search tools bound at cache-create"]
+        P155S5["Stage 2 handoff\n.context JSONs injected in prompt-time guidance"]
+        P155A --> P155S1 --> P155S2 --> P155S3 --> P155S4 --> P155S5
     end
 
     BIBLE[("📖 Series Bible\nbibles/series.json\ncharacters · geography\nweapons · orgs · cultural\nmythology")]
@@ -1575,7 +1577,12 @@ WORK/[volume_id]/
 │   └── illustrations/
 │       └── illust-001.jpg
 └── .context/
-    └── name_registry.json  # Character name mappings
+    ├── character_registry.json        # P1.55 Processor 1 (character context)
+    ├── cultural_glossary.json         # P1.55 Processor 2 (cultural context)
+    ├── timeline_map.json              # P1.55 Processor 3 (temporal context)
+    ├── idiom_transcreation_cache.json # P1.55 Processor 4 (idiom transcreation)
+    ├── chapter_summaries.json         # Lookback continuity memory
+    └── continuity_pack.json           # Legacy continuity bridge
 ```
 
 ### Phase 1.5: Metadata Processor
@@ -1602,9 +1609,9 @@ WORK/[volume_id]/
 - Updated `manifest.json` with English titles + merged schema-agent enrichments + bible terms
 - Updated `bibles/*.json` - New terms pushed back to series bible (if linked)
 
-### Phase 1.55: Autonomous Rich Metadata Processor
+### Phase 1.55: Autonomous Rich Metadata Processor (Enhanced)
 
-**Purpose**: Build a full-volume JP cache and autonomously refine rich metadata continuity before multimodal and translation phases.
+**Purpose**: Build a full-volume JP cache, safely refine rich metadata, and offload high-cost context into reusable `.context` JSONs for Stage 2 translation.
 
 **Core behavior (code-scanned)**:
 - Runs as a standalone phase (`pipeline.metadata_processor.rich_metadata_cache`) and can also run in `--cache-only` mode.
@@ -1616,15 +1623,34 @@ WORK/[volume_id]/
 - Pushes only **volume-scoped event metadata** to bible (relationship dynamics, keigo shifts, arcs), not canonical naming fields.
 - Writes patch artifact: `WORK/<volume>/rich_metadata_cache_patch.json`.
 
+**Enhanced Co-Processors (Context Offload)**:
+- **Processor 1 - Character Context** → `.context/character_registry.json`
+  - Canonical names, aliases, role tags, relationship edges, pronoun hints.
+- **Processor 2 - Cultural Context** → `.context/cultural_glossary.json`
+  - Cultural terms, idioms, honorific strategy hints, location renderings.
+- **Processor 3 - Temporal Context** → `.context/timeline_map.json`
+  - Chapter timeline, scene markers, continuity constraints.
+- **Processor 4 - Opportunistic Idiom Transcreation** → `.context/idiom_transcreation_cache.json`
+  - Confidence-ranked transcreation options + Stage 2 guidance.
+  - Uses Google Search grounding when `google.genai.types` is available.
+
+**Gemini cache/tool constraint handling (important)**:
+- Gemini rejects `generate` requests that combine `cached_content` with `tools/tool_config`.
+- In enhanced Phase 1.55, grounded processor tools are bound at **cache creation time** (cached content config), then generate is called with cached content only.
+- If cache creation fails, the processor falls back to direct non-cached generation, then to deterministic local fallback builders if needed.
+
 **Always-on Google Search Grounding (notable point)**:
 - Grounding is enforced upstream in Phase 1.5 Schema Auto-Update (always passes Google Search tool and records localization provenance).
-- Phase 1.55 then operates autonomously on top of that grounded metadata + bible continuity + full-LN JP cache.
-- Net effect: canon terms are grounded first, then deepened with full-volume context before Phase 1.6/2.
+- Phase 1.55 then deepens that canon-safe baseline with full-volume context + co-processor outputs before Phase 1.6/2.
 
 **Output**:
-- Updated `manifest.json` (`pipeline_state.rich_metadata_cache`)
+- Updated `manifest.json` (`pipeline_state.rich_metadata_cache`, including `context_processors` status)
 - Updated `metadata_<lang>.json` (typically `metadata_en.json`) with safe rich-field refinements
 - `rich_metadata_cache_patch.json` (audit artifact of applied patch scope)
+- `.context/character_registry.json`
+- `.context/cultural_glossary.json`
+- `.context/timeline_map.json`
+- `.context/idiom_transcreation_cache.json`
 
 ### Phase 1.6: Art Director (Multimodal)
 
@@ -2016,7 +2042,7 @@ python mtl.py run INPUT/novel_v1.epub [--verbose] [--id custom_id] [--skip-multi
 # Individual phases
 python mtl.py phase1 INPUT/novel_v1.epub [--id volume_id]
 python mtl.py phase1.5 [volume_id]
-python mtl.py phase1.55 [volume_id]
+python mtl.py phase1.55 [volume_id] [--cache-only]
 python mtl.py phase1.6 [volume_id]
 python mtl.py phase1.7 [volume_id] [--chapters chapter_01 chapter_02]
 python mtl.py phase2 [volume_id] [--chapters 1 2 3] [--force] [--enable-multimodal]

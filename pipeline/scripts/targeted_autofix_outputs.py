@@ -6,6 +6,7 @@ Fix categories:
 2) "would of" -> "would have"
 3) obvious a/an errors before vowel-initial words
 4) Name smile/voice possessives (e.g., "Nagi smile" -> "Nagi's smile")
+5) AI-ism: "I couldn't help but [verb]" -> "I [verb]" (confidence: 0.95)
 
 Scope by default: pipeline/WORK/*/EN/*.md
 """
@@ -139,6 +140,26 @@ def fix_name_smile_voice(text: str) -> Tuple[str, int]:
     return out, count
 
 
+def fix_couldnt_help_but(text: str) -> Tuple[str, int]:
+    """Fix AI-ism: 'I couldn't help but [verb]' -> 'I [verb]'
+
+    Confidence: 0.95 (high - safe for auto-fix)
+    From english_grammar_validation_t1.json v1.3 Phase 2 blocklist
+    """
+    pat = re.compile(r"\bI couldn't help but (\w+)")
+
+    count = 0
+
+    def repl(m: re.Match[str]) -> str:
+        nonlocal count
+        verb = m.group(1)
+        count += 1
+        return f"I {verb}"
+
+    out = pat.sub(repl, text)
+    return out, count
+
+
 def fix_cjk_known_mappings(text: str, mappings: Dict[str, str]) -> Tuple[str, int]:
     # Apply longest keys first to avoid partial collisions.
     keys = [k for k in mappings.keys() if CJK_PATTERN.search(k)]
@@ -170,6 +191,7 @@ def run_fix_on_file(path: Path, cjk_mappings: Dict[str, str], apply: bool) -> Fi
         "would_of": 0,
         "a_an": 0,
         "name_smile_voice_possessive": 0,
+        "ai_ism_couldnt_help_but": 0,
     }
 
     text, n_cjk = fix_cjk_known_mappings(text, cjk_mappings)
@@ -183,6 +205,9 @@ def run_fix_on_file(path: Path, cjk_mappings: Dict[str, str], apply: bool) -> Fi
 
     text, n_pos = fix_name_smile_voice(text)
     fixes["name_smile_voice_possessive"] = n_pos
+
+    text, n_ai_ism = fix_couldnt_help_but(text)
+    fixes["ai_ism_couldnt_help_but"] = n_ai_ism
 
     unresolved = count_cjk_sequences(text)
 
@@ -252,7 +277,7 @@ def write_reports(results: List[FileFixResult], json_out: Path, md_out: Path, ap
         lines.append(f"- `{item['file']}`: {item['total_fixes']} fixes")
         b = item["breakdown"]
         lines.append(
-            f"  - cjk={b['cjk_known_mapping']}, would_of={b['would_of']}, a_an={b['a_an']}, possessive={b['name_smile_voice_possessive']}"
+            f"  - cjk={b['cjk_known_mapping']}, would_of={b['would_of']}, a_an={b['a_an']}, possessive={b['name_smile_voice_possessive']}, ai_ism={b['ai_ism_couldnt_help_but']}"
         )
     lines.append("")
 

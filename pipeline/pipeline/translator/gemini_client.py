@@ -5,6 +5,8 @@ Handles Gemini API communication for the Translator agent.
 """
 
 import time
+import re
+import hashlib
 from dataclasses import dataclass
 from typing import Optional, Dict, Any, List
 from pipeline.common.genai_factory import create_genai_client, resolve_api_key, resolve_genai_backend
@@ -55,6 +57,7 @@ class GeminiClient:
     - Token counting
     - Content caching for RAG modules
     """
+    _CACHE_DISPLAY_NAME_MAX_LEN = 128
 
     def __init__(
         self,
@@ -371,10 +374,11 @@ class GeminiClient:
         try:
             from google.genai import types
 
+            safe_display_name = self._sanitize_cache_display_name(display_name)
             cached_content = self._client.caches.create(
                 model=self.model_name,
                 config=types.CreateCachedContentConfig(
-                    display_name=display_name,
+                    display_name=safe_display_name,
                     contents=content,
                     ttl=f"{ttl_minutes * 60}s"  # Convert to seconds
                 )
@@ -384,6 +388,27 @@ class GeminiClient:
         except Exception as e:
             print(f"[GEMINI] Cache creation failed: {e}")
             return None
+
+    def _sanitize_cache_display_name(self, display_name: Optional[str]) -> str:
+        """Normalize cache display name to meet API limit (<=128, ASCII-safe)."""
+        raw = str(display_name or "").strip()
+        if not raw:
+            return "cache"
+
+        normalized = re.sub(r"\s+", "_", raw)
+        normalized = re.sub(r"[^A-Za-z0-9.\-]+", "_", normalized)
+        normalized = re.sub(r"_+", "_", normalized).strip("._-") or "cache"
+
+        if len(normalized.encode("utf-8")) <= self._CACHE_DISPLAY_NAME_MAX_LEN:
+            return normalized
+
+        suffix = hashlib.sha1(raw.encode("utf-8")).hexdigest()[:10]
+        head_len = self._CACHE_DISPLAY_NAME_MAX_LEN - len(suffix) - 1
+        head = (normalized[:head_len].rstrip("._-") or "cache") if head_len > 0 else ""
+        candidate = f"{head}-{suffix}" if head else suffix[: self._CACHE_DISPLAY_NAME_MAX_LEN]
+        if len(candidate.encode("utf-8")) > self._CACHE_DISPLAY_NAME_MAX_LEN:
+            candidate = candidate[: self._CACHE_DISPLAY_NAME_MAX_LEN]
+        return candidate
 
     def delete_cache(self, cache_name: str) -> bool:
         """

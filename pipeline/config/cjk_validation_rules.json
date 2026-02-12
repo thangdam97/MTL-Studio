@@ -164,6 +164,15 @@
         "date_discovered": "2026-02-10"
       },
       {
+        "pattern": "wasわざわざ",
+        "description": "Mixed English+Japanese token from partial replacement during EN generation",
+        "example": "she wasわざわざ talking about it",
+        "severity": "error",
+        "fix": "wasわざわざ → was deliberately / was going out of her way to",
+        "source": "Vol 25e8 Ch05 Line 1763",
+        "date_discovered": "2026-02-12"
+      },
+      {
         "pattern": "([À-ỹa-zA-Z]+)[\\u4E00-\\u9FFF]{2,}",
         "description": "Two+ character CJK compounds attached to Vietnamese words",
         "example": "Em年頃で知, có nhiều",
@@ -206,7 +215,8 @@
       "やったね": "yay (can be sarcastic) / how nice (IRONIC) / oh joy (SARCASTIC)",
       "なるほど": "I see (can be dismissive) / uh-huh (SARCASTIC) / oh really (IRONIC)",
       "落ち着いた色のものを着れば": "if she wore something in calmer colors",
-      "わざわざ": "even / deliberately (context-dependent)"
+      "わざわざ": "even / deliberately (context-dependent)",
+      "wasわざわざ": "was deliberately"
     },
     "common_korean_leaks": {
       "좌": "trái/ghế/giữa",

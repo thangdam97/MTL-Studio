@@ -90,6 +90,16 @@
             }
           },
           {
+            "id": "a_sense_of_except_idiomatic",
+            "regex": "\\ba sense of (?!humor\\b|direction\\b|purpose\\b|belonging\\b|urgency\\b|duty\\b|self\\b)[a-z]+\\b",
+            "display": "a sense of [noun] (except idiomatic)",
+            "fix": "Prefer direct emotional wording: 'a sense of relief' → 'relief' / 'I felt relieved'",
+            "proximity_penalty": {
+              "window": 100,
+              "severity": "MAJOR"
+            }
+          },
+          {
             "id": "felt_sense_of",
             "regex": "felt a sense of",
             "display": "felt a sense of",
@@ -104,6 +114,16 @@
             "regex": "\\bcould sense (?:the |a |that )?\\w+",
             "display": "could sense [noun/that]",
             "fix": "Use: direct observation or 'noticed' / 'felt'",
+            "proximity_penalty": {
+              "window": 100,
+              "severity": "MAJOR"
+            }
+          },
+          {
+            "id": "eyes_welled_up",
+            "regex": "\\b(?:my|his|her|their|[A-Z][a-z]+['’]s) eyes welled up(?: with tears)?\\b",
+            "display": "[name]'s eyes welled up (with tears)",
+            "fix": "Use direct reaction: 'tears gathered in [name]'s eyes' / '[name]'s eyes stung'",
             "proximity_penalty": {
               "window": 100,
               "severity": "MAJOR"
@@ -151,7 +171,7 @@
           },
           {
             "id": "couldnt_help_but",
-            "regex": "\\bcouldn'?t help but \\w+",
+            "regex": "\\bcould(?:n['’]?t| not) help(?: but)? \\w+",
             "display": "couldn't help but [verb]",
             "fix": "Use direct action: 'couldn't help but smile' → 'smiled'",
             "proximity_penalty": {
@@ -184,6 +204,12 @@
             "regex": "\\b[Tt]o be honest,?",
             "display": "to be honest",
             "fix": "Remove entirely - adds no value. If character voice requires hesitation, use 'honestly' sparingly"
+          },
+          {
+            "id": "to_tell_you_truth",
+            "regex": "\\b[Tt]o tell you the truth,?",
+            "display": "to tell you the truth",
+            "fix": "Remove preface and state line directly unless deliberate rhetorical contrast is required"
           },
           {
             "id": "to_be_fair",

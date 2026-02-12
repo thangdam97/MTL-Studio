@@ -6,7 +6,7 @@
     "en": "I Rescued a Lost Little Girl, and Now the Beautiful Exchange Student Next Door Won't Stop Visiting!",
     "romaji": ""
   },
-  "last_updated": "2026-02-12T04:16:39.552721+00:00",
+  "last_updated": "2026-02-12T10:15:14.451208+00:00",
   "volumes_registered": [
     {
       "volume_id": "0b24",
@@ -14,8 +14,23 @@
       "index": 1
     },
     {
+      "volume_id": "25e8",
+      "title": "迷子になっていた幼女を助けたら、お隣に住む美少女留学生が家に遊びに来るようになった件について 2",
+      "index": 2
+    },
+    {
+      "volume_id": "1294",
+      "title": "迷子になっていた幼女を助けたら、お隣に住む美少女留学生が家に遊びに来るようになった件について 3",
+      "index": 3
+    },
+    {
       "volume_id": "0fa9",
       "title": "I Rescued a Lost Little Girl, and Now the Beautiful Exchange Student Next Door Won't Stop Visiting! 4",
+      "index": 4
+    },
+    {
+      "volume_id": "17fb",
+      "title": "迷子になっていた幼女を助けたら、お隣に住む美少女留学生が家に遊びに来るようになった件について 4",
       "index": 4
     },
     {
@@ -73,6 +88,50 @@
             "notes": "Maintains a polite distance with most, but shows warmth and casualness with those he trusts or cares for deeply."
           },
           "character_arc": "Overcoming past burdens and learning to accept happiness and the affection of others, particularly Charlotte and Emma."
+        },
+        "1294": {
+          "relationship_to_protagonist": "Protagonist",
+          "relationship_to_others": "Charlotte's boyfriend, Emma's adopted father figure, Saionji Akira's best friend, Shinonome Karin's twin brother, Hanazawa Miyu's student, Sasagawa Marin's student.",
+          "keigo_switch": {
+            "narration": "casual",
+            "internal_thoughts": "casual",
+            "speaking_to": {
+              "Charlotte Bennett": "polite (さん), becoming more casual and affectionate as their relationship deepens; often speaks English with her.",
+              "Emma Bennett": "gentle, child-friendly English.",
+              "Saionji Akira": "casual, friendly, sometimes exasperated.",
+              "Hanazawa Miyu": "polite, respectful, but can be subtly teasing or challenging.",
+              "Sasagawa Marin": "polite, wary.",
+              "Shinonome Karin": "gentle, encouraging; later uses her given name (華凜) and accepts 'Onii-chan' (お兄ちゃん) in private.",
+              "Classmates": "generally polite/neutral, but can be dismissive to maintain his 'disliked' persona."
+            },
+            "emotional_shifts": {
+              "anger": "Can become terse or withdraw, especially when confronted with his past.",
+              "affection": "Becomes softer, more gentle, especially with Charlotte and Emma.",
+              "embarrassment": "Can become flustered, stammer, or avert gaze."
+            },
+            "notes": "Maintains a polite distance with most, using 'san' or 'sensei', but drops to casual with close friends like Akira. Uses English extensively with Charlotte and Emma due to their background."
+          },
+          "character_arc": "Overcoming past trauma and self-sacrificing tendencies, learning to accept help and love from others, accepting his new family (Charlotte, Emma, Shinonome), and allowing himself to be happy."
+        },
+        "17fb": {
+          "relationship_to_protagonist": "Self (Protagonist)",
+          "relationship_to_others": "Charlotte Bennett (girlfriend), Emma Bennett (adoptive daughter figure), Saionji Akira (best friend, soccer teammate), Hanazawa Miyu (homeroom teacher, confidante), Shinonome (adopted younger sister), Claire (Emma's friend, guardian figure), Kousaka Kaede (middle school junior, former soccer club manager), Shimizu (classmate, Charlotte's friend).",
+          "keigo_switch": {
+            "narration": "casual",
+            "internal_thoughts": "casual",
+            "speaking_to": {
+              "Charlotte Bennett": "casual (affectionate, sometimes slightly more formal when being gentle or reassuring)",
+              "Emma Bennett": "casual (gentle, playful)",
+              "Saionji Akira": "casual",
+              "Hanazawa Miyu": "polite, respectful",
+              "Shinonome": "casual, protective",
+              "Claire": "casual, gentle",
+              "Kousaka Kaede": "polite, apologetic (due to past), later more casual/friendly",
+              "Shimizu": "polite, cautious, later more casual/direct"
+            },
+            "emotional_shifts": "Can become more formal or gentle when trying to comfort Charlotte; becomes firm when defending Charlotte or Akira; apologetic when discussing his past."
+          },
+          "character_arc": "Continues to overcome past trauma, strengthens his relationship with Charlotte and Emma, confronts his past with Kaede, uses his soccer skills to protect Charlotte's reputation and his own, makes a decision about his future in soccer."
         }
       }
     },
@@ -118,6 +177,47 @@
             "notes": "Her politeness is a consistent trait, reflecting her upbringing, but she shows vulnerability and playfulness with those she trusts."
           },
           "character_arc": "Adjusting to life in Japan, deepening her bond with Akihito and Emma, and navigating her feelings."
+        },
+        "1294": {
+          "relationship_to_protagonist": "Love interest, girlfriend (by end of volume), Emma's older sister.",
+          "relationship_to_others": "Emma's older sister, Shimizu Arisa's friend, Hanazawa Miyu's student, Saionji Akira's classmate.",
+          "keigo_switch": {
+            "narration": "polite/formal (when narrative is from her POV)",
+            "internal_thoughts": "casual, expressive, often includes exclamations of embarrassment or delight.",
+            "speaking_to": {
+              "Aoyagi Akihito": "polite (青柳君), sometimes uses English; becomes more direct and affectionate after confessing.",
+              "Emma Bennett": "gentle, older sister English.",
+              "Hanazawa Miyu": "formal (花澤先生/美優先生).",
+              "Classmates": "polite (さん).",
+              "Shimizu Arisa": "polite (さん), becoming more casual and intimate as their friendship deepens."
+            },
+            "emotional_shifts": {
+              "embarrassment": "Becomes flustered, stammers, blushes intensely, averts gaze, or hides her face/buries her face in Akihito's arm.",
+              "affection": "Voice softens, eyes become 'heated' or 'gooey'.",
+              "anger/frustration": "Rarely shows, but can pout or express mild exasperation, especially with Emma or when Akihito is dense."
+            },
+            "notes": "Maintains a consistently polite and formal register in Japanese, reflecting her upbringing and foreign status, but her English with Emma and Akihito is natural. Her internal thoughts reveal a more playful and passionate personality."
+          },
+          "character_arc": "Learning to be more direct and courageous with her feelings, moving from dependence to mutual support in her relationship with Akihito, embracing her 'childish' side, and becoming a strong emotional pillar for Akihito."
+        },
+        "17fb": {
+          "relationship_to_protagonist": "Girlfriend, deeply in love and devoted to him.",
+          "relationship_to_others": "Emma Bennett (younger sister, very protective), Aoyagi Akihito (boyfriend), Claire (Emma's friend, also cares for her), Shimizu (close friend), Kiriyama (friend), Arazawa (friend), Kousaka Kaede (junior, becomes friendly).",
+          "keigo_switch": {
+            "narration": "casual",
+            "internal_thoughts": "casual",
+            "speaking_to": {
+              "Aoyagi Akihito": "polite, respectful, but increasingly casual and affectionate as their relationship deepens, especially when embarrassed, jealous, or expressing deep affection. Uses 'Akihito-kun'.",
+              "Emma Bennett": "gentle, affectionate, uses 'Emma'.",
+              "Shimizu": "polite, friendly.",
+              "Kiriyama": "polite, friendly.",
+              "Arazawa": "polite, friendly.",
+              "Hanazawa Miyu": "formal, respectful.",
+              "Kousaka Kaede": "polite, kind, later affectionate ('Kaede-chan')."
+            },
+            "emotional_shifts": "Shifts to more direct or flustered speech when embarrassed, jealous, or expressing strong affection. Can become firm or assertive when defending Akihito or expressing her feelings about him."
+          },
+          "character_arc": "Becomes more open about her feelings and jealousy, deepens her relationship with Akihito, learns about and supports Akihito through his past trauma, becomes bolder in expressing her love and possessiveness."
         }
       },
       "biological_arrays": {
@@ -174,6 +274,42 @@
       "short_name": "Emma",
       "visual_identity_non_color": {
         "identity_summary": "Small child with short hair and cat/beast-ear accessories; younger Bennett sister, often shown with innocent expressive gestures."
+      },
+      "volume_events": {
+        "1294": {
+          "relationship_to_protagonist": "Charlotte's younger sister, Akihito's adopted daughter figure.",
+          "relationship_to_others": "Charlotte's younger sister, Claire's friend.",
+          "keigo_switch": {
+            "narration": "N/A",
+            "internal_thoughts": "N/A",
+            "speaking_to": {
+              "Aoyagi Akihito": "affectionate, demanding (抱っこ - 'hug me'), uses 'onii-chan' (おにいちゃん).",
+              "Charlotte Bennett": "affectionate, but can be defiant or whiny.",
+              "Claire": "childlike, simple, can be possessive."
+            },
+            "emotional_shifts": {
+              "sadness": "Eyes well up with tears, pouts, makes weak pleading sounds.",
+              "happiness": "Bright smiles, hugs, excited movements, humming.",
+              "anger/jealousy": "Puffs out cheeks, hits chest (Akihito's), pulls clothes, can become violent (headbutting plushie).",
+              "shyness": "Hides face in Akihito's chest."
+            },
+            "notes": "Speaks almost exclusively in English. Her Japanese understanding is minimal. Her speech is characterized by its simplicity and directness, reflecting her age."
+          },
+          "character_arc": "Adjusting to a new environment, forming bonds with Akihito and friends, learning social norms and sharing."
+        },
+        "17fb": {
+          "relationship_to_protagonist": "Adoptive daughter figure to Akihito, very attached to him, calls him 'Onii-chan'.",
+          "relationship_to_others": "Charlotte Bennett (older sister), Claire (best friend from daycare).",
+          "keigo_switch": {
+            "speaking_to": {
+              "Aoyagi Akihito": "casual, affectionate, demanding (childlike).",
+              "Charlotte Bennett": "casual, affectionate (childlike).",
+              "Claire": "casual, playful (childlike)."
+            },
+            "emotional_shifts": "Becomes sulky when denied something, excited when offered something fun, affectionate when praised or comforted."
+          },
+          "character_arc": "Turns five, learns new skills (soccer), strengthens friendship with Claire, continues to be a central figure in Akihito and Charlotte's lives, shows signs of growth (e.g., sharing Akihito)."
+        }
       }
     },
     "西園寺彰": {
@@ -218,17 +354,136 @@
             "notes": "His casual and direct speech reflects his outgoing and sometimes thoughtless nature."
           },
           "character_arc": "Remaining a supportive friend to Akihito, and potentially maturing in his approach to relationships."
+        },
+        "1294": {
+          "relationship_to_protagonist": "Akihito's best friend, classmate.",
+          "relationship_to_others": "Akihito's best friend, Shinonome Karin's classmate (initially causes her fear), Hanazawa Miyu's student.",
+          "keigo_switch": {
+            "narration": "N/A",
+            "internal_thoughts": "N/A",
+            "speaking_to": {
+              "Aoyagi Akihito": "casual, friendly, sometimes exasperated or challenging.",
+              "Hanazawa Miyu": "polite, but can be playful or make lighthearted complaints.",
+              "Shinonome Karin": "initially loud and causes her fear, later tries to be gentler and more considerate.",
+              "Classmates": "casual, friendly, takes a leadership role in class activities."
+            },
+            "emotional_shifts": {
+              "excitement": "Becomes louder and more animated.",
+              "frustration": "Can become exasperated, especially with Akihito's hidden talents or Miyu-sensei's teasing."
+            },
+            "notes": "His speech is generally informal and direct, reflecting his close relationships and energetic personality. He is a 'mood maker' in the class."
+          },
+          "character_arc": "Supporting Akihito, learning to be more considerate of Shinonome's shyness, and continuing to be a reliable friend."
+        },
+        "17fb": {
+          "relationship_to_protagonist": "Best friend, former soccer teammate, rival in soccer, deeply loyal.",
+          "relationship_to_others": "Aoyagi Akihito (best friend), Charlotte Bennett (friend, supportive of her relationship with Akihito), Shinonome (friend), Kousaka Kaede (middle school junior, holds complicated feelings due to past).",
+          "keigo_switch": {
+            "speaking_to": {
+              "Aoyagi Akihito": "casual, friendly, sometimes challenging (in soccer context).",
+              "Charlotte Bennett": "casual, friendly.",
+              "Shinonome": "casual, friendly.",
+              "Hanazawa Miyu": "respectful (but can be less so when angry or flustered).",
+              "Kousaka Kaede": "confrontational, accusatory (due to past)."
+            },
+            "emotional_shifts": "Becomes angry and confrontational when Akihito is insulted or his past is brought up. Can be sulky when Akihito doesn't follow his advice."
+          },
+          "character_arc": "Supports Akihito through school gossip, confronts his own soccer skills and pride in a match against Akihito, re-evaluates his path as a soccer player, expresses a desire to play with Akihito again."
         }
       }
     },
     "花澤美優": {
-      "canonical_en": "Hanazawa Miyu"
+      "canonical_en": "Hanazawa Miyu",
+      "volume_events": {
+        "1294": {
+          "relationship_to_protagonist": "Akihito's homeroom teacher, mentor figure, Sasagawa Marin's childhood friend.",
+          "relationship_to_others": "Akihito's homeroom teacher, Sasagawa Marin's childhood friend, Emma's temporary caretaker, principal's subordinate.",
+          "keigo_switch": {
+            "narration": "N/A",
+            "internal_thoughts": "N/A",
+            "speaking_to": {
+              "Students": "authoritative, direct, sometimes with a hint of exasperation or teasing.",
+              "Sasagawa Marin": "casual, teasing, can be stern or annoyed, but ultimately caring. Insists on 'Sasagawa-sensei' at school.",
+              "Other staff": "professional, authoritative."
+            },
+            "emotional_shifts": {
+              "anger": "Eyes narrow, tone becomes sharp, can make intimidating remarks.",
+              "amusement": "Narrows eyes into a smile, or makes a 'niyari' (smirking) expression.",
+              "caring": "Voice softens, offers practical advice or support."
+            },
+            "notes": "Her speech is a mix of professional authority and personal familiarity, especially with Sasagawa-sensei. She uses direct language with students, often cutting through nonsense."
+          },
+          "character_arc": "Subtly supporting Akihito and Charlotte's relationship, revealing more of her past through interactions with Sasagawa-sensei, acting as a reliable adult figure."
+        },
+        "17fb": {
+          "relationship_to_protagonist": "Homeroom teacher, confidante, supportive figure who knows his past.",
+          "relationship_to_others": "Aoyagi Akihito (student), Charlotte Bennett (student), Saionji Akira (student), Sasagawa-sensei (colleague, implied close relationship).",
+          "keigo_switch": {
+            "speaking_to": {
+              "Students": "authoritative, but also caring and sometimes teasing.",
+              "Aoyagi Akihito": "direct, sometimes casual and jocular when discussing sensitive topics or offering personal advice.",
+              "Sasagawa-sensei": "casual, friendly (implied)."
+            },
+            "emotional_shifts": "Can be stern when addressing misbehavior, but generally maintains a calm and supportive tone with Akihito."
+          },
+          "character_arc": "Guides Akihito through school challenges related to his relationship and past, offers strategic advice for the ball game tournament, provides emotional support."
+        }
+      }
     },
     "東雲": {
-      "canonical_en": "Shinonome"
+      "canonical_en": "Shinonome",
+      "volume_events": {
+        "17fb": {
+          "relationship_to_protagonist": "Adopted younger sister, very attached to Akihito, calls him 'Onii-chan', implied romantic feelings.",
+          "relationship_to_others": "Aoyagi Akihito (adopted older brother), Charlotte Bennett (Akihito's girlfriend, seems to accept her), Saionji Akira (friend).",
+          "keigo_switch": {
+            "speaking_to": {
+              "Aoyagi Akihito": "polite, respectful, but also affectionate and dependent. Uses 'Onii-chan'.",
+              "Charlotte Bennett": "polite.",
+              "Saionji Akira": "polite."
+            },
+            "emotional_shifts": "Becomes more direct or insistent when expressing her attachment to Akihito or her worries. Can be shy when praised."
+          },
+          "character_arc": "Continues to be attached to Akihito, expresses her desire to spend time with him, shows concern for his well-being during the ball game tournament."
+        }
+      }
     },
     "クレア": {
-      "canonical_en": "Claire"
+      "canonical_en": "Claire",
+      "volume_events": {
+        "1294": {
+          "relationship_to_protagonist": "Emma's friend from daycare.",
+          "relationship_to_others": "Emma's friend.",
+          "keigo_switch": {
+            "narration": "N/A",
+            "internal_thoughts": "N/A",
+            "speaking_to": {
+              "Aoyagi Akihito": "timid, hesitant, uses simple 'yes' or 'no' answers.",
+              "Emma Bennett": "apologetic, simple."
+            },
+            "emotional_shifts": {
+              "fear": "Body trembles, eyes well up with tears, tries to hide or retreat.",
+              "remorse": "Cries, speaks softly, apologizes repeatedly.",
+              "relief/happiness": "Smiles brightly after being forgiven."
+            },
+            "notes": "Her speech reflects her young age and emotional state, often characterized by fear or remorse."
+          },
+          "character_arc": "Learning about sharing, empathy, and apologizing for mistakes."
+        },
+        "17fb": {
+          "relationship_to_protagonist": "Emma's friend, Akihito acts as a guardian figure.",
+          "relationship_to_others": "Emma Bennett (best friend from daycare), Charlotte Bennett (Emma's sister, also cares for her), Claire's mother (mother).",
+          "keigo_switch": {
+            "speaking_to": {
+              "Aoyagi Akihito": "casual, shy, simple (childlike).",
+              "Emma Bennett": "casual, simple (childlike).",
+              "Charlotte Bennett": "casual, simple (childlike)."
+            },
+            "emotional_shifts": "Becomes excited when seeing animals or nature, shy when addressed directly, sad when Emma is upset."
+          },
+          "character_arc": "Learning Japanese, deepening friendship with Emma, experiences new activities with Akihito and Charlotte."
+        }
+      }
     },
     "青柳 明人": {
       "canonical_en": "Aoyagi Akihito",

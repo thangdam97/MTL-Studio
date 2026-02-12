@@ -5,6 +5,8 @@ Shared between Translator and Critics agents.
 
 import time
 import logging
+import re
+import hashlib
 import backoff
 from typing import Optional, List, Dict, Any
 from dataclasses import dataclass
@@ -24,6 +26,8 @@ class GeminiResponse:
     thinking_content: Optional[str] = None  # CoT/thinking parts from model
 
 class GeminiClient:
+    _CACHE_DISPLAY_NAME_MAX_LEN = 128
+
     def __init__(
         self,
         api_key: str = None,
@@ -105,6 +109,43 @@ class GeminiClient:
         """Set cache TTL in minutes (max 120)."""
         self._cache_ttl_minutes = min(minutes, 120)
 
+    def _sanitize_cache_display_name(self, display_name: Optional[str]) -> Optional[str]:
+        """
+        Normalize cache display_name to satisfy API constraints.
+
+        Gemini cache API requires display_name length <= 128.
+        We enforce ASCII-safe names and hard-cap by byte length.
+        """
+        if display_name is None:
+            return None
+
+        raw = str(display_name).strip()
+        if not raw:
+            return None
+
+        # Keep ASCII letters/digits plus dot/dash/underscore only.
+        # Non-ASCII is normalized away to avoid byte-length surprises.
+        normalized = re.sub(r"\s+", "_", raw)
+        normalized = re.sub(r"[^A-Za-z0-9.\-]+", "_", normalized)
+        normalized = re.sub(r"_+", "_", normalized).strip("._-")
+        if not normalized:
+            normalized = "cache"
+
+        if len(normalized.encode("utf-8")) <= self._CACHE_DISPLAY_NAME_MAX_LEN:
+            return normalized
+
+        # Deterministic truncation with suffix to preserve uniqueness.
+        suffix = hashlib.sha1(raw.encode("utf-8")).hexdigest()[:10]
+        head_len = self._CACHE_DISPLAY_NAME_MAX_LEN - len(suffix) - 1  # "-<suffix>"
+        if head_len < 1:
+            return suffix[: self._CACHE_DISPLAY_NAME_MAX_LEN]
+
+        head = normalized[:head_len].rstrip("._-") or "cache"
+        candidate = f"{head}-{suffix}"
+        if len(candidate.encode("utf-8")) > self._CACHE_DISPLAY_NAME_MAX_LEN:
+            candidate = candidate[: self._CACHE_DISPLAY_NAME_MAX_LEN]
+        return candidate
+
     def create_cache(
         self,
         *,
@@ -113,6 +154,8 @@ class GeminiClient:
         contents: Optional[List[str]] = None,
         ttl_seconds: Optional[int] = None,
         display_name: Optional[str] = None,
+        tools: Optional[List[Any]] = None,
+        tool_config: Optional[Any] = None,
     ) -> Optional[str]:
         """
         Create a Gemini cached content resource and return its name.
@@ -130,11 +173,24 @@ class GeminiClient:
         try:
             config = types.CreateCachedContentConfig(ttl=f"{int(ttl)}s")
             if display_name:
-                config.display_name = display_name
+                safe_display_name = self._sanitize_cache_display_name(display_name)
+                if safe_display_name != display_name:
+                    logger.debug(
+                        "[CACHE] display_name normalized for API limit: %r -> %r",
+                        display_name,
+                        safe_display_name,
+                    )
+                config.display_name = safe_display_name
             if system_instruction:
                 config.system_instruction = system_instruction
             if contents:
                 config.contents = contents
+            # When using cached_content in generate requests, Gemini requires tools/tool_config
+            # to be attached to the cache, not the generate call.
+            if tools:
+                config.tools = tools
+            if tool_config is not None:
+                config.tool_config = tool_config
 
             cache = self.client.caches.create(model=target_model, config=config)
             return cache.name
@@ -361,8 +417,13 @@ class GeminiClient:
                     safety_settings=safety_settings,
                     automatic_function_calling=None  # Disable AFC to prevent loops
                 )
+                # NOTE: tools/tool_config cannot be passed with cached_content.
+                # They must be provided at cache creation time.
                 if tools:
-                    config_kwargs["tools"] = tools
+                    logger.debug(
+                        "Ignoring tools in generate() because cached_content is set; "
+                        "tools must be embedded in CachedContent."
+                    )
                 config = types.GenerateContentConfig(**config_kwargs)
                 
                 # Add thinking config if enabled (works with cached content too)

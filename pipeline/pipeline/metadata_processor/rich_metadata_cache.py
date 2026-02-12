@@ -56,6 +56,132 @@ class RichMetadataCacheUpdater:
         "temporal_context": "timeline_map.json",
         "idiom_transcreation": "idiom_transcreation_cache.json",
     }
+    CULTURAL_TERM_DEFAULTS: Dict[str, str] = {
+        "球技大会": "ball game tournament",
+        "内申": "internal school record",
+        "特別推薦": "special recommendation admission",
+        "里親": "foster parent",
+        "軟禁": "house confinement",
+        "万歳三唱": "three cheers",
+        "おにいちゃん": "big brother",
+        "お姉さん": "big sister",
+        "幼女": "little girl",
+        "大和撫子": "Yamato Nadeshiko",
+        "コミカライズ": "manga adaptation",
+    }
+    LOCATION_TERM_DEFAULTS: Dict[str, str] = {
+        "教室": "classroom",
+        "屋上": "rooftop",
+        "体育館": "gymnasium",
+        "保健室": "nurse's office",
+        "職員室": "faculty room",
+        "図書室": "library room",
+        "校庭": "schoolyard",
+        "部室": "club room",
+        "廊下": "hallway",
+        "昇降口": "shoe-locker entrance",
+    }
+    IDIOM_LIBRARY: Dict[str, Dict[str, str]] = {
+        "雨降って地固まる": {
+            "literal": "after the rain, the ground hardens",
+            "meaning": "adversity can strengthen relationships",
+            "category": "proverb",
+        },
+        "猫を被る": {
+            "literal": "to wear a cat",
+            "meaning": "to hide one's true nature and act innocent",
+            "category": "set_phrase",
+        },
+        "二兎を追う者は一兎をも得ず": {
+            "literal": "chase two rabbits and catch neither",
+            "meaning": "trying to do too much leads to failure",
+            "category": "proverb",
+        },
+        "百聞は一見に如かず": {
+            "literal": "hearing a hundred times is not equal to seeing once",
+            "meaning": "seeing is believing",
+            "category": "proverb",
+        },
+        "一期一会": {
+            "literal": "one time, one meeting",
+            "meaning": "treasure each encounter as unique",
+            "category": "set_phrase",
+        },
+        "七転八起": {
+            "literal": "fall seven times, rise eight",
+            "meaning": "keep getting back up",
+            "category": "set_phrase",
+        },
+        "以心伝心": {
+            "literal": "heart-to-heart transmission",
+            "meaning": "understanding without words",
+            "category": "set_phrase",
+        },
+    }
+    BODY_IDIOM_LIBRARY: Dict[str, Dict[str, str]] = {
+        "鼻が高い": {
+            "literal": "my nose is high",
+            "meaning": "to feel proud",
+            "category": "body_part_idiom",
+        },
+        "頭が上がらない": {
+            "literal": "can't raise my head",
+            "meaning": "I am indebted and cannot oppose them",
+            "category": "body_part_idiom",
+        },
+        "耳が痛い": {
+            "literal": "my ears hurt",
+            "meaning": "a criticism hits too close to home",
+            "category": "body_part_idiom",
+        },
+        "目を丸くする": {
+            "literal": "eyes become round",
+            "meaning": "to stare in surprise",
+            "category": "body_part_idiom",
+        },
+        "心が痛む": {
+            "literal": "my heart hurts",
+            "meaning": "to feel emotional pain",
+            "category": "metaphorical_imagery",
+        },
+    }
+    ONOMATOPOEIA_EQUIVALENTS: Dict[str, Dict[str, str]] = {
+        "ドキドキ": {
+            "literal": "doki-doki",
+            "meaning": "heart pounding with nerves or excitement",
+            "default_en": "my heart pounded",
+        },
+        "ワクワク": {
+            "literal": "waku-waku",
+            "meaning": "excited anticipation",
+            "default_en": "I was buzzing with excitement",
+        },
+        "ニヤニヤ": {
+            "literal": "niya-niya",
+            "meaning": "grinning to oneself",
+            "default_en": "he wore a smug grin",
+        },
+        "イライラ": {
+            "literal": "ira-ira",
+            "meaning": "irritated and restless",
+            "default_en": "my irritation kept building",
+        },
+        "バタバタ": {
+            "literal": "bata-bata",
+            "meaning": "hurried commotion",
+            "default_en": "everyone rushed around in a flurry",
+        },
+        "ガタガタ": {
+            "literal": "gata-gata",
+            "meaning": "rattling or trembling",
+            "default_en": "it rattled violently",
+        },
+        "ゴロゴロ": {
+            "literal": "goro-goro",
+            "meaning": "rumbling / lazing around",
+            "default_en": "thunder rolled in the distance",
+        },
+    }
 
     # Keep translation outputs untouched in this phase.
     PROTECTED_FIELDS = {
@@ -112,6 +238,8 @@ class RichMetadataCacheUpdater:
         self.client = GeminiClient(model=self.MODEL_NAME, enable_caching=True)
         self.manifest: Dict[str, Any] = {}
         self.cache_only = cache_only
+        self._chapter_text_cache: Optional[Dict[str, List[str]]] = None
+        self._idiom_fallback_cache: Optional[Dict[str, Any]] = None
 
     def run(self) -> bool:
         if not self.manifest_path.exists():
@@ -443,6 +571,694 @@ class RichMetadataCacheUpdater:
         }
         return payload, stats
 
+    def _load_chapter_text_map(self) -> Dict[str, List[str]]:
+        """Load JP chapter text lines keyed by normalized chapter id."""
+        if self._chapter_text_cache is not None:
+            return self._chapter_text_cache
+
+        chapter_map: Dict[str, List[str]] = {}
+        for chapter in self._get_manifest_chapters():
+            chapter_id = self._normalize_chapter_key(chapter.get("id", ""))
+            jp_file = chapter.get("jp_file") or chapter.get("source_file")
+            if not chapter_id or not jp_file:
+                continue
+            source_path = self.work_dir / "JP" / jp_file
+            if not source_path.exists():
+                continue
+            try:
+                chapter_map[chapter_id] = source_path.read_text(encoding="utf-8").splitlines()
+            except Exception:
+                continue
+
+        self._chapter_text_cache = chapter_map
+        return chapter_map
+
+    def _infer_scene_for_line(
+        self,
+        chapter_key: str,
+        line_number: int,
+        scene_plan_index: Dict[str, Dict[str, Any]],
+    ) -> str:
+        plan = scene_plan_index.get(chapter_key, {})
+        scenes = plan.get("scenes", []) if isinstance(plan, dict) else []
+        if isinstance(scenes, list):
+            for scene in scenes:
+                if not isinstance(scene, dict):
+                    continue
+                start = scene.get("start_paragraph")
+                end = scene.get("end_paragraph")
+                if isinstance(start, int) and isinstance(end, int):
+                    if start <= line_number <= end:
+                        sid = str(scene.get("id", "")).strip()
+                        if sid:
+                            return sid
+        if isinstance(scenes, list):
+            for scene in scenes:
+                if isinstance(scene, dict):
+                    sid = str(scene.get("id", "")).strip()
+                    if sid:
+                        return sid
+        return f"{chapter_key.upper()}_SC01"
+
+    def _transcreation_priority_from_category(self, category: str) -> str:
+        cat = str(category or "").lower()
+        if cat in {"wordplay", "cultural_subtext"}:
+            return "critical"
+        if cat in {"proverb", "body_part_idiom", "set_phrase"}:
+            return "high"
+        if cat in {"onomatopoeia", "metaphorical_imagery"}:
+            return "medium"
+        return "low"
+
+    def _confidence_for_category(self, category: str, heuristic: bool = False) -> float:
+        cat = str(category or "").lower()
+        base = {
+            "wordplay": 0.84,
+            "proverb": 0.90,
+            "set_phrase": 0.82,
+            "body_part_idiom": 0.88,
+            "onomatopoeia": 0.92,
+            "metaphorical_imagery": 0.78,
+            "cultural_subtext": 0.86,
+        }.get(cat, 0.70)
+        if heuristic:
+            base -= 0.12
+        return max(0.45, min(0.98, base))
+
+    def _build_transcreation_options(
+        self,
+        *,
+        japanese: str,
+        literal: str,
+        meaning: str,
+        category: str,
+    ) -> List[Dict[str, Any]]:
+        cat = str(category or "").lower()
+        equivalent = meaning.strip() if meaning else literal.strip()
+        if cat == "onomatopoeia":
+            source = self.ONOMATOPOEIA_EQUIVALENTS.get(japanese, {})
+            equivalent = source.get("default_en", equivalent or "the sound was emphasized")
+
+        creative = equivalent
+        if cat == "proverb":
+            creative = f"{equivalent[:1].upper() + equivalent[1:]}."
+        elif cat == "body_part_idiom":
+            creative = f"The feeling hit all at once: {equivalent}."
+        elif cat == "wordplay":
+            creative = f"Recast as natural English wordplay around: {equivalent}."
+        elif cat == "onomatopoeia":
+            creative = f"A sharper beat: {equivalent}."
+
+        options: List[Dict[str, Any]] = [
+            {
+                "rank": 1,
+                "text": equivalent or literal or japanese,
+                "type": "english_equivalent",
+                "confidence": round(self._confidence_for_category(category), 2),
+                "reasoning": "Best balance of natural English and original meaning.",
+                "register": "neutral",
+                "preserves_imagery": cat in {"proverb", "metaphorical_imagery", "onomatopoeia"},
+                "preserves_meaning": True,
+                "literary_impact": "high" if cat in {"proverb", "wordplay"} else "medium",
+            },
+            {
+                "rank": 2,
+                "text": creative or equivalent or literal or japanese,
+                "type": "creative_transcreation",
+                "confidence": round(max(0.55, self._confidence_for_category(category) - 0.08), 2),
+                "reasoning": "Stylized rendering for scenes requiring stronger literary punch.",
+                "register": "literary",
+                "preserves_imagery": True,
+                "preserves_meaning": True,
+                "literary_impact": "high",
+            },
+            {
+                "rank": 3,
+                "text": literal or japanese,
+                "type": "literal",
+                "confidence": round(max(0.40, self._confidence_for_category(category) - 0.26), 2),
+                "reasoning": "Literal fallback; use only if context already explains intent.",
+                "register": "literal",
+                "preserves_imagery": True,
+                "preserves_meaning": cat in {"onomatopoeia", "metaphorical_imagery"},
+                "literary_impact": "low",
+            },
+        ]
+        return options
+
+    def _build_idiom_transcreation_from_text(
+        self,
+        scene_plan_index: Dict[str, Dict[str, Any]],
+        min_items: int = 15,
+    ) -> Dict[str, Any]:
+        chapter_map = self._load_chapter_text_map()
+        opportunities: List[Dict[str, Any]] = []
+        wordplay_entries: List[Dict[str, Any]] = []
+        seen: set = set()
+        seen_wordplay: set = set()
+
+        idiom_sources: List[Tuple[str, Dict[str, str]]] = []
+        idiom_sources.extend(list(self.IDIOM_LIBRARY.items()))
+        idiom_sources.extend(list(self.BODY_IDIOM_LIBRARY.items()))
+
+        for chapter_key in sorted(chapter_map.keys()):
+            lines = chapter_map.get(chapter_key, [])
+            for line_no, raw_line in enumerate(lines, start=1):
+                line = raw_line.strip()
+                if not line:
+                    continue
+                location = f"{chapter_key.upper()}_LINE_{line_no}"
+                scene_id = self._infer_scene_for_line(chapter_key, line_no, scene_plan_index)
+
+                for phrase, meta in idiom_sources:
+                    if phrase not in line:
+                        continue
+                    dedupe = (location, phrase)
+                    if dedupe in seen:
+                        continue
+                    seen.add(dedupe)
+                    category = meta.get("category", "set_phrase")
+                    confidence = self._confidence_for_category(category)
+                    opportunities.append(
+                        {
+                            "id": f"trans_{len(opportunities) + 1:03d}",
+                            "location": location,
+                            "japanese": phrase,
+                            "literal": meta.get("literal", phrase),
+                            "meaning": meta.get("meaning", ""),
+                            "category": category,
+                            "context": {
+                                "scene": scene_id,
+                                "emotional_tone": "contextual",
+                                "beat_type": "event",
+                            },
+                            "transcreation_priority": self._transcreation_priority_from_category(category),
+                            "confidence": round(confidence, 2),
+                            "options": self._build_transcreation_options(
+                                japanese=phrase,
+                                literal=meta.get("literal", phrase),
+                                meaning=meta.get("meaning", ""),
+                                category=category,
+                            ),
+                            "stage_2_guidance": "Prefer rank 1 unless scene voice requires a stronger literary beat.",
+                        }
+                    )
+
+                for sound, meta in self.ONOMATOPOEIA_EQUIVALENTS.items():
+                    if sound not in line:
+                        continue
+                    dedupe = (location, sound)
+                    if dedupe in seen:
+                        continue
+                    seen.add(dedupe)
+                    opportunities.append(
+                        {
+                            "id": f"trans_{len(opportunities) + 1:03d}",
+                            "location": location,
+                            "japanese": sound,
+                            "literal": meta.get("literal", sound),
+                            "meaning": meta.get("meaning", ""),
+                            "category": "onomatopoeia",
+                            "context": {
+                                "scene": scene_id,
+                                "emotional_tone": "expressive",
+                                "beat_type": "escalation",
+                            },
+                            "transcreation_priority": "medium",
+                            "confidence": round(self._confidence_for_category("onomatopoeia"), 2),
+                            "options": self._build_transcreation_options(
+                                japanese=sound,
+                                literal=meta.get("literal", sound),
+                                meaning=meta.get("meaning", ""),
+                                category="onomatopoeia",
+                            ),
+                            "stage_2_guidance": "Use rank 1 for clean readability; rank 2 for heightened emotional prose.",
+                        }
+                    )
+
+                for match in re.finditer(r"([一-龯ぁ-んァ-ンA-Za-z]+)だけに", line):
+                    anchor = match.group(1)
+                    dedupe = (location, anchor)
+                    if dedupe in seen_wordplay:
+                        continue
+                    seen_wordplay.add(dedupe)
+                    wordplay_entries.append(
+                        {
+                            "id": f"wordplay_{len(wordplay_entries) + 1:03d}",
+                            "location": location,
+                            "japanese": match.group(0),
+                            "meaning": f"Wordplay emphasis around {anchor}.",
+                            "transcreation_priority": "critical",
+                            "confidence": 0.83,
+                            "options": [
+                                {"rank": 1, "text": f"English wordplay centered on '{anchor}'.", "confidence": 0.83},
+                                {"rank": 2, "text": "Keep meaning and explain the pun through narration.", "confidence": 0.76},
+                            ],
+                            "stage_2_guidance": "Recast into natural English wit; avoid literal carryover.",
+                        }
+                    )
+
+        if len(opportunities) < min_items:
+            for chapter_key in sorted(chapter_map.keys()):
+                lines = chapter_map.get(chapter_key, [])
+                for line_no, raw_line in enumerate(lines, start=1):
+                    line = raw_line.strip()
+                    if not line:
+                        continue
+                    location = f"{chapter_key.upper()}_LINE_{line_no}"
+                    scene_id = self._infer_scene_for_line(chapter_key, line_no, scene_plan_index)
+                    for four in re.findall(r"[一-龯]{4}", line):
+                        dedupe = (location, four)
+                        if dedupe in seen:
+                            continue
+                        seen.add(dedupe)
+                        opportunities.append(
+                            {
+                                "id": f"trans_{len(opportunities) + 1:03d}",
+                                "location": location,
+                                "japanese": four,
+                                "literal": four,
+                                "meaning": "Potential four-character idiom; verify context before transcreation.",
+                                "category": "set_phrase",
+                                "context": {
+                                    "scene": scene_id,
+                                    "emotional_tone": "contextual",
+                                    "beat_type": "event",
+                                },
+                                "transcreation_priority": "low",
+                                "confidence": round(self._confidence_for_category("set_phrase", heuristic=True), 2),
+                                "options": self._build_transcreation_options(
+                                    japanese=four,
+                                    literal=four,
+                                    meaning="Potential idiomatic emphasis.",
+                                    category="set_phrase",
+                                ),
+                                "stage_2_guidance": "Only transcreate if surrounding context confirms idiomatic usage.",
+                            }
+                        )
+                        if len(opportunities) >= min_items:
+                            break
+                    if len(opportunities) >= min_items:
+                        break
+                if len(opportunities) >= min_items:
+                    break
+
+        priority_counts = {"critical": 0, "high": 0, "medium": 0, "low": 0}
+        confidence_sum = 0.0
+        for item in opportunities:
+            priority = str(item.get("transcreation_priority", "low")).lower()
+            if priority in priority_counts:
+                priority_counts[priority] += 1
+            confidence_sum += float(item.get("confidence", 0.0) or 0.0)
+
+        avg_conf = confidence_sum / len(opportunities) if opportunities else 0.0
+        return {
+            "volume_id": self.manifest.get("volume_id", self.work_dir.name),
+            "generated_at": datetime.datetime.now().isoformat(),
+            "processor_version": "1.1",
+            "transcreation_opportunities": opportunities[:140],
+            "wordplay_transcreations": wordplay_entries[:60],
+            "summary": {
+                "total_opportunities": len(opportunities[:140]),
+                "by_priority": priority_counts,
+                "avg_confidence": round(avg_conf, 3),
+            },
+        }
+
+    def _get_or_build_idiom_fallback(self, scene_plan_index: Dict[str, Dict[str, Any]]) -> Dict[str, Any]:
+        if self._idiom_fallback_cache is None:
+            self._idiom_fallback_cache = self._build_idiom_transcreation_from_text(
+                scene_plan_index=scene_plan_index,
+                min_items=15,
+            )
+        return json.loads(json.dumps(self._idiom_fallback_cache))
+
+    def _resolve_cultural_term_translation(self, jp_term: str, source: Any) -> Tuple[str, List[str], str]:
+        if isinstance(source, dict):
+            preferred = (
+                source.get("preferred_en")
+                or source.get("canonical_en")
+                or source.get("meaning_en")
+                or source.get("translation")
+                or source.get("en")
+                or ""
+            )
+            aliases = source.get("aliases") or source.get("aliases_en") or []
+        else:
+            preferred = str(source or "")
+            aliases = []
+
+        preferred = str(preferred).strip()
+        if not preferred:
+            preferred = self.CULTURAL_TERM_DEFAULTS.get(jp_term, "").strip()
+
+        normalized_aliases: List[str] = []
+        if isinstance(aliases, list):
+            for alias in aliases:
+                text = str(alias).strip()
+                if text and text != preferred and text not in normalized_aliases:
+                    normalized_aliases.append(text)
+
+        reason = "Taken from canonical metadata."
+        if jp_term in self.CULTURAL_TERM_DEFAULTS and preferred == self.CULTURAL_TERM_DEFAULTS[jp_term]:
+            reason = "Fallback dictionary mapping for stable LN translation consistency."
+        if not preferred:
+            reason = "No stable equivalent found; requires model translation."
+        return preferred, normalized_aliases, reason
+
+    def _build_honorific_policies(self, metadata_en: Dict[str, Any]) -> List[Dict[str, Any]]:
+        policies: List[Dict[str, Any]] = [
+            {
+                "pattern": "-san",
+                "strategy": "omit_in_english",
+                "rule": "Default omission; keep role distance via tone or title when context requires.",
+            },
+            {
+                "pattern": "-chan",
+                "strategy": "omit_with_tender_tone",
+                "rule": "Reflect intimacy through diction, not suffix carryover.",
+            },
+            {
+                "pattern": "-kun",
+                "strategy": "omit_with_peer_register",
+                "rule": "Use casual peer voice in English lines.",
+            },
+            {
+                "pattern": "先輩",
+                "strategy": "translate_to_senior",
+                "rule": "Use 'senior' when hierarchy matters; otherwise infer via voice dynamics.",
+            },
+            {
+                "pattern": "先生",
+                "strategy": "translate_to_teacher",
+                "rule": "Prefer teacher/professor by setting context.",
+            },
+        ]
+
+        localization_notes = metadata_en.get("localization_notes", {})
+        if isinstance(localization_notes, dict):
+            british = localization_notes.get("british_speech_exception", {})
+            if isinstance(british, dict):
+                chars = british.get("character")
+                if chars:
+                    policies.append(
+                        {
+                            "pattern": "formal_exception",
+                            "strategy": "retain_formality_for_listed_characters",
+                            "rule": f"Apply formal register to: {chars}",
+                        }
+                    )
+        return policies
+
+    def _build_location_terms(self) -> List[Dict[str, Any]]:
+        chapter_map = self._load_chapter_text_map()
+        all_text = "\n".join("\n".join(lines) for lines in chapter_map.values())
+        location_terms: List[Dict[str, Any]] = []
+        for jp, en in self.LOCATION_TERM_DEFAULTS.items():
+            if jp in all_text:
+                location_terms.append({"jp": jp, "en": en, "notes": "Detected in volume source text."})
+        return location_terms
+
+    def _enhance_character_registry_payload(self, payload: Dict[str, Any]) -> Dict[str, Any]:
+        chars = payload.get("characters", [])
+        if not isinstance(chars, list):
+            return payload
+
+        for char in chars:
+            if not isinstance(char, dict):
+                continue
+            pronouns = [str(p).lower() for p in char.get("pronoun_hints_en", []) if isinstance(p, str)]
+            if not char.get("gender"):
+                if any(p in {"she", "her", "hers"} for p in pronouns):
+                    char["gender"] = "female"
+                elif any(p in {"he", "him", "his"} for p in pronouns):
+                    char["gender"] = "male"
+                else:
+                    char["gender"] = "unknown"
+
+            if "emotional_arc" not in char:
+                char["emotional_arc"] = {}
+
+            edges = char.get("relationship_edges", [])
+            if isinstance(edges, list):
+                for edge in edges:
+                    if not isinstance(edge, dict):
+                        continue
+                    type_text = str(edge.get("type", "")).lower()
+                    taxonomy = "friendship"
+                    if any(k in type_text for k in ("romantic", "partner", "crush", "love")):
+                        taxonomy = "romantic"
+                    elif any(k in type_text for k in ("sister", "brother", "father", "mother", "family", "guardian")):
+                        taxonomy = "familial"
+                    elif any(k in type_text for k in ("teacher", "student", "mentor", "colleague", "professional")):
+                        taxonomy = "professional"
+                    elif any(k in type_text for k in ("hostile", "antagon", "strained", "conflict")):
+                        taxonomy = "antagonistic"
+                    edge["taxonomy"] = taxonomy
+
+        summary = payload.get("summary", {})
+        if isinstance(summary, dict):
+            summary["total_characters"] = len([c for c in chars if isinstance(c, dict)])
+        return payload
+
+    def _enhance_cultural_glossary_payload(
+        self,
+        payload: Dict[str, Any],
+        metadata_en: Dict[str, Any],
+        scene_plan_index: Dict[str, Dict[str, Any]],
+    ) -> Dict[str, Any]:
+        source_terms = metadata_en.get("cultural_terms", {})
+        if not isinstance(source_terms, dict):
+            source_terms = {}
+
+        raw_terms = payload.get("terms", [])
+        if not isinstance(raw_terms, list) or not raw_terms:
+            seed_terms = list(source_terms.keys())
+            if not seed_terms:
+                chapter_map = self._load_chapter_text_map()
+                all_text = "\n".join("\n".join(lines) for lines in chapter_map.values())
+                for jp_term in self.CULTURAL_TERM_DEFAULTS.keys():
+                    if jp_term in all_text:
+                        seed_terms.append(jp_term)
+            raw_terms = [{"term_jp": key} for key in seed_terms[:80]]
+
+        enriched_terms: List[Dict[str, Any]] = []
+        consistency_rules: List[str] = []
+        seen_terms: set = set()
+
+        for term in raw_terms:
+            if not isinstance(term, dict):
+                continue
+            term_jp = str(term.get("term_jp") or term.get("jp") or "").strip()
+            if not term_jp or term_jp in seen_terms:
+                continue
+            seen_terms.add(term_jp)
+            source = source_terms.get(term_jp, {})
+            preferred, aliases, reason = self._resolve_cultural_term_translation(term_jp, source)
+            notes = str(term.get("notes") or "").strip()
+            if not notes and isinstance(source, dict):
+                notes = str(source.get("notes") or source.get("context") or "").strip()
+
+            entry = {
+                "term_jp": term_jp,
+                "preferred_en": preferred,
+                "alternatives": aliases[:4],
+                "chosen_reason": reason,
+                "consistency_rule": f"Always translate {term_jp} as '{preferred}'." if preferred else "",
+                "notes": notes,
+            }
+            enriched_terms.append(entry)
+            if entry["consistency_rule"]:
+                consistency_rules.append(entry["consistency_rule"])
+
+        payload["terms"] = enriched_terms[:120]
+
+        idioms = payload.get("idioms")
+        if not isinstance(idioms, list) or not idioms:
+            idiom_seed = self._get_or_build_idiom_fallback(scene_plan_index)
+            idioms = []
+            for item in idiom_seed.get("transcreation_opportunities", []):
+                if not isinstance(item, dict):
+                    continue
+                category = str(item.get("category", "")).lower()
+                if category not in {"proverb", "set_phrase", "body_part_idiom"}:
+                    continue
+                idioms.append(
+                    {
+                        "japanese": item.get("japanese", ""),
+                        "meaning": item.get("meaning", ""),
+                        "preferred_rendering": item.get("options", [{}])[0].get("text", "") if isinstance(item.get("options"), list) else "",
+                        "confidence": item.get("confidence", 0.7),
+                    }
+                )
+                if len(idioms) >= 20:
+                    break
+        payload["idioms"] = idioms if isinstance(idioms, list) else []
+
+        honorifics = payload.get("honorific_policies")
+        if not isinstance(honorifics, list) or not honorifics:
+            honorifics = self._build_honorific_policies(metadata_en)
+        payload["honorific_policies"] = honorifics
+
+        location_terms = payload.get("location_terms")
+        if not isinstance(location_terms, list) or not location_terms:
+            location_terms = self._build_location_terms()
+        payload["location_terms"] = location_terms
+
+        payload["consistency_rules"] = consistency_rules[:200]
+        payload["summary"] = {
+            "total_terms": len(payload["terms"]),
+            "total_idioms": len(payload["idioms"]),
+            "translated_terms": len([t for t in payload["terms"] if isinstance(t, dict) and t.get("preferred_en")]),
+            "consistency_rules": len(payload["consistency_rules"]),
+        }
+        return payload
+
+    def _enhance_timeline_payload(self, payload: Dict[str, Any]) -> Dict[str, Any]:
+        chapters = payload.get("chapter_timeline", [])
+        if not isinstance(chapters, list):
+            return payload
+
+        flashback_markers = (
+            "flashback",
+            "past",
+            "years ago",
+            "middle school",
+            "childhood",
+            "昔",
+            "回想",
+        )
+
+        for chapter in chapters:
+            if not isinstance(chapter, dict):
+                continue
+            scenes = chapter.get("scenes", [])
+            if not isinstance(scenes, list):
+                continue
+            for scene in scenes:
+                if not isinstance(scene, dict):
+                    continue
+                summary = str(scene.get("summary", "")).lower()
+                is_flashback = any(marker in summary for marker in flashback_markers)
+                scene["temporal_type"] = "flashback" if is_flashback else "present_timeline"
+                if is_flashback and "flashback_info" not in scene:
+                    scene["flashback_info"] = {
+                        "relative_time": "past",
+                        "trigger": "narrative recollection",
+                        "content": str(scene.get("summary", ""))[:160],
+                    }
+                scene["tense_guidance"] = {
+                    "narrative": "past",
+                    "dialogue": "present",
+                    "flashback": "past_perfect" if is_flashback else "past",
+                }
+
+            chapter["scene_count"] = len([s for s in scenes if isinstance(s, dict)])
+
+        payload["summary"] = {
+            "chapter_count": len([c for c in chapters if isinstance(c, dict)]),
+            "event_count": sum(int(c.get("scene_count", 0) or 0) for c in chapters if isinstance(c, dict)),
+        }
+        return payload
+
+    def _enhance_idiom_payload(
+        self,
+        payload: Dict[str, Any],
+        scene_plan_index: Dict[str, Dict[str, Any]],
+    ) -> Dict[str, Any]:
+        fallback = self._get_or_build_idiom_fallback(scene_plan_index)
+        opportunities = payload.get("transcreation_opportunities", [])
+        if not isinstance(opportunities, list):
+            opportunities = []
+        wordplay = payload.get("wordplay_transcreations", [])
+        if not isinstance(wordplay, list):
+            wordplay = []
+
+        if not opportunities:
+            opportunities = fallback.get("transcreation_opportunities", [])
+        else:
+            existing = {
+                (str(item.get("location", "")), str(item.get("japanese", "")))
+                for item in opportunities
+                if isinstance(item, dict)
+            }
+            for item in fallback.get("transcreation_opportunities", []):
+                if not isinstance(item, dict):
+                    continue
+                key = (str(item.get("location", "")), str(item.get("japanese", "")))
+                if key in existing:
+                    continue
+                opportunities.append(item)
+                if len(opportunities) >= 140:
+                    break
+
+        if not wordplay:
+            wordplay = fallback.get("wordplay_transcreations", [])
+
+        normalized: List[Dict[str, Any]] = []
+        for item in opportunities[:140]:
+            if not isinstance(item, dict):
+                continue
+            category = str(item.get("category", "set_phrase"))
+            priority = str(item.get("transcreation_priority") or self._transcreation_priority_from_category(category)).lower()
+            confidence = float(item.get("confidence", 0.0) or self._confidence_for_category(category))
+            literal = str(item.get("literal", "") or item.get("japanese", ""))
+            meaning = str(item.get("meaning", ""))
+            options = item.get("options")
+            if not isinstance(options, list) or not options:
+                options = self._build_transcreation_options(
+                    japanese=str(item.get("japanese", "")),
+                    literal=literal,
+                    meaning=meaning,
+                    category=category,
+                )
+            item["transcreation_priority"] = priority if priority in {"critical", "high", "medium", "low"} else "medium"
+            item["confidence"] = round(max(0.40, min(0.99, confidence)), 2)
+            item["options"] = options[:4]
+            if not item.get("stage_2_guidance"):
+                item["stage_2_guidance"] = "Prefer rank 1 unless scene register requires stylistic lift."
+            normalized.append(item)
+
+        priority_counts = {"critical": 0, "high": 0, "medium": 0, "low": 0}
+        conf_sum = 0.0
+        for item in normalized:
+            p = str(item.get("transcreation_priority", "low")).lower()
+            if p in priority_counts:
+                priority_counts[p] += 1
+            conf_sum += float(item.get("confidence", 0.0) or 0.0)
+
+        payload["transcreation_opportunities"] = normalized
+        payload["wordplay_transcreations"] = [w for w in wordplay[:60] if isinstance(w, dict)]
+        payload["summary"] = {
+            "total_opportunities": len(normalized),
+            "by_priority": priority_counts,
+            "avg_confidence": round(conf_sum / len(normalized), 3) if normalized else 0.0,
+        }
+        return payload
+
+    def _postprocess_context_processor_payload(
+        self,
+        processor_id: str,
+        payload: Dict[str, Any],
+        metadata_en: Dict[str, Any],
+        scene_plan_index: Dict[str, Dict[str, Any]],
+    ) -> Dict[str, Any]:
+        if not isinstance(payload, dict):
+            return payload
+
+        payload["generated_at"] = datetime.datetime.now().isoformat()
+        payload.setdefault("processor_version", "1.1")
+
+        if processor_id == "character_context":
+            return self._enhance_character_registry_payload(payload)
+        if processor_id == "cultural_context":
+            return self._enhance_cultural_glossary_payload(payload, metadata_en, scene_plan_index)
+        if processor_id == "temporal_context":
+            return self._enhance_timeline_payload(payload)
+        if processor_id == "idiom_transcreation":
+            return self._enhance_idiom_payload(payload, scene_plan_index)
+        return payload
+
     def _build_system_instruction(self) -> str:
         base_instruction = (
             "You are the Phase 1.55 Rich Metadata Updater for MTL Studio.\n"
@@ -635,6 +1451,40 @@ class RichMetadataCacheUpdater:
 
         return updated
 
+    def _extract_balanced_json_object(self, text: str) -> Optional[str]:
+        """Extract first balanced top-level JSON object from arbitrary text."""
+        start = text.find("{")
+        if start < 0:
+            return None
+
+        depth = 0
+        in_string = False
+        escaped = False
+        for idx in range(start, len(text)):
+            ch = text[idx]
+            if in_string:
+                if escaped:
+                    escaped = False
+                    continue
+                if ch == "\\":
+                    escaped = True
+                    continue
+                if ch == '"':
+                    in_string = False
+                continue
+
+            if ch == '"':
+                in_string = True
+                continue
+            if ch == "{":
+                depth += 1
+                continue
+            if ch == "}":
+                depth -= 1
+                if depth == 0:
+                    return text[start : idx + 1]
+        return None
+
     def _parse_json_response(self, content: str) -> Dict[str, Any]:
         text = content.strip()
         if text.startswith("```json"):
@@ -645,13 +1495,39 @@ class RichMetadataCacheUpdater:
             text = text[:-3]
         text = text.strip()
 
-        try:
-            return json.loads(text)
-        except json.JSONDecodeError:
-            match = re.search(r"\{[\s\S]*\}", text)
-            if not match:
-                raise
-            return json.loads(match.group(0))
+        candidates: List[str] = [text]
+
+        balanced = self._extract_balanced_json_object(text)
+        if balanced and balanced not in candidates:
+            candidates.append(balanced)
+
+        match = re.search(r"\{[\s\S]*\}", text)
+        if match:
+            regex_candidate = match.group(0)
+            if regex_candidate not in candidates:
+                candidates.append(regex_candidate)
+
+        last_error: Optional[Exception] = None
+        for candidate in candidates:
+            try:
+                return json.loads(candidate)
+            except Exception as e:
+                last_error = e
+
+        # Repair pass for common model mistakes.
+        for candidate in candidates:
+            cleaned = candidate.replace("\ufeff", "").replace("“", '"').replace("”", '"')
+            cleaned = re.sub(r",\s*([}\]])", r"\1", cleaned)  # trailing commas
+            cleaned = re.sub(r"//.*", "", cleaned)  # single-line comments
+            cleaned = re.sub(r"/\*[\s\S]*?\*/", "", cleaned)  # block comments
+            try:
+                return json.loads(cleaned)
+            except Exception as e:
+                last_error = e
+
+        if last_error:
+            raise last_error
+        raise ValueError("Unable to parse JSON response")
 
     def _extract_event_metadata(self, profile_data: Dict[str, Any]) -> Dict[str, Any]:
         """Extract only current-volume event/relationship metadata from character profile."""
@@ -898,7 +1774,7 @@ class RichMetadataCacheUpdater:
         full_volume_text: str,
         display_name: str,
         tools: Optional[List[Any]] = None,
-    ) -> Optional[Dict[str, Any]]:
+    ) -> Tuple[Optional[Dict[str, Any]], Optional[str], Optional[str]]:
         response = None
         cache_name = None
         try:
@@ -929,19 +1805,31 @@ class RichMetadataCacheUpdater:
                 )
         except Exception as e:
             logger.warning(f"[P1.55] Processor call failed ({display_name}): {e}")
-            return None
+            return None, f"call_failed: {str(e)[:240]}", None
         finally:
             if cache_name:
                 self.client.delete_cache(cache_name)
 
         if not response or not response.content:
-            return None
+            return None, "empty_response", None
         try:
             payload = self._parse_json_response(response.content)
         except Exception as e:
             logger.warning(f"[P1.55] Processor JSON parse failed ({display_name}): {e}")
-            return None
-        return payload if isinstance(payload, dict) else None
+            debug_dir = self._context_dir_path() / "_debug"
+            debug_dir.mkdir(parents=True, exist_ok=True)
+            safe_name = re.sub(r"[^A-Za-z0-9._-]+", "_", display_name).strip("._-") or "processor"
+            debug_path = debug_dir / f"{safe_name}_raw_response.txt"
+            try:
+                debug_path.write_text(response.content, encoding="utf-8")
+            except Exception:
+                debug_path = None
+            return None, f"json_parse_failed: {str(e)[:240]}", (
+                str(debug_path.relative_to(self.work_dir)) if debug_path else None
+            )
+        if not isinstance(payload, dict):
+            return None, "non_dict_payload", None
+        return payload, None, None
 
     def _fallback_character_registry(self, metadata_en: Dict[str, Any]) -> Dict[str, Any]:
         characters: List[Dict[str, Any]] = []
@@ -961,7 +1849,7 @@ class RichMetadataCacheUpdater:
                     }
                 )
 
-        return {
+        payload = {
             "volume_id": self.manifest.get("volume_id", self.work_dir.name),
             "generated_at": datetime.datetime.now().isoformat(),
             "processor_version": "1.0",
@@ -973,6 +1861,7 @@ class RichMetadataCacheUpdater:
                 "total_relationship_edges": 0,
             },
         }
+        return self._enhance_character_registry_payload(payload)
 
     def _fallback_cultural_glossary(self, metadata_en: Dict[str, Any]) -> Dict[str, Any]:
         terms: List[Dict[str, Any]] = []
@@ -980,7 +1869,13 @@ class RichMetadataCacheUpdater:
         if isinstance(source_terms, dict):
             for key, value in list(source_terms.items())[:60]:
                 if isinstance(value, dict):
-                    meaning = value.get("meaning_en") or value.get("translation") or ""
+                    meaning = (
+                        value.get("preferred_en")
+                        or value.get("canonical_en")
+                        or value.get("meaning_en")
+                        or value.get("translation")
+                        or ""
+                    )
                     notes = value.get("notes") or value.get("context") or ""
                 else:
                     meaning = str(value)
@@ -993,7 +1888,7 @@ class RichMetadataCacheUpdater:
                     }
                 )
 
-        return {
+        payload = {
             "volume_id": self.manifest.get("volume_id", self.work_dir.name),
             "generated_at": datetime.datetime.now().isoformat(),
             "processor_version": "1.0",
@@ -1006,24 +1901,65 @@ class RichMetadataCacheUpdater:
                 "total_idioms": 0,
             },
         }
+        return self._enhance_cultural_glossary_payload(payload, metadata_en, {})
 
     def _fallback_timeline_map(self, scene_plan_index: Dict[str, Dict[str, Any]]) -> Dict[str, Any]:
         timeline: List[Dict[str, Any]] = []
-        for chapter_key in sorted(scene_plan_index.keys()):
-            plan = scene_plan_index.get(chapter_key, {})
-            scenes = plan.get("scenes", [])
-            timeline.append(
-                {
-                    "chapter_id": chapter_key,
-                    "sequence_index": int(chapter_key.split("_")[-1]) if "_" in chapter_key else 0,
-                    "scene_count": len(scenes) if isinstance(scenes, list) else 0,
-                    "scenes": scenes if isinstance(scenes, list) else [],
-                    "temporal_markers": [],
-                    "continuity_constraints": [],
-                }
-            )
+        if scene_plan_index:
+            for chapter_key in sorted(scene_plan_index.keys()):
+                plan = scene_plan_index.get(chapter_key, {})
+                scenes = plan.get("scenes", [])
+                timeline.append(
+                    {
+                        "chapter_id": chapter_key,
+                        "sequence_index": int(chapter_key.split("_")[-1]) if "_" in chapter_key else 0,
+                        "scene_count": len(scenes) if isinstance(scenes, list) else 0,
+                        "scenes": scenes if isinstance(scenes, list) else [],
+                        "temporal_markers": [],
+                        "continuity_constraints": [],
+                    }
+                )
+        else:
+            # Stage 1 plans may be missing for older/partial runs. Build a
+            # minimal chapter-level timeline from JP source so Stage 2 still
+            # receives continuity scaffolding instead of an empty map.
+            chapter_map = self._load_chapter_text_map()
+            for chapter_key in sorted(chapter_map.keys()):
+                lines = chapter_map.get(chapter_key, [])
+                excerpt = ""
+                for raw in lines:
+                    text = str(raw).strip()
+                    if not text:
+                        continue
+                    if text.startswith("#"):
+                        continue
+                    excerpt = text
+                    break
+                if not excerpt:
+                    excerpt = "Scene progression inferred from chapter source text."
 
-        return {
+                scene_summary = f"Inferred timeline from source: {excerpt[:140]}"
+                sequence_index = int(chapter_key.split("_")[-1]) if "_" in chapter_key else 0
+                beat = "setup" if sequence_index <= 1 else "event"
+                fallback_scene = {
+                    "id": "S01",
+                    "beat_type": beat,
+                    "summary": scene_summary,
+                    "start_paragraph": 1,
+                    "end_paragraph": max(1, len(lines)),
+                }
+                timeline.append(
+                    {
+                        "chapter_id": chapter_key,
+                        "sequence_index": sequence_index,
+                        "scene_count": 1,
+                        "scenes": [fallback_scene],
+                        "temporal_markers": [],
+                        "continuity_constraints": [],
+                    }
+                )
+
+        payload = {
             "volume_id": self.manifest.get("volume_id", self.work_dir.name),
             "generated_at": datetime.datetime.now().isoformat(),
             "processor_version": "1.0",
@@ -1034,20 +1970,11 @@ class RichMetadataCacheUpdater:
                 "event_count": sum(item.get("scene_count", 0) for item in timeline),
             },
         }
+        return self._enhance_timeline_payload(payload)
 
     def _fallback_idiom_transcreation(self) -> Dict[str, Any]:
-        return {
-            "volume_id": self.manifest.get("volume_id", self.work_dir.name),
-            "generated_at": datetime.datetime.now().isoformat(),
-            "processor_version": "1.0",
-            "transcreation_opportunities": [],
-            "wordplay_transcreations": [],
-            "summary": {
-                "total_opportunities": 0,
-                "by_priority": {"critical": 0, "high": 0, "medium": 0, "low": 0},
-                "avg_confidence": 0.0,
-            },
-        }
+        scene_plan_index = self._load_scene_plan_index()
+        return self._get_or_build_idiom_fallback(scene_plan_index)
 
     def _estimate_processor_items(self, processor_id: str, payload: Dict[str, Any]) -> int:
         if processor_id == "character_context":
@@ -1244,7 +2171,7 @@ class RichMetadataCacheUpdater:
         for spec in processor_specs:
             processor_id = spec["id"]
             output_path = self._context_output_path(processor_id)
-            payload = self._generate_with_optional_cache(
+            payload, fallback_reason, debug_artifact = self._generate_with_optional_cache(
                 prompt=spec["prompt"],
                 system_instruction=spec["system_instruction"],
                 full_volume_text=full_volume_text,
@@ -1256,6 +2183,13 @@ class RichMetadataCacheUpdater:
                 status = "fallback"
             else:
                 status = "completed"
+
+            payload = self._postprocess_context_processor_payload(
+                processor_id=processor_id,
+                payload=payload,
+                metadata_en=metadata_en,
+                scene_plan_index=scene_plan_index,
+            )
 
             if "volume_id" not in payload:
                 payload["volume_id"] = self.manifest.get("volume_id", self.work_dir.name)
@@ -1276,6 +2210,10 @@ class RichMetadataCacheUpdater:
                     "items": item_count,
                     "used_grounding": bool(spec.get("tools")),
                 }
+                if status == "fallback" and fallback_reason:
+                    results["processors"][processor_id]["fallback_reason"] = fallback_reason
+                if status == "fallback" and debug_artifact:
+                    results["processors"][processor_id]["debug_artifact"] = debug_artifact
                 results["output_files"].append(str(output_path.relative_to(self.work_dir)))
                 logger.info(
                     f"[P1.55] {processor_id}: {status} -> {output_path.name} ({item_count} items)"

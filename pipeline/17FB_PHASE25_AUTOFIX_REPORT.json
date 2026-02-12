@@ -1,0 +1,79 @@
+{
+  "volume": "(迷子になっていた幼女を助けたら、お隣に住む美少女留学生が家に遊びに来るようになった件について (4)_20260212_17fb",
+  "files_processed": 7,
+  "total_fixes": 5,
+  "file_results": [
+    {
+      "file": "CHAPTER_01_EN.md",
+      "fixes_applied": 1,
+      "dry_run": false
+    },
+    {
+      "file": "CHAPTER_02_EN.md",
+      "fixes_applied": 0,
+      "dry_run": false
+    },
+    {
+      "file": "CHAPTER_03_EN.md",
+      "fixes_applied": 0,
+      "dry_run": false
+    },
+    {
+      "file": "CHAPTER_04_EN.md",
+      "fixes_applied": 0,
+      "dry_run": false
+    },
+    {
+      "file": "CHAPTER_05_EN.md",
+      "fixes_applied": 0,
+      "dry_run": false
+    },
+    {
+      "file": "CHAPTER_06_EN.md",
+      "fixes_applied": 4,
+      "dry_run": false
+    },
+    {
+      "file": "CHAPTER_07_EN.md",
+      "fixes_applied": 0,
+      "dry_run": false
+    }
+  ],
+  "fixes_applied": [
+    {
+      "file": "CHAPTER_01_EN.md",
+      "pattern": "couldn't help but",
+      "original": "I couldn't help but feel",
+      "fixed": "I felt",
+      "confidence": 0.95
+    },
+    {
+      "file": "CHAPTER_06_EN.md",
+      "pattern": "couldn't help but",
+      "original": "I couldn't help but protest",
+      "fixed": "I protested",
+      "confidence": 0.95
+    },
+    {
+      "file": "CHAPTER_06_EN.md",
+      "pattern": "couldn't help but",
+      "original": "I couldn't help but worry",
+      "fixed": "I worried",
+      "confidence": 0.95
+    },
+    {
+      "file": "CHAPTER_06_EN.md",
+      "pattern": "couldn't help but",
+      "original": "I couldn't help but shout",
+      "fixed": "I shouted",
+      "confidence": 0.95
+    },
+    {
+      "file": "CHAPTER_06_EN.md",
+      "pattern": "couldn't help but",
+      "original": "couldn't help but ask",
+      "fixed": "asked",
+      "confidence": 0.95
+    }
+  ]
+}

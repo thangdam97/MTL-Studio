@@ -38,6 +38,7 @@ Core Commands:
   mtl.py phase1.55 novel_v1
   mtl.py phase1.6 novel_v1
   mtl.py phase1.7 novel_v1 --chapters CHAPTER_01
+  mtl.py phase1.7-cp novel_v1
   mtl.py phase2 novel_v1 --enable-multimodal
   mtl.py phase4 novel_v1
   mtl.py bible list
@@ -82,7 +83,7 @@ Metadata Schema Auto-Transform:
     run_parser = subparsers.add_parser(
         'run',
         parents=[parent_parser],
-        help='Run full pipeline (1 -> 1.5 -> 1.55 -> 1.6 -> 2 -> 4)'
+        help='Run full pipeline (1 -> 1.5 -> 1.55 -> 1.6 -> 1.7 -> 2 -> 4)'
     )
     run_parser.add_argument('epub_path', type=str, help='Path to Japanese EPUB file')
     run_parser.add_argument('--id', dest='volume_id', type=str, help='Custom volume ID (auto-generated if not provided)')
@@ -161,6 +162,14 @@ Metadata Schema Auto-Transform:
         default=65535,
         help='Max output tokens for planning output (default: 65535)',
     )
+
+    # Phase 1.7 Co-Processor (standalone context offload pack)
+    phase1_7_cp_parser = subparsers.add_parser(
+        'phase1.7-cp',
+        parents=[parent_parser],
+        help='Run Phase 1.7 Co-Processor: standalone context offload pack (cache-only)'
+    )
+    phase1_7_cp_parser.add_argument('volume_id', type=str, nargs='?', help='Volume ID (optional - will prompt if not provided)')
 
     # Multimodal Translator (Phase 1.6 + Phase 2)
     multimodal_parser = subparsers.add_parser(

@@ -15,6 +15,7 @@ PHASE_NAMES = {
     'phase1.55': 'Phase 1.55 - Full-LN Cache Rich Metadata Enrichment',
     'phase1.6': 'Phase 1.6 - Multimodal Processor (Visual Analysis)',
     'phase1.7': 'Phase 1.7 - Stage 1 Scene Planner (Narrative Scaffold)',
+    'phase1.7-cp': 'Phase 1.7 - Co-Processor Pack (Standalone Context Offload)',
     'multimodal': 'Multimodal Translator (Phase 1.6 + Phase 2 with Visual Context)',
     'phase2': 'Phase 2 - Translator',
     'phase3': 'Phase 3 - Critics',

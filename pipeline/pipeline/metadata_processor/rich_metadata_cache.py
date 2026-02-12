@@ -926,7 +926,279 @@ class RichMetadataCacheUpdater:
             reason = "No stable equivalent found; requires model translation."
         return preferred, normalized_aliases, reason
 
+    def _is_contemporary_japan_setting(self, metadata_en: Dict[str, Any]) -> bool:
+        """Heuristic detector for modern/contemporary Japan setting."""
+        text_chunks: List[str] = []
+
+        metadata = self.manifest.get("metadata", {})
+        if isinstance(metadata, dict):
+            for key in ("title", "series", "description", "genre", "publisher"):
+                value = metadata.get(key)
+                if isinstance(value, str) and value.strip():
+                    text_chunks.append(value.strip())
+
+        for key in ("world_setting", "localization_notes", "translation_rules", "geography", "scene_contexts"):
+            value = metadata_en.get(key)
+            if value:
+                text_chunks.append(json.dumps(value, ensure_ascii=False))
+
+        haystack = " ".join(text_chunks).lower()
+        if not haystack:
+            return False
+
+        positive_signals = (
+            "contemporary japan",
+            "modern japan",
+            "present-day japan",
+            "japanese high school",
+            "japan",
+            "tokyo",
+            "osaka",
+            "kyoto",
+            "reiwa",
+            "heisei",
+            "slice-of-life",
+            "school life",
+        )
+        negative_signals = (
+            "isekai",
+            "fantasy world",
+            "alternate world",
+            "parallel world",
+            "magic academy",
+            "dungeon",
+            "kingdom",
+            "empire",
+            "medieval",
+        )
+
+        has_positive = any(token in haystack for token in positive_signals)
+        has_negative = any(token in haystack for token in negative_signals)
+        return has_positive and not has_negative
+
+    def _is_fantasy_or_non_contemporary_setting(self, metadata_en: Dict[str, Any]) -> bool:
+        """
+        Detect fantasy/non-contemporary world settings.
+
+        Rule: if Contemporary Japan is detected, this returns False.
+        """
+        if self._is_contemporary_japan_setting(metadata_en):
+            return False
+
+        text_chunks: List[str] = []
+        metadata = self.manifest.get("metadata", {})
+        if isinstance(metadata, dict):
+            for key in ("title", "series", "description", "genre", "publisher"):
+                value = metadata.get(key)
+                if isinstance(value, str) and value.strip():
+                    text_chunks.append(value.strip())
+
+        for key in ("world_setting", "localization_notes", "translation_rules", "geography", "scene_contexts"):
+            value = metadata_en.get(key)
+            if value:
+                text_chunks.append(json.dumps(value, ensure_ascii=False))
+
+        haystack = " ".join(text_chunks).lower()
+        if not haystack:
+            return False
+
+        fantasy_or_noncontemporary_signals = (
+            "fantasy",
+            "isekai",
+            "alternate world",
+            "parallel world",
+            "otherworld",
+            "medieval",
+            "feudal",
+            "historical",
+            "pre-modern",
+            "kingdom",
+            "empire",
+            "royal court",
+            "magic academy",
+            "sword",
+            "sorcery",
+            "dungeon",
+            "noble academy",
+            "non-contemporary",
+        )
+        return any(token in haystack for token in fantasy_or_noncontemporary_signals)
+
+    def _is_noble_setting(self, metadata_en: Dict[str, Any]) -> bool:
+        """Detect aristocratic/noble settings requiring title transcreation."""
+        text_chunks: List[str] = []
+        metadata = self.manifest.get("metadata", {})
+        if isinstance(metadata, dict):
+            for key in ("title", "series", "description", "genre"):
+                value = metadata.get(key)
+                if isinstance(value, str) and value.strip():
+                    text_chunks.append(value.strip())
+
+        for key in ("world_setting", "localization_notes", "translation_rules", "organizations", "geography", "scene_contexts"):
+            value = metadata_en.get(key)
+            if value:
+                text_chunks.append(json.dumps(value, ensure_ascii=False))
+
+        haystack = " ".join(text_chunks).lower()
+        if not haystack:
+            return False
+
+        noble_signals = (
+            "noble",
+            "aristocrat",
+            "aristocracy",
+            "duke",
+            "duchess",
+            "count",
+            "countess",
+            "marquis",
+            "marchioness",
+            "earl",
+            "baron",
+            "viscount",
+            "viscountess",
+            "lord",
+            "lady",
+            "your grace",
+            "your highness",
+            "royal",
+            "princess",
+            "prince",
+            "king",
+            "queen",
+            "court",
+            "knight",
+        )
+        return any(token in haystack for token in noble_signals)
+
+    def _contemporary_japan_honorific_policies(self) -> List[Dict[str, Any]]:
+        """Canonical honorific retention policy for modern Japan settings."""
+        return [
+            {
+                "pattern": "-san",
+                "strategy": "retain_in_english",
+                "rule": "Retain as suffix in English (e.g., Saki-san); do not omit or translate.",
+            },
+            {
+                "pattern": "-chan",
+                "strategy": "retain_in_english",
+                "rule": "Retain as suffix in English (e.g., Emma-chan) to preserve intimacy nuance.",
+            },
+            {
+                "pattern": "-kun",
+                "strategy": "retain_in_english",
+                "rule": "Retain as suffix in English (e.g., Yuuta-kun); do not flatten to first-name only.",
+            },
+            {
+                "pattern": "-sama",
+                "strategy": "retain_in_english",
+                "rule": "Retain as suffix in English for elevated politeness/register.",
+            },
+            {
+                "pattern": "-senpai",
+                "strategy": "retain_in_english",
+                "rule": "Retain senpai as title/suffix in English; do not translate to 'senior'.",
+            },
+            {
+                "pattern": "-sensei",
+                "strategy": "retain_in_english",
+                "rule": "Retain sensei as title/suffix in English; do not translate to 'teacher/professor'.",
+            },
+            {
+                "pattern": "先輩",
+                "strategy": "retain_in_english",
+                "rule": "Render as senpai in English output.",
+            },
+            {
+                "pattern": "先生",
+                "strategy": "retain_in_english",
+                "rule": "Render as sensei in English output.",
+            },
+        ]
+
+    def _fantasy_noncontemporary_honorific_policies(self) -> List[Dict[str, Any]]:
+        """Default policy for fantasy/non-contemporary settings."""
+        return [
+            {
+                "pattern": "name_order",
+                "strategy": "given_name_first_convert_to_english_equivalent",
+                "rule": "Use given-name-first order for character naming and prefer natural English equivalents.",
+            },
+            {
+                "pattern": "-san",
+                "strategy": "transcreate_to_english_equivalent",
+                "rule": "Do not retain '-san'; convert to context-appropriate English address (Mr./Ms./title).",
+            },
+            {
+                "pattern": "-chan",
+                "strategy": "transcreate_to_english_equivalent",
+                "rule": "Do not retain '-chan'; express closeness with tone, nickname, or Miss/young-lady styling by context.",
+            },
+            {
+                "pattern": "-kun",
+                "strategy": "transcreate_to_english_equivalent",
+                "rule": "Do not retain '-kun'; convert to natural English peer/junior address.",
+            },
+            {
+                "pattern": "-senpai",
+                "strategy": "transcreate_to_english_equivalent",
+                "rule": "Do not retain '-senpai'; convert to senior role/title in English context.",
+            },
+            {
+                "pattern": "-sensei",
+                "strategy": "transcreate_to_english_equivalent",
+                "rule": "Do not retain '-sensei'; convert to Master/Instructor/Teacher based on world context.",
+            },
+        ]
+
+    def _noble_honorific_policies(self) -> List[Dict[str, Any]]:
+        """Policy for noble/aristocratic settings: transcreate JP honorifics to noble English titles."""
+        return [
+            {
+                "pattern": "name_order",
+                "strategy": "given_name_first_convert_to_english_equivalent",
+                "rule": "Use given-name-first order and naturalized English naming in noble dialogue/narration.",
+            },
+            {
+                "pattern": "-sama/様",
+                "strategy": "transcreate_to_noble_english_equivalent",
+                "rule": "Transcreate to noble address (e.g., My Lord, My Lady, Your Grace/Highness by rank).",
+            },
+            {
+                "pattern": "-san",
+                "strategy": "transcreate_to_noble_english_equivalent",
+                "rule": "Transcreate to Lord/Lady or formal title based on status and scene register.",
+            },
+            {
+                "pattern": "-kun",
+                "strategy": "transcreate_to_noble_english_equivalent",
+                "rule": "Transcreate to Young Lord/Young Master or equivalent noble junior address.",
+            },
+            {
+                "pattern": "-chan",
+                "strategy": "transcreate_to_noble_english_equivalent",
+                "rule": "Transcreate to Lady/Miss or affectionate noble equivalent (avoid JP suffix retention).",
+            },
+            {
+                "pattern": "-senpai/先輩",
+                "strategy": "transcreate_to_noble_english_equivalent",
+                "rule": "Transcreate to senior rank-role (e.g., Senior Knight, elder court member) by context.",
+            },
+            {
+                "pattern": "-sensei/先生",
+                "strategy": "transcreate_to_noble_english_equivalent",
+                "rule": "Transcreate to Master, Tutor, or Court Instructor based on role.",
+            },
+        ]
+
     def _build_honorific_policies(self, metadata_en: Dict[str, Any]) -> List[Dict[str, Any]]:
+        if self._is_contemporary_japan_setting(metadata_en):
+            return self._contemporary_japan_honorific_policies()
+        if self._is_fantasy_or_non_contemporary_setting(metadata_en):
+            if self._is_noble_setting(metadata_en):
+                return self._noble_honorific_policies()
+            return self._fantasy_noncontemporary_honorific_policies()
+
         policies: List[Dict[str, Any]] = [
             {
                 "pattern": "-san",
@@ -1098,6 +1370,28 @@ class RichMetadataCacheUpdater:
         honorifics = payload.get("honorific_policies")
         if not isinstance(honorifics, list) or not honorifics:
             honorifics = self._build_honorific_policies(metadata_en)
+        if self._is_contemporary_japan_setting(metadata_en):
+            honorifics = self._contemporary_japan_honorific_policies()
+            consistency_rules.append(
+                "Contemporary Japan setting detected: retain all honorifics in English "
+                "(-san, -chan, -kun, -sama, senpai, sensei)."
+            )
+        elif self._is_fantasy_or_non_contemporary_setting(metadata_en):
+            if self._is_noble_setting(metadata_en):
+                honorifics = self._noble_honorific_policies()
+                consistency_rules.append(
+                    "Noble fantasy setting detected: transcreate JP honorifics into noble English equivalents "
+                    "(My Lord/My Lady/Your Grace/Your Highness/Master/Tutor by rank/context)."
+                )
+            else:
+                honorifics = self._fantasy_noncontemporary_honorific_policies()
+                consistency_rules.append(
+                    "Fantasy/non-contemporary setting detected: use given-name-first order and "
+                    "convert JP honorifics to natural English equivalents."
+                )
+            consistency_rules.append(
+                "Name-order policy: given-name-first with English-equivalent naming in non-contemporary settings."
+            )
         payload["honorific_policies"] = honorifics
 
         location_terms = payload.get("location_terms")
@@ -1485,6 +1779,116 @@ class RichMetadataCacheUpdater:
                     return text[start : idx + 1]
         return None
 
+    def _normalize_json_candidate(self, text: str) -> str:
+        """Apply lightweight cleanup to likely-JSON text."""
+        cleaned = text.replace("\ufeff", "").replace("“", '"').replace("”", '"')
+        cleaned = re.sub(r",\s*([}\]])", r"\1", cleaned)  # trailing commas
+        cleaned = re.sub(r"//.*", "", cleaned)  # single-line comments
+        cleaned = re.sub(r"/\*[\s\S]*?\*/", "", cleaned)  # block comments
+        # Repair malformed keys like: temporal_markers": [...]
+        cleaned = re.sub(r'(?m)^(\s*)([A-Za-z_][A-Za-z0-9_]*)(\"?)\s*:', r'\1"\2":', cleaned)
+        # Remove non-JSON control chars that models occasionally emit in long outputs.
+        cleaned = re.sub(r"[\x00-\x08\x0B\x0C\x0E-\x1F]", " ", cleaned)
+        return cleaned.strip()
+
+    def _repair_missing_comma_with_decoder_feedback(
+        self,
+        text: str,
+        *,
+        max_attempts: int = 10,
+    ) -> Optional[str]:
+        """
+        Repair JSON that is syntactically valid except for missing commas.
+
+        Uses JSON decoder feedback to insert a comma at the reported error offset
+        when the decoder specifically asks for a comma delimiter.
+        """
+        candidate = text
+        for _ in range(max_attempts):
+            try:
+                json.loads(candidate)
+                return candidate
+            except json.JSONDecodeError as e:
+                if "Expecting ',' delimiter" not in str(e.msg):
+                    return None
+
+                insert_at = int(e.pos)
+                if insert_at <= 0 or insert_at > len(candidate):
+                    return None
+
+                # Insert before the current token, skipping leading whitespace.
+                while insert_at > 0 and candidate[insert_at - 1].isspace():
+                    insert_at -= 1
+
+                prev = insert_at - 1
+                while prev >= 0 and candidate[prev].isspace():
+                    prev -= 1
+                if prev < 0 or candidate[prev] in "{[,:":  # no valid value before insertion
+                    return None
+                if candidate[prev] == ",":
+                    return None
+
+                candidate = candidate[:insert_at] + "," + candidate[insert_at:]
+                candidate = re.sub(r",\s*,+", ",", candidate)
+                candidate = re.sub(r",\s*([}\]])", r"\1", candidate)
+                continue
+            except Exception:
+                return None
+        return None
+
+    def _repair_truncated_json_candidate(self, text: str) -> Optional[str]:
+        """
+        Attempt recovery for truncated model JSON.
+
+        Strategy:
+        1. Close an unterminated string if needed.
+        2. Replace a dangling key/value delimiter with null.
+        3. Close remaining unbalanced objects/arrays.
+        """
+        candidate = text.strip()
+        if not candidate or not candidate.startswith("{"):
+            return None
+
+        stack: List[str] = []
+        in_string = False
+        escaped = False
+        for ch in candidate:
+            if in_string:
+                if escaped:
+                    escaped = False
+                elif ch == "\\":
+                    escaped = True
+                elif ch == '"':
+                    in_string = False
+                continue
+
+            if ch == '"':
+                in_string = True
+            elif ch in "{[":
+                stack.append(ch)
+            elif ch in "}]":
+                if stack and ((stack[-1] == "{" and ch == "}") or (stack[-1] == "[" and ch == "]")):
+                    stack.pop()
+
+        repaired = candidate
+        if in_string:
+            repaired += '"'
+
+        # If output is cut at a dangling key/value marker, coerce to null.
+        repaired = re.sub(r'("([^"\\]|\\.)*"\s*:\s*)$', r"\1null", repaired)
+        repaired = re.sub(r",\s*$", "", repaired)
+
+        while stack:
+            opener = stack.pop()
+            repaired += "}" if opener == "{" else "]"
+
+        repaired = re.sub(r",\s*([}\]])", r"\1", repaired)
+        try:
+            json.loads(repaired)
+            return repaired
+        except Exception:
+            return None
+
     def _parse_json_response(self, content: str) -> Dict[str, Any]:
         text = content.strip()
         if text.startswith("```json"):
@@ -1507,6 +1911,14 @@ class RichMetadataCacheUpdater:
             if regex_candidate not in candidates:
                 candidates.append(regex_candidate)
 
+        # Recovery: model may restart JSON mid-response. Prefer any block that
+        # looks like a top-level schema root with "volume_id".
+        for marker in re.finditer(r'\{\s*"volume_id"\s*:', text):
+            sub = text[marker.start():]
+            rooted = self._extract_balanced_json_object(sub)
+            if rooted and rooted not in candidates:
+                candidates.append(rooted)
+
         last_error: Optional[Exception] = None
         for candidate in candidates:
             try:
@@ -1516,14 +1928,34 @@ class RichMetadataCacheUpdater:
 
         # Repair pass for common model mistakes.
         for candidate in candidates:
-            cleaned = candidate.replace("\ufeff", "").replace("“", '"').replace("”", '"')
-            cleaned = re.sub(r",\s*([}\]])", r"\1", cleaned)  # trailing commas
-            cleaned = re.sub(r"//.*", "", cleaned)  # single-line comments
-            cleaned = re.sub(r"/\*[\s\S]*?\*/", "", cleaned)  # block comments
+            cleaned = self._normalize_json_candidate(candidate)
             try:
                 return json.loads(cleaned)
             except Exception as e:
                 last_error = e
+
+            balanced_cleaned = self._extract_balanced_json_object(cleaned)
+            if balanced_cleaned:
+                try:
+                    return json.loads(balanced_cleaned)
+                except Exception as e:
+                    last_error = e
+
+            repaired_missing_commas = self._repair_missing_comma_with_decoder_feedback(cleaned)
+            if repaired_missing_commas:
+                try:
+                    return json.loads(repaired_missing_commas)
+                except Exception as e:
+                    last_error = e
+
+            repaired_truncated = self._repair_truncated_json_candidate(
+                repaired_missing_commas or cleaned
+            )
+            if repaired_truncated:
+                try:
+                    return json.loads(repaired_truncated)
+                except Exception as e:
+                    last_error = e
 
         if last_error:
             raise last_error
@@ -2055,6 +2487,16 @@ class RichMetadataCacheUpdater:
                     "You are Processor 2: Cultural Context Processor.\n"
                     "Return JSON only.\n"
                     "Task: Pre-resolve cultural terms, honorific handling, idioms, and location-specific context.\n"
+                    "Setting policy matrix (mandatory):\n"
+                    "A) Contemporary Japan setting:\n"
+                    "   - retain all Japanese honorifics in English output.\n"
+                    "   - retain suffix/title forms: -san, -chan, -kun, -sama, -senpai, -sensei.\n"
+                    "   - do not translate senpai/sensei to senior/teacher and do not omit these honorifics.\n"
+                    "B) Fantasy or non-contemporary world setting:\n"
+                    "   - use given-name-first order and convert names to natural English equivalents.\n"
+                    "   - do not retain JP honorific suffixes verbatim by default; transcreate naturally.\n"
+                    "C) Noble/aristocratic setting (takes priority inside B):\n"
+                    "   - transcreate all JP honorifics to noble English equivalents (My Lord/My Lady/Your Grace/Your Highness, etc.).\n"
                     "Do not force transcreation; preserve clarity and narrative flow.\n"
                     "Output schema:\n"
                     "{\n"
@@ -2063,7 +2505,7 @@ class RichMetadataCacheUpdater:
                     '  "processor_version": "1.0",\n'
                     '  "terms": [{"term_jp":"string","preferred_en":"string","notes":"string","confidence":0.0}],\n'
                     '  "idioms": [{"japanese":"string","meaning":"string","preferred_rendering":"string","confidence":0.0}],\n'
-                    '  "honorific_policies": [{"pattern":"-san","strategy":"retain_or_adapt","rule":"string"}],\n'
+                    '  "honorific_policies": [{"pattern":"-san","strategy":"retain_in_english|retain_or_adapt|transcreate_to_english_equivalent|transcreate_to_noble_english_equivalent|given_name_first_convert_to_english_equivalent","rule":"string"}],\n'
                     '  "location_terms": [{"jp":"string","en":"string","notes":"string"}],\n'
                     '  "summary": {"total_terms":0,"total_idioms":0}\n'
                     "}\n"
@@ -2071,6 +2513,10 @@ class RichMetadataCacheUpdater:
                 "prompt": (
                     "Generate cultural context glossary for Phase 1.55.\n"
                     "Capture terms that Stage 2 repeatedly needs.\n"
+                    "Apply the setting policy matrix strictly:\n"
+                    "- Contemporary Japan => retain JP honorifics.\n"
+                    "- Fantasy/non-contemporary => given-name-first + English-equivalent naming.\n"
+                    "- Noble setting => transcreate all JP honorifics to noble English titles.\n"
                     f"INPUT:\n{json.dumps(context_payload, ensure_ascii=False, indent=2)}"
                 ),
                 "fallback_builder": self._fallback_cultural_glossary,

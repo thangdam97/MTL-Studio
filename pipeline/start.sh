@@ -105,18 +105,20 @@ while true; do
     echo ""
     echo -e "  ${GREEN}1${NC}  Start Full Pipeline"
     echo -e "  ${GREEN}2${NC}  Phase 1: Extract EPUB"
-    echo -e "  ${GREEN}3${NC}  Phase 1.6: Multimodal Processor"
-    echo -e "  ${GREEN}4${NC}  Phase 2: Translate Chapters"
-    echo -e "  ${GREEN}5${NC}  Phase 4: Build EPUB"
-    echo -e "  ${GREEN}6${NC}  Check Volume Status"
-    echo -e "  ${GREEN}7${NC}  List All Volumes"
-    echo -e "  ${GREEN}8${NC}  Configuration"
-    echo -e "  ${GREEN}9${NC}  Exit"
+    echo -e "  ${GREEN}3${NC}  Phase 1.55: Rich Metadata Cache"
+    echo -e "  ${GREEN}4${NC}  Phase 1.6: Multimodal Processor"
+    echo -e "  ${GREEN}5${NC}  Phase 1.7: Scene Planner"
+    echo -e "  ${GREEN}6${NC}  Phase 2: Translate Chapters"
+    echo -e "  ${GREEN}7${NC}  Phase 4: Build EPUB"
+    echo -e "  ${GREEN}8${NC}  Check Volume Status"
+    echo -e "  ${GREEN}9${NC}  List All Volumes"
+    echo -e "  ${GREEN}10${NC} Configuration"
+    echo -e "  ${GREEN}11${NC} Exit"
     echo ""
     # Clear stdin buffer completely before reading
     while IFS= read -r -t 0 line; do :; done 2>/dev/null || true
     # Read choice
-    read -r -p "Select option (1-9): " choice
+    read -r -p "Select option (1-11): " choice
     # Remove any leading/trailing whitespace and ensure valid input
     choice=$(echo "$choice" | xargs)
     echo ""
@@ -224,6 +226,36 @@ while true; do
             read -r -p "Press Enter to continue..."
             ;;
         3)
+            echo -e "${CYAN}Phase 1.55: Rich Metadata Cache${NC}"
+            echo -e "${YELLOW}Builds full-LN cache + context co-processors before translation.${NC}"
+            echo ""
+
+            # Auto-detect latest volume from WORK directory
+            latest_vol=$(ls -1t "$SCRIPT_DIR/WORK" | grep -E ".*_[0-9]{8}_[a-z0-9]{4}$" | head -1)
+
+            if [ -z "$latest_vol" ]; then
+                echo -e "${RED}✗ No volumes found in WORK directory${NC}"
+                read -r -p "Enter volume ID manually: " vol_id
+                if [ -z "$vol_id" ]; then
+                    echo -e "${RED}✗ Volume ID required${NC}"
+                    read -r -p "Press Enter to continue..."
+                    continue
+                fi
+            else
+                echo -e "${GREEN}✓ Auto-detected latest volume:${NC} $latest_vol"
+                read -r -p "Use this volume? (Y/n): " confirm
+                if [[ "$confirm" =~ ^[Nn] ]]; then
+                    read -r -p "Enter volume ID: " vol_id
+                else
+                    vol_id="$latest_vol"
+                fi
+            fi
+
+            $PYTHON_CMD "$SCRIPT_DIR/mtl.py" phase1.55 "$vol_id"
+            echo ""
+            read -r -p "Press Enter to continue..."
+            ;;
+        4)
             echo -e "${CYAN}Phase 1.6: Multimodal Processor (Illustration Analysis)${NC}"
             echo -e "${YELLOW}Pre-bakes visual analysis for illustrations using Gemini 3 Pro Vision.${NC}"
             echo -e "${YELLOW}Run this AFTER Phase 1 and BEFORE Phase 2 for visual-enhanced translation.${NC}"
@@ -254,7 +286,37 @@ while true; do
             echo ""
             read -r -p "Press Enter to continue..."
             ;;
-        4)
+        5)
+            echo -e "${CYAN}Phase 1.7: Scene Planner${NC}"
+            echo -e "${YELLOW}Builds narrative beat + rhythm scaffold before translation.${NC}"
+            echo ""
+
+            # Auto-detect latest volume from WORK directory
+            latest_vol=$(ls -1t "$SCRIPT_DIR/WORK" | grep -E ".*_[0-9]{8}_[a-z0-9]{4}$" | head -1)
+
+            if [ -z "$latest_vol" ]; then
+                echo -e "${RED}✗ No volumes found in WORK directory${NC}"
+                read -r -p "Enter volume ID manually: " vol_id
+                if [ -z "$vol_id" ]; then
+                    echo -e "${RED}✗ Volume ID required${NC}"
+                    read -r -p "Press Enter to continue..."
+                    continue
+                fi
+            else
+                echo -e "${GREEN}✓ Auto-detected latest volume:${NC} $latest_vol"
+                read -r -p "Use this volume? (Y/n): " confirm
+                if [[ "$confirm" =~ ^[Nn] ]]; then
+                    read -r -p "Enter volume ID: " vol_id
+                else
+                    vol_id="$latest_vol"
+                fi
+            fi
+
+            $PYTHON_CMD "$SCRIPT_DIR/mtl.py" phase1.7 "$vol_id"
+            echo ""
+            read -r -p "Press Enter to continue..."
+            ;;
+        6)
             echo -e "${CYAN}Phase 2: Translate Chapters${NC}"
             
             # Auto-detect latest volume from WORK directory
@@ -282,7 +344,7 @@ while true; do
             echo ""
             read -r -p "Press Enter to continue..."
             ;;
-        5)
+        7)
             echo -e "${CYAN}Phase 4: Build EPUB${NC}"
             
             # Auto-detect latest volume from WORK directory
@@ -310,20 +372,20 @@ while true; do
             echo ""
             read -r -p "Press Enter to continue..."
             ;;
-        6)
+        8)
             echo -e "${CYAN}Check Volume Status${NC}"
             read -r -p "Enter volume ID: " vol_id
             $PYTHON_CMD "$SCRIPT_DIR/mtl.py" status "$vol_id"
             echo ""
             read -r -p "Press Enter to continue..."
             ;;
-        7)
+        9)
             echo -e "${CYAN}List All Volumes${NC}"
             $PYTHON_CMD "$SCRIPT_DIR/mtl.py" list
             echo ""
             read -r -p "Press Enter to continue..."
             ;;
-        8)
+        10)
             echo -e "${CYAN}${BOLD}Configuration Menu${NC}"
             echo ""
             echo -e "  ${GREEN}a${NC}  Show Current Config"
@@ -371,15 +433,14 @@ while true; do
                     ;;
             esac
             ;;
-        9)
+        11)
             echo -e "${CYAN}Goodbye!${NC}"
             exit 0
             ;;
         *)
             if [ -n "$choice" ]; then
-                echo -e "${RED}✗ Invalid option: $choice. Please select 1-9.${NC}"
+                echo -e "${RED}✗ Invalid option: $choice. Please select 1-11.${NC}"
             fi
             ;;
     esac
 done
-

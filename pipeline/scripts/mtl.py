@@ -9,6 +9,7 @@ Phases:
   1.55 Rich Cache   - Full-LN JP cache + rich metadata enrichment (Gemini 2.5 Flash)
   1.6 Multimodal    - Pre-bake illustration analysis (Gemini 3 Pro Vision)
   1.7 Scene Planner - Narrative beat + rhythm scaffold (v1.6 Stage 1)
+  1.7 Co-Processor - Standalone context offload pack refresh (cache-only)
   2. Translator     - Gemini-powered translation with RAG + visual context
   3. Critics        - Manual/Agentic quality review (Gemini CLI + IDE Agent)
   4. Builder        - Package final translated EPUB
@@ -24,6 +25,7 @@ Usage:
   mtl.py phase1.6 [volume_id]            # Run Phase 1.6 (multimodal pre-bake)
   mtl.py phase1.6 [volume_id] --full-ln-cache off  # Skip full-LN cache prep
   mtl.py phase1.7 [volume_id]            # Run Phase 1.7 (scene planning scaffold)
+  mtl.py phase1.7-cp [volume_id]         # Run Phase 1.7 Co-Processor (standalone context pack)
   mtl.py phase2 [volume_id]              # Run Phase 2 (interactive if no ID)
   mtl.py phase2 [volume_id] --enable-multimodal  # Phase 2 with visual context
   mtl.py phase2 [volume_id] --full-ln-cache off  # Run without full-LN cache prep
@@ -1669,6 +1671,40 @@ class PipelineController:
         if self._run_command(cmd, "Phase 1.7 (Scene Planner)"):
             logger.info("✓ Phase 1.7 completed successfully")
             self._log_phase1_7_confirmation(volume_id)
+            return True
+        return False
+
+    def run_phase1_7_coprocessor(self, volume_id: str) -> bool:
+        """
+        Run Phase 1.7 Co-Processor (standalone context-offload pack refresh).
+
+        This is a standalone menu command that executes the four co-processors
+        via Phase 1.55 cache-only mode:
+          - character_registry.json
+          - cultural_glossary.json
+          - timeline_map.json
+          - idiom_transcreation_cache.json
+        """
+        self._ui_header(
+            "Phase 1.7 - Co-Processor Pack",
+            "Standalone context offload refresh (cache-only, no metadata overwrite)",
+        )
+
+        manifest = self.load_manifest(volume_id)
+        if not manifest:
+            logger.error(f"No manifest.json found for volume: {volume_id}")
+            logger.error("  Please run Phase 1 and Phase 1.5 first")
+            return False
+
+        cmd = [
+            sys.executable, "-m", "pipeline.metadata_processor.rich_metadata_cache",
+            "--volume", volume_id,
+            "--cache-only",
+        ]
+
+        if self._run_command(cmd, "Phase 1.7 Co-Processor (Cache-Only)"):
+            logger.info("✓ Phase 1.7 Co-Processor completed successfully")
+            self._log_phase1_55_confirmation(volume_id)
             return True
         return False
     
@@ -3496,7 +3532,7 @@ def main():
     if not args.command:
         logger.info("MTL Studio v5.2 CLI")
         logger.info(
-            "Use one of: run | phase1 | phase1.5 | phase1.55 | phase1.6 | phase1.7 | phase2 | phase4 | "
+            "Use one of: run | phase1 | phase1.5 | phase1.55 | phase1.6 | phase1.7 | phase1.7-cp | phase2 | phase4 | "
             "list | status | metadata | schema | bible"
         )
         parser.print_help()
@@ -3553,6 +3589,10 @@ def main():
             temperature=getattr(args, 'temperature', 0.3),
             max_output_tokens=getattr(args, 'max_output_tokens', 65535),
         )
+        sys.exit(0 if success else 1)
+
+    elif args.command == 'phase1.7-cp':
+        success = controller.run_phase1_7_coprocessor(args.volume_id)
         sys.exit(0 if success else 1)
     
     elif args.command == 'multimodal':

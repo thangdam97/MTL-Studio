@@ -352,11 +352,13 @@ def check_illustration_integrity(volume_path: Path) -> IntegrityReport:
     kuchie_dir = assets_dir / "kuchie"
     if kuchie_dir and kuchie_dir.exists():
         for kid in kuchie:
-            # Kuchie don't need JP tags — just verify the file is readable
-            kuchie_path = kuchie_dir / f"{kid}.jpg"
-            if not kuchie_path.exists():
-                kuchie_path = kuchie_dir / f"{kid}.png"
-            if not kuchie_path.exists():
+            # Kuchie don't need JP tags — verify known image extensions.
+            # NOTE: keep .jpeg support in sync with _inventory_assets().
+            kuchie_exists = any(
+                (kuchie_dir / f"{kid}{ext}").exists()
+                for ext in (".jpg", ".jpeg", ".png")
+            )
+            if not kuchie_exists:
                 report.add_error(f"Kuchie file missing: {kid} not found in {kuchie_dir}")
 
     # ── Check D: Cover art exists ─────────────────────────────────────────

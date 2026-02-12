@@ -1,0 +1,525 @@
+{
+  "bible_version": "1.0",
+  "series_id": "series_5283511145",
+  "series_title": {
+    "ja": "高校時代に傲慢だった女王様との同棲生活は意外と居心地が悪くない",
+    "en": "高校時代に傲慢だった女王様との同棲生活は意外と居心地が悪くない",
+    "romaji": ""
+  },
+  "created_at": "2026-02-11T09:45:26.759833+00:00",
+  "last_updated": "2026-02-11T09:47:04.573963+00:00",
+  "volumes_registered": [
+    {
+      "volume_id": "0a23",
+      "title": "高校時代に傲慢だった女王様との同棲生活は意外と居心地が悪くない 4",
+      "index": 4
+    }
+  ],
+  "world_setting": {
+    "type": "modern_japan",
+    "label": "Contemporary Japan, focusing on university and high school life, with elements of romance and personal growth.",
+    "honorifics": {
+      "mode": "localize",
+      "policy": "Japanese honorifics (e.g., -san, -kun, -chan, -senpai, -sensei) should be localized to convey the appropriate level of familiarity, respect, or social distance in English. Direct translations should be avoided unless culturally significant and explained. For example, 'senpai' can be retained if the context of junior/senior relationship is crucial, or translated to 'senior'/'upperclassman' where appropriate. 'Sensei' can be retained for teachers. Casual suffixes like -chan, -kun should be reflected in tone and word choice rather than direct translation, or omitted if the relationship is clear."
+    },
+    "name_order": {
+      "default": "family_given",
+      "policy": "For Japanese characters, the default name order is Family Name followed by Given Name, consistent with Japanese cultural norms. This order should be maintained unless an official English localization dictates otherwise for specific characters. Exceptions for Western characters will follow Given Name, Family Name order. Nicknames and familiar address should be used as per character relationships."
+    },
+    "exceptions": []
+  },
+  "characters": {
+    "林恵": {
+      "canonical_en": "Hayashi Megumi",
+      "source": "manifest_profile_seed",
+      "short_name": "Megu",
+      "category": "Self (Protagonist)",
+      "affiliation": "Japanese",
+      "keigo": {
+        "narration": "casual",
+        "internal_thoughts": "casual",
+        "speaking_to": {
+          "Yamamoto": "casual (often teasing or complaining, but with underlying affection)",
+          "Akari Kasahara": "casual (best friend)",
+          "Matsuo": "assertive, sometimes confrontational (romantic rival)",
+          "Mother": "casual, sometimes argumentative"
+        },
+        "emotional_shifts": {
+          "embarrassment": "becomes more formal or uses indirect speech",
+          "anger": "becomes more direct and sharp"
+        },
+        "notes": "Tends to revert to a more 'Queen-like' assertive tone when flustered or challenged, but quickly becomes shy or defensive when her true feelings are exposed. Often uses indirect or softer language when expressing genuine gratitude or affection."
+      },
+      "visual_identity_non_color": {
+        "identity_summary": "Long, flowing hair (sometimes styled by Yamamoto); often seen in comfortable, casual clothing; a confident, sometimes haughty expression that can quickly shift to flustered or embarrassed; prone to dramatic gestures when exasperated or asserting herself; carries a 'Queen-like' aura despite her vulnerabilities."
+      },
+      "notes": "Formerly arrogant 'Queen' in high school, now more vulnerable, easily embarrassed, directionally challenged, strong-willed, prone to emotional fluctuations, secretly deeply romantic, caring towards those she trusts.",
+      "volume_events": {
+        "0a23": {
+          "relationship_to_protagonist": "Self (Protagonist)",
+          "relationship_to_others": "Cohabitant with Yamamoto, best friend with Akari Kasahara, former high school classmate with Yamamoto, Maeda, and Yoshimi, object of Matsuo's rivalry.",
+          "keigo_switch": {
+            "narration": "casual",
+            "internal_thoughts": "casual",
+            "speaking_to": {
+              "Yamamoto": "casual (often teasing or complaining, but with underlying affection)",
+              "Akari Kasahara": "casual (best friend)",
+              "Matsuo": "assertive, sometimes confrontational (romantic rival)",
+              "Mother": "casual, sometimes argumentative",
+              "Kakogawa-sensei": "polite but friendly, reveals vulnerability and past trauma.",
+              "Maeda": "assertive, disgusted by his irresponsibility."
+            },
+            "emotional_shifts": {
+              "embarrassment": "becomes more formal or uses indirect speech",
+              "anger": "becomes more direct and sharp",
+              "gratitude/affection": "uses softer, more indirect language, or expresses it through actions rather than words."
+            },
+            "notes": "Tends to revert to a more 'Queen-like' assertive tone when flustered or challenged, but quickly becomes shy or defensive when her true feelings are exposed. Often uses indirect or softer language when expressing genuine gratitude or affection."
+          },
+          "character_arc": "Transitioning from an arrogant 'Queen' persona to embracing vulnerability and romantic feelings for Yamamoto, while also dealing with past trauma (DV, father's death). Learning to rely on others and express her true self."
+        }
+      }
+    },
+    "山本": {
+      "canonical_en": "Yamamoto",
+      "source": "manifest_profile_seed",
+      "category": "Cohabitant with Hayashi, developing romantic interest, former high school classmate (initially disliked by Hayashi).",
+      "affiliation": "Japanese",
+      "visual_identity_non_color": {
+        "identity_summary": "Neat, practical hairstyle; often depicted in simple, functional clothing suitable for a university student or part-time worker; a calm, often slightly exasperated expression; stands with a relaxed but capable posture; minimal accessories, emphasizing practicality."
+      },
+      "notes": "Jaded, pragmatic, highly efficient, observant, kind and protective beneath a gruff and logical exterior, somewhat dense or oblivious to subtle romantic advances, meticulous about cleaning, easily flustered by Hayashi's directness.",
+      "keigo": {
+        "narration": "casual",
+        "internal_thoughts": "casual",
+        "speaking_to": {
+          "Hayashi Megumi": "casual (often teasing, sometimes exasperated, but caring)",
+          "Akari Kasahara": "casual (former girlfriend, friend)",
+          "Matsuo": "polite but firm (senpai to kouhai)",
+          "Hayashi's Mother": "formal/polite"
+        },
+        "emotional_shifts": {
+          "concern": "becomes more direct and serious",
+          "embarrassment": "tries to change the subject or deflect"
+        },
+        "notes": "Maintains a generally casual tone but can switch to polite/formal when addressing elders or in formal situations. Tries to appear detached but often shows concern through actions rather than words."
+      },
+      "volume_events": {
+        "0a23": {
+          "relationship_to_protagonist": "Cohabitant with Hayashi, developing romantic interest, former high school classmate (initially disliked by Hayashi).",
+          "relationship_to_others": "Cohabitant with Hayashi, former boyfriend of Akari Kasahara, senpai to Matsuo, part-time convenience store worker.",
+          "keigo_switch": {
+            "narration": "casual",
+            "internal_thoughts": "casual",
+            "speaking_to": {
+              "Hayashi Megumi": "casual (often teasing, sometimes exasperated, but caring)",
+              "Akari Kasahara": "casual (former girlfriend, friend)",
+              "Matsuo": "polite but firm (senpai to kouhai)",
+              "Hayashi's Mother": "formal/polite",
+              "Kakogawa-sensei": "polite but friendly, shows respect and appreciation for her help, can be direct when discussing plans.",
+              "Maeda": "casual, somewhat dismissive due to Maeda's irresponsibility.",
+              "Principal": "formal and respectful, but direct and persuasive when making requests."
+            },
+            "emotional_shifts": {
+              "concern": "becomes more direct and serious",
+              "embarrassment": "tries to change the subject or deflect",
+              "frustration": "sighs or makes exasperated comments, especially with Hayashi's directional challenges.",
+              "sentimentality": "rarely shown, but can lead to a soft smile or a desire to revisit past experiences."
+            },
+            "notes": "Maintains a generally casual tone but can switch to polite/formal when addressing elders or in formal situations. Tries to appear detached but often shows concern through actions rather than words."
+          },
+          "character_arc": "Initially jaded and pragmatic, he gradually opens up emotionally through his cohabitation with Hayashi. Becomes more aware of his own feelings and the impact he has on others."
+        }
+      }
+    },
+    "笠原灯里": {
+      "canonical_en": "Kasahara Akari",
+      "source": "manifest_profile_seed",
+      "short_name": "Akari (灯里)",
+      "category": "Hayashi's best friend, Yamamoto's former girlfriend.",
+      "affiliation": "Japanese",
+      "keigo": {
+        "narration": "N/A",
+        "internal_thoughts": "N/A",
+        "speaking_to": {
+          "Hayashi Megumi": "casual (best friend)",
+          "Yamamoto": "casual (former boyfriend, friend)",
+          "Others": "friendly casual"
+        },
+        "emotional_shifts": {
+          "support": "becomes more encouraging and gentle",
+          "teasing": "playful tone"
+        },
+        "notes": "Generally maintains a cheerful and supportive tone. Very good at reading the room and her friends' emotions."
+      },
+      "visual_identity_non_color": {
+        "identity_summary": "Bright, expressive face with a frequent smile; often seen in fashionable, approachable attire; her posture is open and inviting; uses animated hand gestures when speaking; her overall presence is one of warmth and friendliness."
+      },
+      "notes": "Cheerful, supportive, perceptive, kind, a good mediator, sometimes a bit teasing. She is very understanding and caring towards her friends.",
+      "volume_events": {
+        "0a23": {
+          "relationship_to_protagonist": "Hayashi's best friend, Yamamoto's former girlfriend.",
+          "relationship_to_others": "Best friend to Hayashi, former girlfriend to Yamamoto, former cultural festival committee member.",
+          "keigo_switch": {
+            "narration": "N/A",
+            "internal_thoughts": "N/A",
+            "speaking_to": {
+              "Hayashi Megumi": "casual (best friend)",
+              "Yamamoto": "casual (former boyfriend, friend)",
+              "Others": "friendly casual"
+            },
+            "emotional_shifts": {
+              "support": "becomes more encouraging and gentle",
+              "teasing": "playful tone",
+              "seriousness": "adopts a more thoughtful and direct tone when discussing important matters."
+            },
+            "notes": "Generally maintains a cheerful and supportive tone. Very good at reading the room and her friends' emotions."
+          },
+          "character_arc": "Acts as a supportive figure for both Hayashi and Yamamoto, helping them navigate their feelings and past. Her past relationship with Yamamoto adds a layer of complexity to the group dynamic."
+        }
+      }
+    },
+    "松尾": {
+      "canonical_en": "Matsuo",
+      "source": "manifest_profile_seed",
+      "category": "Kouhai (junior) from high school, romantic rival for Yamamoto.",
+      "affiliation": "Japanese",
+      "visual_identity_non_color": {
+        "identity_summary": "Hair worn down (previously braids); sometimes wears glasses, sometimes contacts; an earnest, determined expression that can turn intense when discussing Yamamoto; often stands with a slightly formal posture, but can lean forward with conviction; carries documents or a notebook related to committee work."
+      },
+      "notes": "Dedicated, persistent, intelligent, initially quiet but grew more confident, deeply devoted to Yamamoto, somewhat intense in her affections, can be surprisingly bold and direct.",
+      "keigo": {
+        "narration": "N/A",
+        "internal_thoughts": "N/A",
+        "speaking_to": {
+          "Yamamoto": "polite (senpai) but very direct and bold in expressing feelings",
+          "Hayashi Megumi": "polite (senpai) but confrontational (romantic rival)",
+          "Teachers": "polite/formal"
+        },
+        "emotional_shifts": {
+          "admiration": "becomes more earnest and expressive",
+          "rivalry": "becomes more sharp and challenging"
+        },
+        "notes": "Her politeness is often overshadowed by her intense emotions, particularly her love for Yamamoto and her rivalry with Hayashi."
+      },
+      "volume_events": {
+        "0a23": {
+          "relationship_to_protagonist": "Kouhai (junior) from high school, romantic rival for Yamamoto.",
+          "relationship_to_others": "Kouhai to Yamamoto and Hayashi, cultural festival committee member (current chair), deeply admires and is in love with Yamamoto.",
+          "keigo_switch": {
+            "narration": "N/A",
+            "internal_thoughts": "N/A",
+            "speaking_to": {
+              "Yamamoto": "polite (senpai) but very direct and bold in expressing feelings",
+              "Hayashi Megumi": "polite (senpai) but confrontational (romantic rival)",
+              "Teachers": "polite/formal",
+              "Fellow Committee Members": "authoritative as chair, but also supportive."
+            },
+            "emotional_shifts": {
+              "admiration": "becomes more earnest and expressive",
+              "rivalry": "becomes more sharp and challenging",
+              "frustration": "sighs or makes exasperated comments, especially with Hayashi's antics.",
+              "sadness/disappointment": "can become quiet and withdrawn, sometimes shedding tears."
+            },
+            "notes": "Her politeness is often overshadowed by her intense emotions, particularly her love for Yamamoto and her rivalry with Hayashi."
+          },
+          "character_arc": "A dedicated kouhai who, inspired by Yamamoto, takes on the challenge of making the cultural festival public. She openly pursues Yamamoto, creating a direct rivalry with Hayashi."
+        }
+      }
+    },
+    "前田": {
+      "canonical_en": "Maeda",
+      "source": "manifest_profile_seed",
+      "category": "Former high school classmate of Hayashi and Yamamoto, former cultural festival committee member.",
+      "affiliation": "Japanese",
+      "visual_identity_non_color": {
+        "identity_summary": "Dyed, styled hair; trendy, somewhat flashy clothing; an initially confident, boisterous expression that quickly turns sheepish or defensive; often seen with a casual, slightly slouched posture."
+      },
+      "notes": "Loud, somewhat self-centered, prone to making excuses, not very responsible (skipped committee work), initially overconfident but easily deflated.",
+      "keigo": {
+        "narration": "N/A",
+        "internal_thoughts": "N/A",
+        "speaking_to": {
+          "Hayashi Megumi": "casual, initially overconfident, then deflated",
+          "Yamamoto": "casual, critical in the past"
+        },
+        "emotional_shifts": {
+          "excitement": "becomes louder",
+          "embarrassment": "becomes quiet and defensive"
+        },
+        "notes": "His speech reflects his generally irresponsible and self-serving nature."
+      },
+      "volume_events": {
+        "0a23": {
+          "relationship_to_protagonist": "Former high school classmate of Hayashi and Yamamoto, former cultural festival committee member.",
+          "relationship_to_others": "Former high school classmate.",
+          "keigo_switch": {
+            "narration": "N/A",
+            "internal_thoughts": "N/A",
+            "speaking_to": {
+              "Hayashi Megumi": "casual, initially overconfident, then deflated",
+              "Yamamoto": "casual, critical in the past"
+            },
+            "emotional_shifts": {
+              "excitement": "becomes louder",
+              "embarrassment": "becomes quiet and defensive"
+            },
+            "notes": "His speech reflects his generally irresponsible and self-serving nature."
+          },
+          "character_arc": "A minor character who provides information about the past cultural festival incident, revealing more about Yamamoto's character and the complex social dynamics of high school."
+        }
+      }
+    },
+    "加古川先生": {
+      "canonical_en": "Kakogawa",
+      "source": "manifest_profile_seed",
+      "short_name": "Kaco-chan (カコちゃん)",
+      "category": "Former high school teacher of Hayashi and Yamamoto.",
+      "affiliation": "Japanese",
+      "keigo": {
+        "narration": "N/A",
+        "internal_thoughts": "N/A",
+        "speaking_to": {
+          "Hayashi Megumi": "friendly, encouraging",
+          "Yamamoto": "friendly, appreciative",
+          "Students": "professional, guiding"
+        },
+        "emotional_shifts": {
+          "exhaustion": "appears haggard",
+          "playfulness": "smiles warmly"
+        },
+        "notes": "Her professional demeanor hides a supportive and somewhat mischievous side, especially when helping her former students."
+      },
+      "visual_identity_non_color": {
+        "identity_summary": "Professional, neatly tied-back hair; wears smart, formal teacher attire; a kind, perceptive expression that can become tired or subtly mischievous; stands with an authoritative yet approachable posture; carries a clipboard or school documents."
+      },
+      "notes": "Initially perceived as serious and proper, but revealed to be surprisingly playful, supportive, and somewhat 'scheming' (in a good way) to help her former students. Good-natured and perceptive.",
+      "volume_events": {
+        "0a23": {
+          "relationship_to_protagonist": "Former high school teacher of Hayashi and Yamamoto.",
+          "relationship_to_others": "Teacher at their former high school, helpful to Yamamoto and Matsuo.",
+          "keigo_switch": {
+            "narration": "N/A",
+            "internal_thoughts": "N/A",
+            "speaking_to": {
+              "Hayashi Megumi": "friendly, encouraging",
+              "Yamamoto": "friendly, appreciative",
+              "Students": "professional, guiding",
+              "Principal": "respectful and professional."
+            },
+            "emotional_shifts": {
+              "exhaustion": "appears haggard",
+              "playfulness": "smiles warmly",
+              "seriousness": "adopts a thoughtful and direct tone, especially when revealing difficult truths.",
+              "empathy": "speaks with a gentle and understanding voice."
+            },
+            "notes": "Her professional demeanor hides a supportive and somewhat mischievous side, especially when helping her former students."
+          },
+          "character_arc": "A supportive adult figure who subtly helps Yamamoto and Matsuo with the cultural festival, and later enables Hayashi and Yamamoto to attend the after-festival."
+        }
+      }
+    },
+    "入江ちゃん": {
+      "canonical_en": "Irie",
+      "source": "manifest_profile_seed",
+      "short_name": "Irie-chan",
+      "category": "Romantic rival (briefly) for Yamamoto's affection.",
+      "affiliation": "Japanese",
+      "keigo": {
+        "narration": "N/A",
+        "internal_thoughts": "N/A",
+        "speaking_to": {},
+        "emotional_shifts": {},
+        "notes": "Her presence is primarily to create a brief moment of jealousy for Hayashi."
+      },
+      "visual_identity_non_color": {
+        "identity_summary": "N/A (only mentioned in passing, no detailed description)."
+      },
+      "notes": "Showed interest in Yamamoto.",
+      "volume_events": {
+        "0a23": {
+          "relationship_to_protagonist": "Romantic rival (briefly) for Yamamoto's affection.",
+          "relationship_to_others": "University acquaintance of Yamamoto.",
+          "keigo_switch": {
+            "narration": "N/A",
+            "internal_thoughts": "N/A",
+            "speaking_to": {},
+            "emotional_shifts": {},
+            "notes": "Her presence is primarily to create a brief moment of jealousy for Hayashi."
+          },
+          "character_arc": "A minor character whose brief appearance highlights Hayashi's developing jealousy and romantic feelings for Yamamoto."
+        }
+      }
+    },
+    "吉見": {
+      "canonical_en": "Yoshimi",
+      "source": "manifest_profile_seed",
+      "short_name": "Yoshimi-san",
+      "category": "Former high school classmate of Hayashi and Akari.",
+      "affiliation": "Japanese",
+      "keigo": {
+        "narration": "N/A",
+        "internal_thoughts": "N/A",
+        "speaking_to": {
+          "Hayashi Megumi": "casual",
+          "Akari Kasahara": "casual"
+        },
+        "emotional_shifts": {},
+        "notes": "Her speech is characteristic of a 'misunderstood girl' who is focused on herself."
+      },
+      "visual_identity_non_color": {
+        "identity_summary": "N/A (only mentioned in passing, no detailed description)."
+      },
+      "notes": "Lively, talkative, seems to think the world revolves around her (self-centered).",
+      "volume_events": {
+        "0a23": {
+          "relationship_to_protagonist": "Former high school classmate of Hayashi and Akari.",
+          "relationship_to_others": "Former high school classmate.",
+          "keigo_switch": {
+            "narration": "N/A",
+            "internal_thoughts": "N/A",
+            "speaking_to": {
+              "Hayashi Megumi": "casual",
+              "Akari Kasahara": "casual"
+            },
+            "emotional_shifts": {},
+            "notes": "Her speech is characteristic of a 'misunderstood girl' who is focused on herself."
+          },
+          "character_arc": "A minor character who appears during the cultural festival, serving as a reminder of Hayashi's high school persona and providing a contrast to her current emotional state."
+        }
+      }
+    },
+    "石田裕子": {
+      "canonical_en": "Ishida Yuuko",
+      "source": "manifest_profile_seed",
+      "short_name": "Icchan (いっちゃん)",
+      "category": "Former high school friend of Hayashi and Akari.",
+      "affiliation": "Japanese",
+      "keigo": {
+        "narration": "N/A",
+        "internal_thoughts": "N/A",
+        "speaking_to": {},
+        "emotional_shifts": {},
+        "notes": "Her personality is described through Hayashi's memories and her mother's observations."
+      },
+      "visual_identity_non_color": {
+        "identity_summary": "Hair worn down (previously ponytail); wears contacts (previously glasses); a composed, adult expression; a graceful, understated posture; minimal, elegant accessories."
+      },
+      "notes": "Formerly an honor student, proper, popular with boys but elusive. Now more mature and adult-like.",
+      "volume_events": {
+        "0a23": {
+          "relationship_to_protagonist": "Former high school friend of Hayashi and Akari.",
+          "relationship_to_others": "Former high school friend.",
+          "keigo_switch": {
+            "narration": "N/A",
+            "internal_thoughts": "N/A",
+            "speaking_to": {},
+            "emotional_shifts": {},
+            "notes": "Her personality is described through Hayashi's memories and her mother's observations."
+          },
+          "character_arc": "A character from Hayashi's past whose transformation highlights Hayashi's own journey and the passage of time."
+        }
+      }
+    },
+    "Hayashi Megumi": {
+      "short_name": "Otousan (お父さん)",
+      "category": "Deceased father of Hayashi Megumi.",
+      "affiliation": "Japanese",
+      "visual_identity_non_color": {
+        "identity_summary": "N/A (only appears in memory or as an abstract presence)."
+      },
+      "notes": "Implied to have been a loving father, though he and Hayashi had a period of estrangement. His memory continues to influence Hayashi.",
+      "keigo": {
+        "narration": "N/A",
+        "internal_thoughts": "N/A",
+        "speaking_to": {},
+        "emotional_shifts": {},
+        "notes": "His presence is felt through Hayashi's memories and her period of mourning."
+      },
+      "volume_events": {
+        "0a23": {
+          "keigo_switch": {
+            "narration": "casual",
+            "internal_thoughts": "casual",
+            "speaking_to": {},
+            "emotional_shifts": {},
+            "notes": "[TO BE FILLED - context-dependent register notes]"
+          }
+        }
+      }
+    },
+    "Kasahara Akari": {
+      "short_name": "Akari (灯里)",
+      "category": "Hayashi's best friend, Yamamoto's former girlfriend.",
+      "affiliation": "Japanese",
+      "visual_identity_non_color": {
+        "identity_summary": "Bright, expressive face with a frequent smile; often seen in fashionable, approachable attire; her posture is open and inviting; uses animated hand gestures when speaking; her overall presence is one of warmth and friendliness."
+      },
+      "notes": "Cheerful, supportive, perceptive, kind, a good mediator, sometimes a bit teasing. She is very understanding and caring towards her friends."
+    },
+    "Hayashi's Mother": {
+      "short_name": "Okaasan (お母さん)",
+      "category": "Mother of Hayashi Megumi.",
+      "affiliation": "Japanese",
+      "visual_identity_non_color": {
+        "identity_summary": "Warm, gentle smile; often seen in comfortable, domestic attire; a relaxed, supportive posture; minimal accessories, suggesting a focus on home and family."
+      },
+      "notes": "Teasing, observant, supportive of her daughter, a bit blunt and enjoys black humor, but ultimately caring."
+    },
+    "Hayashi's Father": {
+      "short_name": "Otousan (お父さん)",
+      "category": "Deceased father of Hayashi Megumi.",
+      "affiliation": "Japanese",
+      "visual_identity_non_color": {
+        "identity_summary": "N/A (only appears in memory or as an abstract presence)."
+      },
+      "notes": "Implied to have been a loving father, though he and Hayashi had a period of estrangement. His memory continues to influence Hayashi."
+    },
+    "Kakogawa-sensei": {
+      "short_name": "Kaco-chan (カコちゃん)",
+      "category": "Former high school teacher of Hayashi and Yamamoto.",
+      "affiliation": "Japanese",
+      "visual_identity_non_color": {
+        "identity_summary": "Professional, neatly tied-back hair; wears smart, formal teacher attire; a kind, perceptive expression that can become tired or subtly mischievous; stands with an authoritative yet approachable posture; carries a clipboard or school documents."
+      },
+      "notes": "Initially perceived as serious and proper, but revealed to be surprisingly playful, supportive, and somewhat 'scheming' (in a good way) to help her former students. Good-natured and perceptive."
+    },
+    "Irie-chan": {
+      "short_name": "Irie-chan",
+      "category": "Romantic rival (briefly) for Yamamoto's affection.",
+      "affiliation": "Japanese",
+      "visual_identity_non_color": {
+        "identity_summary": "N/A (only mentioned in passing, no detailed description)."
+      },
+      "notes": "Showed interest in Yamamoto."
+    },
+    "Yoshimi-san": {
+      "short_name": "Yoshimi-san",
+      "category": "Former high school classmate of Hayashi and Akari.",
+      "affiliation": "Japanese",
+      "visual_identity_non_color": {
+        "identity_summary": "N/A (only mentioned in passing, no detailed description)."
+      },
+      "notes": "Lively, talkative, seems to think the world revolves around her (self-centered)."
+    },
+    "Ishida Yuuko": {
+      "short_name": "Icchan (いっちゃん)",
+      "category": "Former high school friend of Hayashi and Akari.",
+      "affiliation": "Japanese",
+      "visual_identity_non_color": {
+        "identity_summary": "Hair worn down (previously ponytail); wears contacts (previously glasses); a composed, adult expression; a graceful, understated posture; minimal, elegant accessories."
+      },
+      "notes": "Formerly an honor student, proper, popular with boys but elusive. Now more mature and adult-like."
+    }
+  },
+  "geography": {
+    "countries": {},
+    "regions": {},
+    "cities": {}
+  },
+  "weapons_artifacts": {},
+  "organizations": {},
+  "cultural_terms": {},
+  "mythology": {},
+  "translation_rules": {}
+}

@@ -36,6 +36,7 @@ class CanonNameEnforcer:
         self.canon_map: Dict[str, str] = {}  # Japanese → English
         self.nickname_map: Dict[str, str] = {}  # Japanese → Nickname
         self.visual_identity_map: Dict[str, Dict[str, Any]] = {}  # Japanese → non-color visual identity
+        self.biological_arrays_map: Dict[str, Dict[str, Any]] = {}  # Japanese → sibling/biology disambiguation
         self._load_canon_names()
 
     @staticmethod
@@ -93,6 +94,148 @@ class CanonNameEnforcer:
                 return label
         return ""
 
+    @staticmethod
+    def _key_has_relation_suffix(japanese_name: str) -> bool:
+        """
+        Detect role-like keys (e.g., 玉置の母親, 〇〇の姉, etc.).
+
+        Prevents accidental relabeling of proper names such as "Emma" based on
+        relationship text that contains phrases like "older brother figure".
+        """
+        if not isinstance(japanese_name, str):
+            return False
+        jp = japanese_name.strip()
+        if not jp:
+            return False
+        relation_suffixes = ("母親", "父親", "祖母", "祖父", "姉", "兄", "妹", "弟", "先生")
+        if any(jp.endswith(f"の{sfx}") for sfx in relation_suffixes):
+            return True
+        if any(jp.endswith(sfx) for sfx in relation_suffixes):
+            return True
+        return False
+
+    @staticmethod
+    def _normalize_biological_arrays(
+        biological_arrays: Any,
+        relationship_to_others: str = "",
+    ) -> Dict[str, Any]:
+        """
+        Normalize biology-focused sibling disambiguation payload.
+
+        Expected shape:
+          {
+            "blood_related_siblings": [{"canonical_name": "...", "relation": "...", ...}],
+            "family_role_markers": ["older_sister", ...],
+            "anti_confusion_directives": ["...", ...]
+          }
+        """
+        result: Dict[str, Any] = {
+            "blood_related_siblings": [],
+            "family_role_markers": [],
+            "anti_confusion_directives": [],
+        }
+
+        if isinstance(biological_arrays, dict):
+            sibling_rows = biological_arrays.get("blood_related_siblings", [])
+            if isinstance(sibling_rows, list):
+                for row in sibling_rows:
+                    if isinstance(row, dict):
+                        canonical_name = str(row.get("canonical_name", "")).strip()
+                        relation = str(row.get("relation", "")).strip()
+                        if canonical_name:
+                            cleaned = {
+                                "canonical_name": canonical_name,
+                                "relation": relation,
+                            }
+                            japanese_name = str(row.get("japanese_name", "")).strip()
+                            if japanese_name:
+                                cleaned["japanese_name"] = japanese_name
+                            family_name_shared = str(row.get("family_name_shared", "")).strip()
+                            if family_name_shared:
+                                cleaned["family_name_shared"] = family_name_shared
+                            evidence_jp = row.get("evidence_jp", [])
+                            if isinstance(evidence_jp, list):
+                                evidence_clean = [str(v).strip() for v in evidence_jp if str(v).strip()]
+                                if evidence_clean:
+                                    cleaned["evidence_jp"] = evidence_clean[:6]
+                            result["blood_related_siblings"].append(cleaned)
+                    elif isinstance(row, str) and row.strip():
+                        result["blood_related_siblings"].append(
+                            {"canonical_name": row.strip(), "relation": ""}
+                        )
+
+            for key in ("family_role_markers", "anti_confusion_directives"):
+                values = biological_arrays.get(key, [])
+                if isinstance(values, list):
+                    result[key] = [str(v).strip() for v in values if str(v).strip()][:10]
+
+        # Infer sibling links from existing profile text when explicit arrays are absent.
+        rel_text = str(relationship_to_others or "").strip()
+        if rel_text:
+            patterns = [
+                (r"older sister to ([^;,.]+)", "older_sister"),
+                (r"younger sister to ([^;,.]+)", "younger_sister"),
+                (r"older brother to ([^;,.]+)", "older_brother"),
+                (r"younger brother to ([^;,.]+)", "younger_brother"),
+            ]
+            existing_pairs = {
+                (
+                    str(item.get("canonical_name", "")).strip().lower(),
+                    str(item.get("relation", "")).strip().lower(),
+                )
+                for item in result["blood_related_siblings"]
+                if isinstance(item, dict)
+            }
+            rel_lower = rel_text.lower()
+            for pattern, relation in patterns:
+                for m in re.finditer(pattern, rel_lower):
+                    raw_name = rel_text[m.start(1):m.end(1)].strip()
+                    pair_key = (raw_name.lower(), relation.lower())
+                    if raw_name and pair_key not in existing_pairs:
+                        result["blood_related_siblings"].append(
+                            {"canonical_name": raw_name, "relation": relation}
+                        )
+                        existing_pairs.add(pair_key)
+                    if relation not in result["family_role_markers"]:
+                        result["family_role_markers"].append(relation)
+
+        # Remove empty collections for compact prompt rendering.
+        compact = {k: v for k, v in result.items() if v}
+        return compact
+
+    @staticmethod
+    def _format_biological_short(bio: Dict[str, Any]) -> str:
+        """Render compact biology/sibling disambiguation hint."""
+        if not isinstance(bio, dict) or not bio:
+            return ""
+        chunks: List[str] = []
+        siblings = bio.get("blood_related_siblings", [])
+        if isinstance(siblings, list) and siblings:
+            rendered = []
+            for row in siblings[:3]:
+                if isinstance(row, dict):
+                    name = str(row.get("canonical_name", "")).strip()
+                    rel = str(row.get("relation", "")).strip()
+                    if name and rel:
+                        rendered.append(f"{rel}:{name}")
+                    elif name:
+                        rendered.append(name)
+                elif isinstance(row, str) and row.strip():
+                    rendered.append(row.strip())
+            if rendered:
+                chunks.append("blood-sibling=" + ", ".join(rendered))
+        roles = bio.get("family_role_markers", [])
+        if isinstance(roles, list) and roles:
+            role_vals = [str(v).strip() for v in roles if str(v).strip()]
+            if role_vals:
+                chunks.append("roles=" + ", ".join(role_vals[:4]))
+        anti = bio.get("anti_confusion_directives", [])
+        if isinstance(anti, list) and anti:
+            anti_vals = [str(v).strip() for v in anti if str(v).strip()]
+            if anti_vals:
+                chunks.append("guard=" + anti_vals[0])
+        return " | ".join(chunks)[:260]
+
     @classmethod
     def build_canonical_label(
         cls,
@@ -111,8 +254,17 @@ class CanonNameEnforcer:
         full_name = str(profile.get("full_name", "")).strip()
         nickname = cls._first_nickname(str(profile.get("nickname", "")))
         rel_to_protag = str(profile.get("relationship_to_protagonist", "")).strip()
+        rel_to_others = str(profile.get("relationship_to_others", "")).strip()
 
         relation_label = cls._extract_relation_label(japanese_name, rel_to_protag)
+        if not relation_label:
+            relation_label = cls._extract_relation_label(japanese_name, rel_to_others)
+
+        # Proper named characters should keep explicit canonical names.
+        # Relation relabeling is reserved for role-like keys (e.g. "Xの母親").
+        if full_name and not cls._key_has_relation_suffix(japanese_name):
+            return full_name
+
         if relation_label:
             # Preferred: explicit "<Name>'s <Relation>" from relationship text.
             # Example: "Ako's mother" -> "Ako's Mother"
@@ -162,7 +314,13 @@ class CanonNameEnforcer:
             )
             if visual_identity:
                 self.visual_identity_map[kanji_name] = visual_identity
-        
+            biological_arrays = self._normalize_biological_arrays(
+                profile.get("biological_arrays"),
+                str(profile.get("relationship_to_others", "")),
+            )
+            if biological_arrays:
+                self.biological_arrays_map[kanji_name] = biological_arrays
+
         if self.canon_map:
             logger.debug(f"[CANON] Loaded {len(self.canon_map)} character names")
 
@@ -267,12 +425,16 @@ class CanonNameEnforcer:
             nickname = self.nickname_map.get(jp_name, "")
             visual_identity = self.visual_identity_map.get(jp_name, {})
             visual_hint = self._format_visual_identity_short(visual_identity)
+            biology = self.biological_arrays_map.get(jp_name, {})
+            biology_hint = self._format_biological_short(biology)
             if nickname and nickname != en_name:
                 lines.append(f"  {jp_name} → {en_name} (nickname: {nickname})")
             else:
                 lines.append(f"  {jp_name} → {en_name}")
             if visual_hint:
                 lines.append(f"    non-color-id: {visual_hint}")
+            if biology_hint:
+                lines.append(f"    biology: {biology_hint}")
         lines.append("Use these canonical names consistently in all translations.")
         lines.append("=== END CHARACTER REFERENCE ===\n")
         
@@ -301,6 +463,7 @@ def build_multimodal_identity_lock(
             "canonical_name": en_name,
             "nickname": enforcer.nickname_map.get(jp_name, ""),
             "visual_identity": enforcer.visual_identity_map.get(jp_name, {}),
+            "biological_arrays": enforcer.biological_arrays_map.get(jp_name, {}),
         }
 
     if isinstance(bible_characters, dict):
@@ -318,6 +481,10 @@ def build_multimodal_identity_lock(
                     "visual_identity": CanonNameEnforcer._normalize_visual_identity(
                         char_data.get("visual_identity_non_color"), ""
                     ),
+                    "biological_arrays": CanonNameEnforcer._normalize_biological_arrays(
+                        char_data.get("biological_arrays"),
+                        "",
+                    ),
                 }
             else:
                 if not existing.get("nickname"):
@@ -325,6 +492,11 @@ def build_multimodal_identity_lock(
                 if not existing.get("visual_identity"):
                     existing["visual_identity"] = CanonNameEnforcer._normalize_visual_identity(
                         char_data.get("visual_identity_non_color"), ""
+                    )
+                if not existing.get("biological_arrays"):
+                    existing["biological_arrays"] = CanonNameEnforcer._normalize_biological_arrays(
+                        char_data.get("biological_arrays"),
+                        "",
                     )
 
     if not identity_records:
@@ -353,6 +525,49 @@ def build_multimodal_identity_lock(
         visual_hint = CanonNameEnforcer._format_visual_identity_short(visual_identity)
         if visual_hint:
             lines.append(f"  non-color-id: {visual_hint}")
+        biological_arrays = record.get("biological_arrays", {})
+        biology_hint = CanonNameEnforcer._format_biological_short(biological_arrays)
+        if biology_hint:
+            lines.append(f"  biology: {biology_hint}")
+
+    sibling_disambiguation_rules: List[str] = []
+    for record in identity_records.values():
+        if not isinstance(record, dict):
+            continue
+        source_name = str(record.get("canonical_name", "")).strip()
+        bio = record.get("biological_arrays", {})
+        if not source_name or not isinstance(bio, dict):
+            continue
+        siblings = bio.get("blood_related_siblings", [])
+        if not isinstance(siblings, list):
+            continue
+        for row in siblings:
+            if not isinstance(row, dict):
+                continue
+            target_name = str(row.get("canonical_name", "")).strip()
+            relation = str(row.get("relation", "")).strip().replace("_", " ")
+            if not target_name:
+                continue
+            if relation:
+                sibling_disambiguation_rules.append(
+                    f"{source_name} is {relation} of {target_name}; never swap their identities."
+                )
+            else:
+                sibling_disambiguation_rules.append(
+                    f"{source_name} is blood-related to {target_name}; never swap their identities."
+                )
+
+    if sibling_disambiguation_rules:
+        lines.append("Sibling Disambiguation Rules (Blood-related):")
+        deduped = []
+        seen = set()
+        for rule in sibling_disambiguation_rules:
+            if rule in seen:
+                continue
+            seen.add(rule)
+            deduped.append(rule)
+        for rule in deduped[:8]:
+            lines.append(f"  - {rule}")
 
     lines.extend([
         "If uncertain, mark as unresolved_character and continue scene analysis.",
@@ -385,6 +600,7 @@ CANON_EVENT_FIDELITY_DIRECTIVE = """
 === CANON EVENT FIDELITY (ABSOLUTE PRIORITY) ===
 
 The Art Director's Notes above provide STYLISTIC guidance only (vocabulary, atmosphere, emotional tone).
+SOURCE-OF-TRUTH RULE: Raw source text is the only source of truth for events and facts.
 
 **STRICT 1:1 CANON EVENT RULES:**
 1. NEVER add events, actions, or dialogue that appear in illustrations but NOT in the source text
@@ -393,6 +609,7 @@ The Art Director's Notes above provide STYLISTIC guidance only (vocabulary, atmo
 4. If an illustration shows a character crying but the text only mentions they "looked sad", translate as "looked sad"
 5. If an illustration shows physical contact but the text only implies it, maintain the implication
 6. The illustration INFORMS your vocabulary choice, NOT your content invention
+7. Multimodal guidance is descriptive context only; raw text remains canonical truth
 
 **WHAT TO USE FROM ART DIRECTOR'S NOTES:**
 ✓ Emotional tone vocabulary ("cold", "distant", "frozen" vs generic "sad")
@@ -413,7 +630,9 @@ Even if you SEE it in the Art Director's Notes, DO NOT translate it until the SO
 def build_visual_context_block(
     illustration_id: str,
     visual_context: Dict[str, Any],
-    spoiler_prevention: Optional[Dict[str, Any]] = None
+    spoiler_prevention: Optional[Dict[str, Any]] = None,
+    identity_resolution: Optional[Dict[str, Any]] = None,
+    validation: Optional[Dict[str, Any]] = None,
 ) -> str:
     """
     Build a visual context block for injection into the translation prompt.
@@ -439,6 +658,7 @@ def build_visual_context_block(
 
     lines = [
         f"--- ART DIRECTOR'S NOTES [{illustration_id}] ---",
+        "Policy: Multimodal notes are descriptive only. Raw chapter text is canonical truth.",
         f"Scene Composition: {composition}",
         f"Emotional Context: {emotional_delta}",
     ]
@@ -452,6 +672,44 @@ def build_visual_context_block(
         lines.append("Translation Directives:")
         for d in directives:
             lines.append(f"  - {d}")
+
+    if identity_resolution:
+        recognized = identity_resolution.get("recognized_characters", [])
+        unresolved = identity_resolution.get("unresolved_characters", [])
+        if recognized:
+            lines.append("Identity Resolution (scene-local lock):")
+            for rec in recognized[:6]:
+                if not isinstance(rec, dict):
+                    continue
+                canonical = str(rec.get("canonical_name", "")).strip()
+                japanese = str(rec.get("japanese_name", "")).strip()
+                confidence = rec.get("confidence", "")
+                evidence = rec.get("non_color_evidence", [])
+                label = canonical
+                if japanese:
+                    label += f" [{japanese}]"
+                if isinstance(confidence, (int, float)):
+                    label += f" confidence={confidence:.2f}"
+                lines.append(f"  - {label}")
+                if isinstance(evidence, list) and evidence:
+                    lines.append(f"    evidence: {', '.join(str(e) for e in evidence[:4])}")
+        if unresolved:
+            lines.append("Unresolved Characters:")
+            for desc in unresolved[:6]:
+                lines.append(f"  - {desc}")
+
+    if validation:
+        identity_consistency = validation.get("identity_consistency", {})
+        if isinstance(identity_consistency, dict):
+            status = str(identity_consistency.get("status", "")).strip().lower()
+            reason = str(identity_consistency.get("reason", "")).strip()
+            if status in {"fail", "warn"}:
+                lines.append(
+                    "IDENTITY LOCK WARNING: Use neutral descriptors if identity confidence is uncertain. "
+                    "Raw source text remains canonical truth."
+                )
+                if reason:
+                    lines.append(f"Identity QA: {status} ({reason})")
 
     if spoiler_prevention:
         do_not_reveal = spoiler_prevention.get("do_not_reveal_before_text", [])
@@ -532,6 +790,8 @@ def build_chapter_visual_guidance(
     for illust_id in illustration_ids:
         visual_ctx = cache_manager.get_visual_context(illust_id)
         spoiler = cache_manager.get_spoiler_prevention(illust_id)
+        identity_resolution = cache_manager.get_identity_resolution(illust_id)
+        validation = cache_manager.get_validation(illust_id)
 
         if visual_ctx:
             # Enforce canon names in visual context
@@ -539,8 +799,16 @@ def build_chapter_visual_guidance(
                 visual_ctx = enforcer.enforce_in_visual_context(visual_ctx)
                 if spoiler:
                     spoiler = enforcer.enforce_in_visual_context(spoiler)
+                if identity_resolution:
+                    identity_resolution = enforcer.enforce_in_visual_context(identity_resolution)
             
-            block = build_visual_context_block(illust_id, visual_ctx, spoiler)
+            block = build_visual_context_block(
+                illust_id,
+                visual_ctx,
+                spoiler,
+                identity_resolution=identity_resolution,
+                validation=validation,
+            )
             blocks.append(block)
             found_count += 1
         else:
@@ -556,6 +824,7 @@ def build_chapter_visual_guidance(
         f"Illustrations with cached analysis: {found_count}/{len(illustration_ids)}",
         f"Apply these insights to enhance prose quality for illustrated scenes.",
         f"REMINDER: Art Director's Notes are STYLISTIC guides only. Do NOT add events from illustrations.",
+        f"REMINDER: Multimodal is descriptive support only; source text is the only truth.",
     ]
     
     # Add character reference if available

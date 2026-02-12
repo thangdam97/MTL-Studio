@@ -1,0 +1,211 @@
+{
+  "bible_version": "1.0",
+  "series_id": "series_d045bf2b8d",
+  "series_title": {
+    "ja": "自分を負けヒロインだと思い込んでいるすでに勝利済みの幼馴染",
+    "en": "自分を負けヒロインだと思い込んでいるすでに勝利済みの幼馴染",
+    "romaji": ""
+  },
+  "created_at": "2026-02-11T08:43:53.405147+00:00",
+  "last_updated": "2026-02-11T08:43:53.407701+00:00",
+  "volumes_registered": [
+    {
+      "volume_id": "1790",
+      "title": "自分を負けヒロインだと思い込んでいるすでに勝利済みの幼馴染",
+      "index": 1
+    }
+  ],
+  "world_setting": {},
+  "characters": {
+    "奏汰《かなた》": {
+      "canonical_en": "Kanata",
+      "source": "manifest_import"
+    },
+    "文句《もんく》": {
+      "canonical_en": "Monku",
+      "source": "manifest_import"
+    },
+    "所以《ゆえん》": {
+      "canonical_en": "Yuen",
+      "source": "manifest_import"
+    },
+    "天沢《あまさわ》": {
+      "canonical_en": "Amasawa",
+      "source": "manifest_import"
+    },
+    "猶予《ゆうよ》": {
+      "canonical_en": "Yuyo",
+      "source": "manifest_import"
+    },
+    "女狐《めぎつね》": {
+      "canonical_en": "Megitsune",
+      "source": "manifest_import"
+    },
+    "暗闇《くらやみ》": {
+      "canonical_en": "Kurayami",
+      "source": "manifest_import"
+    },
+    "愛歌《まなか》": {
+      "canonical_en": "Manaka",
+      "source": "manifest_import"
+    },
+    "悪戯《いたずら》": {
+      "canonical_en": "Itazura",
+      "source": "manifest_import"
+    },
+    "姫宮《ひめみや》": {
+      "canonical_en": "Himemiya",
+      "source": "manifest_import"
+    },
+    "怖気《おじけ》": {
+      "canonical_en": "Ojike",
+      "source": "manifest_import"
+    },
+    "恍惚《こうこつ》": {
+      "canonical_en": "Koukotsu",
+      "source": "manifest_import"
+    },
+    "雛鳥《ひなどり》": {
+      "canonical_en": "Hinadori",
+      "source": "manifest_import"
+    },
+    "鷹羽《たかばね》": {
+      "canonical_en": "Takabane",
+      "source": "manifest_import"
+    },
+    "痴漢《ちかん》": {
+      "canonical_en": "Chikan",
+      "source": "manifest_import"
+    },
+    "痴女《ちじょ》": {
+      "canonical_en": "Chijo",
+      "source": "manifest_import"
+    },
+    "小百合《さゆり》": {
+      "canonical_en": "Sayuri",
+      "source": "manifest_import"
+    },
+    "夫婦《ふうふ》": {
+      "canonical_en": "Fufu",
+      "source": "manifest_import"
+    },
+    "丁度《ちょうど》": {
+      "canonical_en": "Choudo",
+      "source": "manifest_import"
+    },
+    "天秤《てんびん》": {
+      "canonical_en": "Tenbin",
+      "source": "manifest_import"
+    },
+    "片想《かたおも》": {
+      "canonical_en": "Kataomo",
+      "source": "manifest_import"
+    },
+    "膝枕《ひざまくら》": {
+      "canonical_en": "Hizamakura",
+      "source": "manifest_import"
+    },
+    "洋菓子《ようがし》": {
+      "canonical_en": "Yogashi",
+      "source": "manifest_import"
+    },
+    "嬌声《きょうせい》": {
+      "canonical_en": "Kyosei",
+      "source": "manifest_import"
+    },
+    "素敵《すてき》": {
+      "canonical_en": "Suteki",
+      "source": "manifest_import"
+    },
+    "屋内《おくない》": {
+      "canonical_en": "Okunai",
+      "source": "manifest_import"
+    },
+    "高嶺《たかね》": {
+      "canonical_en": "Takane",
+      "source": "manifest_import"
+    },
+    "紫陽花《あじさい》": {
+      "canonical_en": "Ajisai",
+      "source": "manifest_import"
+    },
+    "綿菓子《わたがし》": {
+      "canonical_en": "Watagashi",
+      "source": "manifest_import"
+    },
+    "愚痴《ぐち》": {
+      "canonical_en": "Guchi",
+      "source": "manifest_import"
+    },
+    "図星《ずぼし》": {
+      "canonical_en": "Zuboshi",
+      "source": "manifest_import"
+    },
+    "桜木《さくらぎ》": {
+      "canonical_en": "Sakuragi",
+      "source": "manifest_import"
+    },
+    "妖艶《ようえん》": {
+      "canonical_en": "Yoen",
+      "source": "manifest_import"
+    },
+    "蠱惑的《こわくてき》": {
+      "canonical_en": "Kowakuteki",
+      "source": "manifest_import"
+    },
+    "強引《ごういん》": {
+      "canonical_en": "Gouin",
+      "source": "manifest_import"
+    },
+    "不味《まず》": {
+      "canonical_en": "Mazu",
+      "source": "manifest_import"
+    },
+    "名残《なごり》": {
+      "canonical_en": "Nagori",
+      "source": "manifest_import"
+    },
+    "洒落《しゃれ》": {
+      "canonical_en": "Share",
+      "source": "manifest_import"
+    },
+    "砂糖《さとう》": {
+      "canonical_en": "Satou",
+      "source": "manifest_import"
+    },
+    "鷹羽奏汰": {
+      "canonical_en": "Takabane Kanata",
+      "source": "manifest_profile_seed",
+      "short_name": "Kanata",
+      "category": "protagonist",
+      "affiliation": "Japanese",
+      "notes": "kind-hearted, observant, dense_in_romance, easily_flustered, loyal"
+    },
+    "姫宮愛歌": {
+      "canonical_en": "Himemiya Manaka",
+      "source": "manifest_profile_seed",
+      "short_name": "Manaka, Losing Heroine (self-proclaimed)",
+      "category": "childhood_friend_romantic_interest",
+      "affiliation": "Japanese (quarter foreign, blonde hair, blue eyes)",
+      "notes": "tsundere, playful, teasing, confident_in_looks, insecure_about_rivals, determined, proactive"
+    },
+    "天沢小百合": {
+      "canonical_en": "Amasawa Sayuri",
+      "source": "manifest_profile_seed",
+      "short_name": "Sayuri",
+      "category": "classmate_friend",
+      "affiliation": "Japanese",
+      "notes": "observant, perceptive, pragmatic, mischievous, common_sense"
+    }
+  },
+  "geography": {
+    "countries": {},
+    "regions": {},
+    "cities": {}
+  },
+  "weapons_artifacts": {},
+  "organizations": {},
+  "cultural_terms": {},
+  "mythology": {},
+  "translation_rules": {}
+}

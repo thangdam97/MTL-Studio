@@ -53,10 +53,17 @@ class RichMetadataCacheUpdater:
         "glossary",
         "translation_timestamp",
     }
-    # Restrict patch structure to v3.9-rich fields only.
+    # Restrict patch structure to v4.0 fields (bible + rich metadata).
     ALLOWED_PATCH_FIELDS = {
         "character_profiles",
         "localization_notes",
+        "world_setting",
+        "geography",
+        "weapons_artifacts",
+        "organizations",
+        "cultural_terms",
+        "mythology",
+        "translation_rules",
         "dialogue_patterns",
         "scene_contexts",
         "emotional_pronoun_shifts",
@@ -138,6 +145,7 @@ class RichMetadataCacheUpdater:
         if self.cache_only:
             cache_name = None
             used_external_cache = False
+            cache_error: Optional[str] = None
             try:
                 cache_name = self.client.create_cache(
                     model=self.MODEL_NAME,
@@ -155,30 +163,39 @@ class RichMetadataCacheUpdater:
                 else:
                     logger.warning("[CACHE] Full-LN cache creation failed in cache-only mode")
             except Exception as e:
-                logger.error(f"Cache-only run failed while creating cache: {e}")
-                self._mark_pipeline_state(
-                    status="failed",
-                    error=str(e)[:500],
-                    cache_stats=cache_stats,
-                    used_external_cache=False,
-                    mode="cache_only",
+                cache_error = str(e)[:500]
+                logger.warning(
+                    "Cache-only run could not create external cache; "
+                    f"continuing in fallback mode: {cache_error}"
                 )
-                self._save_manifest()
-                return False
             finally:
                 if cache_name:
                     self.client.delete_cache(cache_name)
 
             if not used_external_cache:
+                fallback_reason = (
+                    cache_error
+                    if cache_error
+                    else "Cache-only mode could not create external full-LN cache"
+                )
+                logger.warning(
+                    "[CACHE] Cache-only fallback: external full-LN cache unavailable. "
+                    "Proceeding without cache verification."
+                )
                 self._mark_pipeline_state(
-                    status="failed",
-                    error="Cache-only mode could not create external full-LN cache",
+                    status="completed",
+                    error=f"fallback_no_external_cache: {fallback_reason}",
                     cache_stats=cache_stats,
                     used_external_cache=False,
                     mode="cache_only",
                 )
                 self._save_manifest()
-                return False
+                logger.info(
+                    "Phase 1.55 cache-only complete in FALLBACK mode: "
+                    f"external cache not verified ({cache_stats.get('cached_chapters', 0)}/"
+                    f"{cache_stats.get('target_chapters', 0)} chapters payload prepared)."
+                )
+                return True
 
             self._mark_pipeline_state(
                 status="completed",
@@ -394,28 +411,38 @@ class RichMetadataCacheUpdater:
             '  "metadata_en_patch": {\n'
             '    "character_profiles": {...},\n'
             '    "localization_notes": {...},\n'
+            '    "world_setting": {...},\n'
+            '    "geography": {...},\n'
+            '    "weapons_artifacts": {...},\n'
+            '    "organizations": {...},\n'
+            '    "cultural_terms": {...},\n'
+            '    "mythology": {...},\n'
+            '    "translation_rules": {...},\n'
             '    "dialogue_patterns": {...},\n'
             '    "scene_contexts": {...},\n'
             '    "emotional_pronoun_shifts": {...},\n'
             '    "translation_guidelines": {...},\n'
-            '    "schema_version": "v3.9_cached_enrichment"\n'
+            '    "official_localization": {...},\n'
+            '    "schema_version": "v4.0_cached_enrichment"\n'
             "  }\n"
             "}\n"
             "Rules:\n"
             "0) Scan the ENTIRE cached LN corpus before deciding updates.\n"
             "1) Keep Japanese surname-first order for Japanese characters (absolute).\n"
-            "2) Follow v3.9 schema structure exactly for metadata_en_patch fields.\n"
+            "2) Follow v4.0 schema structure exactly for metadata_en_patch fields.\n"
             "3) ONLY fill blank/placeholder values. Do NOT overwrite already-populated fields.\n"
             "4) Do NOT modify title_en/author_en/chapter title fields/character_names/glossary.\n"
             "5) Keep unknown values empty instead of guessing.\n"
             "6) Prefer concrete character evidence from cached chapter text.\n"
             "7) Maintain character_profiles.*.visual_identity_non_color with non-color identity markers:\n"
             "   hairstyle, outfit silhouette/signature, expression baseline, posture/gesture, accessories.\n"
+            "8) Keep Bible-compatible continuity fields schema-safe: world_setting/geography/weapons_artifacts/"
+            "organizations/cultural_terms/mythology/translation_rules.\n"
         )
         if self.schema_spec_path.exists():
             try:
                 schema_text = self.schema_spec_path.read_text(encoding="utf-8")
-                return f"{base_instruction}\n\nReference schema (v3.9):\n{schema_text}"
+                return f"{base_instruction}\n\nReference schema (v4.0):\n{schema_text}"
             except Exception:
                 pass
         return base_instruction
@@ -437,6 +464,8 @@ class RichMetadataCacheUpdater:
             "Refine and expand rich metadata for this volume using the cached full LN text.\n"
             "Focus on character_profiles, localization_notes, dialogue/register behavior,\n"
             "and any semantic guidance that improves Phase 2 translation consistency.\n"
+            "Keep Bible continuity categories aligned and schema-safe:\n"
+            "world_setting, geography, weapons_artifacts, organizations, cultural_terms, mythology, translation_rules.\n"
             "For character_profiles, fill/maintain `visual_identity_non_color` with non-color descriptors.\n"
             "Directive: only fill blank or placeholder values in current metadata_en.\n"
             "Do not overwrite existing populated values.\n"

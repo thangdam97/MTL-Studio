@@ -25,6 +25,7 @@ from pipeline.translator.scene_break_formatter import SceneBreakFormatter
 from pipeline.translator.chunk_merger import ChunkMerger
 from pipeline.translator.glossary_lock import GlossaryLock
 from pipeline.post_processor.vn_cjk_cleaner import VietnameseCJKCleaner
+from pipeline.config import PIPELINE_ROOT
 from modules.gap_integration import GapIntegrationEngine
 # RTASCalculator disabled (2026-02-10): Direct manifest reading instead
 # from modules.rtas_calculator import RTASCalculator, VoiceSettings
@@ -117,6 +118,8 @@ class ChapterProcessor:
         self.enable_rtas = False  # DISABLED - direct manifest reading instead
         self.contraction_rates: Dict[str, int] = {}  # Direct manifest-to-rate mapping
         self._load_contraction_rates_from_manifest()
+        self._stage2_registers = self._load_stage2_registers()
+        self._stage2_rhythm_targets = self._load_stage2_rhythm_targets()
 
     def set_glossary_lock(self, glossary_lock: Optional[GlossaryLock]) -> None:
         """Attach manifest glossary lock from TranslatorAgent."""
@@ -501,6 +504,7 @@ This document contains the internal reasoning process that Gemini used while tra
         model_name: Optional[str] = None,
         cached_content: Optional[str] = None,
         volume_cache: Optional[str] = None,
+        scene_plan: Optional[Dict[str, Any]] = None,
         allow_chunking: bool = True,
     ) -> TranslationResult:
         """
@@ -514,6 +518,7 @@ This document contains the internal reasoning process that Gemini used while tra
             model_name: Model override
             cached_content: Cached content name for continuity (from previous chapter schema)
             volume_cache: Optional alias for cached_content (volume-level cache)
+            scene_plan: Optional Stage 1 scene scaffold from PLANS/{chapter}_scene_plan.json
             allow_chunking: If False, force direct translation without chunk splitting
         """
         try:
@@ -551,6 +556,7 @@ This document contains the internal reasoning process that Gemini used while tra
                     en_title=en_title,
                     model_name=model_name,
                     cached_content=effective_cache,
+                    scene_plan=scene_plan,
                 )
             if allow_chunking and not self.smart_chunking_enabled and is_massive:
                 logger.info(
@@ -839,7 +845,8 @@ This document contains the internal reasoning process that Gemini used while tra
                 dialect_guidance=dialect_guidance,  # v1.0 - Dialect detection
                 en_pattern_guidance=en_pattern_guidance,  # English grammar patterns
                 vn_pattern_guidance=vn_pattern_guidance,  # Vietnamese grammar patterns
-                visual_guidance=visual_guidance
+                visual_guidance=visual_guidance,
+                scene_plan=scene_plan,
             )
             logger.debug(f"[VERBOSE] User prompt length: {len(user_prompt)} characters")
             
@@ -1036,6 +1043,7 @@ This document contains the internal reasoning process that Gemini used while tra
         en_title: Optional[str],
         model_name: Optional[str],
         cached_content: Optional[str],
+        scene_plan: Optional[Dict[str, Any]] = None,
     ) -> TranslationResult:
         """Translate massive chapters via resumable chunk JSON flow."""
         try:
@@ -1076,6 +1084,7 @@ This document contains the internal reasoning process that Gemini used while tra
                     model_name=model_name,
                     cached_content=cached_content,
                     volume_cache=None,
+                    scene_plan=None,  # Chunk-level ranges differ from full chapter scene plan.
                     allow_chunking=False,
                 )
                 if not chunk_result.success:
@@ -1209,6 +1218,285 @@ This document contains the internal reasoning process that Gemini used while tra
             logger.warning(f"[CHUNK] Failed to read {chunk_json_path.name}: {e}")
             return None
 
+    def _load_stage2_rhythm_targets(self) -> Dict[str, str]:
+        """
+        Load rhythm enum -> word range map from planning_config.json.
+
+        Falls back to stable defaults if config is missing.
+        """
+        defaults = {
+            "short_fragments": "4-6 words",
+            "medium_casual": "8-10 words",
+            "long_confession": "15-20 words",
+        }
+        config_path = PIPELINE_ROOT / "config" / "planning_config.json"
+        if not config_path.exists():
+            return defaults
+
+        try:
+            with config_path.open("r", encoding="utf-8") as f:
+                config = json.load(f)
+        except Exception as e:
+            logger.warning(f"[STAGE2] Failed reading planning_config.json: {e}")
+            return defaults
+
+        rhythm_targets = config.get("rhythm_targets", {})
+        if not isinstance(rhythm_targets, dict):
+            return defaults
+
+        extracted: Dict[str, str] = {}
+        for raw_key, raw_val in rhythm_targets.items():
+            key = str(raw_key).strip()
+            if not key:
+                continue
+            if isinstance(raw_val, dict):
+                word_range = str(raw_val.get("word_range", "")).strip()
+            else:
+                word_range = str(raw_val).strip()
+            if word_range:
+                extracted[key] = word_range
+
+        return extracted or defaults
+
+    def _load_stage2_registers(self) -> List[str]:
+        """Load allowed dialogue register enums from planning_config.json."""
+        defaults = [
+            "casual_teen",
+            "flustered_defense",
+            "smug_teasing",
+            "formal_request",
+            "breathless_shock",
+        ]
+        config_path = PIPELINE_ROOT / "config" / "planning_config.json"
+        if not config_path.exists():
+            return defaults
+
+        try:
+            with config_path.open("r", encoding="utf-8") as f:
+                config = json.load(f)
+        except Exception as e:
+            logger.warning(f"[STAGE2] Failed reading planning_config.json: {e}")
+            return defaults
+
+        registers = config.get("dialogue_registers", {})
+        if isinstance(registers, dict):
+            keys = [str(k).strip() for k in registers.keys() if str(k).strip()]
+            return keys or defaults
+        if isinstance(registers, list):
+            keys = [str(v).strip() for v in registers if str(v).strip()]
+            return keys or defaults
+        return defaults
+
+    @staticmethod
+    def _normalize_stage2_token(value: str) -> str:
+        return re.sub(r"[^a-z0-9]+", "_", value.lower()).strip("_")
+
+    @staticmethod
+    def _parse_stage2_word_range(value: str) -> Optional[tuple]:
+        if not value:
+            return None
+        match = re.search(r"(\d+)\s*[-–]\s*(\d+)", value)
+        if match:
+            start, end = int(match.group(1)), int(match.group(2))
+            if start > end:
+                start, end = end, start
+            return (start, end)
+        return None
+
+    def _map_stage2_dialogue_register(self, raw_register: Any) -> str:
+        """Map free-form dialogue register labels to configured enum values."""
+        if not self._stage2_registers:
+            return "casual_teen"
+
+        fallback = "casual_teen" if "casual_teen" in self._stage2_registers else self._stage2_registers[0]
+        text = str(raw_register or "").strip()
+        if not text:
+            return fallback
+        norm = self._normalize_stage2_token(text)
+
+        direct_map = {self._normalize_stage2_token(item): item for item in self._stage2_registers}
+        if norm in direct_map:
+            return direct_map[norm]
+        for key, val in direct_map.items():
+            if key and key in norm:
+                return val
+
+        tokens = set(norm.split("_")) if norm else set()
+        if tokens.intersection({"formal", "polite", "request", "strategic", "assertive"}):
+            return "formal_request" if "formal_request" in self._stage2_registers else fallback
+        if tokens.intersection({"flustered", "defense", "defensive", "denial", "shy", "panic", "embarrassed"}):
+            if "flustered_defense" in self._stage2_registers:
+                return "flustered_defense"
+            if "breathless_shock" in self._stage2_registers:
+                return "breathless_shock"
+            return fallback
+        if tokens.intersection({"shock", "shocked", "breathless", "surprised"}):
+            if "breathless_shock" in self._stage2_registers:
+                return "breathless_shock"
+            if "flustered_defense" in self._stage2_registers:
+                return "flustered_defense"
+            return fallback
+        if tokens.intersection({"smug", "teasing", "playful", "competitive", "provocative", "banter"}):
+            return "smug_teasing" if "smug_teasing" in self._stage2_registers else fallback
+        if tokens.intersection({"internal", "monologue", "narration", "reflective"}):
+            return fallback
+
+        return fallback
+
+    def _map_stage2_rhythm_key(self, raw_rhythm: Any) -> str:
+        """Map free-form rhythm labels to configured rhythm target enum keys."""
+        if not self._stage2_rhythm_targets:
+            return "medium_casual"
+
+        rhythm_keys = list(self._stage2_rhythm_targets.keys())
+        default_key = "medium_casual" if "medium_casual" in self._stage2_rhythm_targets else rhythm_keys[0]
+        text = str(raw_rhythm or "").strip()
+        if not text:
+            return default_key
+        norm = self._normalize_stage2_token(text)
+
+        direct_map = {self._normalize_stage2_token(key): key for key in rhythm_keys}
+        if norm in direct_map:
+            return direct_map[norm]
+        for key_norm, key in direct_map.items():
+            if key_norm and key_norm in norm:
+                return key
+
+        parsed = self._parse_stage2_word_range(text)
+        if parsed:
+            midpoint = (parsed[0] + parsed[1]) / 2.0
+            best_key = default_key
+            best_distance = float("inf")
+            for key, word_range in self._stage2_rhythm_targets.items():
+                parsed_key = self._parse_stage2_word_range(word_range)
+                if not parsed_key:
+                    continue
+                key_midpoint = (parsed_key[0] + parsed_key[1]) / 2.0
+                distance = abs(key_midpoint - midpoint)
+                if distance < best_distance:
+                    best_distance = distance
+                    best_key = key
+            return best_key
+
+        tokens = set(norm.split("_")) if norm else set()
+        if tokens.intersection({"quick", "fast", "rapid", "brief", "short", "snappy", "witty", "punchline", "reveal"}):
+            return "short_fragments" if "short_fragments" in self._stage2_rhythm_targets else default_key
+        if tokens.intersection({"slow", "deliberate", "reflective", "strategic", "tender", "confession", "sensual", "climactic"}):
+            return "long_confession" if "long_confession" in self._stage2_rhythm_targets else default_key
+        return default_key
+
+    @staticmethod
+    def _shorten_stage2_text(value: Any, limit: int = 110) -> str:
+        text = str(value or "").strip().replace("\n", " ")
+        if len(text) <= limit:
+            return text
+        return f"{text[: max(0, limit - 3)].rstrip()}..."
+
+    def _format_stage2_scene_guidance(self, scene_plan: Optional[Dict[str, Any]]) -> str:
+        """
+        Build Stage 2 scene/rhythm scaffold injected into user prompt.
+
+        Scope: English translation runs only.
+        """
+        if self.target_language.lower() not in {"en", "english"}:
+            return ""
+        if not isinstance(scene_plan, dict):
+            return ""
+
+        scenes = scene_plan.get("scenes", [])
+        if not isinstance(scenes, list) or not scenes:
+            return ""
+
+        chapter_id = str(scene_plan.get("chapter_id") or "").strip()
+        overall_tone = self._shorten_stage2_text(scene_plan.get("overall_tone"), 120)
+        pacing = self._shorten_stage2_text(scene_plan.get("pacing_strategy"), 140)
+
+        lines: List[str] = [
+            "## STAGE 2 SCENE RHYTHM SCAFFOLD (MANDATORY)",
+            "",
+            "Apply this chapter-local scaffold while translating.",
+            "Source precedence rule: Japanese source text is the only source of truth.",
+            "Multimodal precedence rule: Visual/multimodal notes are descriptive only; never override source facts.",
+            "Conflict rule: If scaffold conflicts with source, follow source text.",
+            "",
+            "Hard caps (English prose control):",
+            "- Dialogue: <=10 words",
+            "- Narration: <=15 words",
+            "- Narration soft target: 12-14 words in descriptive passages",
+            "- Punchline reaction beats: <=5 words",
+            "",
+            "Phase 2 anti-AI-ism blocklist (strict):",
+            "- Do not use: \"couldn't help but\"",
+            "- Rewrite directly: action/state without perception wrapper",
+            "",
+        ]
+        if chapter_id:
+            lines.append(f"Chapter scaffold ID: {chapter_id}")
+        if overall_tone:
+            lines.append(f"Overall tone: {overall_tone}")
+        if pacing:
+            lines.append(f"Pacing strategy: {pacing}")
+        lines.append("")
+
+        lines.append("Rhythm enum map:")
+        for key, value in self._stage2_rhythm_targets.items():
+            lines.append(f"- {key}: {value}")
+        lines.append("")
+
+        lines.append("Scene beats:")
+        for raw_scene in scenes:
+            if not isinstance(raw_scene, dict):
+                continue
+            scene_id = str(raw_scene.get("id") or "scene").strip()
+            beat_type = str(raw_scene.get("beat_type") or "setup").strip()
+            start_para = raw_scene.get("start_paragraph")
+            end_para = raw_scene.get("end_paragraph")
+            para_range = "P?-?"
+            if isinstance(start_para, int) and isinstance(end_para, int):
+                para_range = f"P{start_para}-P{end_para}"
+            elif isinstance(start_para, int):
+                para_range = f"P{start_para}-P?"
+            elif isinstance(end_para, int):
+                para_range = f"P?-P{end_para}"
+
+            register = str(raw_scene.get("dialogue_register") or "casual_teen").strip()
+            register = self._map_stage2_dialogue_register(register)
+            rhythm_key = self._map_stage2_rhythm_key(raw_scene.get("target_rhythm"))
+            rhythm_range = self._stage2_rhythm_targets.get(rhythm_key, "")
+            rhythm_display = f"{rhythm_key} ({rhythm_range})" if rhythm_range else rhythm_key
+            arc = self._shorten_stage2_text(raw_scene.get("emotional_arc"), 100)
+
+            lines.append(
+                f"- {scene_id} [{para_range}] {beat_type} | register={register} | rhythm={rhythm_display}"
+            )
+            if arc:
+                lines.append(f"  arc: {arc}")
+            if bool(raw_scene.get("illustration_anchor")):
+                lines.append("  note: illustration_anchor=true -> compress narration and trust the visual beat.")
+
+        profiles = scene_plan.get("character_profiles", {})
+        if isinstance(profiles, dict) and profiles:
+            lines.append("")
+            lines.append("Character rhythm anchors:")
+            for name, raw_profile in list(profiles.items())[:12]:
+                if not isinstance(raw_profile, dict):
+                    continue
+                bias = self._shorten_stage2_text(raw_profile.get("sentence_bias"), 80)
+                emotional_state = self._shorten_stage2_text(raw_profile.get("emotional_state"), 80)
+                lines.append(f"- {name}: bias={bias or 'N/A'}; state={emotional_state or 'N/A'}")
+
+                victory = raw_profile.get("victory_patterns")
+                if isinstance(victory, list) and victory:
+                    sample = ", ".join(self._shorten_stage2_text(v, 45) for v in victory[:2])
+                    lines.append(f"  victory cues: {sample}")
+
+                denial = raw_profile.get("denial_patterns")
+                if isinstance(denial, list) and denial:
+                    sample = ", ".join(self._shorten_stage2_text(v, 45) for v in denial[:2])
+                    lines.append(f"  denial cues: {sample}")
+
+        return "\n".join(lines).strip()
+
     def _extract_last_sentence(self, text: str) -> str:
         normalized = re.sub(r"\s+", " ", text.strip())
         if not normalized:
@@ -1231,7 +1519,8 @@ This document contains the internal reasoning process that Gemini used while tra
         dialect_guidance: Optional[str] = None,  # v1.0 - Dialect detection
         en_pattern_guidance: Optional[Dict] = None,  # English grammar patterns
         vn_pattern_guidance: Optional[Dict] = None,  # Vietnamese grammar patterns
-        visual_guidance: Optional[str] = None  # Multimodal visual context
+        visual_guidance: Optional[str] = None,  # Multimodal visual context
+        scene_plan: Optional[Dict[str, Any]] = None,  # Stage 1 scene planner output
     ) -> str:
         """Construct the user message part of the prompt."""
         # Build base prompt
@@ -1275,6 +1564,19 @@ This document contains the internal reasoning process that Gemini used while tra
         if visual_guidance:
             from modules.multimodal.prompt_injector import MULTIMODAL_STRICT_SUFFIX
             base_prompt = f"{base_prompt}\n\n{visual_guidance}\n{MULTIMODAL_STRICT_SUFFIX}"
+
+        # Inject Stage 2 scene/rhythm scaffold before source text section.
+        stage2_scene_guidance = self._format_stage2_scene_guidance(scene_plan)
+        if stage2_scene_guidance:
+            marker = "<!-- SOURCE TEXT TO TRANSLATE -->"
+            if marker in base_prompt:
+                base_prompt = base_prompt.replace(
+                    marker,
+                    f"<!-- STAGE 2 SCENE GUIDANCE -->\n{stage2_scene_guidance}\n\n{marker}",
+                    1,
+                )
+            else:
+                base_prompt = f"{stage2_scene_guidance}\n\n{base_prompt}"
 
         # Inject RTAS character voice settings (English translations only)
         rtas_guidance = self._format_rtas_guidance()

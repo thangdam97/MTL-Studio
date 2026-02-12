@@ -1,7 +1,7 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "version": "1.0",
-  "description": "Literary narrative techniques configuration for AI-driven transcreation. This JSON alters Gemini's default translation behavior by activating specific narrative latent spaces, transforming word-for-word translation into literary prose.",
+  "version": "1.5",
+  "description": "Literary narrative techniques configuration for AI-driven transcreation. This JSON alters Gemini's default translation behavior by activating specific narrative latent spaces, transforming word-for-word translation into literary prose. Enhanced with MMO/Gaming/Comedy patterns from Netoge 1124 audit. v1.4 adds hard caps for sentence length enforcement. v1.5 adds concrete 9-10 word contemporary dialogue targets.",
   "metadata": {
     "purpose": "Define narrative voice, psychic distance, and sensory focus for consistent literary output",
     "tier": 1,
@@ -11,7 +11,10 @@
       "VN"
     ],
     "last_updated": "2026-02-11",
-    "version": "1.2",
+    "version": "1.5",
+    "enhancements_v1_3": "Added mmo_gaming_romcom genre preset and comedy_killer_patterns section based on Netoge vs Fan TL comparative literacy audit",
+    "enhancements_v1_4": "Added hard caps (10w dialogue, 15w narration, 5w punchlines) with split guidance based on 0116 validation report findings. Accepts Gemini's prose refinement strength while enforcing tighter rhythm.",
+    "enhancements_v1_5": "Added target_length_dialogue_examples with validated 0116 successes plus curated 9-10 word contemporary dialogue patterns for slice-of-life romcom and MMO/SNS/game-media subculture.",
     "corpus_integrated": true,
     "corpus_examples_count": {
       "fid": 15,
@@ -689,6 +692,189 @@
       "sentence_pacing": "variable",
       "show_dont_tell": true,
       "emotional_vocabulary": "unsettling, fragmented, paranoid"
+    },
+    "mmo_gaming_romcom": {
+      "description": "Contemporary light novel romcom focused on MMO/gaming/SNS culture - based on Netoge 1124 audit",
+      "narrative_technique": "first_person",
+      "psychic_distance": "level_5_first_person",
+      "sensory_focus": "medium",
+      "sentence_pacing": "variable_with_staccato_bias",
+      "target_avg_sentence_length": "8-10 words (NOT 11+)",
+      "show_dont_tell": true,
+      "emotional_vocabulary": "contemporary, casual, self-aware",
+      "comedy_priority": "critical",
+      "dialogue_authenticity": {
+        "register": "casual_teen_contemporary",
+        "avoid": [
+          "Victorian idioms (hook line and sinker)",
+          "Formal academic connectors (essentially, fundamentally)",
+          "Over-polite descriptors (young lady, quite, rather)",
+          "News flash / Formal announcements",
+          "Explanatory padding before punchlines"
+        ],
+        "prefer": [
+          "Direct contemporary slang (wild, crazy, no way)",
+          "Gaming trash talk (sucker, noob, clueless)",
+          "Internet laugh variations (lol, lmao)",
+          "Punchy reactions (Seriously? For real?)",
+          "Short punchline delivery"
+        ]
+      },
+      "rhythm_enforcement": {
+        "priority": "critical",
+        "target": "Page-turning momentum over grammatical completeness",
+        "hard_caps": {
+          "dialogue_max_words": 10,
+          "narration_max_words": 15,
+          "punchline_max_words": 5,
+          "enforcement": "MANDATORY - If sentence exceeds cap, SPLIT into 2 sentences at natural break point (comma, 'and', 'but', 'so')"
+        },
+        "rules": [
+          "HARD CAP: Dialogue lines MUST NOT exceed 10 words. If exceeded, split at comma or conjunction.",
+          "HARD CAP: Narration sentences MUST NOT exceed 15 words. If exceeded, split into fragments.",
+          "Prefer 3 short sentences over 1 long compound sentence",
+          "Comedy beats: setup → pause (—/...) → punchline (HARD CAP: 5 words maximum)",
+          "Reaction dialogue: max 8 words for humor impact",
+          "Gaming commands: direct imperatives (Pull! Heal me! Not: 'Please provide healing assistance')"
+        ],
+        "split_guidance": {
+          "description": "When sentence exceeds hard cap, identify natural break points and split",
+          "break_points": [
+            "Comma followed by conjunction (', and' → '. And' OR remove conjunction entirely)",
+            "Subordinate clause marker ('because', 'since', 'while', 'when', 'where')",
+            "Parenthetical phrase (move to separate sentence or remove)",
+            "Long dialogue → split into 2 exchanges with brief reaction from other character"
+          ],
+          "examples": [
+            {
+              "original": "It's hard for me to be in the classroom, so I was using 'just going to buy a drink' as an excuse to escape.",
+              "word_count": 20,
+              "violation": "Exceeds 10-word dialogue cap",
+              "split_correct": "\"It's hard for me to be in the classroom. So I use 'just going to buy a drink' as an excuse.\"",
+              "split_word_counts": [9, 11],
+              "note": "Still slightly over on second part, but acceptable. Further split: 'It's hard for me to be in the classroom.' + 'So I escape using that drink excuse.'"
+            },
+            {
+              "original": "I have a recommendation. The title is Honey Story, and as you can see, it is a peaceful game where you move your character left and right with the direction keys, and the only buttons you needed at the start were attack and jump.",
+              "word_count": 44,
+              "violation": "Exceeds 15-word narration cap",
+              "split_correct": "I have a recommendation. The title is *Honey Story*. It's a peaceful game. You move left and right with arrow keys. Only two buttons at the start: attack and jump.",
+              "split_word_counts": [4, 5, 5, 9, 9],
+              "note": "Fragmented into digestible beats"
+            }
+          ]
+        }
+      },
+      "target_length_dialogue_examples": {
+        "description": "Concrete 9-10 word dialogue targets for contemporary slice-of-life romcom and MMO/SNS/game-media sub-culture scenes.",
+        "target_word_range": {
+          "min": 9,
+          "max": 10,
+          "strict_preference": true
+        },
+        "use_case": "Use these as style anchors when a line should be short, natural, and complete (not fragmented padding).",
+        "real_world_successes_0116": [
+          {
+            "text": "You need to take this game a little more seriously.",
+            "word_count": 10,
+            "category": "gaming advice / complaint"
+          },
+          {
+            "text": "Come to think of it, how are your grades, Ako?",
+            "word_count": 10,
+            "category": "casual question / topic shift"
+          },
+          {
+            "text": "They're bad, you know? Did you think they weren't?",
+            "word_count": 9,
+            "category": "self-aware admission / sarcasm"
+          },
+          {
+            "text": "How bad, exactly? I can teach you if you want.",
+            "word_count": 10,
+            "category": "offer to help"
+          },
+          {
+            "text": "It's no boast, but I've never scored below average.",
+            "word_count": 9,
+            "category": "humble brag"
+          }
+        ],
+        "curated_examples": {
+          "gaming_commands_strategy": [
+            {
+              "text": "Don't chase kills; hold lane and ping if they rotate.",
+              "word_count": 10
+            },
+            {
+              "text": "Stack cooldowns now, burst together, then peel back immediately.",
+              "word_count": 9
+            }
+          ],
+          "casual_questions": [
+            {
+              "text": "You free after class, or grinding ranked again tonight?",
+              "word_count": 9
+            },
+            {
+              "text": "By the way, did your stream clip finally upload?",
+              "word_count": 9
+            }
+          ],
+          "reactions_with_substance": [
+            {
+              "text": "Wait, you queued solo on that account? That's reckless.",
+              "word_count": 9
+            },
+            {
+              "text": "Seriously, you posted that in guild chat? Brave move.",
+              "word_count": 9
+            }
+          ],
+          "brief_explanations": [
+            {
+              "text": "The patch buffed tanks, so our old comp collapses.",
+              "word_count": 9
+            },
+            {
+              "text": "Her tone stayed light, but the silence did the damage.",
+              "word_count": 10
+            }
+          ],
+          "offers_suggestions": [
+            {
+              "text": "Send me the draft; I'll tighten jokes and pacing.",
+              "word_count": 9
+            },
+            {
+              "text": "If you're tilted, take five and queue with us.",
+              "word_count": 9
+            }
+          ],
+          "complaints_observations": [
+            {
+              "text": "This app keeps lagging exactly when the punchline lands.",
+              "word_count": 9
+            },
+            {
+              "text": "Everyone says 'just one game,' then it's three hours.",
+              "word_count": 9
+            }
+          ]
+        },
+        "guardrails": [
+          "Target complete natural lines, not chopped fragments.",
+          "Keep register contemporary and youth-casual for romcom gaming scenes.",
+          "Prefer one clear action or attitude per line.",
+          "Allow >10 words only for explicit emotional pivot beats."
+        ]
+      },
+      "mmo_scene_specific": {
+        "guild_chat": "Mimic real Discord/game chat - fragmented, emoji-like reactions (lol), rapid turn-taking",
+        "login_chaos": "Staccato sentences, exclamations, fragment volleys",
+        "strategy_discussion": "Still casual but slightly longer - max 12 words/sentence",
+        "romantic_pivot": "Allow 15-20 words for emotional confession beats ONLY"
+      }
     }
   },
   "integration_notes": {
@@ -992,6 +1178,347 @@
         "double_quotes_for_sync": "Use \"\" (no space) for perfectly synchronized dialogue",
         "preserve_tsukkomi": "Keep straight-man reactions sharp and immediate: 'Don't phrase it like that!'",
         "italics_for_internal": "Use *italics* for internal monologue that contrasts with external dialogue"
+      },
+      "comedy_killer_patterns": {
+        "description": "Anti-patterns that destroy comedic timing - based on Netoge 1124 literacy audit",
+        "source": "Fan TL vs Gemini comparative analysis",
+        "priority": "CRITICAL for comedy-focused works",
+        "patterns_to_avoid": {
+          "over_embellishment": {
+            "issue": "Adding flowery idioms or formal language to casual banter kills humor",
+            "examples": [
+              {
+                "gemini_error": "Fell for it hook, line, and sinker, you gullible fool!",
+                "fan_correct": "You fell for it, you clueless sucker!",
+                "why_it_fails": "'Hook, line, and sinker' is a fishing idiom that feels forced. 'Gullible fool' is Victorian. Gaming trash talk needs punchy modern insults."
+              },
+              {
+                "gemini_error": "Having to introduce yourself essentially saying 'I'm a pig' would naturally be quite embarrassing for a young lady.",
+                "fan_correct": "Saying something like, 'I am a pig, pleased to meet you' would be pretty humiliating for a girl.",
+                "why_it_fails": "'Naturally be quite embarrassing' + 'young lady' = overly formal. Comedy needs directness."
+              }
+            ],
+            "fix": "Use contemporary slang and direct phrasing. Shorter = funnier."
+          },
+          "punchline_explanation": {
+            "issue": "Explaining the joke in the punchline itself destroys impact",
+            "examples": [
+              {
+                "gemini_error": "I'd be surprised enough to have a heart attack if you just got a girlfriend.",
+                "fan_correct": "Honestly, just the fact that you got a girlfriend would knock the wind outta me.",
+                "why_it_fails": "'Surprised enough to have a heart attack' explains the surprise level. Idiomatic 'knock the wind outta me' delivers same meaning with rhythm."
+              }
+            ],
+            "fix": "Trust the reader. Use idiomatic expressions, not explanatory constructions."
+          },
+          "formal_connectors_in_banter": {
+            "issue": "Academic transitional phrases slow comedic rhythm",
+            "examples": [
+              {
+                "gemini_error": "Wow, there are some pretty intense people out there, trying to be a girl in a game.",
+                "fan_correct": "Really? Are there actually people out there trying to play as girls in games? That's wild.",
+                "why_it_fails": "'There are some pretty intense people' sounds like a nature documentary narrator. Teen reactions need immediate slang."
+              }
+            ],
+            "fix": "Use contemporary reactions: 'That's wild / crazy / insane / No way / Seriously?'"
+          },
+          "dialogue_tag_padding": {
+            "issue": "Stacking verb + adverb + intensifier slows delivery",
+            "examples": [
+              {
+                "gemini_error": "My classmate shot back, looking completely fed up.",
+                "fan_correct": "My classmate replied, sounding totally fed up.",
+                "why_it_fails": "'Shot back' + 'looking' + 'completely' = three descriptors doing one job."
+              }
+            ],
+            "fix": "Pick one descriptor maximum. Or merge: 'shot back, fed up.'"
+          },
+          "reaction_beat_over_extension": {
+            "issue": "Extending reaction past optimal length dilutes impact",
+            "rule": "Funny reactions should be max 8 words. Punchlines max 5 words.",
+            "examples": [
+              {
+                "gemini_error": "\"Oh, right, it's a joke. Hahaha, Nekohime-san, you're such a prankster.\"",
+                "fan_correct": "\"Ah, of course, a joke! Haha, Nekohime sure is a prankster.\"",
+                "why_it_fails": "'Oh, right' is weaker than 'Ah, of course'. Adding 'you're such a' before 'prankster' is padding."
+              }
+            ],
+            "fix": "Trim to core emotional beat. Remove transition words."
+          },
+          "shock_reaction_verbosity": {
+            "issue": "Horror/surprise loses visceral impact when over-articulated",
+            "examples": [
+              {
+                "gemini_error": "\"H-Huh? Seriously? Pig? Schwein is pig?\"",
+                "fan_correct": "\"W–What? Are you serious? Pig? Schwein?\"",
+                "why_it_fails": "'Schwein is pig?' is grammatically complete but less panicked than fragment 'Schwein?'"
+              }
+            ],
+            "fix": "Use fragments, stutters, em-dashes for shock. '—...What?' > 'Huh?'"
+          }
+        },
+        "sentence_length_targets": {
+          "gaming_banter": "5-8 words average (HARD CAP: 10 words)",
+          "shock_reactions": "1-3 word fragments",
+          "punchline_delivery": "Maximum 5 words (HARD CAP - no exceptions)",
+          "setup_before_punchline": "Maximum 12 words",
+          "emotional_confessions": "15-20 words (exception for sincerity, narration cap still applies)",
+          "hard_cap_enforcement": "Dialogue: 10 words maximum. Narration: 15 words maximum. Punchlines: 5 words maximum. These are MANDATORY limits, not suggestions."
+        },
+        "hard_cap_examples": {
+          "description": "Concrete before/after examples demonstrating 10-word dialogue cap and 15-word narration cap",
+          "dialogue_violations": [
+            {
+              "violation": "It's hard for me to be in the classroom, so I was using 'just going to buy a drink' as an excuse to escape.",
+              "word_count": 20,
+              "correct_split": "\"It's hard for me to be in the classroom. So I use 'buy a drink' as my escape.\"",
+              "word_counts": [9, 10],
+              "technique": "Split at conjunction, tighten second part"
+            },
+            {
+              "violation": "\"I fundamentally disagree with your strategy because it doesn't account for the enemy's positioning and movement patterns.\"",
+              "word_count": 16,
+              "correct_split": "\"I totally disagree with your strategy. You're not accounting for enemy positioning.\"",
+              "word_counts": [6, 7],
+              "technique": "Split at subordinate clause, convert to direct statement"
+            }
+          ],
+          "narration_violations": [
+            {
+              "violation": "The guild master was a guy named †Black Sorcerer†, clad from head to toe in gleaming, powerful-looking gear that you could tell was top-tier at a glance.",
+              "word_count": 28,
+              "correct_split": "The guild master was †Black Sorcerer†. He was clad head to toe in gleaming gear. Top-tier, no question.",
+              "word_counts": [6, 11, 3],
+              "technique": "Fragment into beats: identification → description → judgment"
+            },
+            {
+              "violation": "After listening to my story, Ako looked down and spoke sympathetically, her voice soft and understanding as she tried to comfort me.",
+              "word_count": 22,
+              "correct_split": "After listening to my story, Ako looked down. Her voice was soft and sympathetic.",
+              "word_counts": [9, 7],
+              "technique": "Split action from description, remove redundancy"
+            }
+          ],
+          "punchline_violations": [
+            {
+              "violation": "\"Too laaaaaate for that now!\"",
+              "word_count": 4,
+              "status": "PASS (under 5-word cap)",
+              "note": "Drawn-out emphasis doesn't count as extra words"
+            },
+            {
+              "violation": "\"I'd be really surprised if that actually worked out for you.\"",
+              "word_count": 11,
+              "correct": "\"That working out? I'd be shocked.\"",
+              "word_count_fixed": 5,
+              "technique": "Flip to question + reaction format"
+            }
+          ]
+        },
+        "register_enforcement": {
+          "casual_teen_dialogue_avoid": [
+            "Victorian idioms",
+            "Formal academic connectors",
+            "'young lady' / 'young man'",
+            "'naturally be quite'",
+            "'News flash'",
+            "'essentially' / 'fundamentally'"
+          ],
+          "casual_teen_dialogue_prefer": [
+            "Direct contemporary slang",
+            "Idiomatic expressions",
+            "Shortened reactions",
+            "Gaming/internet vocabulary",
+            "Fragments and stutters for emotion"
+          ]
+        },
+        "target_length_dialogue_examples": {
+          "description": "Curated 9-10 word dialogue examples demonstrating ideal contemporary casual dialogue length - based on v1.4 successful output analysis",
+          "purpose": "Show Gemini concrete target patterns rather than just enforcing caps. These examples hit the sweet spot: substantive but not padded, natural but not fragmented.",
+          "source": "Netoge v1.4 validation (Ch 1-7) + curated contemporary romcom/MMO/slice-of-life corpus",
+          "target_range": "9-10 words (acceptable: 7-12 words)",
+          "categories": {
+            "casual_questions": {
+              "description": "Natural topic shifts, checking in, asking about situations",
+              "examples": [
+                {
+                  "dialogue": "Come to think of it, how are your grades, Ako?",
+                  "word_count": 10,
+                  "context": "Topic shift in casual conversation",
+                  "why_it_works": "Natural conversational flow, question + name for personalization"
+                },
+                {
+                  "dialogue": "So what's the deal with you and that guild master?",
+                  "word_count": 10,
+                  "context": "Asking about relationships/rumors",
+                  "why_it_works": "Contemporary phrasing ('what's the deal'), casual register"
+                },
+                {
+                  "dialogue": "Wait, you seriously think that's gonna work out for you?",
+                  "word_count": 10,
+                  "context": "Skeptical question about friend's plan",
+                  "why_it_works": "Skepticism marker + casual 'gonna', doubt expressed naturally"
+                },
+                {
+                  "dialogue": "Did you already finish grinding those mobs for the quest?",
+                  "word_count": 10,
+                  "context": "MMO party chat - checking progress",
+                  "why_it_works": "Gaming vocabulary, direct question, natural flow"
+                }
+              ]
+            },
+            "self_aware_admissions": {
+              "description": "Characters acknowledging their own flaws, situations, or feelings",
+              "examples": [
+                {
+                  "dialogue": "They're bad, you know? Did you think they weren't?",
+                  "word_count": 9,
+                  "context": "Admitting bad grades with rhetorical question",
+                  "why_it_works": "Self-aware + rhetorical question adds personality without padding"
+                },
+                {
+                  "dialogue": "I know I'm weird, but this is important to me.",
+                  "word_count": 10,
+                  "context": "Defending unusual hobby/interest",
+                  "why_it_works": "Admission + justification in one natural breath"
+                },
+                {
+                  "dialogue": "Honestly, I didn't think I'd end up liking this game.",
+                  "word_count": 10,
+                  "context": "Admitting changed opinion about MMO",
+                  "why_it_works": "Honesty marker + past assumption, relatable self-reflection"
+                }
+              ]
+            },
+            "offers_and_suggestions": {
+              "description": "Helping, teaching, proposing activities",
+              "examples": [
+                {
+                  "dialogue": "How bad, exactly? I can teach you if you want.",
+                  "word_count": 10,
+                  "context": "Offering to help with grades",
+                  "why_it_works": "Clarifying question + conditional offer, natural two-part flow"
+                },
+                {
+                  "dialogue": "Let's party up tonight and farm some experience points together.",
+                  "word_count": 10,
+                  "context": "MMO invite to play together",
+                  "why_it_works": "Gaming vocabulary, casual invitation, activity specification"
+                },
+                {
+                  "dialogue": "I could show you the ropes if you're free this weekend.",
+                  "word_count": 10,
+                  "context": "Offering to mentor new player/friend",
+                  "why_it_works": "Idiomatic 'show you the ropes' + time qualifier"
+                }
+              ]
+            },
+            "observations_and_complaints": {
+              "description": "Commenting on situations, expressing frustration or amusement",
+              "examples": [
+                {
+                  "dialogue": "You need to take this game a little more seriously.",
+                  "word_count": 10,
+                  "context": "Mild complaint about casual playstyle",
+                  "why_it_works": "Advisory tone, 'a little' softens criticism naturally"
+                },
+                {
+                  "dialogue": "This is exactly why I told you not to trust him.",
+                  "word_count": 10,
+                  "context": "I-told-you-so moment after betrayal",
+                  "why_it_works": "Contemporary phrasing 'this is why', retrospective vindication"
+                },
+                {
+                  "dialogue": "It's no boast, but I've never scored below average.",
+                  "word_count": 9,
+                  "context": "Humble brag about academic performance",
+                  "why_it_works": "Self-aware qualifier 'no boast' + statement, natural flow"
+                }
+              ]
+            },
+            "contemporary_reactions": {
+              "description": "Responses showing surprise, agreement, or emotional reaction",
+              "examples": [
+                {
+                  "dialogue": "Wait, are you saying you actually believed that whole thing?",
+                  "word_count": 10,
+                  "context": "Surprise at friend's gullibility",
+                  "why_it_works": "'Wait' pause + clarifying question, natural incredulity"
+                },
+                {
+                  "dialogue": "That's pretty bold of you to say that to her face.",
+                  "word_count": 10,
+                  "context": "Commenting on friend's audacity",
+                  "why_it_works": "Contemporary 'pretty bold' + action specification"
+                },
+                {
+                  "dialogue": "No way that's gonna fly with the guild master, though.",
+                  "word_count": 10,
+                  "context": "Predicting negative reaction from authority",
+                  "why_it_works": "Casual 'no way' + idiomatic 'fly' + casual 'though' ending"
+                }
+              ]
+            },
+            "strategic_mmo_dialogue": {
+              "description": "Gaming strategy, party coordination, MMO-specific communication",
+              "examples": [
+                {
+                  "dialogue": "Can you pull aggro while I heal the tank real quick?",
+                  "word_count": 10,
+                  "context": "MMO party coordination during dungeon",
+                  "why_it_works": "Gaming terms, action request, time qualifier 'real quick'"
+                },
+                {
+                  "dialogue": "The boss spawns in five minutes, so get ready to move.",
+                  "word_count": 10,
+                  "context": "Raid timing coordination",
+                  "why_it_works": "Event timing + instruction, natural command structure"
+                }
+              ]
+            }
+          },
+          "usage_guidance": {
+            "when_to_use_9_10_words": [
+              "Casual questions that need context (not yes/no)",
+              "Self-aware statements with personality",
+              "Offers/suggestions with conditions",
+              "Observations with reasoning",
+              "Reactions that need clarification",
+              "Gaming strategy with specific actions"
+            ],
+            "when_to_use_shorter": [
+              "Quick reactions (Seriously? / No way! / That's wild!)",
+              "Gaming commands (Pull! / Heal me! / Let's go!)",
+              "Punchlines (max 5 words)",
+              "Shock/surprise fragments (W-What? / You're kidding...)"
+            ],
+            "when_to_use_longer": [
+              "Emotional confessions (15-20 words, narration cap applies)",
+              "Complex explanations (split into 2 sentences at 10w mark)",
+              "Multi-part statements (split at conjunction/subordinate clause)"
+            ]
+          },
+          "anti_patterns_to_avoid": {
+            "padding_to_reach_9_words": {
+              "issue": "Don't artificially lengthen short statements to hit 9-10 word target",
+              "bad_example": "So, well, you know, I guess I'll just go myself then.",
+              "good_example": "Guess I'll go myself then.",
+              "explanation": "Filler words ('so', 'well', 'you know', 'I guess', 'just') add nothing. If statement is naturally 5-6 words, leave it."
+            },
+            "splitting_natural_9_10_word_sentences": {
+              "issue": "Don't split sentences that are already at optimal length",
+              "bad_example": "Come to think of it, how are your grades? Ako?",
+              "good_example": "Come to think of it, how are your grades, Ako?",
+              "explanation": "10 words is TARGET length, not maximum. Don't split what's already optimal."
+            },
+            "formal_register_in_casual_context": {
+              "issue": "9-10 word dialogue must maintain casual register",
+              "bad_example": "I would appreciate it if you could assist me with this.",
+              "good_example": "Could you help me out with this real quick?",
+              "explanation": "Both are 10 words, but first is formal, second is contemporary casual."
+            }
+          }
+        }
       }
     },
     "sarcasm_and_irony_examples": {

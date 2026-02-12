@@ -10,12 +10,29 @@
   "last_updated": "2026-02-11T04:25:26.560295+00:00",
   "volumes_registered": [
     {
+      "volume_id": "1124",
+      "title": "ネトゲの嫁は女の子じゃないと思った?",
+      "index": 1
+    },
+    {
       "volume_id": "0116",
       "title": "ネトゲの嫁は女の子じゃないと思った? Lv.2",
       "index": 2
     }
   ],
-  "world_setting": {},
+  "world_setting": {
+    "type": "modern_japan",
+    "label": "Contemporary Japanese Setting",
+    "honorifics": {
+      "mode": "retain",
+      "policy": "Keep all JP honorifics (-san, -kun, -chan, -sama, -senpai, -sensei)."
+    },
+    "name_order": {
+      "default": "family_given",
+      "policy": "Japanese surname-first order for Japanese characters."
+    },
+    "exceptions": []
+  },
   "characters": {},
   "geography": {
     "countries": {},

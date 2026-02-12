@@ -247,6 +247,40 @@ class BuilderAgent:
         self.language_code = self.lang_config.get('language_code', self.target_language)
         self.output_suffix = self.lang_config.get('output_suffix', f'_{self.target_language.upper()}')
 
+    def _coerce_text(self, value: Any, fallback: str = "") -> str:
+        """
+        Normalize mixed manifest values (str/dict/list/etc.) to plain text.
+        """
+        if value is None:
+            return fallback
+        if isinstance(value, str):
+            text = value.strip()
+            return text if text else fallback
+        if isinstance(value, (int, float, bool)):
+            return str(value)
+        if isinstance(value, dict):
+            preferred_keys = (
+                "title_en", "title_english", "english", "title",
+                "name", "label", "text", "value", "romaji",
+                "title_jp", "japanese"
+            )
+            for key in preferred_keys:
+                if key in value:
+                    candidate = self._coerce_text(value.get(key), "")
+                    if candidate:
+                        return candidate
+            for candidate in value.values():
+                normalized = self._coerce_text(candidate, "")
+                if normalized:
+                    return normalized
+            return fallback
+        if isinstance(value, (list, tuple)):
+            parts = [self._coerce_text(v, "") for v in value]
+            parts = [p for p in parts if p]
+            return " / ".join(parts) if parts else fallback
+        text = str(value).strip()
+        return text if text else fallback
+
     def build_epub(
         self,
         volume_id: str,
@@ -339,6 +373,7 @@ class BuilderAgent:
                              metadata_translated.get('title_en') or 
                              manifest.get('title_en') or 
                              metadata_jp.get('title', 'Unknown'))
+            book_title = self._coerce_text(book_title, "Unknown")
             print(f"     Title: {book_title}")
             print(f"     Target Language: {actual_language_name}")
             print(f"     Chapters: {len(chapters)}")
@@ -350,7 +385,11 @@ class BuilderAgent:
             if is_multi_act:
                 print(f"     [MULTI-ACT] {len(volume_acts)} acts detected")
                 for act in volume_acts:
-                    print(f"       Act {act['act_number']}: {act.get('title_en') or act.get('title', '')}")
+                    act_label = self._coerce_text(
+                        act.get('title_en') or act.get('title', ''),
+                        f"Act {act.get('act_number', '')}"
+                    )
+                    print(f"       Act {act['act_number']}: {act_label}")
 
             # Step 2: Create build directory
             print("\n[STEP 2/8] Creating EPUB structure...")
@@ -526,6 +565,7 @@ class BuilderAgent:
                      metadata_translated.get('title_en') or 
                      manifest.get('title_en') or 
                      metadata_jp.get('title', ''))
+        book_title = self._coerce_text(book_title, "Unknown")
         lang_config = get_language_config(target_language)
         lang_code = lang_config.get('language_code', target_language)
 
@@ -541,12 +581,13 @@ class BuilderAgent:
         chapter_info = []  # For navigation
 
         for i, chapter in enumerate(chapters):
-            chapter_id = chapter.get('id', f'chapter_{i+1:02d}')
-            source_file = chapter.get('source_file', '')
+            chapter_id = self._coerce_text(chapter.get('id', f'chapter_{i+1:02d}'), f'chapter_{i+1:02d}')
+            source_file = self._coerce_text(chapter.get('source_file', ''), '')
             # Prioritize language-specific chapter title
             chapter_title_key = f'title_{target_language}'
             # v3.7 uses title_english, older versions use title_en
-            title = chapter.get(chapter_title_key) or chapter.get('title_english') or chapter.get('title_en') or chapter.get('title', f'Chapter {i+1}')
+            raw_title = chapter.get(chapter_title_key) or chapter.get('title_english') or chapter.get('title_en') or chapter.get('title', f'Chapter {i+1}')
+            title = self._coerce_text(raw_title, f'Chapter {i+1}')
 
             # Skip chapters without source files (e.g., cover, kuchie)
             if not source_file:
@@ -555,7 +596,8 @@ class BuilderAgent:
             # Look for translated file in language-specific dir first, then fallback
             # Use the target_language parameter (from manifest), not self.target_language (from config)
             lang_file_key = f'{target_language}_file'
-            translated_filename = chapter.get(lang_file_key) or chapter.get('translated_file', source_file)
+            translated_filename_raw = chapter.get(lang_file_key) or chapter.get('translated_file', source_file)
+            translated_filename = self._coerce_text(translated_filename_raw, source_file)
             translated_file = translated_dir / translated_filename
             jp_file = jp_dir / source_file
 
@@ -1030,10 +1072,11 @@ class BuilderAgent:
                 metadata_translated.get('title_en') or 
                 manifest.get('title_en') or 
                 metadata_jp.get('title', ''))
+        title = self._coerce_text(title, "Unknown")
         
         # Get UI strings from language config
         ui_strings = lang_config.get('ui_strings', {})
-        toc_title = ui_strings.get('toc_title', 'Table of Contents')
+        toc_title = self._coerce_text(ui_strings.get('toc_title', 'Table of Contents'), 'Table of Contents')
 
         manifest_items = []
 
@@ -1150,7 +1193,10 @@ class BuilderAgent:
                 act = ch_id_to_act.get(ch['id'])
                 if act and act['act_number'] != current_act_num:
                     current_act_num = act['act_number']
-                    act_label = act.get('title_en') or act.get('title', f"Act {current_act_num}")
+                    act_label = self._coerce_text(
+                        act.get('title_en') or act.get('title', f"Act {current_act_num}"),
+                        f"Act {current_act_num}"
+                    )
                     separator_href = f"act{current_act_num:03d}_separator.xhtml" if current_act_num >= 2 else ch['xhtml_filename']
                     toc_entries.append({
                         'href': separator_href,
@@ -1158,13 +1204,13 @@ class BuilderAgent:
                     })
                 toc_entries.append({
                     'href': ch['xhtml_filename'],
-                    'label': ch['title']
+                    'label': self._coerce_text(ch.get('title'), 'Chapter')
                 })
         else:
             for ch in chapter_info:
                 toc_entries.append({
                     'href': ch['xhtml_filename'],
-                    'label': ch['title']
+                    'label': self._coerce_text(ch.get('title'), 'Chapter')
                 })
 
         toc_path = paths.text_dir / "toc.xhtml"
@@ -1219,6 +1265,7 @@ class BuilderAgent:
                      metadata_translated.get('title_en') or
                      manifest.get('title_en') or
                      metadata_jp.get('title', ''))
+        book_title = self._coerce_text(book_title, "Unknown")
         
         # Get full kuchie list for global indexing
         kuchie_list = self._detect_kuchie_images(assets, manifest)
@@ -1230,7 +1277,10 @@ class BuilderAgent:
                 continue  # Act 1 handled in frontmatter
             
             act_num = act['act_number']
-            act_title = act.get('title_en') or act.get('title', f'Act {act_num}')
+            act_title = self._coerce_text(
+                act.get('title_en') or act.get('title', f'Act {act_num}'),
+                f'Act {act_num}'
+            )
             
             # 1. Generate act separator page
             separator_id = f"act-{act_num:03d}-separator"
@@ -1314,13 +1364,14 @@ class BuilderAgent:
                 metadata_translated.get('title_en') or 
                 manifest.get('title_en') or 
                 metadata_jp.get('title', ''))
+        title = self._coerce_text(title, "Unknown")
         identifier = manifest.get('volume_id', '')
         
         # Get UI strings from language config
         ui_strings = lang_config.get('ui_strings', {})
-        toc_title = ui_strings.get('toc_title', 'Table of Contents')
-        cover_title = ui_strings.get('cover_title', 'Cover')
-        start_content = ui_strings.get('start_content', 'Start of Content')
+        toc_title = self._coerce_text(ui_strings.get('toc_title', 'Table of Contents'), 'Table of Contents')
+        cover_title = self._coerce_text(ui_strings.get('cover_title', 'Cover'), 'Cover')
+        start_content = self._coerce_text(ui_strings.get('start_content', 'Start of Content'), 'Start of Content')
 
         manifest_items = []
 
@@ -1340,7 +1391,10 @@ class BuilderAgent:
             chapters_sorted = sorted(chapters_manifest, key=lambda c: c.get('toc_order', 999))
             
             for act in volume_acts:
-                act_title = act.get('title_en') or act.get('title', f"Act {act['act_number']}")
+                act_title = self._coerce_text(
+                    act.get('title_en') or act.get('title', f"Act {act['act_number']}"),
+                    f"Act {act['act_number']}"
+                )
                 first_idx = act.get('first_chapter_index', 0)
                 last_idx = act.get('last_chapter_index', len(chapters_sorted) - 1)
                 
@@ -1354,7 +1408,7 @@ class BuilderAgent:
                 for ch in chapter_info:
                     if ch['id'] in act_chapter_ids:
                         child_entries.append(TOCEntry(
-                            label=ch['title'],
+                            label=self._coerce_text(ch.get('title'), 'Chapter'),
                             href=ch['xhtml_filename']
                         ))
                 
@@ -1374,7 +1428,7 @@ class BuilderAgent:
             # Flat TOC (original behavior)
             for ch in chapter_info:
                 toc_entries.append(TOCEntry(
-                    label=ch['title'],
+                    label=self._coerce_text(ch.get('title'), 'Chapter'),
                     href=ch['xhtml_filename']
                 ))
 
@@ -1420,7 +1474,7 @@ class BuilderAgent:
         for ch in chapter_info:
             nav_points.append(NavPoint(
                 id=f"nav_{ch['id']}",
-                label=ch['title'],
+                label=self._coerce_text(ch.get('title'), 'Chapter'),
                 src=f"Text/{ch['xhtml_filename']}",
                 play_order=play_order
             ))
@@ -1540,16 +1594,25 @@ class BuilderAgent:
                 series_value = series_value.get(f'title_{target_language}') or series_value.get(target_language) or series_value.get('title_english') or series_value.get('english') or ''
         
         book_metadata = BookMetadata(
-            title=(metadata_translated.get(title_key) or 
-                  metadata_translated.get('title_en') or 
-                  manifest.get('title_en') or 
-                  jp_title),
-            author=metadata_translated.get(author_key) or metadata_translated.get('author_en') or jp_author,
+            title=self._coerce_text(
+                metadata_translated.get(title_key) or 
+                metadata_translated.get('title_en') or 
+                manifest.get('title_en') or 
+                jp_title,
+                'Unknown'
+            ),
+            author=self._coerce_text(
+                metadata_translated.get(author_key) or metadata_translated.get('author_en') or jp_author,
+                ''
+            ),
             language=language_code,
-            publisher=metadata_translated.get(publisher_key) or metadata_translated.get('publisher_en') or jp_publisher,
-            series=series_value,
+            publisher=self._coerce_text(
+                metadata_translated.get(publisher_key) or metadata_translated.get('publisher_en') or jp_publisher,
+                ''
+            ),
+            series=self._coerce_text(series_value, ''),
             series_index=series_index,
-            identifier=manifest.get('volume_id', '')
+            identifier=self._coerce_text(manifest.get('volume_id', ''), '')
         )
 
         # Build spine - order matters!

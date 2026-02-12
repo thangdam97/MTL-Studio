@@ -42,6 +42,9 @@ pipeline/chroma_sino_vn/
 pipeline/chroma_english_patterns/
 pipeline/chroma_vietnamese_patterns/
 
+# Bible data (large copyrighted text)
+pipeline/Bible/
+
 # ============================================
 # DOCUMENTATION - INTERNAL/DEVELOPMENT NOTES
 # ============================================

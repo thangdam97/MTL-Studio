@@ -296,6 +296,7 @@ class BibleSyncAgent:
             series_en = ""
 
         title_ja = str(metadata.get("title", "") or "").strip()
+        title_sort_ja = str(metadata.get("title_sort", "") or "").strip()
         title_en = str(metadata_en.get("title_en", "") or metadata.get("title_en", "") or "").strip()
         series_title_en = str(
             metadata_en.get("series_title_en", "")
@@ -303,16 +304,31 @@ class BibleSyncAgent:
             or series_en
             or ""
         ).strip()
+        source_epub = str(metadata.get("source_epub", "") or "").strip()
+        source_epub_stem = ""
+        if source_epub:
+            try:
+                source_epub_stem = Path(source_epub).stem.replace("_", " ").strip()
+            except Exception:
+                source_epub_stem = ""
 
-        canonical_series_ja = self._strip_volume_suffix(series_ja or title_ja)
-        canonical_series_en = self._strip_volume_suffix(series_title_en or title_en)
+        canonical_series_ja = self._strip_volume_suffix(series_ja)
+        canonical_series_en = self._strip_volume_suffix(series_title_en or series_en)
+        canonical_series_title_sort = self._strip_volume_suffix(title_sort_ja)
+        canonical_series_epub_stem = self._strip_volume_suffix(source_epub_stem)
+        canonical_title_ja = self._strip_volume_suffix(title_ja)
+        canonical_title_en = self._strip_volume_suffix(title_en)
 
         base_name = (
             explicit_bible_id
+            # OPF and librarian-derived canonical fields (highest priority)
             or canonical_series_ja
             or canonical_series_en
-            or self._strip_volume_suffix(title_en)
-            or self._strip_volume_suffix(title_ja)
+            or canonical_series_title_sort
+            or canonical_series_epub_stem
+            # Fallbacks
+            or canonical_title_ja
+            or canonical_title_en
         )
         if not base_name:
             return None
@@ -332,9 +348,12 @@ class BibleSyncAgent:
         for candidate in [
             canonical_series_ja,
             canonical_series_en,
-            self._strip_volume_suffix(title_ja),
-            self._strip_volume_suffix(title_en),
+            canonical_series_title_sort,
+            canonical_series_epub_stem,
+            canonical_title_ja,
+            canonical_title_en,
             series_base,
+            source_epub_stem,
         ]:
             text = str(candidate or "").strip()
             if text and text not in match_patterns:
@@ -378,6 +397,7 @@ class BibleSyncAgent:
 
         patterns = [
             r"\s*(?:Vol(?:ume)?\.?|VOL\.?)\s*[0-9０-９]+$",
+            r"\s*(?:Lv\.?|LV\.?|level)\s*[0-9０-９]+$",
             r"\s*[Vv]\s*[0-9０-９]+$",
             r"\s*第\s*[0-9０-９一二三四五六七八九十百千]+(?:巻|話|章)$",
             r"\s*[0-9０-９]+$",
@@ -547,9 +567,46 @@ class BibleSyncAgent:
         result = BiblePushResult()
         metadata_en = manifest.get('metadata_en', {})
 
-        # ── Push character_names ─────────────────────────────────
+        # ── Push character names ─────────────────────────────────
+        # Primary source: metadata_en.character_names
+        # Fallback source: metadata_en.character_profiles (v3 flow may keep character_names empty)
         char_names = metadata_en.get('character_names', {})
-        for jp_name, en_name in char_names.items():
+        if not isinstance(char_names, dict):
+            char_names = {}
+        profiles = metadata_en.get('character_profiles', {})
+        if not isinstance(profiles, dict):
+            profiles = {}
+
+        derived_names: Dict[str, str] = {}
+        for profile_key, profile_data in profiles.items():
+            if not isinstance(profile_data, dict):
+                continue
+            full_name = str(profile_data.get('full_name', '')).strip()
+            if not full_name:
+                continue
+
+            jp_name = None
+            if re.search(r'[\u3040-\u30ff\u4e00-\u9fff]', profile_key):
+                jp_name = profile_key
+            else:
+                ruby_base = str(profile_data.get('ruby_base', '')).strip()
+                if ruby_base and re.search(r'[\u3040-\u30ff\u4e00-\u9fff]', ruby_base):
+                    jp_name = ruby_base
+
+            if not jp_name or jp_name in char_names:
+                continue
+            derived_names[jp_name] = full_name
+
+        if derived_names:
+            logger.info(
+                f"   Derived {len(derived_names)} character names from character_profiles "
+                "(character_names fallback)."
+            )
+
+        combined_char_names = dict(char_names)
+        combined_char_names.update(derived_names)
+
+        for jp_name, en_name in combined_char_names.items():
             if not isinstance(en_name, str) or not en_name.strip():
                 continue
 
@@ -568,14 +625,17 @@ class BibleSyncAgent:
                 # New character — add to bible
                 self.bible.add_entry('characters', jp_name, {
                     'canonical_en': en_name,
-                    'source': 'phase1.5_auto_sync',
+                    'source': (
+                        'phase1.5_auto_sync_profiles'
+                        if jp_name in derived_names
+                        else 'phase1.5_auto_sync'
+                    ),
                     'discovered_in': manifest.get('volume_id', ''),
                 })
                 result.characters_added += 1
                 logger.debug(f"   New character: {jp_name} → {en_name}")
 
         # ── Enrich with character_profiles ───────────────────────
-        profiles = metadata_en.get('character_profiles', {})
         for profile_key, profile_data in profiles.items():
             if not isinstance(profile_data, dict):
                 continue

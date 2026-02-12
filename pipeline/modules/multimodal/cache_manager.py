@@ -145,7 +145,7 @@ class VisualCacheManager:
             return {}
 
         status = entry.get("status", "unknown")
-        if status in ("cached", "manual_override", "safety_blocked"):
+        if status in ("cached", "manual_override", "safety_blocked", "needs_review"):
             return entry.get("visual_ground_truth", {})
 
         return {}
@@ -156,9 +156,23 @@ class VisualCacheManager:
         entry = self.cache.get(resolved_id, {})
         return entry.get("spoiler_prevention", {})
 
+    def get_identity_resolution(self, illustration_id: str) -> Dict[str, Any]:
+        """Get normalized identity resolution payload for a specific illustration."""
+        resolved_id = self._resolve_id(illustration_id)
+        entry = self.cache.get(resolved_id, {})
+        identity = entry.get("identity_resolution", {})
+        return identity if isinstance(identity, dict) else {}
+
+    def get_validation(self, illustration_id: str) -> Dict[str, Any]:
+        """Get validation metadata (identity consistency, candidates) for a specific illustration."""
+        resolved_id = self._resolve_id(illustration_id)
+        entry = self.cache.get(resolved_id, {})
+        validation = entry.get("validation", {})
+        return validation if isinstance(validation, dict) else {}
+
     def get_cache_stats(self) -> Dict[str, int]:
         """Get summary statistics of cache contents."""
-        stats = {"total": 0, "cached": 0, "safety_blocked": 0, "manual_override": 0}
+        stats = {"total": 0, "cached": 0, "safety_blocked": 0, "manual_override": 0, "needs_review": 0}
         for entry in self.cache.values():
             stats["total"] += 1
             if not isinstance(entry, dict):
@@ -187,12 +201,17 @@ class VisualCacheManager:
 
     @staticmethod
     def should_regenerate(
-        entry: Optional[Dict], current_key: Dict[str, str], max_age_days: int = 90
+        entry: Optional[Dict],
+        current_key: Dict[str, str],
+        max_age_days: int = 90,
+        force_override: bool = False,
     ) -> bool:
         """Determine if a cached analysis needs regeneration."""
         if not entry:
             return True
-        if entry.get("status") == "manual_override":
+        if not force_override and entry.get("status") == "manual_override":
+            return False
+        if not force_override and entry.get("override_lock", False):
             return False
 
         cached_key = entry.get("cache_key", {})

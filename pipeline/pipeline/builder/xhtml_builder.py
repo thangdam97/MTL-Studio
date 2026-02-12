@@ -10,6 +10,7 @@ Path convention: Uses OEBPS standard paths (../Styles/)
 import re
 from pathlib import Path
 from html import escape
+from typing import Any
 
 from .config import get_epub_version
 
@@ -19,6 +20,41 @@ CSS_PATH = "../Styles/stylesheet.css"
 
 class XHTMLBuilder:
     """Builds XHTML files with content following industry standards."""
+
+    @staticmethod
+    def _coerce_text(value: Any, fallback: str = "") -> str:
+        """
+        Convert mixed manifest values (str/dict/list/etc.) into safe text.
+        """
+        if value is None:
+            return fallback
+        if isinstance(value, str):
+            text = value.strip()
+            return text if text else fallback
+        if isinstance(value, (int, float, bool)):
+            return str(value)
+        if isinstance(value, dict):
+            preferred_keys = (
+                "title_en", "title_english", "english", "title",
+                "name", "label", "text", "value", "romaji",
+                "title_jp", "japanese"
+            )
+            for key in preferred_keys:
+                if key in value:
+                    candidate = XHTMLBuilder._coerce_text(value.get(key), "")
+                    if candidate:
+                        return candidate
+            for candidate in value.values():
+                normalized = XHTMLBuilder._coerce_text(candidate, "")
+                if normalized:
+                    return normalized
+            return fallback
+        if isinstance(value, (list, tuple)):
+            parts = [XHTMLBuilder._coerce_text(v, "") for v in value]
+            parts = [p for p in parts if p]
+            return " / ".join(parts) if parts else fallback
+        text = str(value).strip()
+        return text if text else fallback
 
     @staticmethod
     def build_chapter_xhtml(
@@ -41,14 +77,16 @@ class XHTMLBuilder:
         Returns:
             Complete XHTML document string
         """
-        escaped_title = escape(chapter_title) if chapter_title else ""
-        section_id = chapter_id if chapter_id else "chapter"
-        page_title = escape(book_title) if book_title else escaped_title or "Chapter"
+        chapter_title_text = XHTMLBuilder._coerce_text(chapter_title, "")
+        escaped_title = escape(chapter_title_text) if chapter_title_text else ""
+        section_id = XHTMLBuilder._coerce_text(chapter_id, "chapter") or "chapter"
+        book_title_text = XHTMLBuilder._coerce_text(book_title, "")
+        page_title = escape(book_title_text) if book_title_text else escaped_title or "Chapter"
         epub_version = get_epub_version()
 
         # Build chapter title if provided
         title_html = ""
-        if chapter_title:
+        if chapter_title_text:
             title_html = f'      <h1>{escaped_title}</h1>\n\n'
 
         if epub_version == "EPUB3":

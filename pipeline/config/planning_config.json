@@ -1,0 +1,76 @@
+{
+  "version": "1.0",
+  "description": "Scene planning configuration for v1.6 Stage 1 narrative scaffolding",
+  "beat_types": {
+    "setup": {
+      "description": "Establish context, character positions, mood",
+      "target_rhythm": "10-12 words",
+      "priority": "low"
+    },
+    "escalation": {
+      "description": "Increase tension, raise stakes, compress prose",
+      "target_rhythm": "6-8 words",
+      "priority": "high"
+    },
+    "punchline": {
+      "description": "Comedic payoff and expectation subversion",
+      "target_rhythm": "3-5 words",
+      "priority": "critical"
+    },
+    "pivot": {
+      "description": "Emotional direction shift",
+      "target_rhythm": "15-20 words",
+      "priority": "high"
+    },
+    "illustration_anchor": {
+      "description": "Visual beat where image carries narrative weight",
+      "target_rhythm": "3-5 words",
+      "priority": "critical"
+    }
+  },
+  "dialogue_registers": {
+    "casual_teen": "Contemporary casual voice with contractions",
+    "flustered_defense": "Denial fragments and interrupted phrasing",
+    "smug_teasing": "Short victory fragments and playful pressure",
+    "formal_request": "Polite complete phrasing",
+    "breathless_shock": "Compressed reactions with breaks"
+  },
+  "rhythm_targets": {
+    "short_fragments": {
+      "word_range": "4-6 words",
+      "use_cases": [
+        "shock reactions",
+        "banter",
+        "punchlines",
+        "gaming commands"
+      ]
+    },
+    "medium_casual": {
+      "word_range": "8-10 words",
+      "use_cases": [
+        "casual conversation",
+        "offers",
+        "questions",
+        "MMO strategy"
+      ]
+    },
+    "long_confession": {
+      "word_range": "15-20 words",
+      "use_cases": [
+        "emotional pivots",
+        "vulnerability",
+        "sincere admissions"
+      ]
+    }
+  },
+  "character_emotional_states": [
+    "smug_teasing_victory",
+    "flustered_denial",
+    "vulnerable_confession",
+    "angry_confrontation",
+    "playful_banter",
+    "sincere_concern",
+    "embarrassed_retreat"
+  ]
+}
+

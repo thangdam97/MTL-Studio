@@ -1077,6 +1077,13 @@ class PromptLoader:
             logger.info(f"✓ Anti-AI-ism enforcement active: {', '.join(anti_ai_ism_injected)}")
         else:
             logger.warning("⚠ No anti-AI-ism modules injected into system instruction")
+
+        # Inject hard anti-AI-ism policy at TOP (prompt-time enforcement only, no post-healing)
+        if anti_ai_ism_data and self.target_language in ['en', 'english']:
+            hard_policy = self._format_hard_anti_ai_ism_policy(anti_ai_ism_data, self._semantic_metadata)
+            if hard_policy:
+                final_prompt = f"<!-- HARD ANTI-AI-ISM POLICY -->\n{hard_policy}\n\n{final_prompt}"
+                logger.info("✓ Injected hard anti-AI-ism policy block at TOP of system instruction")
         
         # LEGACY CHARACTER NAME INJECTION DISABLED (v3 Enhanced Schema)
         # Character names are now loaded via character_profiles in semantic_metadata
@@ -1961,6 +1968,79 @@ class PromptLoader:
         lines.append(f"**Failure Condition:** AI-ism density >{target_density}/1k words = Below professional standard.\n")
         
         return "\n".join(lines)
+
+    def _format_hard_anti_ai_ism_policy(
+        self,
+        anti_ai_ism_data: Dict[str, Any],
+        semantic_metadata: Optional[Dict[str, Any]] = None
+    ) -> str:
+        """
+        Build a concise, high-priority anti-AI-ism policy block for top-of-prompt injection.
+
+        This is prompt-time enforcement only (self-healing remains disabled by design).
+        """
+        lines = ["## 🔒 HARD ANTI-AI-ISM OUTPUT POLICY\n"]
+        lines.append("Treat this as binding output policy, not optional style advice.\n")
+
+        lines.append("### Non-Negotiable Rules")
+        lines.append("1. Output ZERO CRITICAL anti-AI-ism patterns.")
+        lines.append("2. Minimize MAJOR anti-AI-ism patterns aggressively.")
+        lines.append("3. Rewrite any flagged phrase before final output; do not explain, just fix.")
+        lines.append("4. Prefer direct verbs, concrete phrasing, and concise modern rhythm.\n")
+        lines.append("5. Keep CRITICAL+MAJOR anti-AI-ism count <= 5 per chapter.\n")
+
+        critical_patterns = anti_ai_ism_data.get('CRITICAL', {}).get('patterns', [])
+        if isinstance(critical_patterns, list) and critical_patterns:
+            lines.append("### CRITICAL Patterns (Never Output)")
+            for p in critical_patterns[:12]:
+                if not isinstance(p, dict):
+                    continue
+                display = p.get('display', '').strip()
+                fix = p.get('fix', '').strip()
+                if display and fix:
+                    lines.append(f"- `{display}` -> {fix}")
+                elif display:
+                    lines.append(f"- `{display}`")
+            lines.append("")
+
+        # Pull project-level overrides from semantic metadata translation guidelines, if available.
+        guidelines = {}
+        if isinstance(semantic_metadata, dict):
+            maybe = semantic_metadata.get('translation_guidelines', {})
+            if isinstance(maybe, dict):
+                guidelines = maybe
+
+        forbidden = guidelines.get('forbidden_patterns', [])
+        if isinstance(forbidden, list) and forbidden:
+            lines.append("### Project Forbidden Patterns (Volume Override)")
+            for item in forbidden[:20]:
+                lines.append(f"- `{item}`")
+            lines.append("")
+
+        preferred = guidelines.get('preferred_alternatives', {})
+        if isinstance(preferred, dict) and preferred:
+            lines.append("### Project Preferred Alternatives")
+            for bad, replacement in list(preferred.items())[:12]:
+                if isinstance(replacement, list):
+                    replacement_str = ", ".join(str(x) for x in replacement[:3])
+                else:
+                    replacement_str = str(replacement)
+                lines.append(f"- `{bad}` -> {replacement_str}")
+            lines.append("")
+
+        target_metrics = guidelines.get('target_metrics', {})
+        if isinstance(target_metrics, dict) and target_metrics:
+            lines.append("### Project Quality Targets")
+            for k, v in target_metrics.items():
+                lines.append(f"- `{k}`: `{v}`")
+            lines.append("")
+
+        lines.append("### Final Self-Check (Before Responding)")
+        lines.append("- Scan draft for CRITICAL patterns and remove all.")
+        lines.append("- Replace MAJOR filter phrases (e.g., seemed to, started to, couldn't help but) where natural.")
+        lines.append("- Keep tone/honorific consistency while de-AI-ising phrasing.\n")
+
+        return "\n".join(lines)
     
     def _format_english_grammar_rag_for_injection(self, grammar_rag_data: Dict[str, Any]) -> str:
         """
@@ -2157,6 +2237,48 @@ class PromptLoader:
                 preserve_strengths = mmo_profile.get('preserve_strengths', [])
                 if preserve_strengths:
                     lines.append(f"- Preserve strengths: {', '.join(preserve_strengths[:3])}")
+                lines.append("")
+
+            # Concrete 9-10 word dialogue anchors for live generation
+            target_examples = rhythm.get('target_length_dialogue_examples', {})
+            if target_examples:
+                lines.append("### Target-Length Dialogue Anchors (9-10 words)")
+                target_range = target_examples.get('target_word_range', {})
+                min_words = target_range.get('min')
+                max_words = target_range.get('max')
+                if min_words is not None and max_words is not None:
+                    lines.append(f"- Preferred range: {min_words}-{max_words} words")
+                use_case = target_examples.get('use_case', '')
+                if use_case:
+                    lines.append(f"- Use case: {use_case}")
+
+                real_world = target_examples.get('real_world_successes_0116', [])
+                if real_world:
+                    lines.append("- Validated examples:")
+                    for ex in real_world[:5]:
+                        text = ex.get('text', '')
+                        word_count = ex.get('word_count')
+                        if text and word_count is not None:
+                            lines.append(f"  - ({word_count}w) \"{text}\"")
+
+                curated = target_examples.get('curated_examples', {})
+                if curated:
+                    lines.append("- Curated pattern anchors:")
+                    for category, entries in curated.items():
+                        if not entries:
+                            continue
+                        label = category.replace('_', ' ')
+                        first = entries[0]
+                        text = first.get('text', '')
+                        word_count = first.get('word_count')
+                        if text and word_count is not None:
+                            lines.append(f"  - {label}: ({word_count}w) \"{text}\"")
+
+                guardrails = target_examples.get('guardrails', [])
+                if guardrails:
+                    lines.append("- Guardrails:")
+                    for rule in guardrails[:3]:
+                        lines.append(f"  - {rule}")
                 lines.append("")
 
         lines.append("## 🔗 INTERLOCK WITH LITERACY TECHNIQUES")

@@ -2,7 +2,7 @@
 Visual Asset Processor (Phase 1.6).
 
 Pre-bakes visual analysis for all illustrations in a volume using
-Gemini 3 Pro Vision with ThinkingConfig enabled.
+Gemini 3 Multimodal Vision with ThinkingConfig enabled.
 
 This is the "Art Director" component of the CPU+GPU architecture.
 It runs ONCE per volume and produces visual_cache.json containing
@@ -21,11 +21,11 @@ Usage:
 
 import json
 import time
-import base64
 import logging
+import re
 from pathlib import Path
 from datetime import datetime
-from typing import Dict, Any, Optional, List
+from typing import Dict, Any, Optional, List, Tuple
 
 from modules.multimodal.cache_manager import VisualCacheManager
 from modules.multimodal.thought_logger import ThoughtLogger, VisualAnalysisLog
@@ -48,7 +48,7 @@ Provide a structured analysis as JSON:
    plot details visible in the image that the text hasn't confirmed yet
 6. "identity_resolution": Object with:
    - "recognized_characters": array of objects:
-       {"canonical_name": "...", "japanese_name": "...", "non_color_evidence": ["..."]}
+       {"canonical_name": "...", "japanese_name": "...", "confidence": 0.0-1.0, "non_color_evidence": ["..."]}
    - "unresolved_characters": array of brief descriptors if identity remains uncertain
 
 Output ONLY the JSON object. No commentary or explanation.
@@ -66,7 +66,8 @@ class VisualAssetProcessor:
         api_key: Optional[str] = None,
         rate_limit_seconds: float = 3.0,
         max_retries: int = 3,
-        timeout_seconds: float = 120.0
+        timeout_seconds: float = 120.0,
+        force_override: bool = False,
     ):
         self.volume_path = volume_path
         self.model = model
@@ -76,6 +77,7 @@ class VisualAssetProcessor:
         self.rate_limit_seconds = rate_limit_seconds
         self.max_retries = max_retries
         self.timeout_seconds = timeout_seconds
+        self.force_override = force_override
 
         if not self.api_key and self.backend == "developer":
             raise ValueError(
@@ -170,6 +172,338 @@ class VisualAssetProcessor:
             logger.debug(f"[PHASE 1.6] Could not load bible identities: {e}")
         return {}
 
+    def _manifest_chapters(self) -> List[Dict[str, Any]]:
+        """Return normalized manifest chapter list."""
+        manifest = self.cache_manager.get_manifest()
+        if not isinstance(manifest, dict):
+            return []
+        chapters = manifest.get("chapters", [])
+        if not isinstance(chapters, list) or not chapters:
+            structure = manifest.get("structure", {})
+            if isinstance(structure, dict):
+                chapters = structure.get("chapters", [])
+        return chapters if isinstance(chapters, list) else []
+
+    def _chapter_for_illustration(self, image_name: str) -> Optional[Dict[str, Any]]:
+        """Find chapter metadata entry that owns this illustration."""
+        image_stem = Path(image_name).stem
+        for chapter in self._manifest_chapters():
+            if not isinstance(chapter, dict):
+                continue
+            illustrations = chapter.get("illustrations", [])
+            if not isinstance(illustrations, list):
+                continue
+            for ill in illustrations:
+                ill_name = str(ill).strip()
+                if not ill_name:
+                    continue
+                if ill_name == image_name or Path(ill_name).stem == image_stem:
+                    return chapter
+        return None
+
+    def _scene_local_candidates(self, img_path: Path) -> Tuple[List[Dict[str, Any]], Optional[str]]:
+        """
+        Build scene-local identity candidates from JP text near the illustration marker.
+
+        Returns tuple:
+            - candidate list
+            - source anchor string
+        """
+        chapter = self._chapter_for_illustration(img_path.name)
+        if not chapter:
+            return [], None
+
+        source_file = str(chapter.get("source_file", "")).strip()
+        if not source_file:
+            return [], None
+
+        jp_path = self.volume_path / "JP" / source_file
+        if not jp_path.exists():
+            return [], None
+
+        try:
+            lines = jp_path.read_text(encoding="utf-8").splitlines()
+        except Exception:
+            return [], None
+
+        marker_idx = None
+        marker_tokens = [img_path.name, img_path.stem, f"![illustration]({img_path.name})"]
+        for i, line in enumerate(lines):
+            if any(tok in line for tok in marker_tokens):
+                marker_idx = i
+                break
+
+        if marker_idx is None:
+            return [], None
+
+        window_start = max(0, marker_idx - 40)
+        window_end = min(len(lines), marker_idx + 41)
+        scene_text_raw = "\n".join(lines[window_start:window_end])
+        # Strip ruby annotations: 笠{かさ}原 -> 笠原
+        scene_text = re.sub(r"\{[^{}]*\}", "", scene_text_raw)
+
+        manifest = self.cache_manager.get_manifest()
+        metadata_en = manifest.get("metadata_en", {}) if isinstance(manifest, dict) else {}
+        profiles = metadata_en.get("character_profiles", {}) if isinstance(metadata_en, dict) else {}
+        if not isinstance(profiles, dict):
+            return [], None
+
+        candidates: List[Dict[str, Any]] = []
+        for jp_name, profile in profiles.items():
+            if jp_name == "Unknown" or not isinstance(profile, dict):
+                continue
+
+            ruby_base = str(profile.get("ruby_base", "")).strip()
+            alias_tokens: List[str] = []
+            # JP key might already be Japanese in some manifests
+            if any(ord(ch) > 127 for ch in str(jp_name)):
+                alias_tokens.append(str(jp_name))
+            if ruby_base:
+                alias_tokens.append(ruby_base)
+                if len(ruby_base) >= 2:
+                    alias_tokens.append(ruby_base[:2])  # likely surname form
+                if len(ruby_base) == 2:
+                    alias_tokens.append(ruby_base[:1])  # e.g., 林恵 -> 林
+
+            matched = False
+            for token in {t.strip() for t in alias_tokens if t and t.strip()}:
+                if len(token) == 1:
+                    if re.search(rf"{re.escape(token)}(?:さん|君|ちゃん|くん|は|が|を|に|と|、|。|！|？)", scene_text):
+                        matched = True
+                        break
+                else:
+                    if token in scene_text:
+                        matched = True
+                        break
+            if not matched:
+                continue
+
+            canonical_name = str(profile.get("full_name", "")).strip()
+            if not canonical_name:
+                continue
+            visual_non_color = profile.get("visual_identity_non_color")
+            candidates.append({
+                "canonical_name": canonical_name,
+                "japanese_name": ruby_base or jp_name,
+                "visual_identity_non_color": visual_non_color if isinstance(visual_non_color, (dict, list, str)) else "",
+            })
+
+        source_anchor = f"{source_file}:{marker_idx + 1}"
+        return candidates, source_anchor
+
+    @staticmethod
+    def _format_identity_hint(identity_value: Any) -> str:
+        """Render compact non-color identity hint."""
+        if isinstance(identity_value, str):
+            return identity_value.strip()[:200]
+        if isinstance(identity_value, list):
+            vals = [str(v).strip() for v in identity_value if str(v).strip()]
+            return ", ".join(vals[:4])[:200]
+        if isinstance(identity_value, dict):
+            chunks: List[str] = []
+            for key in ("hairstyle", "clothing_signature", "expression_signature", "posture_signature", "identity_summary"):
+                value = identity_value.get(key)
+                if isinstance(value, str) and value.strip():
+                    chunks.append(value.strip())
+                elif isinstance(value, list):
+                    vals = [str(v).strip() for v in value if str(v).strip()]
+                    if vals:
+                        chunks.append(", ".join(vals[:3]))
+            return " | ".join(chunks[:3])[:220]
+        return ""
+
+    def _build_scene_candidate_prompt(
+        self,
+        img_path: Path,
+    ) -> Tuple[str, List[str], bool, Optional[str]]:
+        """
+        Build scene-local candidate prompt block.
+
+        Returns tuple:
+            - prompt block string
+            - allowed canonical names
+            - multi-character expected signal
+            - source anchor
+        """
+        candidates, source_anchor = self._scene_local_candidates(img_path)
+        if not candidates:
+            return "", [], False, source_anchor
+
+        allowed_names = [c["canonical_name"] for c in candidates if c.get("canonical_name")]
+        multi_expected = len(allowed_names) >= 2
+
+        lines = [
+            "=== SCENE-LOCAL IDENTITY CANDIDATES (RAW TEXT ANCHOR) ===",
+            "Raw text near this illustration is canonical for who is present.",
+            "Use ONLY the following canonical names for recognized_characters in this scene.",
+            "If uncertain, keep unresolved_characters and DO NOT guess outside this list.",
+        ]
+        if source_anchor:
+            lines.append(f"Source anchor: {source_anchor}")
+        for c in candidates[:10]:
+            canonical = c.get("canonical_name", "")
+            jp = c.get("japanese_name", "")
+            lines.append(f"- {canonical} [{jp}]")
+            hint = self._format_identity_hint(c.get("visual_identity_non_color"))
+            if hint:
+                lines.append(f"  non-color-id: {hint}")
+
+        lines.extend([
+            "SOURCE OF TRUTH: Multimodal is descriptive only; raw text is canonical truth.",
+            "=== END SCENE-LOCAL CANDIDATES ===",
+        ])
+        return "\n".join(lines), allowed_names, multi_expected, source_anchor
+
+    @staticmethod
+    def _coerce_identity_resolution(identity_resolution: Any) -> Dict[str, Any]:
+        """Normalize identity_resolution to stable schema."""
+        result = {"recognized_characters": [], "unresolved_characters": []}
+        if not isinstance(identity_resolution, dict):
+            return result
+
+        recognized = identity_resolution.get("recognized_characters", [])
+        if isinstance(recognized, list):
+            for item in recognized:
+                if not isinstance(item, dict):
+                    continue
+                canonical = str(item.get("canonical_name", "")).strip()
+                if not canonical:
+                    continue
+                jp = str(item.get("japanese_name", "")).strip()
+                confidence_raw = item.get("confidence", 0.0)
+                try:
+                    confidence = float(confidence_raw)
+                except Exception:
+                    confidence = 0.0
+                evidence = item.get("non_color_evidence", [])
+                if not isinstance(evidence, list):
+                    evidence = []
+                evidence = [str(v).strip() for v in evidence if str(v).strip()][:6]
+                result["recognized_characters"].append({
+                    "canonical_name": canonical,
+                    "japanese_name": jp,
+                    "confidence": max(0.0, min(1.0, confidence)),
+                    "non_color_evidence": evidence,
+                })
+
+        unresolved = identity_resolution.get("unresolved_characters", [])
+        if isinstance(unresolved, list):
+            result["unresolved_characters"] = [str(v).strip() for v in unresolved if str(v).strip()][:8]
+        return result
+
+    @staticmethod
+    def _infer_multi_character_expected(
+        visual_ground_truth: Dict[str, Any],
+        scene_multi_signal: bool,
+    ) -> bool:
+        """Infer whether multi-character identity resolution should be present."""
+        if scene_multi_signal:
+            return True
+        composition = str(visual_ground_truth.get("composition", "")).lower()
+        cues = (
+            "two characters",
+            "both characters",
+            "across from each other",
+            "handshake",
+            "face-off",
+            "pair shot",
+        )
+        return any(cue in composition for cue in cues)
+
+    def _validate_identity_resolution(
+        self,
+        identity_resolution: Dict[str, Any],
+        *,
+        allowed_names: List[str],
+        multi_expected: bool,
+        text_mentions: Optional[List[str]] = None,
+    ) -> Tuple[Dict[str, Any], Dict[str, Any]]:
+        """
+        Validate and sanitize identity_resolution against scene-local candidates.
+        """
+        normalized = self._coerce_identity_resolution(identity_resolution)
+        recognized = normalized.get("recognized_characters", [])
+        unresolved = normalized.get("unresolved_characters", [])
+
+        allowed_set = {str(n).strip() for n in allowed_names if str(n).strip()}
+        out_of_candidate: List[str] = []
+        if allowed_set:
+            kept = []
+            for item in recognized:
+                canonical = str(item.get("canonical_name", "")).strip()
+                if canonical in allowed_set:
+                    kept.append(item)
+                else:
+                    out_of_candidate.append(canonical)
+                    unresolved.append(f"out_of_candidate:{canonical}")
+            recognized = kept
+            normalized["recognized_characters"] = recognized
+            normalized["unresolved_characters"] = sorted(set(unresolved))
+
+        recognized_names = sorted({str(item.get("canonical_name", "")).strip() for item in recognized if str(item.get("canonical_name", "")).strip()})
+        text_mentioned_names = sorted({str(n).strip() for n in (text_mentions or []) if str(n).strip()})
+
+        status = "pass"
+        reason = "ok"
+        if out_of_candidate:
+            status = "fail"
+            reason = "out_of_candidate_names"
+        elif recognized_names and text_mentioned_names and set(recognized_names) != set(text_mentioned_names):
+            status = "fail"
+            reason = "text_vs_identity_conflict"
+        elif multi_expected and not recognized:
+            status = "fail"
+            reason = "missing_recognized_for_multi_character_scene"
+        elif multi_expected and len(recognized) == 1:
+            status = "warn"
+            reason = "single_recognized_for_multi_character_scene"
+        elif not allowed_set:
+            status = "warn"
+            reason = "no_scene_local_candidates_available"
+
+        validation = {
+            "identity_consistency": {
+                "status": status,
+                "reason": reason,
+                "out_of_candidate_names": out_of_candidate,
+                "text_mentioned_names": text_mentioned_names,
+                "recognized_names": recognized_names,
+            },
+            "recognized_count": len(recognized),
+            "multi_character_expected": bool(multi_expected),
+            "allowed_candidates": sorted(allowed_set),
+            "checked_at": datetime.now().isoformat(),
+        }
+        return normalized, validation
+
+    @staticmethod
+    def _extract_canonical_mentions_from_visual(
+        visual_ground_truth: Dict[str, Any],
+        candidate_names: List[str],
+    ) -> List[str]:
+        """Extract canonical name mentions from visual fields for consistency checks."""
+        if not isinstance(visual_ground_truth, dict) or not candidate_names:
+            return []
+        chunks: List[str] = [
+            str(visual_ground_truth.get("composition", "")),
+            str(visual_ground_truth.get("emotional_delta", "")),
+        ]
+        key_details = visual_ground_truth.get("key_details", {})
+        if isinstance(key_details, dict):
+            chunks.extend(str(v) for v in key_details.values())
+        directives = visual_ground_truth.get("narrative_directives", [])
+        if isinstance(directives, list):
+            chunks.extend(str(v) for v in directives)
+        text = "\n".join(chunks)
+
+        mentions: List[str] = []
+        for name in candidate_names:
+            if not name:
+                continue
+            if re.search(rf"\b{re.escape(name)}\b", text):
+                mentions.append(name)
+        return sorted(set(mentions))
+
     @property
     def genai_client(self):
         """Lazy initialization of Gemini client."""
@@ -216,7 +550,7 @@ class VisualAssetProcessor:
             logger.error(f"[PHASE 1.6] No assets directory found in {self.volume_path}")
             return {"error": "No assets directory found"}
 
-        illustrations: List[Path] = []
+        inline_illustrations: List[Path] = []
 
         # Patterns to EXCLUDE from illustration inventory
         EXCLUDE_PATTERNS = {'cover', 'gaiji-', 'i-bookwalker', '_title'}
@@ -244,14 +578,14 @@ class VisualAssetProcessor:
                         logger.debug(f"[PHASE 1.6]   Skipped (kuchie): {img_file.name}")
                         continue
                     logger.debug(f"[PHASE 1.6]   Added illustration: {img_file.name}")
-                    illustrations.append(img_file)
-                if illustrations:
-                    logger.info(f"[PHASE 1.6] Found {len(illustrations)} inline illustration(s)")
+                    inline_illustrations.append(img_file)
+                if inline_illustrations:
+                    logger.info(f"[PHASE 1.6] Found {len(inline_illustrations)} inline illustration(s)")
                     break
 
         # 2. Kuchie color plates: _assets/kuchie/ or _assets/illustrations/
         # Accept both kuchie-NNN and k### naming patterns
-        kuchie_files = []
+        kuchie_files: List[Path] = []
         kuchie_dir = assets_dir / "kuchie"
         if kuchie_dir.exists():
             for img_file in sorted(kuchie_dir.glob("*.*")):
@@ -267,22 +601,38 @@ class VisualAssetProcessor:
                 if any(stem_lower.startswith(pattern) for pattern in KUCHIE_PATTERNS):
                     if img_file not in kuchie_files:  # Avoid duplicates
                         kuchie_files.append(img_file)
-            if kuchie_files:
-                logger.info(f"[PHASE 1.6] Found {len(kuchie_files)} kuchie color plate(s)")
-                illustrations.extend(kuchie_files)
+        if kuchie_files:
+            logger.info(f"[PHASE 1.6] Found {len(kuchie_files)} kuchie color plate(s)")
 
         # 3. Cover art: _assets/cover.*
+        cover_files: List[Path] = []
         for cover_path in assets_dir.glob("cover.*"):
             if cover_path.suffix.lower() in (".jpg", ".jpeg", ".png"):
                 logger.info(f"[PHASE 1.6] Found cover art: {cover_path.name}")
-                illustrations.append(cover_path)
+                cover_files.append(cover_path)
                 break
+
+        # Processing priority:
+        # 1) Kuchie (color plates) first for strongest identity grounding
+        # 2) Inline illustrations
+        # 3) Cover art
+        illustrations: List[Path] = []
+        seen_paths = set()
+        for img_path in kuchie_files + inline_illustrations + cover_files:
+            resolved = str(img_path.resolve())
+            if resolved in seen_paths:
+                continue
+            seen_paths.add(resolved)
+            illustrations.append(img_path)
 
         if not illustrations:
             logger.warning(f"[PHASE 1.6] No illustrations found in {assets_dir}")
             return {"total": 0, "cached": 0, "generated": 0, "blocked": 0}
 
         logger.info(f"[PHASE 1.6] Found {len(illustrations)} illustrations to process")
+        logger.info(
+            "[PHASE 1.6] Processing priority: kuchie (color) -> inline illustrations -> cover"
+        )
         if self.identity_lock_status.get("enabled"):
             logger.info(
                 "[PHASE 1.6] Identity lock active BEFORE analysis: "
@@ -299,9 +649,15 @@ class VisualAssetProcessor:
                 img_path, self.analysis_prompt, self.model
             )
 
+            scene_prompt, allowed_candidates, scene_multi_expected, source_anchor = self._build_scene_candidate_prompt(img_path)
+
             # Check if regeneration needed
             existing_entry = self.cache_manager.cache.get(illust_id)
-            if not VisualCacheManager.should_regenerate(existing_entry, current_key):
+            if not VisualCacheManager.should_regenerate(
+                existing_entry,
+                current_key,
+                force_override=self.force_override,
+            ):
                 status = existing_entry.get("status", "cached")
                 logger.info(f"  [SKIP] {illust_id}: Using existing cache (status={status})")
                 stats["cached"] += 1
@@ -312,27 +668,59 @@ class VisualAssetProcessor:
             start_time = time.time()
 
             try:
-                analysis = self._analyze_illustration(img_path)
+                analysis = self._analyze_illustration(img_path, prompt_override=scene_prompt)
                 elapsed = time.time() - start_time
 
-                if analysis.get("status") == "safety_blocked":
+                visual_ground_truth = analysis.get("visual_ground_truth", {})
+                identity_resolution = analysis.get("identity_resolution", {})
+                multi_expected = self._infer_multi_character_expected(
+                    visual_ground_truth if isinstance(visual_ground_truth, dict) else {},
+                    scene_multi_expected,
+                )
+                text_mentions = self._extract_canonical_mentions_from_visual(
+                    visual_ground_truth if isinstance(visual_ground_truth, dict) else {},
+                    allowed_candidates,
+                )
+                identity_resolution, validation = self._validate_identity_resolution(
+                    identity_resolution if isinstance(identity_resolution, dict) else {},
+                    allowed_names=allowed_candidates,
+                    multi_expected=multi_expected,
+                    text_mentions=text_mentions,
+                )
+
+                final_status = analysis.get("status", "cached")
+                if (
+                    final_status == "cached"
+                    and validation.get("identity_consistency", {}).get("status") == "fail"
+                ):
+                    final_status = "needs_review"
+                    logger.warning(
+                        f"  [REVIEW] {illust_id}: identity consistency failed "
+                        f"({validation.get('identity_consistency', {}).get('reason')})"
+                    )
+
+                if final_status == "safety_blocked":
                     stats["blocked"] += 1
                     logger.warning(f"  [BLOCKED] {illust_id}: Safety filter ({elapsed:.1f}s)")
                 else:
                     stats["generated"] += 1
-                    logger.info(f"  [DONE] {illust_id}: Analysis complete ({elapsed:.1f}s)")
+                    logger.info(f"  [DONE] {illust_id}: Analysis complete ({elapsed:.1f}s, status={final_status})")
 
                 # Save to cache
                 self.cache_manager.set_entry(illust_id, {
-                    "status": analysis.get("status", "cached"),
+                    "status": final_status,
                     "cache_key": current_key,
                     "cache_version": "1.0",
                     "generated_at": datetime.now().isoformat(),
                     "model": self.model,
                     "thinking_level": self.thinking_level,
-                    "visual_ground_truth": analysis.get("visual_ground_truth", {}),
+                    "visual_ground_truth": visual_ground_truth,
                     "spoiler_prevention": analysis.get("spoiler_prevention", {}),
-                    "identity_resolution": analysis.get("identity_resolution", {}),
+                    "identity_resolution": identity_resolution,
+                    "scene_local_candidates": allowed_candidates,
+                    "source_anchor": source_anchor,
+                    "multi_character_expected": multi_expected,
+                    "validation": validation,
                 })
 
                 # Log thoughts
@@ -421,7 +809,7 @@ class VisualAssetProcessor:
         except Exception as e:
             logger.warning(f"[PHASE 1.6] Failed to inject canon names: {e}")
 
-    def _analyze_illustration(self, img_path: Path) -> Dict[str, Any]:
+    def _analyze_illustration(self, img_path: Path, prompt_override: str = "") -> Dict[str, Any]:
         """
         Analyze a single illustration using Gemini 3 Pro Vision + Thinking.
 
@@ -444,7 +832,7 @@ class VisualAssetProcessor:
         last_error = None
         for attempt in range(1, self.max_retries + 1):
             try:
-                return self._call_gemini_vision(image_part, attempt)
+                return self._call_gemini_vision(image_part, attempt, prompt_override=prompt_override)
             except Exception as e:
                 last_error = e
                 error_str = str(e)
@@ -481,14 +869,18 @@ class VisualAssetProcessor:
         # Should not reach here, but safety net
         raise last_error  # type: ignore
 
-    def _call_gemini_vision(self, image_part, attempt: int = 1) -> Dict[str, Any]:
+    def _call_gemini_vision(self, image_part, attempt: int = 1, prompt_override: str = "") -> Dict[str, Any]:
         """Execute a single Gemini Vision API call with timeout."""
         from google.genai import types
 
         try:
+            prompt_text = self.analysis_prompt
+            if prompt_override:
+                prompt_text = f"{prompt_text}\n\n{prompt_override}"
+
             response = self.genai_client.models.generate_content(
                 model=self.model,
-                contents=[self.analysis_prompt, image_part],
+                contents=[prompt_text, image_part],
                 config=types.GenerateContentConfig(
                     thinking_config=types.ThinkingConfig(
                         include_thoughts=True,
@@ -531,8 +923,36 @@ class VisualAssetProcessor:
                     elif part.text:
                         response_text += part.text
 
-            # Parse JSON response
+            # Parse JSON response (with one strict retry when output is malformed)
             analysis = self._parse_analysis_json(response_text)
+            if analysis.get("_parse_failed"):
+                strict_prompt = (
+                    f"{prompt_text}\n\n"
+                    "STRICT JSON RETRY:\n"
+                    "Return exactly one valid JSON object (no markdown, no prose).\n"
+                    "Required keys: composition, emotional_delta, key_details, "
+                    "narrative_directives, spoiler_prevention, identity_resolution.\n"
+                )
+                retry_response = self.genai_client.models.generate_content(
+                    model=self.model,
+                    contents=[strict_prompt, image_part],
+                    config=types.GenerateContentConfig(
+                        thinking_config=types.ThinkingConfig(
+                            include_thoughts=True,
+                            thinking_level=self.thinking_level
+                        ),
+                        temperature=0.2,
+                        max_output_tokens=4096,
+                    )
+                )
+                retry_text = ""
+                if retry_response.candidates and retry_response.candidates[0].content:
+                    for part in retry_response.candidates[0].content.parts:
+                        if part.text and not (hasattr(part, "thought") and part.thought):
+                            retry_text += part.text
+                analysis_retry = self._parse_analysis_json(retry_text)
+                if not analysis_retry.get("_parse_failed"):
+                    analysis = analysis_retry
 
             return {
                 "status": "cached",
@@ -543,6 +963,7 @@ class VisualAssetProcessor:
                     "narrative_directives": analysis.get("narrative_directives", []),
                 },
                 "spoiler_prevention": analysis.get("spoiler_prevention", {}),
+                "identity_resolution": analysis.get("identity_resolution", {}),
                 "thoughts": thoughts,
             }
 
@@ -584,4 +1005,7 @@ class VisualAssetProcessor:
                 "emotional_delta": "Analysis produced non-JSON output",
                 "key_details": {},
                 "narrative_directives": ["Raw analysis available in thought logs"],
+                "spoiler_prevention": {},
+                "identity_resolution": {"recognized_characters": [], "unresolved_characters": []},
+                "_parse_failed": True,
             }

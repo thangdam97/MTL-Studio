@@ -25,7 +25,7 @@ def build_parser() -> argparse.ArgumentParser:
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""
 Pipeline Flow (v5.2):
-  Phase 1 -> 1.5 -> 1.55 -> 1.6 -> 2 -> 3 -> 4
+  Phase 1 -> 1.5 -> 1.55 -> 1.6 -> 1.7 -> 2 -> 3 -> 4
   Librarian -> Metadata -> Rich Cache -> Art Director -> Translator -> Critics -> Builder
 
 Quick Start:
@@ -37,6 +37,7 @@ Core Commands:
   mtl.py phase1.5 novel_v1
   mtl.py phase1.55 novel_v1
   mtl.py phase1.6 novel_v1
+  mtl.py phase1.7 novel_v1 --chapters CHAPTER_01
   mtl.py phase2 novel_v1 --enable-multimodal
   mtl.py phase4 novel_v1
   mtl.py bible list
@@ -133,6 +134,33 @@ Metadata Schema Auto-Transform:
         default='ask',
         help='Full-LN cache policy before Phase 1.6: ask (prompt), on (prepare), off (skip)',
     )
+    phase1_6_parser.add_argument(
+        '--force-override',
+        action='store_true',
+        help='Allow regenerating entries even when cache status is manual_override/override_lock',
+    )
+
+    # Phase 1.7 (Stage 1 Scene Planner)
+    phase1_7_parser = subparsers.add_parser(
+        'phase1.7',
+        parents=[parent_parser],
+        help='Run Phase 1.7: Stage 1 Scene Planner (v1.6 narrative scaffold)'
+    )
+    phase1_7_parser.add_argument('volume_id', type=str, nargs='?', help='Volume ID (optional - will prompt if not provided)')
+    phase1_7_parser.add_argument('--chapters', nargs='+', help='Optional chapter selectors (id, file name, or number)')
+    phase1_7_parser.add_argument('--force', action='store_true', help='Regenerate existing scene plan files')
+    phase1_7_parser.add_argument(
+        '--temperature',
+        type=float,
+        default=0.3,
+        help='Planning temperature (default: 0.3)',
+    )
+    phase1_7_parser.add_argument(
+        '--max-output-tokens',
+        type=int,
+        default=65535,
+        help='Max output tokens for planning output (default: 65535)',
+    )
 
     # Multimodal Translator (Phase 1.6 + Phase 2)
     multimodal_parser = subparsers.add_parser(
@@ -148,6 +176,11 @@ Metadata Schema Auto-Transform:
         choices=['ask', 'on', 'off'],
         default='ask',
         help='Full-LN cache policy for phase1.6+phase2: ask (prompt), on (prepare), off (skip)',
+    )
+    multimodal_parser.add_argument(
+        '--force-override',
+        action='store_true',
+        help='Allow Phase 1.6 to regenerate manual_override/override_lock entries',
     )
 
     # Phase 2

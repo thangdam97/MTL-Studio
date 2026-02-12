@@ -1,8 +1,11 @@
 {
-  "version": "1.0",
+  "version": "1.3",
   "tier": "tier_1_mechanical_correctness",
-  "description": "Tier 1 English Grammar Validation Rules - Mechanical correctness checks for possessives, articles, tense, agreement, and basic syntax. Used for post-translation QC.",
-  "last_updated": "2026-02-11",
+  "description": "Tier 1 English Grammar Validation Rules - Mechanical correctness checks for possessives, articles, tense, agreement, and basic syntax. Enhanced with MMO/Gaming/Comedy timing patterns from Netoge 1124 audit. v1.3 adds AI-ism purple prose blocklist from v1.6 validation.",
+  "last_updated": "2026-02-12",
+  "enhancements_v1_1": "Added dialogue_register_errors, comedy_punchline_protection, gaming_culture_authenticity categories based on Netoge vs Fan TL literacy audit findings",
+  "enhancements_v1_2": "Added rhythm_and_emphasis.target_length_dialogue_examples mirrored from literacy_techniques.mmo_gaming_romcom for live prompt-time grammar enforcement.",
+  "enhancements_v1_3": "Added ai_ism_purple_prose category with Phase 2 blocklist patterns from v1.6 Chapter 2 validation (Novel 1790). Targets 'I couldn't help but', 'heavy with', 'drilling into', 'locked in volley', 'fleeting swept away', 'welled up' constructions.",
   "priority": "blocking",
   "usage": "Apply after translation to catch mechanical grammar errors before human review",
 
@@ -815,7 +818,533 @@
             "relationship turn points"
           ]
         }
+      },
+      "target_length_dialogue_examples": {
+        "description": "Concrete 9-10 word dialogue targets for contemporary slice-of-life romcom and MMO/SNS/game-media sub-culture scenes.",
+        "target_word_range": {
+          "min": 9,
+          "max": 10,
+          "strict_preference": true
+        },
+        "use_case": "Use these as style anchors when a line should be short, natural, and complete (not fragmented padding).",
+        "real_world_successes_0116": [
+          {
+            "text": "You need to take this game a little more seriously.",
+            "word_count": 10,
+            "category": "gaming advice / complaint"
+          },
+          {
+            "text": "Come to think of it, how are your grades, Ako?",
+            "word_count": 10,
+            "category": "casual question / topic shift"
+          },
+          {
+            "text": "They're bad, you know? Did you think they weren't?",
+            "word_count": 9,
+            "category": "self-aware admission / sarcasm"
+          },
+          {
+            "text": "How bad, exactly? I can teach you if you want.",
+            "word_count": 10,
+            "category": "offer to help"
+          },
+          {
+            "text": "It's no boast, but I've never scored below average.",
+            "word_count": 9,
+            "category": "humble brag"
+          }
+        ],
+        "curated_examples": {
+          "gaming_commands_strategy": [
+            {
+              "text": "Don't chase kills; hold lane and ping if they rotate.",
+              "word_count": 10
+            },
+            {
+              "text": "Stack cooldowns now, burst together, then peel back immediately.",
+              "word_count": 9
+            }
+          ],
+          "casual_questions": [
+            {
+              "text": "You free after class, or grinding ranked again tonight?",
+              "word_count": 9
+            },
+            {
+              "text": "By the way, did your stream clip finally upload?",
+              "word_count": 9
+            }
+          ],
+          "reactions_with_substance": [
+            {
+              "text": "Wait, you queued solo on that account? That's reckless.",
+              "word_count": 9
+            },
+            {
+              "text": "Seriously, you posted that in guild chat? Brave move.",
+              "word_count": 9
+            }
+          ],
+          "brief_explanations": [
+            {
+              "text": "The patch buffed tanks, so our old comp collapses.",
+              "word_count": 9
+            },
+            {
+              "text": "Her tone stayed light, but the silence did the damage.",
+              "word_count": 10
+            }
+          ],
+          "offers_suggestions": [
+            {
+              "text": "Send me the draft; I'll tighten jokes and pacing.",
+              "word_count": 9
+            },
+            {
+              "text": "If you're tilted, take five and queue with us.",
+              "word_count": 9
+            }
+          ],
+          "complaints_observations": [
+            {
+              "text": "This app keeps lagging exactly when the punchline lands.",
+              "word_count": 9
+            },
+            {
+              "text": "Everyone says 'just one game,' then it's three hours.",
+              "word_count": 9
+            }
+          ]
+        },
+        "guardrails": [
+          "Target complete natural lines, not chopped fragments.",
+          "Keep register contemporary and youth-casual for romcom gaming scenes.",
+          "Prefer one clear action or attitude per line.",
+          "Allow >10 words only for explicit emotional pivot beats."
+        ]
       }
+    },
+
+    "dialogue_register_errors": {
+      "description": "Detect formal/archaic/Victorian language in casual teen/young adult dialogue - based on Netoge 1124 audit findings",
+      "severity": "medium",
+      "applies_to": "MMO/SNS/gaming/contemporary romcom dialogue",
+      "priority": "high",
+      "patterns": [
+        {
+          "id": "victorian_embellishment_in_banter",
+          "pattern": "\\b(hook, line, and sinker|gullible fool|young lady|for all his talk|I suppose|naturally be quite|would naturally be|terribly|dreadfully|frightfully|awfully nice|exceedingly|remarkably)\\b",
+          "issue": "Archaic/formal idioms inappropriate for casual teen gaming banter",
+          "fix_suggestions": {
+            "hook, line, and sinker": "completely / totally",
+            "gullible fool": "sucker / idiot",
+            "young lady": "girl",
+            "for all his talk": "anyway / still",
+            "I suppose": "I guess / probably",
+            "naturally be quite": "pretty / really",
+            "would naturally be": "would be",
+            "terribly": "really / super",
+            "dreadfully": "really / super",
+            "frightfully": "really / super",
+            "awfully nice": "really nice / super nice",
+            "exceedingly": "really / super",
+            "remarkably": "really / super"
+          },
+          "examples": [
+            {
+              "incorrect": "Fell for it hook, line, and sinker, you gullible fool!",
+              "correct": "You fell for it, you clueless sucker!",
+              "context": "Gaming trash talk - MMO party chat"
+            },
+            {
+              "incorrect": "Having to introduce yourself essentially saying 'I'm a pig' would naturally be quite embarrassing for a young lady.",
+              "correct": "Saying 'I am a pig' would be pretty humiliating for a girl.",
+              "context": "Teen explaining name meaning"
+            },
+            {
+              "incorrect": "Wow, there are some pretty intense people out there, trying to be a girl in a game.",
+              "correct": "Really? Are there actually people out there trying to play as girls in games? That's wild.",
+              "context": "Casual conversation about gaming"
+            }
+          ],
+          "review_required": true
+        },
+        {
+          "id": "formal_connector_in_casual_speech",
+          "pattern": "\\b(essentially|fundamentally|particularly|specifically|ultimately|consequently|furthermore|moreover|nevertheless|nonetheless|henceforth|whereby)\\s",
+          "issue": "Academic/formal connectors inappropriate for casual dialogue",
+          "context": "Dialogue content, not narration",
+          "fix_suggestions": {
+            "essentially": "basically / pretty much",
+            "fundamentally": "basically",
+            "particularly": "especially / really",
+            "specifically": "exactly / in particular",
+            "ultimately": "in the end / finally",
+            "consequently": "so / because of that",
+            "furthermore": "also / plus / and",
+            "moreover": "also / plus",
+            "nevertheless": "still / but / anyway",
+            "nonetheless": "still / but / anyway"
+          },
+          "examples": [
+            {
+              "incorrect": "\"I fundamentally disagree with your strategy.\"",
+              "correct": "\"I totally disagree with your strategy.\" / \"That strategy's wrong.\"",
+              "context": "Gaming strategy debate"
+            }
+          ],
+          "review_required": true
+        },
+        {
+          "id": "news_flash_unironic_formal",
+          "pattern": "\\bNews flash:\\s",
+          "issue": "'News flash' used unironically sounds translated - teenagers don't say this",
+          "fix_suggestions": {
+            "News flash:": "Guess what / Hey / So / FYI"
+          },
+          "examples": [
+            {
+              "incorrect": "\"News flash: I've finally got myself a waifu.\"",
+              "correct": "\"Guess what, I finally got myself a wife.\" / \"Hey, I finally got a waifu.\"",
+              "context": "Teen announcing news to friend"
+            }
+          ],
+          "review_required": true
+        }
+      ],
+      "confidence_threshold": 0.75
+    },
+
+    "comedy_punchline_protection": {
+      "description": "Detect over-explanation and padding that kills comedic timing - based on Netoge 1124 audit",
+      "severity": "high",
+      "applies_to": "Comedy scenes, punchlines, reactions, gaming banter",
+      "priority": "critical",
+      "patterns": [
+        {
+          "id": "punchline_over_explanation",
+          "pattern": "\\b(surprised enough to|[A-Z][a-z]+ enough to have a|I'd be [A-Za-z]+ enough to)\\b",
+          "issue": "Over-explaining reaction weakens comedic impact",
+          "fix_suggestions": {
+            "default": "Use direct idiom or shorter phrase"
+          },
+          "examples": [
+            {
+              "incorrect": "I'd be surprised enough to have a heart attack if you just got a girlfriend.",
+              "correct": "Honestly, just the fact that you got a girlfriend would knock the wind outta me.",
+              "reason": "Shorter = funnier. Direct idiom > explanation."
+            }
+          ],
+          "review_required": true
+        },
+        {
+          "id": "reaction_verb_stack",
+          "pattern": "\\b(shot back|replied|answered|responded), (sounding|looking) (completely|totally|really|very)\\s",
+          "issue": "Dialogue tag + adverb + intensifier = padding that slows rhythm",
+          "fix_suggestions": {
+            "default": "Pick one: verb OR modifier, not both"
+          },
+          "examples": [
+            {
+              "incorrect": "My classmate shot back, looking completely fed up.",
+              "correct": "My classmate replied, sounding totally fed up.",
+              "reason": "Remove one descriptor or merge: 'shot back, fed up'"
+            }
+          ],
+          "review_required": true
+        },
+        {
+          "id": "comedy_you_see_explanation_marker",
+          "pattern": "\\b(you see,|the thing is,|what I mean is,|the point is,)\\s[^.!?]{30,}",
+          "issue": "Explanatory setup before joke delivery weakens timing",
+          "fix_suggestions": {
+            "default": "Cut setup, deliver punchline directly"
+          },
+          "examples": [
+            {
+              "incorrect": "You see, 'Schwein' means 'pig' in German. Having to introduce yourself essentially saying 'I'm a pig' would naturally be quite embarrassing for a young lady.",
+              "correct": "'Schwein' means pig in German. Saying something like, 'I am a pig, pleased to meet you' would be pretty humiliating for a girl.",
+              "reason": "Remove 'you see', cut wordiness, get to the joke faster"
+            }
+          ],
+          "review_required": true
+        }
+      ],
+      "confidence_threshold": 0.7
+    },
+
+    "ai_ism_purple_prose": {
+      "description": "AI-generated purple prose patterns that bloat rhythm and feel unnatural - Phase 2 blocklist from v1.6 validation",
+      "severity": "high",
+      "applies_to": "All narrative prose and dialogue",
+      "priority": "critical",
+      "patterns": [
+        {
+          "id": "couldnt_help_but",
+          "pattern": "\\bI couldn't help but\\b",
+          "issue": "Common AI-ism that adds unnecessary filter - violates show-don't-tell",
+          "fix_suggestions": {
+            "I couldn't help but flinch": "I flinched",
+            "I couldn't help but smile": "I smiled",
+            "I couldn't help but feel": "I felt",
+            "I couldn't help but notice": "I noticed",
+            "I couldn't help but think": "I thought",
+            "I couldn't help but wonder": "I wondered",
+            "I couldn't help but be thrilled": "thrilled, I—",
+            "I couldn't help but retort": "I shot back"
+          },
+          "examples": [
+            {
+              "incorrect": "I couldn't help but flinch at the sudden sound.",
+              "correct": "I flinched at the sudden sound.",
+              "reason": "Direct action stronger than filtered reaction"
+            },
+            {
+              "incorrect": "I couldn't help but be thrilled by her words.",
+              "correct": "Her words thrilled me. / Thrilled, I—",
+              "reason": "Remove unnecessary filter, show emotion directly"
+            }
+          ],
+          "severity": "high",
+          "auto_fix_eligible": true,
+          "confidence_threshold": 0.95
+        },
+        {
+          "id": "heavy_with_sultry",
+          "pattern": "\\bheavy with (a |an )?(sultry|seductive|dangerous|ominous|dark|sinister)\\s",
+          "issue": "Purple prose AI-ism - overwrought atmospheric description",
+          "fix_suggestions": {
+            "heavy with a sultry charm": "sultry / seductive",
+            "heavy with danger": "dangerous / threatening",
+            "heavy with ominous silence": "ominously silent"
+          },
+          "examples": [
+            {
+              "incorrect": "Her voice, heavy with a sultry charm, made my heart race.",
+              "correct": "Her sultry voice made my heart race.",
+              "reason": "Direct adjective cleaner than 'heavy with' construction"
+            }
+          ],
+          "severity": "high",
+          "auto_fix_eligible": false,
+          "confidence_threshold": 0.9
+        },
+        {
+          "id": "drilling_into_metaphor",
+          "pattern": "\\b([a-z]+-)?drilling into (my|his|her|their) (ribs|chest|skull|brain|mind)\\b",
+          "issue": "Overwrought physical sensation metaphor - typical AI purple prose",
+          "fix_suggestions": {
+            "hammer-drilling into my ribs": "pounding my ribs / jabbing my ribs",
+            "drilling into my skull": "piercing my head / throbbing in my skull"
+          },
+          "examples": [
+            {
+              "incorrect": "Her elbow, hammer-drilling into my ribs, made me wince.",
+              "correct": "Her elbow jabbed my ribs. I winced.",
+              "reason": "Simpler verb + split sentence for tighter rhythm"
+            }
+          ],
+          "severity": "medium",
+          "auto_fix_eligible": false,
+          "confidence_threshold": 0.85
+        },
+        {
+          "id": "locked_in_volley",
+          "pattern": "\\blocked in a (back-and-forth |rapid |heated )?(volley|exchange|battle)\\b",
+          "issue": "Cliché AI construction for describing dialogue/conflict",
+          "fix_suggestions": {
+            "locked in a back-and-forth volley": "traded barbs / went back and forth",
+            "locked in a heated exchange": "argued / clashed"
+          },
+          "examples": [
+            {
+              "incorrect": "We were locked in a back-and-forth volley of insults.",
+              "correct": "We traded barbs. / We went back and forth.",
+              "reason": "Simpler phrasing, less melodramatic"
+            }
+          ],
+          "severity": "medium",
+          "auto_fix_eligible": false,
+          "confidence_threshold": 0.85
+        },
+        {
+          "id": "fleeting_swept_away",
+          "pattern": "\\b(fleeting|momentary|brief) ([a-z]+) (was|were) swept away\\b",
+          "issue": "Purple prose pattern for emotional transitions",
+          "fix_suggestions": {
+            "fleeting hesitation was swept away": "hesitation vanished / I pushed past my hesitation",
+            "momentary doubt was swept away": "doubt disappeared"
+          },
+          "examples": [
+            {
+              "incorrect": "My fleeting hesitation was swept away by her smile.",
+              "correct": "Her smile erased my hesitation. / I pushed past my hesitation.",
+              "reason": "Active construction stronger than passive 'was swept away'"
+            }
+          ],
+          "severity": "medium",
+          "auto_fix_eligible": false,
+          "confidence_threshold": 0.85
+        },
+        {
+          "id": "welled_up_emotion",
+          "pattern": "\\b(emotion|feeling|warmth|tears|anger|frustration|joy|sadness) welled up\\b",
+          "issue": "Overused AI-ism for emotional reactions - filter instead of direct action",
+          "fix_suggestions": {
+            "emotion welled up": "I felt—",
+            "warmth welled up": "warmth spread / I felt warm",
+            "tears welled up": "tears formed / my eyes stung",
+            "frustration welled up": "frustration rose / I felt frustrated"
+          },
+          "examples": [
+            {
+              "incorrect": "Warmth welled up in my chest as she spoke.",
+              "correct": "Warmth spread through my chest. / Her words warmed me.",
+              "reason": "Direct description or active cause-effect stronger"
+            }
+          ],
+          "severity": "medium",
+          "auto_fix_eligible": false,
+          "confidence_threshold": 0.85
+        },
+        {
+          "id": "a_sense_of_except_idiomatic",
+          "pattern": "\\ba sense of ([a-z]+)\\b(?! humor|direction|purpose|belonging|urgency|duty|self)",
+          "issue": "Nominalized construction weakens prose - exception for idiomatic usage",
+          "fix_suggestions": {
+            "a sense of relief": "relief / felt relieved",
+            "a sense of dread": "dread / felt dread",
+            "a sense of nostalgia": "nostalgia / felt nostalgic",
+            "a sense of superiority": "felt superior"
+          },
+          "examples": [
+            {
+              "incorrect": "I felt a sense of relief wash over me.",
+              "correct": "Relief washed over me. / I felt relieved.",
+              "reason": "Direct emotion or verb form tighter"
+            },
+            {
+              "correct_exception": "He had no sense of direction.",
+              "reason": "Idiomatic usage - not AI-ism"
+            }
+          ],
+          "severity": "low",
+          "auto_fix_eligible": false,
+          "confidence_threshold": 0.7,
+          "note": "Already in rhythm_and_emphasis but worth reinforcing with exceptions"
+        }
+      ],
+      "confidence_threshold": 0.85,
+      "auto_fix_strategy": {
+        "high_confidence_auto_fix": [
+          "couldnt_help_but (0.95 threshold)"
+        ],
+        "flag_for_review": [
+          "heavy_with_sultry",
+          "drilling_into_metaphor",
+          "locked_in_volley",
+          "fleeting_swept_away",
+          "welled_up_emotion"
+        ]
+      },
+      "validation_notes": {
+        "source": "v1.6 validation report (Chapter 2, Novel 1790)",
+        "residual_v1_6": "4 instances of 'I couldn't help but' remain in v1.6 output",
+        "web_gemini_patterns": "Purple prose patterns found in Web Gemini output (58 AI-isms total)",
+        "goal": "Phase 2 refinement should catch these automatically"
+      }
+    },
+
+    "gaming_culture_authenticity": {
+      "description": "Contemporary gaming/internet/SNS vocabulary mapping - based on Netoge 1124 audit",
+      "severity": "medium",
+      "applies_to": "MMO scenes, gaming dialogue, SNS/chat exchanges",
+      "priority": "high",
+      "vocabulary_mapping": {
+        "contemporary_teen_reactions": {
+          "avoid": [
+            "That's quite intense",
+            "There are some pretty intense people out there",
+            "How unusual",
+            "That's rather peculiar",
+            "I find that surprising"
+          ],
+          "prefer": [
+            "That's wild",
+            "That's crazy",
+            "No way",
+            "Seriously?",
+            "Are you for real?"
+          ]
+        },
+        "gaming_banter_insults": {
+          "avoid": [
+            "gullible fool",
+            "you naive individual",
+            "you credulous person"
+          ],
+          "prefer": [
+            "you sucker",
+            "you idiot",
+            "you clueless sucker",
+            "you noob"
+          ]
+        },
+        "internet_laughter": {
+          "instruction": "Use varied laugh lengths naturally: 'lol' (mild), 'lolol' (stronger), 'lmao' (very funny). Avoid formal 'haha' in text chat.",
+          "examples": [
+            {
+              "context": "mild amusement in guild chat",
+              "use": "lol"
+            },
+            {
+              "context": "genuinely funny moment",
+              "use": "lololol / lmao"
+            }
+          ]
+        },
+        "character_descriptors_in_banter": {
+          "avoid": [
+            "that quiet guy",
+            "that reserved individual"
+          ],
+          "prefer": [
+            "that brooding guy",
+            "Mr. Silent",
+            "edgelord"
+          ],
+          "note": "Repeated nicknames show guild familiarity"
+        },
+        "mmo_commands": {
+          "prefer_direct": [
+            "Do your part!",
+            "Pull aggro!",
+            "Heal me!",
+            "Tank this!",
+            "I'm pulling mobs!"
+          ],
+          "avoid_verbose": [
+            "Please take some of these enemies",
+            "If you could provide healing assistance",
+            "I am currently attracting the attention of hostile entities"
+          ]
+        }
+      },
+      "patterns": [
+        {
+          "id": "formal_descriptor_for_gaming_culture",
+          "pattern": "\\b(some pretty intense people|rather peculiar|quite unusual|fairly uncommon)\\b",
+          "issue": "Formal descriptive language where contemporary slang fits better",
+          "fix_suggestions": {
+            "some pretty intense people": "some crazy people / wild people",
+            "rather peculiar": "weird / strange",
+            "quite unusual": "weird / rare",
+            "fairly uncommon": "rare / not common"
+          },
+          "review_required": true
+        }
+      ],
+      "confidence_threshold": 0.7
     }
   },
 
@@ -827,7 +1356,8 @@
         "possessive_errors.missing_possessive_honorific_noun",
         "article_errors.a_vs_an_vowel_sound",
         "contraction_errors.malformed_contraction",
-        "double_negatives.double_negative_standard"
+        "double_negatives.double_negative_standard",
+        "ai_ism_purple_prose.couldnt_help_but"
       ],
       "confidence_required": 0.9
     },
@@ -842,7 +1372,12 @@
         "rhythm_and_emphasis.intensifier_stack",
         "rhythm_and_emphasis.adjacent_repetition_same_claim",
         "possessive_errors.possible_no_particle_family_relation",
-        "subject_verb_agreement (if in dialogue)"
+        "subject_verb_agreement (if in dialogue)",
+        "ai_ism_purple_prose.heavy_with_sultry",
+        "ai_ism_purple_prose.drilling_into_metaphor",
+        "ai_ism_purple_prose.locked_in_volley",
+        "ai_ism_purple_prose.fleeting_swept_away",
+        "ai_ism_purple_prose.welled_up_emotion"
       ],
       "confidence_required": 0.7
     }

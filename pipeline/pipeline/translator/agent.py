@@ -777,6 +777,58 @@ class TranslatorAgent:
                 resolved[chapter_id] = raw
 
         return resolved
+
+    def _load_scene_plan_context(self, chapter: Dict[str, Any]) -> Optional[Dict[str, Any]]:
+        """
+        Load per-chapter Stage 1 scene plan from manifest entry.
+
+        Expected manifest key:
+          chapter["scene_plan_file"] = "PLANS/chapter_XX_scene_plan.json"
+        """
+        scene_plan_ref = chapter.get("scene_plan_file")
+        if not scene_plan_ref:
+            return None
+        if not isinstance(scene_plan_ref, str):
+            logger.warning(
+                f"[STAGE2] Invalid scene_plan_file type for {chapter.get('id')}: "
+                f"{type(scene_plan_ref).__name__}"
+            )
+            return None
+
+        scene_plan_path = Path(scene_plan_ref)
+        if not scene_plan_path.is_absolute():
+            scene_plan_path = self.work_dir / scene_plan_path
+
+        if not scene_plan_path.exists():
+            logger.warning(
+                f"[STAGE2] Scene plan file missing for {chapter.get('id')}: {scene_plan_path}"
+            )
+            return None
+
+        try:
+            with scene_plan_path.open("r", encoding="utf-8") as f:
+                scene_plan = json.load(f)
+        except Exception as e:
+            logger.warning(f"[STAGE2] Failed reading scene plan {scene_plan_path}: {e}")
+            return None
+
+        if not isinstance(scene_plan, dict):
+            logger.warning(f"[STAGE2] Invalid scene plan format (not object): {scene_plan_path}")
+            return None
+
+        scenes = scene_plan.get("scenes")
+        if not isinstance(scenes, list) or not scenes:
+            logger.warning(f"[STAGE2] Scene plan has no scenes: {scene_plan_path}")
+            return None
+
+        if not scene_plan.get("chapter_id"):
+            scene_plan["chapter_id"] = chapter.get("id")
+
+        logger.info(
+            f"[STAGE2] Loaded scene scaffold for {chapter.get('id')}: "
+            f"{len(scenes)} beat(s) from {scene_plan_path.name}"
+        )
+        return scene_plan
     
     def _prewarm_cache(self):
         """Pre-warm context cache with system instruction before translation starts."""
@@ -1066,6 +1118,7 @@ class TranslatorAgent:
                 else:
                     logger.warning("[CACHE VERIFY] Chapter translation running without cache.")
 
+            scene_plan = self._load_scene_plan_context(chapter)
             result = self.processor.translate_chapter(
                 source_path,
                 output_path,
@@ -1074,6 +1127,7 @@ class TranslatorAgent:
                 model_name=chapter_model,
                 cached_content=effective_cache_name,
                 volume_cache=effective_cache_name if self.volume_cache_name else None,
+                scene_plan=scene_plan,
             )
 
             # Fallback to configured fallback model on failure (safety blocks, rate limits, etc)
@@ -1094,6 +1148,7 @@ class TranslatorAgent:
                     model_name=fallback_model,
                     cached_content=None,
                     volume_cache=None,
+                    scene_plan=scene_plan,
                 )
                 if result.success:
                     logger.info(f"     [FALLBACK] Successfully translated with {fallback_model}")

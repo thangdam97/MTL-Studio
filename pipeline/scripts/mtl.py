@@ -8,6 +8,7 @@ Phases:
   1.5 Metadata      - Schema autoupdate + title/author/chapter translation
   1.55 Rich Cache   - Full-LN JP cache + rich metadata enrichment (Gemini 2.5 Flash)
   1.6 Multimodal    - Pre-bake illustration analysis (Gemini 3 Pro Vision)
+  1.7 Scene Planner - Narrative beat + rhythm scaffold (v1.6 Stage 1)
   2. Translator     - Gemini-powered translation with RAG + visual context
   3. Critics        - Manual/Agentic quality review (Gemini CLI + IDE Agent)
   4. Builder        - Package final translated EPUB
@@ -22,6 +23,7 @@ Usage:
   mtl.py phase1.55 [volume_id]           # Run Phase 1.55 (full-LN cache metadata enrichment)
   mtl.py phase1.6 [volume_id]            # Run Phase 1.6 (multimodal pre-bake)
   mtl.py phase1.6 [volume_id] --full-ln-cache off  # Skip full-LN cache prep
+  mtl.py phase1.7 [volume_id]            # Run Phase 1.7 (scene planning scaffold)
   mtl.py phase2 [volume_id]              # Run Phase 2 (interactive if no ID)
   mtl.py phase2 [volume_id] --enable-multimodal  # Phase 2 with visual context
   mtl.py phase2 [volume_id] --full-ln-cache off  # Run without full-LN cache prep
@@ -618,6 +620,37 @@ class PipelineController:
             logger.info(f"│  Bible Glossary:    {bible_flat_count:<5}  terms for GlossaryLock            │")
         logger.info("└─────────────────────────────────────────────────────────────┘")
 
+    def _log_phase1_7_confirmation(self, volume_id: str) -> None:
+        """Log verbose confirmation for Phase 1.7 (Scene Planner) results."""
+        manifest = self.load_manifest(volume_id)
+        if not manifest:
+            return
+
+        planner_state = manifest.get("pipeline_state", {}).get("scene_planner", {})
+        plans_dir = self.work_dir / volume_id / "PLANS"
+        plan_files = list(plans_dir.glob("*_scene_plan.json")) if plans_dir.exists() else []
+
+        generated = int(planner_state.get("generated_plans", 0))
+        skipped = int(planner_state.get("skipped_plans", 0))
+        failed = int(planner_state.get("failed_plans", 0))
+        selected = int(planner_state.get("total_selected", len(plan_files)))
+        model = str(planner_state.get("model", "N/A"))
+        status = str(planner_state.get("status", "not started"))
+
+        logger.info("")
+        logger.info("┌─────────────────────────────────────────────────────────────┐")
+        logger.info("│  PHASE 1.7 CONFIRMATION — Stage 1 Scene Planner            │")
+        logger.info("├─────────────────────────────────────────────────────────────┤")
+        logger.info(f"│  Status:            {status[:46]:<46}│")
+        logger.info(f"│  Model:             {model[:46]:<46}│")
+        logger.info(f"│  Plan Files:        {len(plan_files):<5}                                    │")
+        logger.info("├─────────────────────────────────────────────────────────────┤")
+        logger.info(f"│  Selected:          {selected:<5}                                    │")
+        logger.info(f"│  Generated:         {generated:<5}                                    │")
+        logger.info(f"│  Skipped:           {skipped:<5}                                    │")
+        logger.info(f"│  Failed:            {failed:<5}                                    │")
+        logger.info("└─────────────────────────────────────────────────────────────┘")
+
     def _run_command(self, cmd: list, description: str) -> bool:
         """Run a command with verbosity control."""
         if self.verbose:
@@ -1027,6 +1060,43 @@ class PipelineController:
         if not chapters:
             chapters = manifest.get("structure", {}).get("chapters", [])
         return chapters if isinstance(chapters, list) else []
+
+    def _missing_scene_plan_chapter_ids(
+        self,
+        volume_id: str,
+        target_chapters: List[Dict[str, Any]],
+    ) -> List[str]:
+        """
+        Return chapter IDs that do not have a usable Stage 1.7 scene plan reference.
+
+        A chapter is considered missing when:
+          - scene_plan_file is absent/empty, or
+          - referenced plan file does not exist on disk.
+        """
+        work_volume_dir = self.work_dir / volume_id
+        missing: List[str] = []
+
+        for chapter in target_chapters:
+            if not isinstance(chapter, dict):
+                continue
+
+            chapter_id = str(chapter.get("id", "")).strip()
+            if not chapter_id:
+                continue
+
+            scene_plan_ref = chapter.get("scene_plan_file")
+            if not isinstance(scene_plan_ref, str) or not scene_plan_ref.strip():
+                missing.append(chapter_id)
+                continue
+
+            scene_plan_path = Path(scene_plan_ref.strip())
+            if not scene_plan_path.is_absolute():
+                scene_plan_path = work_volume_dir / scene_plan_path
+
+            if not scene_plan_path.exists():
+                missing.append(chapter_id)
+
+        return missing
 
     def _check_full_ln_cache_state(self, manifest: Dict[str, Any]) -> Dict[str, Any]:
         """
@@ -1446,7 +1516,13 @@ class PipelineController:
         logger.info("Purged local full-LN cache state for this volume.")
         return True
 
-    def run_phase1_6(self, volume_id: str, standalone: bool = False, full_ln_cache_mode: str = "ask") -> bool:
+    def run_phase1_6(
+        self,
+        volume_id: str,
+        standalone: bool = False,
+        full_ln_cache_mode: str = "ask",
+        force_override: bool = False,
+    ) -> bool:
         """
         Run Phase 1.6: Multimodal Processor (Visual Asset Pre-bake).
         
@@ -1514,7 +1590,7 @@ class PipelineController:
 
             from modules.multimodal.asset_processor import VisualAssetProcessor
 
-            processor = VisualAssetProcessor(volume_path)
+            processor = VisualAssetProcessor(volume_path, force_override=force_override)
             stats = processor.process_volume()
 
             if stats.get("error"):
@@ -1546,6 +1622,43 @@ class PipelineController:
             import traceback
             traceback.print_exc()
             return False
+
+    def run_phase1_7(
+        self,
+        volume_id: str,
+        chapters: Optional[list] = None,
+        force: bool = False,
+        temperature: float = 0.3,
+        max_output_tokens: int = 65535,
+    ) -> bool:
+        """Run Phase 1.7: Stage 1 Scene Planner (v1.6 architecture)."""
+        self._ui_header(
+            "Phase 1.7 - Stage 1 Scene Planner",
+            "Narrative beat + character rhythm scaffold before translation",
+        )
+
+        manifest = self.load_manifest(volume_id)
+        if not manifest:
+            logger.error(f"No manifest.json found for volume: {volume_id}")
+            logger.error("  Please run Phase 1 first to extract the EPUB")
+            return False
+
+        cmd = [
+            sys.executable, "-m", "pipeline.planner.agent",
+            "--volume", volume_id,
+            "--temperature", str(temperature),
+            "--max-output-tokens", str(max_output_tokens),
+        ]
+        if chapters:
+            cmd.extend(["--chapters", *chapters])
+        if force:
+            cmd.append("--force")
+
+        if self._run_command(cmd, "Phase 1.7 (Scene Planner)"):
+            logger.info("✓ Phase 1.7 completed successfully")
+            self._log_phase1_7_confirmation(volume_id)
+            return True
+        return False
     
     # Alias for backward compatibility
     def run_phase0(self, volume_id: str) -> bool:
@@ -1709,8 +1822,38 @@ class PipelineController:
 
         target_chapters = manifest_chapters
         if chapters:
-            target_ids = set(chapters)
-            target_chapters = [c for c in manifest_chapters if c.get("id") in target_ids]
+            target_ids = {str(ch).strip() for ch in chapters}
+            target_chapters = [
+                c for c in manifest_chapters
+                if str(c.get("id", "")).strip() in target_ids
+            ]
+
+        # Standalone Phase 2 should self-heal Stage 1.7 prerequisites.
+        # Full run already executes 1.7 explicitly before Phase 2.
+        if standalone and target_chapters:
+            missing_plan_ids = self._missing_scene_plan_chapter_ids(volume_id, target_chapters)
+            if missing_plan_ids:
+                logger.info(
+                    "Phase 2 standalone: Stage 1.7 plans missing for "
+                    f"{len(missing_plan_ids)} chapter(s); auto-running planner."
+                )
+                if not self.run_phase1_7(volume_id, chapters=missing_plan_ids):
+                    logger.error("Phase 1.7 auto-run failed; cannot continue Phase 2.")
+                    return False
+
+                # Reload manifest to pick up newly written scene_plan_file paths.
+                manifest = self.load_manifest(volume_id) or manifest
+                manifest_chapters = self._get_manifest_chapters(manifest)
+                target_chapters = manifest_chapters
+                if chapters:
+                    target_ids = {str(ch).strip() for ch in chapters}
+                    target_chapters = [
+                        c for c in manifest_chapters
+                        if str(c.get("id", "")).strip() in target_ids
+                    ]
+            else:
+                logger.info("Phase 2 standalone: Stage 1.7 plans already available.")
+
         expected_total = len(target_chapters) if target_chapters else 1
         
         cmd = [
@@ -1836,7 +1979,7 @@ class PipelineController:
     def run_full_pipeline(self, epub_path: Path, volume_id: Optional[str] = None,
                           skip_multimodal: bool = False) -> bool:
         """
-        Run the complete pipeline (Phases 1, 1.5, 1.6, 2, and 4).
+        Run the complete pipeline (Phases 1, 1.5, 1.55, 1.6, 1.7, 2, and 4).
 
         Args:
             epub_path: Path to source EPUB file
@@ -1872,13 +2015,13 @@ class PipelineController:
             volume_id = self.generate_volume_id(epub_path)
             logger.info(f"Generated volume ID: {volume_id}")
 
-        self._ui_header("Full Pipeline Run (v5.2)", "1 -> 1.5 -> 1.55 -> 1.6 -> 2 -> 4")
+        self._ui_header("Full Pipeline Run (v5.2)", "1 -> 1.5 -> 1.55 -> 1.6 -> 1.7 -> 2 -> 4")
         logger.info(f"Target Language: {language_name} ({target_lang.upper()})")
         logger.info(f"Source: {epub_path}")
         logger.info(f"Volume ID: {volume_id}")
         logger.info("")
 
-        phase_total = 5 if skip_multimodal else 6
+        phase_total = 6 if skip_multimodal else 7
         phase_done = 0
 
         with self.ui.phase_progress(phase_total, "Pipeline v5.2") as pipeline_tracker:
@@ -1974,6 +2117,14 @@ class PipelineController:
             else:
                 logger.info("ℹ️  Skipping Phase 1.6 (Multimodal) - --skip-multimodal flag set")
                 logger.info("")
+
+            # Phase 1.7: Stage 1 Scene Planner (required before Stage 2 translation)
+            if not self.run_phase1_7(volume_id):
+                pipeline_tracker.fail("P1.7 Scene Planner")
+                return False
+            _advance_pipeline("P1.7 Scene Planner")
+
+            logger.info("")
 
             # Phase 2: Translator (with multimodal if Phase 1.6 succeeded)
             enable_multimodal = multimodal_success and not skip_multimodal
@@ -3333,7 +3484,7 @@ def main():
     if not args.command:
         logger.info("MTL Studio v5.2 CLI")
         logger.info(
-            "Use one of: run | phase1 | phase1.5 | phase1.55 | phase1.6 | phase2 | phase4 | "
+            "Use one of: run | phase1 | phase1.5 | phase1.55 | phase1.6 | phase1.7 | phase2 | phase4 | "
             "list | status | metadata | schema | bible"
         )
         parser.print_help()
@@ -3373,10 +3524,22 @@ def main():
     
     elif args.command == 'phase1.6':
         full_ln_cache_mode = getattr(args, 'full_ln_cache', 'ask')
+        force_override = getattr(args, 'force_override', False)
         success = controller.run_phase1_6(
             args.volume_id,
             standalone=True,
             full_ln_cache_mode=full_ln_cache_mode,
+            force_override=force_override,
+        )
+        sys.exit(0 if success else 1)
+
+    elif args.command == 'phase1.7':
+        success = controller.run_phase1_7(
+            args.volume_id,
+            chapters=getattr(args, 'chapters', None),
+            force=getattr(args, 'force', False),
+            temperature=getattr(args, 'temperature', 0.3),
+            max_output_tokens=getattr(args, 'max_output_tokens', 65535),
         )
         sys.exit(0 if success else 1)
     
@@ -3411,10 +3574,12 @@ def main():
             logger.warning("Step 0: Skipping full-LN cache preparation by user request.")
 
         logger.info("Step 1: Running Phase 1.6 (Visual Analysis)...")
+        force_override = getattr(args, 'force_override', False)
         success_p16 = controller.run_phase1_6(
             args.volume_id,
             standalone=False,
             full_ln_cache_mode="off" if not use_full_ln_cache else "on",
+            force_override=force_override,
         )
         
         if not success_p16:

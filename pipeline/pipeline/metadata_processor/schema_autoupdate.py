@@ -48,6 +48,25 @@ class SchemaAutoUpdater:
         "language_code",
     }
     PROTECTED_CHAPTER_FIELDS = {"title_en", "title_vn"}
+    # v4.0 unified schema contract: bible continuity + rich metadata.
+    ALLOWED_PATCH_FIELDS = {
+        "character_profiles",
+        "localization_notes",
+        "official_localization",
+        "world_setting",
+        "geography",
+        "weapons_artifacts",
+        "organizations",
+        "cultural_terms",
+        "mythology",
+        "translation_rules",
+        "dialogue_patterns",
+        "scene_contexts",
+        "emotional_pronoun_shifts",
+        "translation_guidelines",
+        "chapters",
+        "schema_version",
+    }
 
     def __init__(self, work_dir: Path):
         self.work_dir = work_dir
@@ -127,7 +146,7 @@ class SchemaAutoUpdater:
 
     def _build_system_instruction(self) -> str:
         base = (
-            "You are the Schema v3.9 Metadata Agent for an MTL light novel pipeline.\n"
+            "You are the Schema v4.0 Metadata Agent for an MTL light novel pipeline.\n"
             "Your job is to enrich metadata_en fields using extracted source data.\n"
             "Return JSON only. Do not output markdown or commentary.\n"
             "Use this output shape:\n"
@@ -135,8 +154,19 @@ class SchemaAutoUpdater:
             '  "metadata_en_patch": {\n'
             '    "character_profiles": {...},\n'
             '    "localization_notes": {...},\n'
+            '    "world_setting": {...},\n'
+            '    "geography": {...},\n'
+            '    "weapons_artifacts": {...},\n'
+            '    "organizations": {...},\n'
+            '    "cultural_terms": {...},\n'
+            '    "mythology": {...},\n'
+            '    "translation_rules": {...},\n'
+            '    "dialogue_patterns": {...},\n'
+            '    "scene_contexts": {...},\n'
+            '    "emotional_pronoun_shifts": {...},\n'
+            '    "translation_guidelines": {...},\n'
             '    "chapters": {...},\n'
-            '    "schema_version": "v3.9",\n'
+            '    "schema_version": "v4.0",\n'
             '    "official_localization": {\n'
             '      "should_use_official": true,\n'
             '      "series_title_en": "string",\n'
@@ -150,6 +180,13 @@ class SchemaAutoUpdater:
             "}\n"
             "Do not write translation fields such as title_en, author_en, chapter title_en, or character_names.\n"
             "Respect existing chapter ids and character profile keys when patching.\n\n"
+            "BIBLE CONTINUITY REQUIREMENT:\n"
+            "- Maintain schema-compatible continuity blocks when data is inferable:\n"
+            "  world_setting, geography, weapons_artifacts, organizations, cultural_terms, mythology, translation_rules.\n"
+            "- Preserve existing canon terms and avoid conflicting renames.\n\n"
+            "PHASE 1.55 RICH METADATA COMPATIBILITY:\n"
+            "- Support dialogue_patterns, scene_contexts, emotional_pronoun_shifts, and translation_guidelines.\n"
+            "- Keep these structures JSON-safe and prompt-friendly.\n\n"
             "CHARACTER VISUAL IDENTITY REQUIREMENT:\n"
             "- For each character_profiles entry, include/maintain `visual_identity_non_color`.\n"
             "- Use non-color traits only: hairstyle, clothing silhouette/signature, expression baseline,\n"
@@ -219,6 +256,8 @@ class SchemaAutoUpdater:
             "Requirements:\n"
             "- Fill [TO BE FILLED] and weak placeholder values with concrete data where possible.\n"
             "- Add RTAS-compatible relationship structures when inferable.\n"
+            "- Keep metadata compatible with Bible categories: world_setting, geography, weapons_artifacts, organizations, cultural_terms, mythology, translation_rules.\n"
+            "- Keep metadata compatible with rich semantic categories: dialogue_patterns, scene_contexts, emotional_pronoun_shifts, translation_guidelines.\n"
             "- Keep unknown values empty rather than hallucinating.\n"
             "- Keep chapter ids unchanged.\n"
             "- Add `character_profiles.*.visual_identity_non_color` using non-color descriptors "
@@ -363,7 +402,11 @@ class SchemaAutoUpdater:
             raise
 
     def _sanitize_patch(self, patch: Dict[str, Any]) -> Dict[str, Any]:
-        cleaned = dict(patch)
+        cleaned = {
+            key: value
+            for key, value in patch.items()
+            if key in self.ALLOWED_PATCH_FIELDS
+        }
         for field in self.PROTECTED_TOP_LEVEL_FIELDS:
             cleaned.pop(field, None)
 

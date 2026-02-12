@@ -14,6 +14,7 @@ PHASE_NAMES = {
     'phase1.5': 'Phase 1.5 - Schema Autoupdate + Metadata Translation',
     'phase1.55': 'Phase 1.55 - Full-LN Cache Rich Metadata Enrichment',
     'phase1.6': 'Phase 1.6 - Multimodal Processor (Visual Analysis)',
+    'phase1.7': 'Phase 1.7 - Stage 1 Scene Planner (Narrative Scaffold)',
     'multimodal': 'Multimodal Translator (Phase 1.6 + Phase 2 with Visual Context)',
     'phase2': 'Phase 2 - Translator',
     'phase3': 'Phase 3 - Critics',

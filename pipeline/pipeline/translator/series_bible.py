@@ -19,6 +19,7 @@ from __future__ import annotations
 import json
 import logging
 import re
+import unicodedata
 from datetime import datetime, timezone
 from difflib import SequenceMatcher
 from pathlib import Path
@@ -639,12 +640,18 @@ class BibleController:
 
         # 2. Volume ID lookup
         volume_id = manifest.get('volume_id', '')
-        # Extract short hash (last 4 chars after underscore)
+        # Try both short hash and full volume_id for compatibility.
+        ids_to_try: List[str] = []
         short_id = self._extract_short_id(volume_id)
         if short_id:
+            ids_to_try.append(short_id)
+        if volume_id:
+            ids_to_try.append(volume_id)
+
+        for probe_id in ids_to_try:
             for sid, entry in self.index.get('series', {}).items():
-                if short_id in entry.get('volumes', []):
-                    logger.info(f"Bible resolved via volume ID {short_id}: {sid}")
+                if probe_id in entry.get('volumes', []):
+                    logger.info(f"Bible resolved via volume ID {probe_id}: {sid}")
                     return self._get_or_load(sid, entry)
 
         # 3. Series metadata pattern match
@@ -660,11 +667,11 @@ class BibleController:
     def detect_series(self, manifest: dict) -> Optional[str]:
         """Detect which registered series a manifest belongs to.
 
-        Checks metadata.series and metadata.title against match_patterns.
+        Prioritizes OPF/spine-derived metadata first, then enriched metadata fields.
         """
-        metadata = manifest.get('metadata', {})
-        series_str = metadata.get('series', '')
-        title_str = metadata.get('title', '')
+        ranked_candidates = self._extract_series_candidates(manifest)
+        if not ranked_candidates:
+            return None
 
         best_match: Optional[str] = None
         best_score: float = 0.0
@@ -672,27 +679,144 @@ class BibleController:
         for sid, entry in self.index.get('series', {}).items():
             patterns = entry.get('match_patterns', [])
             for pattern in patterns:
-                # Exact substring match on series field
-                if series_str and pattern.lower() in series_str.lower():
-                    return sid
-                # Exact substring match on title
-                if title_str and pattern.lower() in title_str.lower():
-                    return sid
-                # Fuzzy match
-                for candidate in [series_str, title_str]:
-                    if candidate:
-                        score = SequenceMatcher(
-                            None, pattern.lower(), candidate.lower()
-                        ).ratio()
-                        if score > best_score:
-                            best_score = score
-                            best_match = sid
+                if not isinstance(pattern, str) or not pattern.strip():
+                    continue
+                pattern_norm = self._normalize_series_text(pattern)
+                for source, candidate in ranked_candidates:
+                    candidate_norm = self._normalize_series_text(candidate)
+                    if not candidate_norm:
+                        continue
+
+                    # Exact/substring checks on normalized text.
+                    if pattern_norm and (
+                        pattern_norm in candidate_norm or candidate_norm in pattern_norm
+                    ):
+                        return sid
+
+                    score = SequenceMatcher(None, pattern_norm, candidate_norm).ratio()
+                    # OPF + spine-derived metadata has higher authority than
+                    # translated/enriched fallback fields for series resolution.
+                    weighted_score = score * {
+                        "opf_series": 1.25,
+                        "opf_title_sort": 1.20,
+                        "opf_title": 1.15,
+                        "source_epub_stem": 1.10,
+                        "metadata_title": 1.00,
+                        "metadata_series": 1.00,
+                        "official_localization": 0.98,
+                        "metadata_en": 0.95,
+                        "volume_id": 0.90,
+                    }.get(source, 1.0)
+                    if weighted_score > best_score:
+                        best_score = weighted_score
+                        best_match = sid
 
         if best_score >= FUZZY_MATCH_THRESHOLD:
             logger.debug(f"Fuzzy match: {best_match} (score: {best_score:.2f})")
             return best_match
 
         return None
+
+    @staticmethod
+    def _extract_series_candidates(manifest: dict) -> List[Tuple[str, str]]:
+        """
+        Build ordered series-match candidates from manifest metadata.
+
+        Priority: OPF/spine-derived metadata first, then enriched fallbacks.
+        """
+        metadata = manifest.get("metadata", {})
+        metadata_en = manifest.get("metadata_en", {})
+        toc = manifest.get("toc", {})
+
+        candidates: List[Tuple[str, str]] = []
+
+        def add(source: str, value: Any) -> None:
+            if not isinstance(value, str):
+                return
+            text = value.strip()
+            if text:
+                candidates.append((source, text))
+
+        # 1) OPF-authoritative fields populated by Librarian metadata parser.
+        if isinstance(metadata, dict):
+            series_raw = metadata.get("series", "")
+            if isinstance(series_raw, dict):
+                for key in ("ja", "japanese", "en", "english", "title", "title_english"):
+                    value = series_raw.get(key, "")
+                    if isinstance(value, dict):
+                        for nested in ("ja", "japanese", "en", "english"):
+                            add("opf_series", value.get(nested, ""))
+                    else:
+                        add("opf_series", value)
+            else:
+                add("opf_series", series_raw)
+
+            add("opf_title_sort", metadata.get("title_sort", ""))
+            add("opf_title", metadata.get("title", ""))
+            add("metadata_title", metadata.get("title", ""))
+            add("metadata_series", metadata.get("series", ""))
+
+            source_epub = metadata.get("source_epub", "")
+            if isinstance(source_epub, str) and source_epub.strip():
+                try:
+                    stem = Path(source_epub).stem
+                    add("source_epub_stem", stem.replace("_", " "))
+                except Exception:
+                    pass
+
+        # 2) TOC/spine-adjacent fallback from nav source path basename.
+        if isinstance(toc, dict):
+            source_file = toc.get("source_file", "")
+            if isinstance(source_file, str) and source_file.strip():
+                try:
+                    nav_stem = Path(source_file).parent.parent.name
+                    add("source_epub_stem", nav_stem.replace("_", " "))
+                except Exception:
+                    pass
+
+        # 3) Enriched metadata fallbacks.
+        if isinstance(metadata_en, dict):
+            for key in ("series_title_en", "series_en", "title_en"):
+                add("metadata_en", metadata_en.get(key, ""))
+            official = metadata_en.get("official_localization", {})
+            if isinstance(official, dict):
+                for key in ("series_title_en", "volume_title_en"):
+                    add("official_localization", official.get(key, ""))
+
+        add("volume_id", manifest.get("volume_id", ""))
+
+        # Preserve insertion order while deduplicating on normalized text.
+        deduped: List[Tuple[str, str]] = []
+        seen: set[str] = set()
+        for source, text in candidates:
+            norm = BibleController._normalize_series_text(text)
+            if norm and norm not in seen:
+                deduped.append((source, text))
+                seen.add(norm)
+        return deduped
+
+    @staticmethod
+    def _normalize_series_text(text: str) -> str:
+        """Normalize titles for robust cross-volume series matching."""
+        s = unicodedata.normalize("NFKC", str(text or "")).strip().lower()
+        if not s:
+            return ""
+
+        # Remove common trailing volume markers.
+        volume_patterns = [
+            r"\s*(?:vol(?:ume)?\.?|lv\.?|level)\s*[0-9]+$",
+            r"\s*[v]\s*[0-9]+$",
+            r"\s*第\s*[0-9一二三四五六七八九十百千]+\s*(?:巻|話|章)$",
+            r"\s*[0-9]+$",
+            r"\s*[\(\[]\s*[0-9]+\s*[\)\]]$",
+        ]
+        for pat in volume_patterns:
+            s = re.sub(pat, "", s).strip()
+
+        # Compact punctuation noise for fuzzy comparisons.
+        s = re.sub(r"[^\w\u3040-\u30ff\u3400-\u9fff]+", " ", s)
+        s = re.sub(r"\s+", " ", s).strip()
+        return s
 
     def _get_or_load(self, series_id: str, entry: dict) -> SeriesBible:
         """Get cached bible or load from disk."""
@@ -923,7 +1047,42 @@ class BibleController:
         # Character profiles → enrich existing character entries
         if 'character_profiles' in categories:
             profiles = metadata_en.get('character_profiles', {})
+            seeded = 0
             enriched = 0
+
+            # Seed missing character entries directly from character_profiles
+            # when character_names is empty (common in v3 metadata flow).
+            for profile_key, profile_data in profiles.items():
+                if not isinstance(profile_data, dict):
+                    continue
+
+                full_name = str(profile_data.get('full_name', '')).strip()
+                if not full_name:
+                    continue
+
+                jp_key = None
+                if re.search(r'[\u3040-\u30ff\u4e00-\u9fff]', profile_key):
+                    jp_key = profile_key
+                else:
+                    ruby_base = str(profile_data.get('ruby_base', '')).strip()
+                    if ruby_base and re.search(r'[\u3040-\u30ff\u4e00-\u9fff]', ruby_base):
+                        jp_key = ruby_base
+
+                if not jp_key:
+                    continue
+                if bible.get_character(jp_key):
+                    continue
+
+                payload: Dict[str, Any] = {
+                    'canonical_en': full_name,
+                    'source': 'manifest_profile_seed',
+                }
+                nickname = str(profile_data.get('nickname', '')).strip()
+                if nickname:
+                    payload['short_name'] = nickname
+                bible.add_entry('characters', jp_key, payload)
+                seeded += 1
+
             for profile_key, profile_data in profiles.items():
                 if not isinstance(profile_data, dict):
                     continue
@@ -972,6 +1131,7 @@ class BibleController:
                     bible.add_entry('characters', jp_key, enrichments)
                     enriched += 1
 
+            summary['character_profiles_seeded'] = seeded
             summary['character_profiles'] = enriched
 
         # Register volume

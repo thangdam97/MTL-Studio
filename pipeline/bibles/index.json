@@ -1,6 +1,6 @@
 {
   "version": "1.0",
-  "last_updated": "2026-02-11T04:25:26.560440+00:00",
+  "last_updated": "2026-02-12T04:16:39.553562+00:00",
   "series": {
     "madan_no_ou_to_vanadis": {
       "bible_file": "madan_no_ou_to_vanadis.json",
@@ -120,9 +120,10 @@
       "volumes": [
         "0b24",
         "0fa9",
-        "0a51"
+        "0a51",
+        "1b97"
       ],
-      "entry_count": 7,
+      "entry_count": 13,
       "last_updated": "2026-02-09T08:16:46Z"
     },
     "クラスで２番目に可愛い女の子と友だちになった電子版": {
@@ -301,13 +302,41 @@
       "bible_file": "lv.json",
       "match_patterns": [
         "ネトゲの嫁は女の子じゃないと思った? Lv.",
-        "And You Thought There Is Never a Girl Online?"
+        "And You Thought There Is Never a Girl Online?",
+        "Netoge no Yome wa Onnanoko ja Nai to Omotta?"
       ],
       "volumes": [
+        "1124",
         "0116"
       ],
       "entry_count": 0,
       "last_updated": "2026-02-11T04:25:26.557650+00:00"
+    },
+    "series_d045bf2b8d": {
+      "bible_file": "series_d045bf2b8d.json",
+      "match_patterns": [
+        "自分を負けヒロインだと思い込んでいるすでに勝利済みの幼馴染",
+        "自分を負けヒロインだと思い込んでいるすでに勝利済みの幼馴染",
+        "My Childhood Friend Thinks She's the Losing Heroine (She's Already Won)"
+      ],
+      "volumes": [
+        "1790"
+      ],
+      "entry_count": 42,
+      "last_updated": "2026-02-11T08:43:53.407694+00:00"
+    },
+    "series_5283511145": {
+      "bible_file": "series_5283511145.json",
+      "match_patterns": [
+        "高校時代に傲慢だった女王様との同棲生活は意外と居心地が悪くない",
+        "高校時代に傲慢だった女王様との同棲生活は意外と居心地が悪くない",
+        "高校時代に傲慢だった女王様との同棲生活は意外と居心地が悪くない 4"
+      ],
+      "volumes": [
+        "0a23"
+      ],
+      "entry_count": 17,
+      "last_updated": "2026-02-11T09:45:26.762920+00:00"
     }
   }
 }

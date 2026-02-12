@@ -46,6 +46,15 @@ flowchart TB
         P15A --> P15S1 --> P15S2 --> P15S3 --> P15S4 --> P15S5
     end
 
+    subgraph P155["PHASE 1.55 — RICH METADATA CACHE · Full-LN Context"]
+        direction TB
+        P155A["RichMetadataCache\nrich_metadata_cache.py"]
+        P155S1["Full-LN cache prep\nGemini cache TTL 7200s"]
+        P155S2["Placeholder-safe patch merge\npreserve populated fields"]
+        P155S3["visual_identity_non_color backfill\n+ volume-scoped bible event sync"]
+        P155A --> P155S1 --> P155S2 --> P155S3
+    end
+
     BIBLE[("📖 Series Bible\nbibles/series.json\ncharacters · geography\nweapons · orgs · cultural\nmythology")]
 
     subgraph P16["PHASE 1.6 — ART DIRECTOR · Gemini 3 Pro Preview · Vision + Thinking"]
@@ -60,11 +69,21 @@ flowchart TB
     end
 
     VCACHE["visual_cache.json\nper-illustration analysis\n+ Art Director's Notes"]
+    PLANS["PLANS/chapter_*_scene_plan.json\nStage 1 scene scaffold"]
 
-    subgraph P2["PHASE 2 — TRANSLATOR · Gemini 2.5 Pro · 3-Tier RAG"]
+    subgraph P17["PHASE 1.7 — SCENE PLANNER · Stage 1 Rhythm Planning"]
+        direction TB
+        P17A["ScenePlannerAgent\nplanner/agent.py"]
+        P17S1["Narrative beat segmentation\nsetup/escalation/reveal/landing"]
+        P17S2["Normalize to config enums\ndialogue_register + target_rhythm"]
+        P17S3["Write per-chapter plan\nmanifest.scene_plan_file"]
+        P17A --> P17S1 --> P17S2 --> P17S3
+    end
+
+    subgraph P2["PHASE 2 — TRANSLATOR (Stage 2) · Gemini 2.5 Pro · 3-Tier RAG"]
         direction TB
         P2A["TranslatorAgent\nagent.py · 1515 lines\n16-step initialization"]
-        P2CP["ChapterProcessor\nchapter_processor.py · 1472 lines\nper-chapter translate + QC"]
+        P2CP["ChapterProcessor\nchapter_processor.py\nStage 2 scaffold + per-chapter translate"]
 
         subgraph RAG["3-Tier RAG System · PromptLoader · 2393 lines"]
             direction LR
@@ -130,8 +149,10 @@ flowchart TB
     INPUT ==> P1
     P1 ==> WK1
     WK1 ==> P15
-    P15 ==> P16
-    P16 ==> P2
+    P15 ==> P155
+    P155 ==> P16
+    P16 ==> P17
+    P17 ==> P2
     P2 ==> WK2
     WK2 ==> P3
     P3 ==> P4
@@ -142,9 +163,13 @@ flowchart TB
 
     P16 --> VCACHE
     VCACHE -.->|"Art Director's Notes"| P2
+    P17 --> PLANS
+    PLANS -.->|"Stage 2 scene scaffold"| P2
 
     MANIFEST -.->|"read by all phases"| P15
+    MANIFEST -.-> P155
     MANIFEST -.-> P16
+    MANIFEST -.-> P17
     MANIFEST -.-> P2
     MANIFEST -.-> P4
 
@@ -181,6 +206,7 @@ flowchart TB
     - [World Setting Directive System](#world-setting-directive-system)
 5. [What's New in V5.2](#whats-new-in-v52-current-release)
 6. [System Architecture](#system-architecture)
+    - [V1.6 Redesign Visual Map](#v16-redesign-visual-map)
 7. [Pipeline Phases](#pipeline-phases)
 8. [Installation](#installation)
 9. [Quick Start](#quick-start)
@@ -221,10 +247,10 @@ V5.2 (February 2026) introduces a **Three-Pillar Translation Architecture** that
 
 ### Core Capabilities
 
-#### 1) Full Pipeline Orchestration (Phase 1 → 1.5 → 1.6 → 2 → 3 → 4)
+#### 1) Full Pipeline Orchestration (Phase 1 → 1.5 → 1.55 → 1.6 → 1.7 → 2 → 3 → 4)
 
-- **Single-command production flow**: `mtl.py run <epub>` executes extraction, metadata translation, multimodal analysis, translation, and EPUB build in sequence.
-- **Modular phase control**: Each stage can run independently (`phase1`, `phase1.5`, `phase1.6`, `phase2`, `phase3`, `phase4`) for iterative workflows and targeted retries.
+- **Single-command production flow**: `mtl.py run <epub>` executes extraction, grounded metadata/bible sync, rich metadata cache refinement, multimodal analysis, Stage 1 scene planning, Stage 2 translation, and EPUB build in sequence.
+- **Modular phase control**: Each stage can run independently (`phase1`, `phase1.5`, `phase1.55`, `phase1.6`, `phase1.7`, `phase2`, `phase3`, `phase4`) for iterative workflows and targeted retries.
 - **Backward-compatible operation**: Legacy paths remain supported while v5.2 behavior is standardized around the Three-Pillar architecture.
 - **Manifest-driven state tracking**: `manifest.json` stores pipeline state, chapter status, language outputs, and audit metadata for resumable execution.
 
@@ -903,8 +929,9 @@ When enabled, the Translator agent automatically:
 | Phase | Command | Action |
 |-------|---------|--------|
 | **Phase 1.6** | `mtl.py phase1.6 <volume_id>` | Gemini 3 Pro Vision analyzes all illustrations → `visual_cache.json` |
-| **Phase 2** | `mtl.py phase2 <volume_id>` | Translator reads visual cache, injects Art Director's Notes per chapter |
-| **Full Pipeline** | `mtl.py run <epub>` | Phase 1.6 runs automatically before Phase 2 |
+| **Phase 1.7** | `mtl.py phase1.7 <volume_id>` | Stage 1 scene planner writes beat/rhythm scaffold to `PLANS/` |
+| **Phase 2** | `mtl.py phase2 <volume_id>` | Stage 2 translator consumes `visual_cache.json` + `PLANS/` scene scaffold |
+| **Full Pipeline** | `mtl.py run <epub>` | Phase 1.6 and Phase 1.7 run automatically before Phase 2 |
 
 ### Thought Logging
 
@@ -1342,11 +1369,12 @@ Lord Marksman and Vanadis was chosen as the reference series because it exercise
 
 This section uses the same capability taxonomy as **Core Capabilities** so the release deltas are easy to map to operational behavior.
 
-### 1) Full Pipeline Orchestration (Phase 1 → 1.5 → 1.6 → 2 → 3 → 4)
+### 1) Full Pipeline Orchestration (Phase 1 → 1.5 → 1.55 → 1.6 → 1.7 → 2 → 3 → 4)
 
-- **Phase model standardized around v5.2**: The production workflow is explicitly structured as Librarian → Schema Agent Autoupdate → Metadata → Art Director → Translator → Critics → Builder.
+- **Phase model standardized around v5.2**: The production workflow is explicitly structured as Librarian → Schema Agent Autoupdate → Metadata → Rich Metadata Cache → Art Director → Scene Planner (Stage 1) → Translator (Stage 2) → Critics → Builder.
 - **Builder/navigation hardening**: Chapters marked `is_pre_toc_content: true` are excluded from reader navigation generation (`nav.xhtml`) for publisher-correct frontmatter handling.
 - **Image mapping continuity**: Source image naming and normalized image IDs are tracked in manifest-level mapping for reliable downstream packaging.
+- **Stage 2 normalization wiring**: Scene plan `dialogue_register` and `target_rhythm` are hard-mapped to `planning_config.json` enums before prompt-time injection.
 
 ### 2) Three-Pillar Translation Intelligence (v5.2 Core)
 
@@ -1368,7 +1396,7 @@ This section uses the same capability taxonomy as **Core Capabilities** so the r
 - **World Setting Directive**: Per-series honorific policy (localize/retain), name order, and per-character exceptions injected at TOP of system instruction.
 - **Schema Agent with Google Search grounding**: Always-on Google Search in Gemini 2.5 Flash with two fixed priority chains: `Official Localization -> AniDB (public API) -> MyAnimeList -> Ranobe-Mori (JP) -> Fan Translation -> Heuristic Inference` for both localization metadata and canonical term resolution.
 - **Schema v3.6 enrichment**: Metadata now includes `gap_moe_markers`, `dual_voice_analysis`, and `transcreation_notes`.
-- **Schema Agent v3.6 auto-run in Phase 1.5**: Flow is now `Librarian → Schema Agent autoupdate → Bible PULL → Title/Chapter translation → Bible PUSH → Phase 2`.
+- **Schema Agent v3.6 auto-run in Phase 1.5**: Flow is now `Librarian → Schema Agent autoupdate → Bible PULL → Title/Chapter translation → Bible PUSH → Phase 1.55 → Phase 1.6 → Phase 1.7 → Phase 2`.
 - **Official localization preference**: When a series has an established localized title, schema auto-update prioritizes official localization metadata over literal fallback naming.
 - **Bible CLI tooling**: `mtl bible` provides 9 subcommands for managing bibles: `list`, `show`, `validate`, `import`, `link`, `unlink`, `orphans`, `prompt`, `sync`.
 - **Continuity-focused validation**: Name consistency via bible glossary lock, sequel inheritance safety, and schema integrity checks are enforced earlier in the pipeline.
@@ -1418,6 +1446,25 @@ This section uses the same capability taxonomy as **Core Capabilities** so the r
 
 > See the full interactive diagram at the [top of this README](#mtl-studio) — GitHub renders it as a navigable SVG.
 
+### V1.6 Redesign Visual Map
+
+```mermaid
+flowchart LR
+    P1["Phase 1\nLibrarian"] --> P15["Phase 1.5\nMetadata + Bible sync"]
+    P15 --> P155["Phase 1.55\nRich metadata cache\n(full-LN context patch)"]
+    P155 --> P16["Phase 1.6\nArt Director multimodal"]
+    P16 --> P17["Phase 1.7\nStage 1 Scene Planner"]
+    P17 --> P2["Phase 2\nStage 2 Translator"]
+    P2 --> P4["Phase 4\nBuilder"]
+
+    P17 --> PLAN["PLANS/chapter_*_scene_plan.json"]
+    VC["visual_cache.json"] -. multimodal notes .-> P2
+    PLAN -. scene/rhythm scaffold .-> P2
+    RAW["JP chapter text"] -. source of truth .-> P2
+
+    RULES["Stage 2 precedence rules\n1) Raw JP text is authoritative\n2) Multimodal is descriptive only\n3) Scene scaffold guides rhythm, never facts"] -. enforced .-> P2
+```
+
 ### Agent Communication Protocol
 
 Agents communicate through a file-based protocol using `manifest.json` as the central state machine. Each agent reads the manifest, verifies predecessor completion, performs its work, and updates the manifest with its status.
@@ -1459,6 +1506,13 @@ ART DIRECTOR          → Gemini 3 Pro Vision analyzes all illustrations
                       → post-analysis canon reconciliation applied to cache entries
                       → cache/thoughts/*.json (reasoning traces)
 
+SCENE PLANNER         → Stage 1 planning for narrative beats and rhythm
+ (Phase 1.7)          → Reads JP chapter + metadata context
+                      → Writes PLANS/<chapter>_scene_plan.json
+                      → Normalizes dialogue_register to planning_config enums
+                      → Normalizes target_rhythm to planning_config rhythm keys
+                      → Updates manifest chapter scene_plan_file pointer
+
 VECTOR SEARCH INIT    → EnglishPatternStore auto-rebuilds if empty
  (Phase 2 startup)    → ChromaDB loaded: 204 EN patterns (28 categories)
                       → SinoVietnameseStore loaded (VN pipeline only)
@@ -1471,6 +1525,9 @@ TRANSLATOR reads      → checks librarian.status == "completed"
                       → Grammar Pattern Detector scans JP source (70+ regex)
                       → Vector Search injects high-confidence matches (≥0.78)
                       → Art Director's Notes injected for illustrated chapters
+                      → Loads Stage 1 scene_plan_file for Stage 2 scaffold injection
+                      → Source precedence: JP text remains the only source of truth
+                      → Multimodal precedence: descriptive only, never overrides source facts
                       → Full-volume cache created once (optional)
                       → Massive chapters use Smart Chunking (optional)
                       → Chunk JSONs merged and validated
@@ -1584,9 +1641,23 @@ WORK/[volume_id]/
 - `visual_cache.json` - Structured visual analysis per illustration (composition, emotional_delta, narrative_directives, spoiler_prevention)
 - `cache/thoughts/*.json` - ThinkingConfig(HIGH) reasoning traces for editorial review
 
-### Phase 2: Translator
+### Phase 1.7: Scene Planner (Stage 1)
 
-**Purpose**: Translate JP chapters to EN/VN using Gemini 2.5 Pro with RAG, Vector Search, and Multimodal Context
+**Purpose**: Pre-plan chapter beat flow and sentence rhythm so translation starts from a controlled scene scaffold.
+
+**Responsibilities**:
+- Segment each chapter into scene beats (`setup`, `escalation`, `reveal`, `landing`, etc.)
+- Assign `dialogue_register` and `target_rhythm` per beat
+- Normalize free-form planner outputs to `planning_config.json` enums/keys
+- Record chapter-level plan pointers in manifest for deterministic Stage 2 loading
+
+**Output**:
+- `PLANS/chapter_*_scene_plan.json` - Stage 1 beat/rhythm scaffold
+- Updated `manifest.json` chapter entries with `scene_plan_file` path
+
+### Phase 2: Translator (Stage 2)
+
+**Purpose**: Translate JP chapters to EN/VN using Gemini 2.5 Pro with RAG, Vector Search, Multimodal Context, and Stage 2 scene-rhythm guidance
 
 **Translation Flow**:
 ```
@@ -1647,6 +1718,10 @@ WORK/[volume_id]/
 
 **Key Features**:
 - Context-aware translation with 2-chapter lookback
+- **Stage 2 scene scaffold injection**: Loads `PLANS/chapter_*_scene_plan.json` and injects beat/rhythm controls into chapter prompts
+- **Source-of-truth precedence**: JP raw text always wins over scaffold and multimodal notes
+- **Multimodal precedence policy**: Visual notes are descriptive only and cannot override textual facts
+- **Standalone self-heal**: `phase2` auto-runs `phase1.7` if selected chapters are missing plan files
 - **Vector Search**: Grammar pattern detection → semantic embedding → confidence-based injection
 - **Multimodal**: Art Director's Notes injected for chapters with `[ILLUSTRATION:]` markers
 - **Smart Chunking (massive chapters)**: byte/char-threshold split + resumable chunk translation
@@ -1941,7 +2016,9 @@ python mtl.py run INPUT/novel_v1.epub [--verbose] [--id custom_id] [--skip-multi
 # Individual phases
 python mtl.py phase1 INPUT/novel_v1.epub [--id volume_id]
 python mtl.py phase1.5 [volume_id]
+python mtl.py phase1.55 [volume_id]
 python mtl.py phase1.6 [volume_id]
+python mtl.py phase1.7 [volume_id] [--chapters chapter_01 chapter_02]
 python mtl.py phase2 [volume_id] [--chapters 1 2 3] [--force] [--enable-multimodal]
 python mtl.py phase3 [volume_id]
 python mtl.py phase4 [volume_id] [--output "Custom Title.epub"]
@@ -1994,11 +2071,13 @@ python mtl.py config --toggle-multimodal
 | `run` | Execute full pipeline from EPUB input |
 | `phase1` | Librarian: Extract EPUB to working directory |
 | `phase1.5` | Metadata Processor: Translate metadata, bible auto-sync (PULL/PUSH), and preserve schema continuity |
+| `phase1.55` | Rich Metadata Cache: Build full-LN cache and apply safe metadata patch refinement |
 | `phase1.6` | Art Director: Analyze illustrations and build `visual_cache.json` |
-| `phase2` | Translator: Translate chapters with Gemini |
+| `phase1.7` | Scene Planner: Generate beat/rhythm scaffold (`PLANS/chapter_*_scene_plan.json`) |
+| `phase2` | Translator (Stage 2): Translate chapters with Gemini, auto-running `phase1.7` in standalone mode if plans are missing |
 | `phase3` | Display critics workflow instructions for audit/review |
 | `phase4` | Builder: Package translated content to EPUB |
-| `multimodal` | Run `phase1.6` + `phase2 --enable-multimodal` in one command |
+| `multimodal` | Run `phase1.6` + `phase2 --enable-multimodal` (with `phase1.7` auto-run when plans are missing) |
 | `cache-inspect` | Inspect multimodal cache status and per-image analysis metadata |
 | `visual-thinking` | Convert visual thought logs (`cache/thoughts/*.json`) to markdown |
 | `status` | Display volume processing status |
@@ -3257,7 +3336,7 @@ See LICENSE.txt for licensing information.
 - **Cache Runtime Upgrade**: Context cache TTL standardized to 120 minutes with explicit volume-cache source coverage verification logging
 - **Publisher Profile Hardening**: Shueisha-specific `embed0000.jpg` exclusion to suppress publisher-logo gaiji noise in JP extraction and translation flow
 - **Self-Healing Quality Pipeline**: Integrated CJK cleaning + Anti-AI-ism healing for post-translation stabilization
-- **CLI Expansion**: `phase1.6`, `multimodal`, `cache-inspect`, `visual-thinking`, and richer schema tooling
+- **CLI Expansion**: `phase1.55`, `phase1.6`, `phase1.7`, `multimodal`, `cache-inspect`, `visual-thinking`, and richer schema tooling
 
 ### Version 4.0 LTS (February 2026)
 - **Gap Moe Semantic Analysis**: Automatic detection and preservation of character behavioral transitions (cute→scary, cold→warm)

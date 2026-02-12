@@ -6,7 +6,7 @@
     "en": "I Rescued a Lost Little Girl, and Now the Beautiful Exchange Student Next Door Won't Stop Visiting!",
     "romaji": ""
   },
-  "last_updated": "2026-02-09T08:16:46Z",
+  "last_updated": "2026-02-12T04:16:39.552721+00:00",
   "volumes_registered": [
     {
       "volume_id": "0b24",
@@ -19,6 +19,11 @@
       "index": 4
     },
     {
+      "volume_id": "1b97",
+      "title": "迷子になっていた幼女を助けたら、お隣に住む美少女留学生が家に遊びに来るようになった件について",
+      "index": 5
+    },
+    {
       "volume_id": "0a51",
       "title": "迷子になっていた幼女を助けたら、お隣に住む美少女留学生が家に遊びに来るようになった件について 5",
       "index": 5
@@ -27,16 +32,194 @@
   "characters": {
     "青柳明人": {
       "canonical_en": "Aoyagi Akihito",
-      "category": "protagonist"
+      "category": "Protagonist",
+      "affiliation": "Japanese",
+      "keigo": {
+        "narration": "casual",
+        "internal_thoughts": "casual",
+        "speaking_to": {
+          "Miyu-sensei": "polite",
+          "Saionji Akira": "casual",
+          "Charlotte Bennett": "initially polite, gradually more casual as they grow closer",
+          "Emma": "gentle, casual"
+        },
+        "emotional_shifts": {
+          "embarrassment": "becomes flustered, stutters, avoids eye contact",
+          "surprise": "voice may waver"
+        },
+        "notes": "Maintains a polite distance with most, but shows warmth and casualness with those he trusts or cares for deeply."
+      },
+      "visual_identity_non_color": {
+        "identity_summary": "Standard short hair, typical high school uniform, often has a thoughtful or slightly flustered expression, sometimes seen with a slightly withdrawn posture."
+      },
+      "notes": "Reserved, thoughtful, kind, responsible, self-sacrificing due to a past event, intelligent (good student, proficient in English), easily flustered by romantic attention.",
+      "volume_events": {
+        "1b97": {
+          "relationship_to_protagonist": "Protagonist",
+          "relationship_to_others": "Best friend with Saionji Akira; neighbor and developing romantic interest with Charlotte Bennett; surrogate older brother figure to Emma; student of Miyu-sensei.",
+          "keigo_switch": {
+            "narration": "casual",
+            "internal_thoughts": "casual",
+            "speaking_to": {
+              "Miyu-sensei": "polite",
+              "Saionji Akira": "casual",
+              "Charlotte Bennett": "initially polite, gradually more casual as they grow closer",
+              "Emma": "gentle, casual"
+            },
+            "emotional_shifts": {
+              "embarrassment": "becomes flustered, stutters, avoids eye contact",
+              "surprise": "voice may waver"
+            },
+            "notes": "Maintains a polite distance with most, but shows warmth and casualness with those he trusts or cares for deeply."
+          },
+          "character_arc": "Overcoming past burdens and learning to accept happiness and the affection of others, particularly Charlotte and Emma."
+        }
+      }
     },
     "シャーロット・ベネット": {
-      "canonical_en": "Charlotte Bennett"
+      "canonical_en": "Charlotte Bennett",
+      "short_name": "Charlotte",
+      "category": "Foreign exchange student, neighbor, developing romantic interest, relies on him for support with Emma.",
+      "affiliation": "British (England)",
+      "keigo": {
+        "narration": "polite",
+        "internal_thoughts": "polite",
+        "speaking_to": {
+          "Aoyagi Akihito": "polite (keigo), becoming slightly less formal as intimacy grows",
+          "Emma": "gentle, sisterly",
+          "Miyu-sensei": "polite (keigo)"
+        },
+        "emotional_shifts": {
+          "embarrassment": "blushes, stutters, covers mouth, looks down",
+          "playfulness": "smiles brightly, giggles"
+        },
+        "notes": "Her politeness is a consistent trait, reflecting her upbringing, but she shows vulnerability and playfulness with those she trusts."
+      },
+      "visual_identity_non_color": {
+        "identity_summary": "Long, straight hair, elegant gestures, friendly and sometimes mischievous smile, often seen in school uniform or casual home attire (sometimes resembling pajamas), tends to blush easily."
+      },
+      "notes": "Elegant, friendly, kind, sincere, a bit mischievous, highly proficient in Japanese, skilled at Japanese cooking, initially reserved but opens up, easily embarrassed, especially by romantic topics.",
+      "volume_events": {
+        "1b97": {
+          "relationship_to_protagonist": "Foreign exchange student, neighbor, developing romantic interest, relies on him for support with Emma.",
+          "relationship_to_others": "Older sister to Emma; classmate of Aoyagi Akihito and Saionji Akira; student of Miyu-sensei.",
+          "keigo_switch": {
+            "narration": "polite",
+            "internal_thoughts": "polite",
+            "speaking_to": {
+              "Aoyagi Akihito": "polite (keigo), becoming slightly less formal as intimacy grows",
+              "Emma": "gentle, sisterly",
+              "Miyu-sensei": "polite (keigo)"
+            },
+            "emotional_shifts": {
+              "embarrassment": "blushes, stutters, covers mouth, looks down",
+              "playfulness": "smiles brightly, giggles"
+            },
+            "notes": "Her politeness is a consistent trait, reflecting her upbringing, but she shows vulnerability and playfulness with those she trusts."
+          },
+          "character_arc": "Adjusting to life in Japan, deepening her bond with Akihito and Emma, and navigating her feelings."
+        }
+      },
+      "biological_arrays": {
+        "blood_related_siblings": [
+          {
+            "canonical_name": "Emma",
+            "japanese_name": "エマ",
+            "family_name_shared": "Bennett",
+            "relation": "older_sister",
+            "evidence_jp": [
+              "ベネット姉妹",
+              "妹",
+              "ロッティー"
+            ]
+          }
+        ],
+        "family_role_markers": [
+          "older_sister",
+          "teen_sibling",
+          "protective_guardian"
+        ],
+        "anti_confusion_directives": [
+          "Charlotte is the elder Bennett sister; do not map her as Emma.",
+          "Charlotte is taller and holds sisterly/guardian posture in shared scenes."
+        ]
+      }
     },
     "エマ・ベネット": {
-      "canonical_en": "Emma Bennett"
+      "canonical_en": "Emma Bennett",
+      "biological_arrays": {
+        "blood_related_siblings": [
+          {
+            "canonical_name": "Charlotte Bennett",
+            "japanese_name": "シャーロット・ベネット",
+            "family_name_shared": "Bennett",
+            "relation": "younger_sister",
+            "evidence_jp": [
+              "ロッティー",
+              "妹",
+              "ベネット姉妹"
+            ]
+          }
+        ],
+        "family_role_markers": [
+          "younger_sister",
+          "small_child",
+          "dependent_sibling"
+        ],
+        "anti_confusion_directives": [
+          "Emma is the younger Bennett sister; do not map her as Charlotte.",
+          "Emma is child-sized and calls Charlotte 'Lottie' (ロッティー)."
+        ]
+      },
+      "short_name": "Emma",
+      "visual_identity_non_color": {
+        "identity_summary": "Small child with short hair and cat/beast-ear accessories; younger Bennett sister, often shown with innocent expressive gestures."
+      }
     },
     "西園寺彰": {
-      "canonical_en": "Saionji Akira"
+      "canonical_en": "Saionji Akira",
+      "short_name": "Akira",
+      "category": "Best friend since elementary school, confidante.",
+      "affiliation": "Japanese",
+      "keigo": {
+        "narration": "N/A",
+        "internal_thoughts": "N/A",
+        "speaking_to": {
+          "Aoyagi Akihito": "casual",
+          "Miyu-sensei": "casual, sometimes disrespectful (leading to scolding)",
+          "Charlotte Bennett": "direct, forward"
+        },
+        "emotional_shifts": {
+          "excitement": "loud, enthusiastic",
+          "disappointment": "sulks, complains loudly"
+        },
+        "notes": "His casual and direct speech reflects his outgoing and sometimes thoughtless nature."
+      },
+      "visual_identity_non_color": {
+        "identity_summary": "Sportsman-like short hair, handsome face, energetic posture, often seen with a wide grin or a sulking, pouting expression."
+      },
+      "notes": "Energetic, outgoing, friendly, handsome, athletic, excellent communicator, prone to acting impulsively, especially around girls, often the class mood-maker, but can be dense.",
+      "volume_events": {
+        "1b97": {
+          "relationship_to_protagonist": "Best friend since elementary school, confidante.",
+          "relationship_to_others": "Classmate of Akihito and Charlotte; soccer player in youth league; student of Miyu-sensei.",
+          "keigo_switch": {
+            "narration": "N/A",
+            "internal_thoughts": "N/A",
+            "speaking_to": {
+              "Aoyagi Akihito": "casual",
+              "Miyu-sensei": "casual, sometimes disrespectful (leading to scolding)",
+              "Charlotte Bennett": "direct, forward"
+            },
+            "emotional_shifts": {
+              "excitement": "loud, enthusiastic",
+              "disappointment": "sulks, complains loudly"
+            },
+            "notes": "His casual and direct speech reflects his outgoing and sometimes thoughtless nature."
+          },
+          "character_arc": "Remaining a supportive friend to Akihito, and potentially maturing in his approach to relationships."
+        }
+      }
     },
     "花澤美優": {
       "canonical_en": "Hanazawa Miyu"
@@ -46,6 +229,218 @@
     },
     "クレア": {
       "canonical_en": "Claire"
+    },
+    "青柳 明人": {
+      "canonical_en": "Aoyagi Akihito",
+      "source": "phase1.5_auto_sync_profiles",
+      "discovered_in": "(迷子になっていた幼女を助けたら、お隣に住む美少女留学生が家に遊びに来るようになった件について (1)_20260212_1b97"
+    },
+    "エマ": {
+      "canonical_en": "Emma",
+      "source": "phase1.5_auto_sync_profiles",
+      "discovered_in": "(迷子になっていた幼女を助けたら、お隣に住む美少女留学生が家に遊びに来るようになった件について (1)_20260212_1b97",
+      "short_name": "Emma-chan",
+      "category": "Rescued by Akihito, beloved 'Onii-chan' (older brother figure), playmate, very attached to him.",
+      "affiliation": "British (England)",
+      "keigo": {
+        "narration": "N/A",
+        "internal_thoughts": "N/A",
+        "speaking_to": {
+          "Aoyagi Akihito": "casual, affectionate ('Onii-chan')",
+          "Charlotte Bennett": "casual, sisterly ('Lottie')"
+        },
+        "emotional_shifts": {
+          "unhappiness": "pouts, stomps feet, cries loudly",
+          "excitement": "eyes sparkle, smiles brightly",
+          "affection": "clings to people, rubs face against them"
+        },
+        "notes": "Her speech is typical of a young child, direct and focused on her immediate desires."
+      },
+      "visual_identity_non_color": {
+        "identity_summary": "Small stature, often seen wearing a beast-ear hood (pajamas), tends to cling to people she likes, wide-eyed innocent expression, pouts with puffed cheeks when unhappy, brightens with a wide smile when excited."
+      },
+      "notes": "Innocent, sweet, easily attached, playful, a bit stubborn when she wants something, usually loves cat videos, cries easily when startled or sad, very affectionate.",
+      "volume_events": {
+        "1b97": {
+          "relationship_to_protagonist": "Rescued by Akihito, beloved 'Onii-chan' (older brother figure), playmate, very attached to him.",
+          "relationship_to_others": "Younger sister to Charlotte Bennett, doted upon.",
+          "keigo_switch": {
+            "narration": "N/A",
+            "internal_thoughts": "N/A",
+            "speaking_to": {
+              "Aoyagi Akihito": "casual, affectionate ('Onii-chan')",
+              "Charlotte Bennett": "casual, sisterly ('Lottie')"
+            },
+            "emotional_shifts": {
+              "unhappiness": "pouts, stomps feet, cries loudly",
+              "excitement": "eyes sparkle, smiles brightly",
+              "affection": "clings to people, rubs face against them"
+            },
+            "notes": "Her speech is typical of a young child, direct and focused on her immediate desires."
+          },
+          "character_arc": "Adapting to a new country and language, finding comfort and a sense of belonging with Akihito, and growing closer to her sister."
+        }
+      },
+      "biological_arrays": {
+        "blood_related_siblings": [
+          {
+            "canonical_name": "Charlotte Bennett",
+            "japanese_name": "シャーロット・ベネット",
+            "family_name_shared": "Bennett",
+            "relation": "younger_sister",
+            "evidence_jp": [
+              "ロッティー",
+              "妹",
+              "ベネット姉妹"
+            ]
+          }
+        ],
+        "family_role_markers": [
+          "younger_sister",
+          "small_child",
+          "dependent_sibling"
+        ],
+        "anti_confusion_directives": [
+          "Emma is the younger Bennett sister; do not map her as Charlotte.",
+          "Emma is child-sized and calls Charlotte 'Lottie' (ロッティー)."
+        ]
+      }
+    },
+    "西園寺 彰": {
+      "canonical_en": "Saionji Akira",
+      "source": "phase1.5_auto_sync_profiles",
+      "discovered_in": "(迷子になっていた幼女を助けたら、お隣に住む美少女留学生が家に遊びに来るようになった件について (1)_20260212_1b97"
+    },
+    "美優先生": {
+      "canonical_en": "Miyu-sensei",
+      "source": "phase1.5_auto_sync_profiles",
+      "discovered_in": "(迷子になっていた幼女を助けたら、お隣に住む美少女留学生が家に遊びに来るようになった件について (1)_20260212_1b97",
+      "short_name": "Miyu-chan (by Hanazawa-sensei)",
+      "category": "Homeroom teacher, observant of his personal life, knows about his past, likes to tease him.",
+      "affiliation": "Japanese",
+      "keigo": {
+        "narration": "N/A",
+        "internal_thoughts": "N/A",
+        "speaking_to": {
+          "Students": "authoritative, sometimes casual/teasing",
+          "Colleagues": "casual, sometimes argumentative"
+        },
+        "emotional_shifts": {
+          "anger": "raises voice, scolds directly",
+          "amusement": "smirks, teases"
+        },
+        "notes": "Her speech reflects her dual role as a strict teacher and a caring, albeit teasing, mentor."
+      },
+      "visual_identity_non_color": {
+        "identity_summary": "Beautiful appearance, professional attire, often has a stern or teasing expression, sometimes seen with a hand on her hip in an authoritative stance."
+      },
+      "notes": "Beautiful, short-tempered, tomboyish, observant, caring towards her students (especially Akihito), enjoys teasing, but also offers genuine advice.",
+      "volume_events": {
+        "1b97": {
+          "relationship_to_protagonist": "Homeroom teacher, observant of his personal life, knows about his past, likes to tease him.",
+          "relationship_to_others": "Colleague of Hanazawa-sensei and Sasagawa-sensei; teacher to Akihito, Akira, and Charlotte.",
+          "keigo_switch": {
+            "narration": "N/A",
+            "internal_thoughts": "N/A",
+            "speaking_to": {
+              "Students": "authoritative, sometimes casual/teasing",
+              "Colleagues": "casual, sometimes argumentative"
+            },
+            "emotional_shifts": {
+              "anger": "raises voice, scolds directly",
+              "amusement": "smirks, teases"
+            },
+            "notes": "Her speech reflects her dual role as a strict teacher and a caring, albeit teasing, mentor."
+          },
+          "character_arc": "Supporting Akihito's emotional growth and subtly guiding him towards happiness."
+        }
+      }
+    },
+    "花澤先生": {
+      "canonical_en": "Hanazawa-sensei",
+      "source": "phase1.5_auto_sync_profiles",
+      "discovered_in": "(迷子になっていた幼女を助けたら、お隣に住む美少女留学生が家に遊びに来るようになった件について (1)_20260212_1b97",
+      "category": "Teacher, colleague of Miyu-sensei.",
+      "affiliation": "Japanese",
+      "keigo": {
+        "narration": "N/A",
+        "internal_thoughts": "N/A",
+        "speaking_to": {
+          "Miyu-sensei": "casual, teasing",
+          "Charlotte Bennett": "polite"
+        },
+        "emotional_shifts": {
+          "amusement": "smiles slyly, laughs"
+        },
+        "notes": "Her speech is often lighthearted and aimed at provoking a reaction, especially from Miyu-sensei."
+      },
+      "visual_identity_non_color": {
+        "identity_summary": "Professional attire, often seen with a sly or amused smile, composed posture."
+      },
+      "notes": "Teasing, observant, seems to know about Akihito's situation and Miyu-sensei's personality.",
+      "volume_events": {
+        "1b97": {
+          "relationship_to_protagonist": "Teacher, colleague of Miyu-sensei.",
+          "relationship_to_others": "Colleague of Miyu-sensei and Sasagawa-sensei; has a teasing relationship with Miyu-sensei.",
+          "keigo_switch": {
+            "narration": "N/A",
+            "internal_thoughts": "N/A",
+            "speaking_to": {
+              "Miyu-sensei": "casual, teasing",
+              "Charlotte Bennett": "polite"
+            },
+            "emotional_shifts": {
+              "amusement": "smiles slyly, laughs"
+            },
+            "notes": "Her speech is often lighthearted and aimed at provoking a reaction, especially from Miyu-sensei."
+          },
+          "character_arc": "Minor character, provides comedic relief and insight into Akihito's situation."
+        }
+      }
+    },
+    "笹川先生": {
+      "canonical_en": "Sasagawa-sensei",
+      "source": "phase1.5_auto_sync_profiles",
+      "discovered_in": "(迷子になっていた幼女を助けたら、お隣に住む美少女留学生が家に遊びに来るようになった件について (1)_20260212_1b97",
+      "category": "Teacher, colleague of Miyu-sensei.",
+      "affiliation": "Japanese",
+      "keigo": {
+        "narration": "N/A",
+        "internal_thoughts": "N/A",
+        "speaking_to": {
+          "Miyu-sensei": "casual, complaining",
+          "Hanazawa-sensei": "casual, defensive"
+        },
+        "emotional_shifts": {
+          "frustration": "pouts, whines",
+          "pain": "groans"
+        },
+        "notes": "His speech reflects his often-victim status in the teachers' office banter."
+      },
+      "visual_identity_non_color": {
+        "identity_summary": "Not enough specific visual details, but implied to be less composed, often seen with a pouting or defeated expression, perhaps slightly disheveled when teased."
+      },
+      "notes": "Childlike (pouts), easily provoked, often on the receiving end of jokes, somewhat hapless.",
+      "volume_events": {
+        "1b97": {
+          "relationship_to_protagonist": "Teacher, colleague of Miyu-sensei.",
+          "relationship_to_others": "Colleague of Miyu-sensei and Hanazawa-sensei; often the target of teasing and scolding.",
+          "keigo_switch": {
+            "narration": "N/A",
+            "internal_thoughts": "N/A",
+            "speaking_to": {
+              "Miyu-sensei": "casual, complaining",
+              "Hanazawa-sensei": "casual, defensive"
+            },
+            "emotional_shifts": {
+              "frustration": "pouts, whines",
+              "pain": "groans"
+            },
+            "notes": "His speech reflects his often-victim status in the teachers' office banter."
+          },
+          "character_arc": "Minor character, provides comedic relief."
+        }
+      }
     }
   },
   "geography": {

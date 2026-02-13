@@ -67,6 +67,7 @@ class Stage1PlannerRunner:
         model: Optional[str] = None,
         temperature: float = 0.3,
         max_output_tokens: int = 65535,
+        fail_on_partial: bool = False,
     ) -> bool:
         logger.info("=" * 60)
         logger.info(f"STAGE 1 SCENE PLANNER - Volume: {volume_id}")
@@ -152,7 +153,9 @@ class Stage1PlannerRunner:
         logger.info(f"Plans dir: {plans_dir}")
         logger.info("=" * 60)
 
-        return failed == 0
+        if fail_on_partial:
+            return failed == 0
+        return (generated + skipped) > 0
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -192,6 +195,11 @@ def build_parser() -> argparse.ArgumentParser:
         default=65535,
         help="Max output tokens for planning response (default: 65535)",
     )
+    parser.add_argument(
+        "--fail-on-partial",
+        action="store_true",
+        help="Exit non-zero when any chapter planning fails",
+    )
     return parser
 
 
@@ -205,6 +213,7 @@ def main() -> None:
         model=args.model,
         temperature=args.temperature,
         max_output_tokens=args.max_output_tokens,
+        fail_on_partial=args.fail_on_partial,
     )
     sys.exit(0 if ok else 1)
 

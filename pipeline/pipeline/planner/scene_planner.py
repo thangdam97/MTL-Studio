@@ -258,12 +258,84 @@ class ScenePlanningAgent:
             return candidate[start : end + 1]
         return candidate
 
+    @staticmethod
+    def _strip_invalid_control_chars(text: str) -> str:
+        """Remove JSON-invalid control chars while preserving common whitespace."""
+        if not text:
+            return text
+        return "".join(
+            ch for ch in text
+            if ch in ("\n", "\r", "\t") or ord(ch) >= 0x20
+        )
+
+    @staticmethod
+    def _remove_trailing_commas(text: str) -> str:
+        """Remove trailing commas before object/array close."""
+        return re.sub(r",\s*([}\]])", r"\1", text)
+
+    @staticmethod
+    def _insert_missing_object_commas(text: str) -> str:
+        """
+        Heuristic fixer for common LLM JSON mistakes:
+        - Missing comma between object fields on adjacent lines.
+        - Missing comma between array/object elements on adjacent lines.
+        """
+        repaired = text
+        repaired = re.sub(
+            r'((?:"(?:\\.|[^"\\])*"|true|false|null|-?\d+(?:\.\d+)?(?:[eE][+-]?\d+)?|\]|\}))(\s*\n\s*")',
+            r"\1,\2",
+            repaired,
+        )
+        repaired = re.sub(
+            r'((?:\}|\]))(\s*\n\s*(?:\{|\[|"))',
+            r"\1,\2",
+            repaired,
+        )
+        return repaired
+
+    def _build_json_repair_candidates(self, json_text: str) -> List[str]:
+        """
+        Build a small set of progressively repaired JSON candidates.
+        Order matters: least-invasive first.
+        """
+        candidates: List[str] = []
+
+        def add(value: str) -> None:
+            value = value.strip()
+            if value and value not in candidates:
+                candidates.append(value)
+
+        add(json_text)
+
+        sanitized = self._strip_invalid_control_chars(json_text)
+        add(sanitized)
+
+        trailing = self._remove_trailing_commas(sanitized)
+        add(trailing)
+
+        missing_commas = self._insert_missing_object_commas(trailing)
+        add(missing_commas)
+
+        add(self._remove_trailing_commas(missing_commas))
+        return candidates
+
     def _parse_response_json(self, text: str) -> Dict[str, Any]:
         json_text = self._extract_json_from_text(text)
-        try:
-            parsed = json.loads(json_text)
-        except json.JSONDecodeError as e:
-            raise ScenePlanningError(f"Failed parsing planner JSON: {e}") from e
+        parse_errors: List[str] = []
+        parsed: Any = None
+        for candidate in self._build_json_repair_candidates(json_text):
+            try:
+                parsed = json.loads(candidate)
+                break
+            except json.JSONDecodeError as e:
+                parse_errors.append(str(e))
+                continue
+
+        if parsed is None:
+            detail = parse_errors[0] if parse_errors else "unknown parse failure"
+            raise ScenePlanningError(
+                f"Failed parsing planner JSON: {detail}"
+            )
 
         if not isinstance(parsed, dict):
             raise ScenePlanningError("Planner response must be a JSON object")

@@ -104,7 +104,7 @@ while true; do
     echo -e "${BLUE}${BOLD}═══ MAIN MENU ═══${NC}"
     echo ""
     echo -e "  ${GREEN}1${NC}  Start Full Pipeline"
-    echo -e "  ${GREEN}2${NC}  Phase 1: Extract EPUB"
+    echo -e "  ${GREEN}2${NC}  Phase 1: Librarian (Standalone Extraction)"
     echo -e "  ${GREEN}3${NC}  Phase 1.55: Rich Metadata Cache"
     echo -e "  ${GREEN}4${NC}  Phase 1.6: Multimodal Processor"
     echo -e "  ${GREEN}5${NC}  Phase 1.7: Scene Planner"
@@ -174,7 +174,7 @@ while true; do
             read -r -p "Press Enter to continue..."
             ;;
         2)
-            echo -e "${CYAN}Phase 1: Extract EPUB${NC}"
+            echo -e "${CYAN}Phase 1: Librarian (Standalone Extraction)${NC}"
             echo ""
             
             # List available EPUB files
@@ -221,6 +221,36 @@ while true; do
                 $PYTHON_CMD "$SCRIPT_DIR/mtl.py" phase1 "$epub_path"
             else
                 $PYTHON_CMD "$SCRIPT_DIR/mtl.py" phase1 "$epub_path" --id "$vol_id"
+            fi
+            phase1_exit=$?
+
+            if [ "$phase1_exit" -eq 0 ]; then
+                target_vol="$vol_id"
+                if [ -z "$target_vol" ]; then
+                    target_vol=$($PYTHON_CMD -c "from pathlib import Path; import sys; work=Path(sys.argv[1]); vols=[p for p in work.iterdir() if p.is_dir() and (p/'manifest.json').exists()]; print(max(vols, key=lambda p: p.stat().st_mtime).name if vols else '')" "$SCRIPT_DIR/WORK")
+                    if [ -n "$target_vol" ]; then
+                        echo -e "${GREEN}✓ Auto-detected extracted volume:${NC} $target_vol"
+                    fi
+                fi
+
+                if [ -z "$target_vol" ]; then
+                    read -r -p "Enter volume ID to continue to Phase 1.5 + 1.55 (or leave blank to skip): " target_vol
+                fi
+
+                if [ -n "$target_vol" ]; then
+                    read -r -p "Continue with Phase 1.5 + Phase 1.55 for '$target_vol'? (Y/n): " continue_meta
+                    if [[ ! "$continue_meta" =~ ^[Nn]$ ]]; then
+                        $PYTHON_CMD "$SCRIPT_DIR/mtl.py" phase1.5 "$target_vol"
+                        phase15_exit=$?
+                        if [ "$phase15_exit" -eq 0 ]; then
+                            $PYTHON_CMD "$SCRIPT_DIR/mtl.py" phase1.55 "$target_vol"
+                        else
+                            echo -e "${RED}✗ Phase 1.5 failed. Skipping Phase 1.55.${NC}"
+                        fi
+                    else
+                        echo -e "${YELLOW}Skipped Phase 1.5 and Phase 1.55.${NC}"
+                    fi
+                fi
             fi
             echo ""
             read -r -p "Press Enter to continue..."

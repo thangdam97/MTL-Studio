@@ -1876,6 +1876,9 @@ class RichMetadataCacheUpdater:
 
         # If output is cut at a dangling key/value marker, coerce to null.
         repaired = re.sub(r'("([^"\\]|\\.)*"\s*:\s*)$', r"\1null", repaired)
+        # If output is cut right after a key token (e.g., {"context": {"scene"),
+        # coerce dangling key into null so object can be closed safely.
+        repaired = re.sub(r'([,{]\s*"([^"\\]|\\.)*")\s*$', r"\1: null", repaired)
         repaired = re.sub(r",\s*$", "", repaired)
 
         while stack:
@@ -1888,6 +1891,44 @@ class RichMetadataCacheUpdater:
             return repaired
         except Exception:
             return None
+
+    def _extract_midstream_fence_segments(self, text: str) -> List[str]:
+        """
+        Split content around markdown-fence JSON restarts injected mid-response.
+
+        Some model responses restart with ```json {...} inside an unfinished
+        object/string. We keep both prefix and suffix segments as recovery
+        candidates.
+        """
+        segments: List[str] = []
+        seen = set()
+
+        for marker in re.finditer(r"```(?:json)?\s*\{", text, flags=re.IGNORECASE):
+            if marker.start() == 0:
+                continue
+
+            # Prefix: trim the partial line containing the fence marker.
+            line_start = text.rfind("\n", 0, marker.start())
+            prefix_end = line_start if line_start >= 0 else marker.start()
+            prefix = text[:prefix_end].strip()
+            if prefix and prefix not in seen:
+                segments.append(prefix)
+                seen.add(prefix)
+
+            # Suffix: remove the fence token and keep the restarted JSON body.
+            suffix = text[marker.start():]
+            suffix = re.sub(
+                r"^```(?:json)?\s*",
+                "",
+                suffix,
+                count=1,
+                flags=re.IGNORECASE,
+            ).strip()
+            if suffix and suffix not in seen:
+                segments.append(suffix)
+                seen.add(suffix)
+
+        return segments
 
     def _parse_json_response(self, content: str) -> Dict[str, Any]:
         text = content.strip()
@@ -1918,6 +1959,15 @@ class RichMetadataCacheUpdater:
             rooted = self._extract_balanced_json_object(sub)
             if rooted and rooted not in candidates:
                 candidates.append(rooted)
+
+        # Recovery: midstream markdown fence restart (```json) can corrupt a
+        # string/key in the first object. Add split segments as candidates.
+        for segment in self._extract_midstream_fence_segments(text):
+            if segment not in candidates:
+                candidates.append(segment)
+            balanced_segment = self._extract_balanced_json_object(segment)
+            if balanced_segment and balanced_segment not in candidates:
+                candidates.append(balanced_segment)
 
         last_error: Optional[Exception] = None
         for candidate in candidates:

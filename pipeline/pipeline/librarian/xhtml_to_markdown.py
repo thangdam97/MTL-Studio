@@ -11,7 +11,7 @@ Language-agnostic conversion that handles:
 import re
 from pathlib import Path
 from typing import List, Optional, Dict, Tuple, Callable
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from bs4 import BeautifulSoup, NavigableString, Tag
 
 from .config import REMOVE_RUBY_TAGS, SCENE_BREAK_MARKER
@@ -27,6 +27,10 @@ class ConvertedChapter:
     word_count: int
     paragraph_count: int
     is_pre_toc_content: bool = False  # True if unlisted opening hook
+    source_files: List[str] = field(default_factory=list)  # Original source XHTML files merged into this chapter
+    raw_group_index: Optional[int] = None  # Original unsplit spine group index (for Builder re-merge)
+    raw_group_title: Optional[str] = None  # Original unsplit spine group title
+    split_strategy: Optional[str] = None  # e.g., "text_page_boundary"
 
 
 class XHTMLToMarkdownConverter:
@@ -68,15 +72,102 @@ class XHTMLToMarkdownConverter:
         self.scene_break = scene_break
         self.content_dir = content_dir
         self.exclude_image_matcher = exclude_image_matcher
+        # Per-file exclusions populated by raw XHTML header scan.
+        self._runtime_excluded_images = set()
 
     def _is_excluded_image(self, image_filename: str) -> bool:
         """Check whether an image should be excluded from markdown output."""
+        if image_filename.lower() in self._runtime_excluded_images:
+            return True
         if not self.exclude_image_matcher:
             return False
         try:
             return bool(self.exclude_image_matcher(image_filename))
         except Exception:
             return False
+
+    def _extract_image_filename(self, element: Tag) -> Optional[str]:
+        """Extract image filename from img/image/svg tags."""
+        if not isinstance(element, Tag):
+            return None
+
+        tag_name = (element.name or "").lower()
+        if tag_name == 'img':
+            src = element.get('src', element.get('xlink:href', ''))
+            return Path(src).name if src else None
+        if tag_name == 'image':
+            href = element.get('href', element.get('{http://www.w3.org/1999/xlink}href', ''))
+            return Path(href).name if href else None
+        if tag_name == 'svg':
+            nested = element.find('image')
+            if nested:
+                return self._extract_image_filename(nested)
+        return None
+
+    def _resolve_header_scan_root(self, body: Tag) -> Tag:
+        """
+        Unwrap generic container wrappers so top-of-file header scan sees real flow nodes.
+        """
+        root = body
+        wrapper_tags = {'div', 'section', 'article', 'main'}
+
+        while True:
+            child_tags = [
+                child for child in root.children
+                if isinstance(child, Tag) and (child.name or "").lower() not in self.SKIP_ELEMENTS
+            ]
+            has_direct_text = any(
+                isinstance(child, NavigableString) and child.strip() for child in root.children
+            )
+            if len(child_tags) == 1 and not has_direct_text and (child_tags[0].name or "").lower() in wrapper_tags:
+                root = child_tags[0]
+                continue
+            return root
+
+    def _detect_stylized_header_images(self, body: Tag) -> set:
+        """
+        Detect top-of-file decorative/chapter-header images from raw JP XHTML.
+
+        Heuristic:
+        - Scan top flow elements in order.
+        - Collect image tags seen before the first substantial text block.
+        - Apply only when substantial text exists later in the same file.
+          (prevents excluding full-page illustration wrappers)
+        """
+        if not isinstance(body, Tag):
+            return set()
+
+        scan_root = self._resolve_header_scan_root(body)
+        header_images = []
+        saw_story_text = False
+        story_text_threshold = 24
+
+        for child in scan_root.children:
+            if not isinstance(child, Tag):
+                continue
+
+            tag_name = (child.name or "").lower()
+            if tag_name in self.SKIP_ELEMENTS:
+                continue
+
+            text = re.sub(r'\s+', '', child.get_text(separator='', strip=True))
+            if len(text) >= story_text_threshold:
+                saw_story_text = True
+                break
+
+            # Treat only image-only top blocks as stylized headers.
+            # If short text already exists, this is likely real content.
+            if text:
+                continue
+
+            for image_tag in child.find_all(['img', 'image', 'svg']):
+                img_name = self._extract_image_filename(image_tag)
+                if img_name:
+                    header_images.append(img_name.lower())
+
+        if not saw_story_text:
+            return set()
+        return set(header_images)
 
     def convert_file(self, xhtml_path: Path, chapter_title: str = "") -> ConvertedChapter:
         """
@@ -125,7 +216,11 @@ class XHTMLToMarkdownConverter:
 
         # Convert content
         markdown_lines = []
-        self._convert_element(body, markdown_lines, illustrations)
+        self._runtime_excluded_images = self._detect_stylized_header_images(body)
+        try:
+            self._convert_element(body, markdown_lines, illustrations)
+        finally:
+            self._runtime_excluded_images = set()
 
         # Clean up and format
         markdown = self._clean_markdown(markdown_lines)
@@ -363,10 +458,7 @@ class XHTMLToMarkdownConverter:
                 img_type = self._classify_inline_image(img_name, css_class)
                 
                 if img_type == 'gaiji':
-                    # Gaiji: inline character replacement - preserve as inline markdown image
-                    # These render inline with text (no line breaks)
-                    lines.append(f'![gaiji]({img_name})')
-                    illustrations.append(img_name)  # Track for copying
+                    # Hard-filter gaiji inline glyph assets.
                     return
                 
                 if img_type == 'scene_break':
@@ -391,9 +483,7 @@ class XHTMLToMarkdownConverter:
                 img_type = self._classify_inline_image(img_name, css_class)
                 
                 if img_type == 'gaiji':
-                    # Gaiji: inline character replacement
-                    lines.append(f'![gaiji]({img_name})')
-                    illustrations.append(img_name)
+                    # Hard-filter gaiji inline glyph assets.
                     return
                 
                 if img_type == 'scene_break':
@@ -421,8 +511,7 @@ class XHTMLToMarkdownConverter:
                     img_type = self._classify_inline_image(img_name, css_class)
                     
                     if img_type == 'gaiji':
-                        lines.append(f'![gaiji]({img_name})')
-                        illustrations.append(img_name)
+                        # Hard-filter gaiji inline glyph assets.
                         return
                     
                     if img_type == 'scene_break':

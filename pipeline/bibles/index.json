@@ -1,6 +1,6 @@
 {
   "version": "1.0",
-  "last_updated": "2026-02-12T10:15:14.452468+00:00",
+  "last_updated": "2026-02-13T03:48:20.041958+00:00",
   "series": {
     "madan_no_ou_to_vanadis": {
       "bible_file": "madan_no_ou_to_vanadis.json",
@@ -340,6 +340,19 @@
       ],
       "entry_count": 17,
       "last_updated": "2026-02-11T09:45:26.762920+00:00"
+    },
+    "series_0a8bc7cf2c": {
+      "bible_file": "series_0a8bc7cf2c.json",
+      "match_patterns": [
+        "テスターですけど、このネトゲ学園が難しすぎるとか言うのやめれる？　「これ絶対クリアできないんですけど、責任とれそ？」",
+        "テスターですけど、このネトゲ学園が難しすぎるとか言うのやめれる？　「これ絶対クリアできないんですけど、責任とれそ？」"
+      ],
+      "volumes": [
+        "066e",
+        "0704"
+      ],
+      "entry_count": 11,
+      "last_updated": "2026-02-13T03:26:40.942319+00:00"
     }
   }
 }

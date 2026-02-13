@@ -267,7 +267,8 @@ class TranslatorAgent:
             self.client,
             self.prompt_loader,
             self.context_manager,
-            target_language=self.target_language
+            target_language=self.target_language,
+            work_dir=self.work_dir  # Phase 1.2 - Enable volume-level context
         )
         self.processor.set_glossary_lock(self.glossary_lock)
 

@@ -13,6 +13,7 @@ from pathlib import Path
 from datetime import datetime
 from dataclasses import dataclass, field
 from typing import Dict, Any, Optional, List
+import xml.etree.ElementTree as ET
 
 from ..config import WORK_DIR, OUTPUT_DIR, get_target_language, get_language_config
 from .epub_structure import create_epub_structure, EPUBPaths
@@ -580,50 +581,63 @@ class BuilderAgent:
         manifest_items = []
         chapter_info = []  # For navigation
 
-        for i, chapter in enumerate(chapters):
-            chapter_id = self._coerce_text(chapter.get('id', f'chapter_{i+1:02d}'), f'chapter_{i+1:02d}')
-            source_file = self._coerce_text(chapter.get('source_file', ''), '')
+        merge_enabled, merge_diag = self._should_merge_split_chapters_to_raw_structure(
+            manifest, work_dir, chapters
+        )
+        if merge_enabled:
+            chapter_batches = self._group_chapters_by_raw_group_index(chapters)
+            print(
+                "     [INFO] Raw-structure merge enabled: "
+                f"{len(chapters)} translated chapters -> {len(chapter_batches)} EPUB chapters"
+            )
+        else:
+            chapter_batches = [[chapter] for chapter in chapters]
+            if any(ch.get('split_strategy') == 'text_page_boundary' for ch in chapters):
+                reason = self._coerce_text(merge_diag.get("reason"), "raw structure not verified")
+                print(
+                    "     [INFO] Detected text-page split chapters but raw-structure merge is disabled "
+                    f"({reason}); keeping per-chapter EPUB layout."
+                )
+
+        for i, batch in enumerate(chapter_batches):
+            primary = batch[0]
+            chapter_id = self._coerce_text(primary.get('id', f'chapter_{i+1:02d}'), f'chapter_{i+1:02d}')
+            source_file = self._coerce_text(primary.get('source_file', ''), '')
+
             # Prioritize language-specific chapter title
             chapter_title_key = f'title_{target_language}'
-            # v3.7 uses title_english, older versions use title_en
-            raw_title = chapter.get(chapter_title_key) or chapter.get('title_english') or chapter.get('title_en') or chapter.get('title', f'Chapter {i+1}')
+            raw_title = (
+                primary.get(chapter_title_key)
+                or primary.get('title_english')
+                or primary.get('title_en')
+                or primary.get('title')
+                or f'Chapter {i+1}'
+            )
             title = self._coerce_text(raw_title, f'Chapter {i+1}')
 
-            # Skip chapters without source files (e.g., cover, kuchie)
+            # Skip non-content entries (cover/kuchie placeholders)
             if not source_file:
                 continue
 
-            # Look for translated file in language-specific dir first, then fallback
-            # Use the target_language parameter (from manifest), not self.target_language (from config)
-            lang_file_key = f'{target_language}_file'
-            translated_filename_raw = chapter.get(lang_file_key) or chapter.get('translated_file', source_file)
-            translated_filename = self._coerce_text(translated_filename_raw, source_file)
-            translated_file = translated_dir / translated_filename
-            jp_file = jp_dir / source_file
-
-            if translated_file.exists():
-                md_path = translated_file
-            elif jp_file.exists():
-                md_path = jp_file
-                print(f"     [WARNING] Using JP source for: {source_file}")
-            else:
-                # Fallback: try to map filename
-                mapped_id = self._map_filename_to_chapter_id(source_file)
-                if mapped_id != source_file:
-                    # Try mapped filename
-                    translated_file_mapped = translated_dir / f"{mapped_id}.md"
-                    if translated_file_mapped.exists():
-                        md_path = translated_file_mapped
-                        print(f"     [INFO] Mapped {source_file} -> {mapped_id}.md")
-                    else:
-                        print(f"     [SKIP] File not found: {source_file}")
-                        continue
-                else:
-                    print(f"     [SKIP] File not found: {source_file}")
+            merged_markdown_chunks: List[str] = []
+            merged_source_files: List[str] = []
+            for chapter in batch:
+                md_path = self._resolve_chapter_markdown_path(
+                    chapter=chapter,
+                    translated_dir=translated_dir,
+                    jp_dir=jp_dir,
+                    target_language=target_language,
+                )
+                if md_path is None:
                     continue
+                merged_markdown_chunks.append(md_path.read_text(encoding='utf-8'))
+                merged_source_files.append(self._coerce_text(chapter.get('source_file', ''), ''))
 
-            # Read markdown
-            md_content = md_path.read_text(encoding='utf-8')
+            if not merged_markdown_chunks:
+                print(f"     [SKIP] No markdown content resolved for chapter batch {i+1}")
+                continue
+
+            md_content = '\n\n'.join(chunk for chunk in merged_markdown_chunks if chunk)
 
             # Convert to XHTML paragraphs
             paragraphs = self._markdown_to_paragraphs(md_content)
@@ -635,7 +649,7 @@ class BuilderAgent:
 
             # Pre-TOC content: suppress title header to match original formatting
             chapter_title_for_xhtml = title
-            if chapter.get('is_pre_toc_content', False):
+            if primary.get('is_pre_toc_content', False):
                 chapter_title_for_xhtml = ""  # No H1 header for unlisted content
                 print(f"     [INFO] Pre-TOC content: suppressing title header")
 
@@ -656,17 +670,279 @@ class BuilderAgent:
             ))
 
             # Track for navigation (skip pre-TOC content like cover pages)
-            if not chapter.get('is_pre_toc_content', False):
+            if not primary.get('is_pre_toc_content', False):
                 chapter_info.append({
                     'id': chapter_id,
                     'title': title,
                     'xhtml_filename': xhtml_filename,
-                    'href': f"Text/{xhtml_filename}"
+                    'href': f"Text/{xhtml_filename}",
                 })
 
-            print(f"     [OK] {source_file} -> {xhtml_filename}")
+            if len(batch) > 1:
+                merged_count = len([f for f in merged_source_files if f])
+                print(
+                    f"     [OK] merged {merged_count} source chapters "
+                    f"(raw_group={primary.get('raw_group_index')}) -> {xhtml_filename}"
+                )
+            else:
+                print(f"     [OK] {source_file} -> {xhtml_filename}")
 
         return manifest_items, chapter_info
+
+    def _resolve_chapter_markdown_path(
+        self,
+        chapter: dict,
+        translated_dir: Path,
+        jp_dir: Path,
+        target_language: str
+    ) -> Optional[Path]:
+        """Resolve translated markdown path for one manifest chapter entry."""
+        source_file = self._coerce_text(chapter.get('source_file', ''), '')
+        if not source_file:
+            return None
+
+        # Look for translated file in language-specific dir first, then fallback.
+        lang_file_key = f'{target_language}_file'
+        translated_filename_raw = chapter.get(lang_file_key) or chapter.get('translated_file', source_file)
+        translated_filename = self._coerce_text(translated_filename_raw, source_file)
+        translated_file = translated_dir / translated_filename
+        jp_file = jp_dir / source_file
+
+        if translated_file.exists():
+            return translated_file
+        if jp_file.exists():
+            print(f"     [WARNING] Using JP source for: {source_file}")
+            return jp_file
+
+        # Fallback: try mapped chapter ID naming.
+        mapped_id = self._map_filename_to_chapter_id(source_file)
+        if mapped_id != source_file:
+            translated_file_mapped = translated_dir / f"{mapped_id}.md"
+            if translated_file_mapped.exists():
+                print(f"     [INFO] Mapped {source_file} -> {mapped_id}.md")
+                return translated_file_mapped
+
+        print(f"     [SKIP] File not found: {source_file}")
+        return None
+
+    def _group_chapters_by_raw_group_index(self, chapters: List[dict]) -> List[List[dict]]:
+        """
+        Group consecutive chapters that originated from the same raw spine group.
+
+        Chapters without raw_group_index remain standalone.
+        """
+        grouped: List[List[dict]] = []
+        current_group: List[dict] = []
+        current_raw_group: Optional[int] = None
+
+        for chapter in chapters:
+            raw_group = chapter.get('raw_group_index')
+            if raw_group is None:
+                if current_group:
+                    grouped.append(current_group)
+                    current_group = []
+                    current_raw_group = None
+                grouped.append([chapter])
+                continue
+
+            if not current_group:
+                current_group = [chapter]
+                current_raw_group = raw_group
+                continue
+
+            if raw_group == current_raw_group:
+                current_group.append(chapter)
+                continue
+
+            grouped.append(current_group)
+            current_group = [chapter]
+            current_raw_group = raw_group
+
+        if current_group:
+            grouped.append(current_group)
+
+        return grouped
+
+    def _should_merge_split_chapters_to_raw_structure(
+        self,
+        manifest: dict,
+        work_dir: Path,
+        chapters: List[dict]
+    ) -> tuple:
+        """
+        Decide whether Builder should re-merge split chapters back to raw structure.
+
+        We only merge when:
+        - Librarian used spine fallback split strategy (text page boundary)
+        - Raw TOC/spine inspection confirms malformed TOC + single-content structure
+        """
+        split_chapters = [
+            ch for ch in chapters
+            if ch.get('split_strategy') == 'text_page_boundary'
+            and ch.get('raw_group_index') is not None
+        ]
+        if not split_chapters:
+            return False, {"reason": "no_text_page_boundary_split"}
+
+        raw_group_count = len({ch.get('raw_group_index') for ch in split_chapters})
+        if raw_group_count <= 0 or len(chapters) <= raw_group_count:
+            return False, {"reason": "nothing_to_merge"}
+
+        inspection = self._inspect_raw_single_content_structure(work_dir)
+        librarian_state = manifest.get('pipeline_state', {}).get('librarian', {})
+        toc_entries = librarian_state.get('toc_entries')
+        malformed_toc = inspection.get('malformed_toc', False)
+        if not malformed_toc and isinstance(toc_entries, int):
+            malformed_toc = toc_entries <= 3
+        one_content_structure = inspection.get('one_content_structure', False)
+
+        if malformed_toc and one_content_structure:
+            return True, {
+                "reason": "verified_malformed_toc_single_content",
+                "raw_group_count": raw_group_count,
+                "inspection": inspection,
+            }
+
+        return False, {
+            "reason": "raw_structure_verification_failed",
+            "inspection": inspection,
+        }
+
+    def _detect_title_in_body(self, body: Any, title_patterns: List[re.Pattern]) -> Optional[str]:
+        """Detect chapter title markers from a parsed XHTML body."""
+        for tag in ['h1', 'h2', 'h3']:
+            heading = body.find(tag)
+            if heading:
+                text = heading.get_text(strip=True)
+                if text and len(text) > 0 and len(text) < 100:
+                    for pattern in title_patterns:
+                        if pattern.search(text):
+                            return text
+                    if len(text) > 2:
+                        return text
+
+        paragraphs = body.find_all('p', limit=5)
+        for p in paragraphs:
+            text = p.get_text(strip=True)
+            if not text:
+                continue
+            for pattern in title_patterns:
+                match = pattern.search(text)
+                if match:
+                    matched_text = match.group(0)
+                    if text.startswith(matched_text):
+                        return text if len(text) < 50 else matched_text
+                    return matched_text
+
+        return None
+
+    def _inspect_raw_single_content_structure(self, work_dir: Path) -> Dict[str, Any]:
+        """
+        Inspect extracted raw EPUB TOC/spine to detect malformed TOC + single-content layout.
+        """
+        inspection = {
+            "toc_entries": 0,
+            "spine_items": 0,
+            "text_page_count": 0,
+            "detected_title_count": 0,
+            "malformed_toc": False,
+            "one_content_structure": False,
+        }
+
+        # TOC diagnostics
+        toc_path = work_dir / "toc.json"
+        if toc_path.exists():
+            try:
+                toc_data = json.loads(toc_path.read_text(encoding='utf-8'))
+                nav_points = toc_data.get("nav_points", [])
+                if isinstance(nav_points, list):
+                    inspection["toc_entries"] = len(nav_points)
+            except Exception:
+                pass
+        inspection["malformed_toc"] = inspection["toc_entries"] <= 3
+
+        # Locate OPF
+        opf_path = work_dir / "_epub_extracted" / "item" / "standard.opf"
+        if not opf_path.exists():
+            candidates = sorted(work_dir.glob("_epub_extracted/**/standard.opf"))
+            if candidates:
+                opf_path = candidates[0]
+        if not opf_path.exists():
+            return inspection
+
+        try:
+            from bs4 import BeautifulSoup
+        except Exception:
+            return inspection
+
+        try:
+            ns = {'opf': 'http://www.idpf.org/2007/opf'}
+            root = ET.parse(opf_path).getroot()
+            manifest_items = {
+                item.attrib['id']: item.attrib.get('href', '')
+                for item in root.findall('.//opf:manifest/opf:item', ns)
+                if item.attrib.get('id')
+            }
+            spine_idrefs = [
+                item.attrib.get('idref', '')
+                for item in root.findall('.//opf:spine/opf:itemref', ns)
+            ]
+            inspection["spine_items"] = len(spine_idrefs)
+
+            title_patterns = [
+                re.compile(p, re.IGNORECASE)
+                for p in [
+                    r'^第[一二三四五六七八九十百千]+章',
+                    r'^第\d+章',
+                    r'^第[一二三四五六七八九十百千]+話',
+                    r'^第\d+話',
+                    r'^Chapter\s*\d+',
+                    r'^プロローグ',
+                    r'^エピローグ',
+                    r'^幕間',
+                    r'^あとがき',
+                    r'^Prologue',
+                    r'^Epilogue',
+                    r'^Interlude',
+                ]
+            ]
+            skip_patterns = ('cover', 'toc', 'nav', 'titlepage', 'caution', 'colophon', '998', '999')
+
+            for idref in spine_idrefs:
+                href = manifest_items.get(idref, '')
+                if not href:
+                    continue
+                filename = href.split('/')[-1]
+                if any(skip in filename.lower() for skip in skip_patterns):
+                    continue
+
+                xhtml_path = opf_path.parent / href
+                if not xhtml_path.exists():
+                    continue
+
+                content = xhtml_path.read_text(encoding='utf-8', errors='ignore')
+                soup = BeautifulSoup(content, 'xml')
+                body = soup.find('body')
+                if not body:
+                    continue
+
+                text = body.get_text(strip=True)
+                has_text = not (body.find('svg') and not text) and len(text) > 20
+                if not has_text:
+                    continue
+
+                inspection["text_page_count"] += 1
+                if self._detect_title_in_body(body, title_patterns):
+                    inspection["detected_title_count"] += 1
+
+            inspection["one_content_structure"] = (
+                inspection["text_page_count"] >= 4
+                and inspection["detected_title_count"] <= 1
+            )
+        except Exception:
+            return inspection
+
+        return inspection
 
     def _markdown_to_paragraphs(self, md_content: str) -> List[str]:
         """Convert markdown content to list of paragraphs."""

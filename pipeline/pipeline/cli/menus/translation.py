@@ -18,6 +18,89 @@ from ..utils.config_bridge import ConfigBridge
 console = Console()
 
 
+def start_librarian_flow(input_dir: Path) -> Optional[Dict[str, Any]]:
+    """
+    Interactive flow for standalone Phase 1 (Librarian extraction).
+
+    Args:
+        input_dir: Path to INPUT directory
+
+    Returns:
+        Dictionary with extraction options, or None if cancelled
+    """
+    console.print()
+    console.print(Panel(
+        "[bold]Phase 1: Librarian (Standalone)[/bold]\n"
+        "[dim]Extract EPUB to JP markdown + assets + manifest[/dim]",
+        border_style="cyan",
+        padding=(1, 2),
+    ))
+    console.print()
+
+    epub_files = list(input_dir.glob("*.epub"))
+    if not epub_files:
+        console.print("[red]No EPUB files found in INPUT directory[/red]")
+        console.print(f"[dim]Place your Japanese EPUB files in: {input_dir}[/dim]")
+        return None
+
+    epub_choices = [
+        questionary.Choice(f.name, value=str(f)) for f in sorted(epub_files)
+    ]
+    epub_choices.append(questionary.Separator())
+    epub_choices.append(questionary.Choice("Back to Main Menu", value="back"))
+
+    selected_epub = questionary.select(
+        "Select EPUB file:",
+        choices=epub_choices,
+        style=custom_style,
+    ).ask()
+
+    if selected_epub == "back" or selected_epub is None:
+        return None
+
+    epub_path = Path(selected_epub)
+
+    timestamp = datetime.now().strftime("%Y%m%d")
+    auto_id = f"{epub_path.stem}_{timestamp}_{hash(str(epub_path)) % 10000:04x}"
+    console.print(f"\n[dim]Auto-generated ID: {auto_id}[/dim]")
+
+    use_auto_id = questionary.confirm(
+        "Use auto-generated volume ID?",
+        default=True,
+        style=custom_style,
+    ).ask()
+
+    if use_auto_id:
+        volume_id = auto_id
+    else:
+        volume_id = questionary.text(
+            "Enter custom volume ID:",
+            default=epub_path.stem,
+            validate=lambda x: len(x) > 0 and " " not in x,
+            style=custom_style,
+        ).ask()
+
+        if volume_id is None:
+            return None
+
+    console.print()
+    console.print(Panel(
+        f"[bold]Ready to run Phase 1:[/bold]\n\n"
+        f"  EPUB: [cyan]{epub_path.name}[/cyan]\n"
+        f"  Volume ID: [cyan]{volume_id}[/cyan]",
+        border_style="cyan",
+        padding=(1, 2),
+    ))
+
+    if not questionary.confirm("Run Phase 1 now?", default=True, style=custom_style).ask():
+        return None
+
+    return {
+        'epub_path': epub_path,
+        'volume_id': volume_id,
+    }
+
+
 def start_translation_flow(
     config: ConfigBridge,
     input_dir: Path,

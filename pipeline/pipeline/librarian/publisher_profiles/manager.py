@@ -129,6 +129,16 @@ class PublisherProfileManager:
     - Track and report mismatches
     """
 
+    # Hard exclusions always applied regardless of publisher profile.
+    # These assets are non-story noise and must never enter chapter illustrations.
+    HARD_EXCLUDE_IMAGE_PATTERNS: Tuple[re.Pattern, ...] = (
+        re.compile(r'^gaiji[-_].*\.(jpe?g|png)$', re.IGNORECASE),
+        re.compile(r'^fan[-_]?letter\.(jpe?g|png)$', re.IGNORECASE),
+        re.compile(r'^(?:i[-_])?bookwalker(?:[-_].*)?\.(jpe?g|png)$', re.IGNORECASE),
+        re.compile(r'^m[-_]?\d{2,4}\.(jpe?g|png)$', re.IGNORECASE),
+        re.compile(r'^midashi\d+\.(jpe?g|png)$', re.IGNORECASE),
+    )
+
     def __init__(self, profiles_dir: Optional[Path] = None):
         """
         Initialize manager.
@@ -191,17 +201,25 @@ class PublisherProfileManager:
                     # Convert individual JSON format to database format
                     image_patterns_converted = {}
                     for img_type, type_data in individual_data.get("image_patterns", {}).items():
-                        # Normalize key: "illustrations" -> "illustration"
-                        normalized_type = img_type.rstrip('s') if img_type.endswith('s') and img_type != 'kuchie' else img_type
+                        raw_type = img_type.lower()
+                        # Normalize keys from per-publisher JSON:
+                        # - illustrations -> illustration
+                        # - special -> exclude (non-story assets)
+                        if raw_type in {"special", "exclude", "excludes", "excluded"}:
+                            normalized_type = "exclude"
+                        elif raw_type.endswith('s') and raw_type != 'kuchie':
+                            normalized_type = raw_type.rstrip('s')
+                        else:
+                            normalized_type = raw_type
                         
-                        patterns_list = []
+                        patterns_list = image_patterns_converted.setdefault(normalized_type, [])
+                        start_priority = len(patterns_list)
                         for i, pattern_str in enumerate(type_data.get("patterns", [])):
                             patterns_list.append({
                                 "pattern": pattern_str,
                                 "flags": "i",
-                                "priority": i + 1
+                                "priority": start_priority + i + 1
                             })
-                        image_patterns_converted[normalized_type] = patterns_list
                     
                     profile = PublisherProfile(
                         canonical_name=individual_data.get("publisher", pub_name),
@@ -293,6 +311,13 @@ class PublisherProfileManager:
     # IMAGE PATTERN MATCHING
     # =========================================================================
 
+    def _get_hard_exclude_pattern(self, filename: str) -> Optional[str]:
+        """Return matching hard-exclude pattern, if any."""
+        for pattern in self.HARD_EXCLUDE_IMAGE_PATTERNS:
+            if pattern.match(filename):
+                return pattern.pattern
+        return None
+
     def match_image(self, filename: str, publisher: str = None) -> PatternMatch:
         """
         Match image filename to type using publisher patterns.
@@ -304,6 +329,16 @@ class PublisherProfileManager:
         Returns:
             PatternMatch with classification result
         """
+        hard_pattern = self._get_hard_exclude_pattern(filename)
+        if hard_pattern:
+            return PatternMatch(
+                matched=True,
+                image_type="exclude",
+                pattern_used=hard_pattern,
+                publisher="hard_filter",
+                confidence="confirmed"
+            )
+
         # Get profile to use
         profile = self._profiles.get(publisher, self._fallback_profile)
         pattern_source = publisher if publisher in self._profiles else "fallback"
@@ -337,6 +372,9 @@ class PublisherProfileManager:
 
         Unlike match_image(), this method does not track mismatches.
         """
+        if self._get_hard_exclude_pattern(filename):
+            return True
+
         profile = self._profiles.get(publisher, self._fallback_profile)
         for pattern in profile._compiled_patterns.get("exclude", []):
             if pattern.match(filename):

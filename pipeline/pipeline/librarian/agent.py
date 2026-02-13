@@ -45,6 +45,10 @@ class ChapterEntry:
     translation_status: str = "pending"
     qc_status: str = "pending"
     is_pre_toc_content: bool = False  # True if unlisted opening hook
+    source_files: List[str] = field(default_factory=list)  # Original XHTML spine files for this chapter
+    raw_group_index: Optional[int] = None  # Original unsplit spine-group index
+    raw_group_title: Optional[str] = None  # Original unsplit spine-group title
+    split_strategy: Optional[str] = None  # Spine fallback split strategy name
 
     def to_dict(self) -> Dict[str, Any]:
         return asdict(self)
@@ -474,7 +478,8 @@ class LibrarianAgent:
                 source_dir,
                 toc,
                 spine,
-                converter
+                converter,
+                publisher=publisher_name
             )
         print(f"     Converted {len(chapters)} chapters")
 
@@ -570,9 +575,15 @@ class LibrarianAgent:
         # Exclude kuchie images from inline illustrations
         chapter_illustrations_to_copy = chapter_illustrations - spine_kuchie_originals
         copied_illustrations = []
+        filtered_illustrations = 0
         existing_illustrations = {img.filename for img in image_catalog["illustrations"]}
         
         for img_filename in chapter_illustrations_to_copy:
+            # Hard-filter excluded assets (gaiji, fan-letter, bookwalker promo, stylized headers).
+            if profile_manager.is_excluded_image(img_filename, publisher_name):
+                filtered_illustrations += 1
+                continue
+
             # Try to find the image in content_dir
             for images_folder in ['images', 'image', 'Images', 'IMAGES']:
                 src_path = extraction.content_dir / images_folder / img_filename
@@ -592,6 +603,8 @@ class LibrarianAgent:
         
         if copied_illustrations:
             print(f"     Copied {len(copied_illustrations)} inline illustrations to assets")
+        if filtered_illustrations:
+            print(f"     Hard-filtered {filtered_illustrations} excluded inline image references")
 
         # Update illustration references in markdown files
         if filename_mapping:
@@ -758,7 +771,8 @@ class LibrarianAgent:
         output_dir: Path,
         toc: TableOfContents,
         spine: Spine,
-        converter: XHTMLToMarkdownConverter
+        converter: XHTMLToMarkdownConverter,
+        publisher: str = None
     ) -> List[ConvertedChapter]:
         """
         Convert XHTML chapters to markdown, merging content between TOC entries.
@@ -774,11 +788,13 @@ class LibrarianAgent:
             toc: Parsed table of contents
             spine: Parsed spine with reading order
             converter: XHTML to Markdown converter
+            publisher: Publisher canonical name for exclusion matching
 
         Returns:
             List of ConvertedChapter objects
         """
         import re
+        profile_manager = get_profile_manager()
         chapters = []
 
         # Build TOC entry map: normalized filename -> (title, TOC entry)
@@ -875,6 +891,8 @@ class LibrarianAgent:
                         # Extract illustration reference from the file
                         illust_ref = self._extract_illustration_from_file(xhtml_path)
                         if illust_ref:
+                            if profile_manager.is_excluded_image(illust_ref, publisher):
+                                continue
                             merged_content.append(f"\n[ILLUSTRATION: {illust_ref}]\n")
                             all_illustrations.append(illust_ref)
                         continue
@@ -916,6 +934,10 @@ class LibrarianAgent:
                     word_count=word_count,
                     paragraph_count=len(paragraphs),
                     is_pre_toc_content=is_pre_toc_chapter,
+                    source_files=list(file_list),
+                    raw_group_index=None,
+                    raw_group_title=None,
+                    split_strategy=None,
                 )
 
                 # Generate filename and save
@@ -966,7 +988,6 @@ class LibrarianAgent:
             List of ConvertedChapter objects
         """
         import re
-        from bs4 import BeautifulSoup
 
         chapters = []
         profile_manager = get_profile_manager()
@@ -998,12 +1019,13 @@ class LibrarianAgent:
                         boundary_file = spine.items[idx].href.split('/')[-1] if '/' in spine.items[idx].href else spine.items[idx].href
                         act_boundary_files.add(boundary_file)
 
-        # Group files into chapters based on content scanning
-        chapter_groups = []  # List of (title, [files])
+        # Group files into raw chapter groups based on title scan.
+        raw_groups = []  # List[Dict[str, Any]]
         current_title = None
         current_files = []
         chapter_counter = 0
         pending_next_chapter_files = []  # Deferred act-boundary pages
+        raw_group_index = 0
 
         for filename in spine_order:
             lower_name = filename.lower()
@@ -1047,7 +1069,14 @@ class LibrarianAgent:
             if detected_title:
                 # Save previous chapter if exists
                 if current_title is not None and current_files:
-                    chapter_groups.append((current_title, current_files))
+                    raw_groups.append({
+                        "title": current_title,
+                        "files": list(current_files),
+                        "raw_group_index": raw_group_index,
+                        "raw_group_title": current_title,
+                        "split_strategy": None,
+                    })
+                    raw_group_index += 1
 
                 # Start new chapter with detected title
                 current_title = detected_title
@@ -1067,11 +1096,40 @@ class LibrarianAgent:
 
         # Don't forget the last chapter
         if current_title is not None and current_files:
-            chapter_groups.append((current_title, current_files))
+            raw_groups.append({
+                "title": current_title,
+                "files": list(current_files),
+                "raw_group_index": raw_group_index,
+                "raw_group_title": current_title,
+                "split_strategy": None,
+            })
+
+        # Future-proofing: detect "collapsed" groups in malformed/minimal TOC books
+        # and split them using original text page boundaries.
+        chapter_groups, split_stats = self._apply_text_page_boundary_split_if_needed(
+            raw_groups=raw_groups,
+            content_dir=content_dir,
+            spine_map=spine_map,
+            title_patterns=title_patterns,
+            content_config=content_config,
+        )
+        if split_stats.get("applied"):
+            print(
+                "     [INFO] Text-page boundary split applied: "
+                f"{split_stats.get('raw_groups', 0)} raw groups -> "
+                f"{split_stats.get('final_groups', 0)} chapter files"
+            )
 
         # Convert each chapter group to markdown
-        for idx, (chapter_title, file_list) in enumerate(chapter_groups):
+        split_config = profile_manager.get_chapter_split_config(publisher)
+        for idx, group in enumerate(chapter_groups):
             try:
+                chapter_title = group.get("title", "")
+                file_list = group.get("files", [])
+                raw_group_idx = group.get("raw_group_index")
+                raw_group_title = group.get("raw_group_title")
+                split_strategy = group.get("split_strategy")
+
                 merged_content = []
                 all_illustrations = []
 
@@ -1086,6 +1144,8 @@ class LibrarianAgent:
                     if spine_item and spine_item.is_illustration:
                         illust_ref = self._extract_illustration_from_file(xhtml_path)
                         if illust_ref:
+                            if profile_manager.is_excluded_image(illust_ref, publisher):
+                                continue
                             merged_content.append(f"\n[ILLUSTRATION: {illust_ref}]\n")
                             all_illustrations.append(illust_ref)
                         continue
@@ -1110,10 +1170,7 @@ class LibrarianAgent:
                 full_content = '\n\n'.join(merged_content)
                 full_content = re.sub(r'\n{3,}', '\n\n', full_content)
 
-                # Check if chapter splitting is needed (for publishers like Hifumi)
-                profile_manager = get_profile_manager()
-                split_config = profile_manager.get_chapter_split_config(publisher)
-                
+                # Check if chapter splitting is needed (publisher-specific long-chapter handling)
                 if split_config and split_config.get("enabled", False):
                     # Check if this chapter exceeds token limit
                     splitter = ContentSplitter(
@@ -1149,6 +1206,10 @@ class LibrarianAgent:
                                 word_count=part.word_count,
                                 paragraph_count=len([p for p in part.content.split('\n\n') if p.strip()]),
                                 is_pre_toc_content=False,
+                                source_files=list(file_list),
+                                raw_group_index=raw_group_idx,
+                                raw_group_title=raw_group_title,
+                                split_strategy=split_strategy,
                             )
                             chapters.append(part_chapter)
                             
@@ -1168,6 +1229,10 @@ class LibrarianAgent:
                     word_count=word_count,
                     paragraph_count=len(paragraphs),
                     is_pre_toc_content=False,
+                    source_files=list(file_list),
+                    raw_group_index=raw_group_idx,
+                    raw_group_title=raw_group_title,
+                    split_strategy=split_strategy,
                 )
 
                 # Generate filename and save
@@ -1187,6 +1252,180 @@ class LibrarianAgent:
                 print(f"     [FAIL] {chapter_title}: {e}")
 
         return chapters
+
+    def _is_fallback_chapter_title(self, title: str, fallback_template: str) -> bool:
+        """Return True when title matches generated fallback chapter naming."""
+        import re
+
+        normalized = (title or "").strip()
+        if not normalized:
+            return True
+
+        # Template-aware fallback check (e.g., "Chapter {n}").
+        template = (fallback_template or "Chapter {n}").strip()
+        regex = re.escape(template)
+        regex = regex.replace(r'\{n\}', r'\d+').replace(r'\{num\}', r'\d+')
+        if re.match(rf'^{regex}$', normalized, re.IGNORECASE):
+            return True
+
+        # Safety baseline for legacy generated titles.
+        return bool(re.match(r'^Chapter\s+\d+$', normalized, re.IGNORECASE))
+
+    def _split_spine_group_on_text_pages(
+        self,
+        file_list: List[str],
+        content_dir: Path,
+        spine_map: Dict[str, SpineItem],
+        title_patterns: List
+    ) -> Dict[str, Any]:
+        """
+        Split one raw spine group into segments using text XHTML files as boundaries.
+
+        Returns:
+            {
+              "segments": [{"files": [...], "detected_title": "..."}, ...],
+              "text_page_count": int,
+              "detected_title_count": int
+            }
+        """
+        segments: List[Dict[str, Any]] = []
+        current_segment: Optional[Dict[str, Any]] = None
+        leading_non_text: List[str] = []
+        text_page_count = 0
+        detected_title_count = 0
+
+        for filename in file_list:
+            xhtml_path = self._find_xhtml_file(content_dir, filename)
+            if xhtml_path is None:
+                if current_segment is not None:
+                    current_segment["files"].append(filename)
+                else:
+                    leading_non_text.append(filename)
+                continue
+
+            spine_item = spine_map.get(filename)
+            if spine_item and spine_item.is_illustration:
+                if current_segment is not None:
+                    current_segment["files"].append(filename)
+                else:
+                    leading_non_text.append(filename)
+                continue
+
+            has_content = self._file_has_text_content(xhtml_path)
+            if not has_content:
+                if current_segment is not None:
+                    current_segment["files"].append(filename)
+                else:
+                    leading_non_text.append(filename)
+                continue
+
+            detected_title = self._detect_chapter_title_in_file(xhtml_path, title_patterns)
+            if detected_title:
+                detected_title_count += 1
+            text_page_count += 1
+
+            if current_segment is not None:
+                segments.append(current_segment)
+
+            segment_files = list(leading_non_text)
+            segment_files.append(filename)
+            leading_non_text = []
+            current_segment = {
+                "files": segment_files,
+                "detected_title": detected_title,
+            }
+
+        if current_segment is not None:
+            segments.append(current_segment)
+
+        # If no text pages found, preserve original ordering as one segment.
+        if not segments and file_list:
+            segments = [{"files": list(file_list), "detected_title": None}]
+
+        return {
+            "segments": segments,
+            "text_page_count": text_page_count,
+            "detected_title_count": detected_title_count,
+        }
+
+    def _apply_text_page_boundary_split_if_needed(
+        self,
+        raw_groups: List[Dict[str, Any]],
+        content_dir: Path,
+        spine_map: Dict[str, SpineItem],
+        title_patterns: List,
+        content_config
+    ) -> tuple:
+        """
+        Detect collapsed spine groups and split by original text-page boundaries.
+
+        Trigger heuristic:
+        - Raw group title is generated fallback (e.g., "Chapter 1")
+        - Group contains many text pages
+        - Very few explicit chapter markers inside the group
+        """
+        if not raw_groups:
+            return raw_groups, {
+                "applied": False,
+                "raw_groups": 0,
+                "final_groups": 0,
+            }
+
+        rebuilt_groups: List[Dict[str, Any]] = []
+        applied = False
+
+        for raw_group in raw_groups:
+            split_result = self._split_spine_group_on_text_pages(
+                file_list=raw_group.get("files", []),
+                content_dir=content_dir,
+                spine_map=spine_map,
+                title_patterns=title_patterns,
+            )
+            segments = split_result["segments"]
+            text_page_count = split_result["text_page_count"]
+            detected_title_count = split_result["detected_title_count"]
+            base_title = raw_group.get("title", "")
+
+            should_split = (
+                len(segments) >= 2
+                and text_page_count >= 4
+                and detected_title_count <= 1
+                and self._is_fallback_chapter_title(base_title, content_config.fallback_chapter_title)
+            )
+
+            if should_split:
+                applied = True
+                for segment in segments:
+                    rebuilt_groups.append({
+                        "title": segment.get("detected_title") or base_title,
+                        "files": list(segment.get("files", [])),
+                        "raw_group_index": raw_group.get("raw_group_index"),
+                        "raw_group_title": raw_group.get("raw_group_title") or base_title,
+                        "split_strategy": "text_page_boundary",
+                    })
+            else:
+                rebuilt_groups.append({
+                    "title": base_title,
+                    "files": list(raw_group.get("files", [])),
+                    "raw_group_index": raw_group.get("raw_group_index"),
+                    "raw_group_title": raw_group.get("raw_group_title") or base_title,
+                    "split_strategy": raw_group.get("split_strategy"),
+                })
+
+        if applied:
+            # Renumber all generated fallback titles after split.
+            fallback_counter = 0
+            for group in rebuilt_groups:
+                title = group.get("title", "")
+                if self._is_fallback_chapter_title(title, content_config.fallback_chapter_title):
+                    fallback_counter += 1
+                    group["title"] = content_config.fallback_chapter_title.format(n=fallback_counter)
+
+        return rebuilt_groups, {
+            "applied": applied,
+            "raw_groups": len(raw_groups),
+            "final_groups": len(rebuilt_groups),
+        }
 
     def _detect_chapter_title_in_file(
         self,
@@ -1418,7 +1657,11 @@ class LibrarianAgent:
                     illustrations=split_ch.illustrations,
                     word_count=split_ch.word_count,
                     paragraph_count=len([p for p in split_ch.content.split('\n\n') if p.strip()]),
-                    is_pre_toc_content=False
+                    is_pre_toc_content=False,
+                    source_files=list(getattr(chapter, "source_files", []) or []),
+                    raw_group_index=getattr(chapter, "raw_group_index", None),
+                    raw_group_title=getattr(chapter, "raw_group_title", None),
+                    split_strategy=getattr(chapter, "split_strategy", None),
                 )
                 new_chapters.append(new_chapter)
                 print(f"       -> {new_filename}: '{split_ch.title}' ({split_ch.word_count} words)")
@@ -2404,6 +2647,10 @@ class LibrarianAgent:
         try:
             validator = ReferenceValidator(enable_wikipedia=False)  # Skip Wikipedia per user request
 
+            # Create .context folder for validation reports (not in JP source folder)
+            context_dir = source_dir.parent / '.context'
+            context_dir.mkdir(parents=True, exist_ok=True)
+
             total_entities = 0
             total_obfuscated = 0
 
@@ -2430,9 +2677,10 @@ class LibrarianAgent:
                     total_entities += report.total_entities_detected
                     total_obfuscated += report.obfuscated_entities
 
-                    # Save validation report alongside source chapter
-                    report_path = chapter_path.with_suffix('.references')
-                    validator.generate_report(report, report_path)
+                    # Save JSON-only validation report to .context folder (not JP source folder)
+                    report_filename = chapter_path.stem + '.references'
+                    report_path = context_dir / report_filename
+                    validator.generate_report(report, report_path, json_only=True)
 
             if total_entities > 0:
                 print(f"     Total: {total_entities} real-world references detected "
@@ -2497,6 +2745,10 @@ class LibrarianAgent:
                 toc_level=toc_entry.level if toc_entry else 0,  # Nesting level
                 illustrations=ch.illustrations,
                 is_pre_toc_content=ch.is_pre_toc_content,
+                source_files=list(getattr(ch, "source_files", []) or []),
+                raw_group_index=getattr(ch, "raw_group_index", None),
+                raw_group_title=getattr(ch, "raw_group_title", None),
+                split_strategy=getattr(ch, "split_strategy", None),
             )
             chapter_entries.append(entry.to_dict())
 
@@ -2528,6 +2780,17 @@ class LibrarianAgent:
             librarian_state["toc_coverage"] = round(recovery_info["toc_coverage"], 2)
             if recovery_info["missing_from_toc"]:
                 librarian_state["missing_from_toc"] = recovery_info["missing_from_toc"][:10]  # Limit to 10 for brevity
+            split_chapters = [c for c in chapter_entries if c.get("split_strategy") == "text_page_boundary"]
+            if split_chapters:
+                librarian_state["spine_split_strategy"] = "text_page_boundary"
+                librarian_state["spine_split_chapters"] = len(split_chapters)
+                raw_group_indices = {
+                    c.get("raw_group_index")
+                    for c in chapter_entries
+                    if c.get("raw_group_index") is not None
+                }
+                if raw_group_indices:
+                    librarian_state["spine_raw_group_count"] = len(raw_group_indices)
         
         pipeline_state = {
             "librarian": librarian_state,

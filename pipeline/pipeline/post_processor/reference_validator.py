@@ -492,6 +492,50 @@ If no entities detected, return empty array: []
             logger.warning(f"Wikipedia verification failed for {entity.real_name}: {e}")
             return None
 
+    def _is_afterword(self, file_path: Path, content: str) -> bool:
+        """
+        Detect if a chapter is an afterword.
+
+        Afterwords typically contain author commentary, acknowledgments, and meta-discussion
+        about the writing process. They often reference real-world concepts without obfuscation.
+
+        Args:
+            file_path: Path to the file
+            content: Chapter content
+
+        Returns:
+            True if chapter appears to be an afterword
+        """
+        filename = file_path.name.lower()
+        content_lower = content.lower()
+
+        # Check filename patterns
+        afterword_filename_patterns = [
+            'afterword', 'あとがき', 'epilogue', 'postscript',
+            'author_note', 'author_commentary', 'closing_remarks'
+        ]
+
+        for pattern in afterword_filename_patterns:
+            if pattern in filename:
+                logger.info(f"Detected afterword by filename: {file_path.name}")
+                return True
+
+        # Check content patterns (first 500 characters)
+        content_start = content[:500].lower()
+
+        afterword_content_patterns = [
+            'afterword', 'author\'s note', 'author commentary',
+            'thank you for reading', 'acknowledgments',
+            'closing remarks', 'あとがき', '著者より'
+        ]
+
+        for pattern in afterword_content_patterns:
+            if pattern in content_start:
+                logger.info(f"Detected afterword by content pattern: '{pattern}'")
+                return True
+
+        return False
+
     def validate_file(self, file_path: Path) -> ValidationReport:
         """
         Validate all real-world references in a markdown file.
@@ -506,6 +550,19 @@ If no entities detected, return empty array: []
 
         with open(file_path, 'r', encoding='utf-8') as f:
             content = f.read()
+
+        # Skip validation for afterwords
+        if self._is_afterword(file_path, content):
+            logger.info(f"Skipping reference validation for afterword: {file_path.name}")
+            return ValidationReport(
+                file_path=str(file_path),
+                total_entities_detected=0,
+                obfuscated_entities=0,
+                legitimate_entities=0,
+                high_confidence_fixes=0,
+                wikipedia_verified=0,
+                entities=[]
+            )
 
         # Detect entities using Gemini
         entities = self.detect_entities_in_text(content)
@@ -544,12 +601,27 @@ If no entities detected, return empty array: []
 
         return report
 
-    def generate_report(self, report: ValidationReport, output_path: Path):
-        """Generate JSON and Markdown validation reports."""
+    def generate_report(self, report: ValidationReport, output_path: Path, json_only: bool = False):
+        """
+        Generate validation reports.
+
+        Args:
+            report: ValidationReport object
+            output_path: Path to output file (without extension)
+            json_only: If True, only generate JSON report (no markdown)
+        """
+        # Ensure output directory exists
+        output_path.parent.mkdir(parents=True, exist_ok=True)
+
         # JSON report
         json_path = output_path.with_suffix('.json')
         with open(json_path, 'w', encoding='utf-8') as f:
             json.dump(report.to_dict(), f, indent=2, ensure_ascii=False)
+
+        logger.info(f"Saved JSON report: {json_path}")
+
+        if json_only:
+            return
 
         # Markdown report
         md_path = output_path.with_suffix('.md')

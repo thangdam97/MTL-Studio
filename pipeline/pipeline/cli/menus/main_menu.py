@@ -72,6 +72,10 @@ def main_menu() -> Optional[str]:
             value="new"
         ),
         questionary.Choice(
+            title="Run Phase 1: Librarian (Standalone Extraction)",
+            value="phase1"
+        ),
+        questionary.Choice(
             title="Resume Volume",
             value="resume"
         ),

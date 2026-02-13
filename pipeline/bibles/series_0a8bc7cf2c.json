@@ -1,0 +1,262 @@
+{
+  "bible_version": "1.0",
+  "series_id": "series_0a8bc7cf2c",
+  "series_title": {
+    "ja": "テスターですけど、このネトゲ学園が難しすぎるとか言うのやめれる？　「これ絶対クリアできないんですけど、責任とれそ？」",
+    "en": "テスターですけど、このネトゲ学園が難しすぎるとか言うのやめれる？　「これ絶対クリアできないんですけど、責任とれそ？」",
+    "romaji": ""
+  },
+  "created_at": "2026-02-13T03:26:40.939551+00:00",
+  "last_updated": "2026-02-13T03:48:20.040871+00:00",
+  "volumes_registered": [
+    {
+      "volume_id": "066e",
+      "title": "テスターですけど、このネトゲ学園が難しすぎるとか言うのやめれる？　「これ絶対クリアできないんですけど、責任とれそ？」",
+      "index": 2
+    },
+    {
+      "volume_id": "0704",
+      "title": "テスターですけど、このネトゲ学園が難しすぎるとか言うのやめれる？　「これ絶対クリアできないんですけど、責任とれそ？」",
+      "index": 3
+    }
+  ],
+  "world_setting": {
+    "type": "modern_japan_with_virtual_reality_game_elements",
+    "label": "Overcome Academy and the 'Tutorial' virtual world",
+    "honorifics": {
+      "mode": "localize",
+      "policy": "Japanese honorifics like -sensei should be localized to 'Professor' or 'Mr./Ms. [Last Name]' unless a specific cultural nuance is lost. Other honorifics should be adapted to natural English equivalents or omitted if not critical to character voice. Retain 'sensei' for teachers if it feels natural in a school setting."
+    },
+    "name_order": {
+      "default": "family_given",
+      "policy": "For Japanese characters, family name comes first. For Western characters (if any), given name comes first. Nicknames are used as preferred."
+    },
+    "exceptions": []
+  },
+  "characters": {
+    "千葉王我": {
+      "canonical_en": "千葉王我",
+      "source": "manifest_profile_seed",
+      "short_name": "ラグ",
+      "category": "Self (Protagonist)",
+      "affiliation": "Japanese",
+      "keigo": {
+        "narration": "casual",
+        "internal_thoughts": "casual",
+        "speaking_to": {
+          "Ria": "casual",
+          "Salis": "casual",
+          "Colon": "casual",
+          "Suzune": "casual",
+          "Teachers/Authority": "respectful/formal as appropriate for a student"
+        },
+        "emotional_shifts": {
+          "frustration": "more direct, less polite",
+          "excitement": "more energetic, informal"
+        },
+        "notes": "Generally casual, but can adopt a more formal register when speaking to authority figures or in serious game-related discussions."
+      },
+      "visual_identity_non_color": {
+        "identity_summary": "In-game avatar: Wears a stealth robe, carries a straight sword. Real-world: Standard student uniform, often with a focused or slightly exasperated expression."
+      },
+      "notes": "Gamer, analytical, somewhat frustrated by game difficulty, confident, strategic"
+    },
+    "麻木莉愛": {
+      "canonical_en": "麻木莉愛",
+      "source": "manifest_profile_seed",
+      "short_name": "リア",
+      "category": "Fellow student/tester, potential ally",
+      "affiliation": "Japanese",
+      "keigo": {
+        "narration": "formal",
+        "internal_thoughts": "formal",
+        "speaking_to": {
+          "Chiba Ouga": "polite/formal",
+          "Salis": "polite/formal",
+          "Colon": "polite/formal",
+          "Suzune": "polite/formal",
+          "Teachers/Authority": "highly formal"
+        },
+        "emotional_shifts": {
+          "excitement": "slightly less formal, but still polite",
+          "determination": "firm, clear"
+        },
+        "notes": "Maintains a polite and formal register, especially in public or when addressing new acquaintances. Her enthusiasm might occasionally break through."
+      },
+      "visual_identity_non_color": {
+        "identity_summary": "In-game avatar: Elegant dress, elaborate vertical roll hairstyle. Real-world: Standard student uniform, often with a bright, determined expression."
+      },
+      "notes": "Enthusiastic, proactive, determined, polite, strategic, aims for self-improvement and team building."
+    },
+    "サリス": {
+      "canonical_en": "サリス",
+      "source": "manifest_profile_seed",
+      "category": "Fellow student/tester",
+      "affiliation": "Japanese",
+      "visual_identity_non_color": {
+        "identity_summary": "No specific details available yet, likely standard student uniform or a distinct avatar outfit."
+      },
+      "notes": "Polite, cautious, observant, recognizes strong opponents.",
+      "keigo": {
+        "narration": "formal",
+        "internal_thoughts": "formal",
+        "speaking_to": {
+          "Chiba Ouga": "polite",
+          "Asagiri Ria": "polite"
+        },
+        "emotional_shifts": {},
+        "notes": "Consistently polite and somewhat reserved."
+      }
+    },
+    "コロン": {
+      "canonical_en": "コロン",
+      "source": "manifest_profile_seed",
+      "category": "Potential ally for Ria's corps, VRFPS player",
+      "affiliation": "Japanese",
+      "visual_identity_non_color": {
+        "identity_summary": "No specific details available yet, likely standard student uniform or a distinct avatar outfit."
+      },
+      "notes": "Thoughtful, analytical, skilled VRFPS player.",
+      "keigo": {
+        "narration": "casual",
+        "internal_thoughts": "casual",
+        "speaking_to": {
+          "Asagiri Ria": "polite/thoughtful"
+        },
+        "emotional_shifts": {},
+        "notes": "Speaks with a thoughtful demeanor."
+      }
+    },
+    "スズネ": {
+      "canonical_en": "スズネ",
+      "source": "manifest_profile_seed",
+      "category": "Fellow student, broadcast club member",
+      "affiliation": "Japanese",
+      "visual_identity_non_color": {
+        "identity_summary": "No specific details available yet, likely standard student uniform, perhaps with a headset or microphone accessory."
+      },
+      "notes": "Confident in articulation, uses a distinct synthetic voice.",
+      "keigo": {
+        "narration": "casual",
+        "internal_thoughts": "casual",
+        "speaking_to": {
+          "Chiba Ouga": "casual",
+          "Asagiri Ria": "casual"
+        },
+        "emotional_shifts": {},
+        "notes": "Her synthetic voice and 'nanoda' ending are key to her speech pattern."
+      }
+    },
+    "松下": {
+      "canonical_en": "松下",
+      "source": "manifest_profile_seed",
+      "category": "Principal of Overcome Academy",
+      "affiliation": "Japanese",
+      "visual_identity_non_color": {
+        "identity_summary": "Formal attire, serious or composed expression, posture of authority."
+      },
+      "notes": "Authoritative, formal, likely a figurehead.",
+      "keigo": {
+        "narration": "formal",
+        "internal_thoughts": "formal",
+        "speaking_to": {},
+        "emotional_shifts": {},
+        "notes": "Maintains a formal and authoritative tone."
+      }
+    },
+    "三木谷": {
+      "canonical_en": "三木谷",
+      "source": "manifest_profile_seed",
+      "category": "Vice Principal of Overcome Academy",
+      "affiliation": "Japanese",
+      "visual_identity_non_color": {
+        "identity_summary": "Formal attire, possibly a stern or exasperated expression, posture of authority."
+      },
+      "notes": "Authoritative, potentially dramatic or easily frustrated by student actions.",
+      "keigo": {
+        "narration": "formal",
+        "internal_thoughts": "formal",
+        "speaking_to": {},
+        "emotional_shifts": {
+          "frustration": "more exclamatory"
+        },
+        "notes": "Formal but prone to expressing exasperation."
+      }
+    },
+    "柏原美咲": {
+      "canonical_en": "柏原美咲",
+      "source": "manifest_profile_seed",
+      "short_name": "美咲先生",
+      "category": "Teacher of 1st year G class",
+      "affiliation": "Japanese",
+      "keigo": {
+        "narration": "formal",
+        "internal_thoughts": "formal",
+        "speaking_to": {
+          "Students": "polite/instructive"
+        },
+        "emotional_shifts": {},
+        "notes": "Maintains a professional and guiding tone with students."
+      },
+      "visual_identity_non_color": {
+        "identity_summary": "Professional attire (teacher's uniform or formal wear), composed expression, posture of an educator."
+      },
+      "notes": "Professional, guiding, introduces herself clearly."
+    },
+    "Chiba Ouga": {
+      "short_name": "ラグ",
+      "category": "Self (Protagonist)",
+      "affiliation": "Japanese",
+      "visual_identity_non_color": {
+        "identity_summary": "In-game avatar: Wears a stealth robe, carries a straight sword. Real-world: Standard student uniform, often with a focused or slightly exasperated expression."
+      },
+      "notes": "Gamer, analytical, somewhat frustrated by game difficulty, confident, strategic",
+      "keigo": {
+        "narration": "casual",
+        "internal_thoughts": "casual",
+        "speaking_to": {},
+        "emotional_shifts": {},
+        "notes": "[TO BE FILLED - context-dependent register notes]"
+      },
+      "volume_events": {
+        "0704": {
+          "keigo_switch": {
+            "narration": "casual",
+            "internal_thoughts": "casual",
+            "speaking_to": {},
+            "emotional_shifts": {},
+            "notes": "[TO BE FILLED - context-dependent register notes]"
+          }
+        }
+      }
+    },
+    "Asagiri Ria": {
+      "short_name": "リア",
+      "category": "Fellow student/tester, potential ally",
+      "affiliation": "Japanese",
+      "visual_identity_non_color": {
+        "identity_summary": "In-game avatar: Elegant dress, elaborate vertical roll hairstyle. Real-world: Standard student uniform, often with a bright, determined expression."
+      },
+      "notes": "Enthusiastic, proactive, determined, polite, strategic, aims for self-improvement and team building."
+    },
+    "Kashiwabara Misaki": {
+      "short_name": "美咲先生",
+      "category": "Teacher of 1st year G class",
+      "affiliation": "Japanese",
+      "visual_identity_non_color": {
+        "identity_summary": "Professional attire (teacher's uniform or formal wear), composed expression, posture of an educator."
+      },
+      "notes": "Professional, guiding, introduces herself clearly."
+    }
+  },
+  "geography": {
+    "countries": {},
+    "regions": {},
+    "cities": {}
+  },
+  "weapons_artifacts": {},
+  "organizations": {},
+  "cultural_terms": {},
+  "mythology": {},
+  "translation_rules": {}
+}

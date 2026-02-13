@@ -20,10 +20,16 @@ from .menus.main_menu import (
     confirm_exit,
 )
 from .menus.settings import settings_panel, show_current_settings
-from .menus.translation import start_translation_flow, resume_volume_flow, select_chapters_flow
+from .menus.translation import (
+    start_librarian_flow,
+    start_translation_flow,
+    resume_volume_flow,
+    select_chapters_flow,
+)
 from .menus.status import show_status_panel, list_volumes_panel
 from .components.confirmations import confirm_continuity_pack, confirm_series_inheritance
 from .components.progress import TranslationProgress
+from .components.styles import custom_style
 from .utils.config_bridge import ConfigBridge
 from .utils.display import (
     console,
@@ -106,6 +112,9 @@ class MTLApp:
                 elif action == "new":
                     self._handle_new_translation()
 
+                elif action == "phase1":
+                    self._handle_phase1()
+
                 elif action == "resume":
                     self._handle_resume_volume()
 
@@ -176,6 +185,58 @@ class MTLApp:
             print_success(f"Pipeline completed for {volume_id}")
         else:
             print_error(f"Pipeline failed for {volume_id}")
+
+        input("\nPress Enter to continue...")
+
+    def _handle_phase1(self) -> None:
+        """Handle standalone Phase 1 (Librarian extraction)."""
+        import questionary
+
+        result = start_librarian_flow(input_dir=self.input_dir)
+        if result is None:
+            return
+
+        epub_path = result['epub_path']
+        volume_id = result['volume_id']
+        self.current_volume = volume_id
+
+        success = self._run_phase1(epub_path, volume_id)
+        if not success:
+            print_error(f"Phase 1 failed for {volume_id}")
+            input("\nPress Enter to continue...")
+            return
+
+        print_success(f"Phase 1 completed for {volume_id}")
+
+        next_action = questionary.select(
+            "Phase 1 completed. Continue to metadata phases?",
+            choices=[
+                questionary.Choice(
+                    "Continue with Phase 1.5 + Phase 1.55",
+                    value="continue",
+                ),
+                questionary.Choice(
+                    "Skip and return to Main Menu",
+                    value="skip",
+                ),
+            ],
+            style=custom_style,
+        ).ask()
+
+        if next_action == "continue":
+            success_15 = self._run_phase1_5(volume_id)
+            if not success_15:
+                print_error(f"Phase 1.5 failed for {volume_id}")
+                input("\nPress Enter to continue...")
+                return
+
+            success_155 = self._run_phase1_55(volume_id)
+            if not success_155:
+                print_error(f"Phase 1.55 failed for {volume_id}")
+                input("\nPress Enter to continue...")
+                return
+
+            print_success(f"Phase 1.5 and Phase 1.55 completed for {volume_id}")
 
         input("\nPress Enter to continue...")
 
@@ -351,6 +412,30 @@ class MTLApp:
 
         console.print("\n[bold cyan]Phase 2: Translator[/bold cyan]")
         return controller.run_phase2(volume_id, chapters=chapters, force=force)
+
+    def _run_phase1(self, epub_path: Path, volume_id: str) -> bool:
+        """Run Phase 1 (Librarian) only."""
+        from scripts.mtl import PipelineController
+
+        controller = PipelineController(
+            work_dir=self.work_dir,
+            verbose=self.config.verbose_mode,
+        )
+
+        console.print("\n[bold cyan]Phase 1: Librarian[/bold cyan]")
+        return controller.run_phase1(epub_path, volume_id)
+
+    def _run_phase1_5(self, volume_id: str) -> bool:
+        """Run Phase 1.5 (Metadata) only."""
+        from scripts.mtl import PipelineController
+
+        controller = PipelineController(
+            work_dir=self.work_dir,
+            verbose=self.config.verbose_mode,
+        )
+
+        console.print("\n[bold cyan]Phase 1.5: Metadata[/bold cyan]")
+        return controller.run_phase1_5(volume_id)
 
     def _run_phase1_55(self, volume_id: str) -> bool:
         """Run Phase 1.55 (Rich Metadata Cache) only."""

@@ -24,6 +24,7 @@ from pipeline.translator.config import (
 from pipeline.translator.scene_break_formatter import SceneBreakFormatter
 from pipeline.translator.chunk_merger import ChunkMerger
 from pipeline.translator.glossary_lock import GlossaryLock
+from pipeline.translator.volume_context_integration import VolumeContextIntegration
 from pipeline.post_processor.vn_cjk_cleaner import VietnameseCJKCleaner
 from pipeline.config import PIPELINE_ROOT
 from modules.gap_integration import GapIntegrationEngine
@@ -57,7 +58,8 @@ class ChapterProcessor:
         gemini_client: GeminiClient,
         prompt_loader: PromptLoader,
         context_manager: ContextManager,
-        target_language: str = "en"
+        target_language: str = "en",
+        work_dir: Optional[Path] = None
     ):
         self.client = gemini_client
         self.prompt_loader = prompt_loader
@@ -96,6 +98,15 @@ class ChapterProcessor:
         # Initialize multimodal (visual context injection)
         self.enable_multimodal = False  # Will be enabled from agent if needed
         self.visual_cache = None  # VisualCacheManager, set by agent
+
+        # Volume-level context integration (Phase 1.2 - Full Long Context)
+        self.volume_context_integration = None
+        if work_dir:
+            self.volume_context_integration = VolumeContextIntegration(
+                work_dir=work_dir,
+                gemini_client=self.client
+            )
+            logger.info("✓ Volume-level context integration enabled")
 
         # Massive chapter handling
         translation_config = get_translation_config()
@@ -833,7 +844,25 @@ This document contains the internal reasoning process that Gemini used while tra
             logger.debug(f"[VERBOSE] Getting context prompt...")
             context_str = self.context_manager.get_context_prompt(chapter_id)
             logger.debug(f"[VERBOSE] Context length: {len(context_str)} characters")
-            
+
+            # === VOLUME-LEVEL CONTEXT (Phase 1.2) ===
+            volume_context_text = None
+            volume_cache_name = None
+            if self.volume_context_integration:
+                logger.debug(f"[VERBOSE] Getting volume-level context...")
+                volume_context_text, volume_cache_name = self.volume_context_integration.get_volume_context(
+                    chapter_id=chapter_id,
+                    source_dir=source_path.parent,
+                    en_dir=output_path.parent
+                )
+
+                # If volume cache exists, use it instead of effective_cache
+                if volume_cache_name:
+                    effective_cache = volume_cache_name
+                    logger.info(f"[VOLUME-CACHE] Using volume-level cache: {volume_cache_name[:50]}...")
+                    logger.debug(f"[VERBOSE] Volume context length: {len(volume_context_text) if volume_context_text else 0} characters")
+            # === END VOLUME CONTEXT ===
+
             # Construct User Message
             logger.debug(f"[VERBOSE] Building user prompt...")
             user_prompt = self._build_user_prompt(
@@ -848,6 +877,7 @@ This document contains the internal reasoning process that Gemini used while tra
                 vn_pattern_guidance=vn_pattern_guidance,  # Vietnamese grammar patterns
                 visual_guidance=visual_guidance,
                 scene_plan=scene_plan,
+                volume_context=volume_context_text,  # Phase 1.2 - Volume-level context
             )
             logger.debug(f"[VERBOSE] User prompt length: {len(user_prompt)} characters")
             
@@ -1021,7 +1051,18 @@ This document contains the internal reasoning process that Gemini used while tra
             #         logger.warning("[ANTI-AI-ISM] Continuing without auto-correction (run 'mtl.py heal' manually)")
 
             validation_warnings = list(audit.warnings or [])
-            
+
+            # === LOG VOLUME CONTEXT COST SAVINGS (Phase 1.2) ===
+            if self.volume_context_integration:
+                savings_report = self.volume_context_integration.get_cost_savings_report()
+                if savings_report['cache_hit_count'] > 0:
+                    logger.info(
+                        f"[VOLUME-CACHE] 💰 Cost savings: ${savings_report['total_cost_saved_usd']:.4f} "
+                        f"({savings_report['cache_hit_count']} cache hits, "
+                        f"{savings_report['cache_hit_rate']*100:.1f}% hit rate)"
+                    )
+            # === END COST SAVINGS ===
+
             return TranslationResult(
                 success=True,
                 output_path=output_path,
@@ -1776,6 +1817,7 @@ This document contains the internal reasoning process that Gemini used while tra
         vn_pattern_guidance: Optional[Dict] = None,  # Vietnamese grammar patterns
         visual_guidance: Optional[str] = None,  # Multimodal visual context
         scene_plan: Optional[Dict[str, Any]] = None,  # Stage 1 scene planner output
+        volume_context: Optional[str] = None,  # Phase 1.2 - Volume-level context
     ) -> str:
         """Construct the user message part of the prompt."""
         # Build base prompt
@@ -1819,6 +1861,15 @@ This document contains the internal reasoning process that Gemini used while tra
         if visual_guidance:
             from modules.multimodal.prompt_injector import MULTIMODAL_STRICT_SUFFIX
             base_prompt = f"{base_prompt}\n\n{visual_guidance}\n{MULTIMODAL_STRICT_SUFFIX}"
+
+        # === VOLUME CONTEXT INJECTION (Phase 1.2) ===
+        # Per Gemini best practices: "context before query"
+        # Volume context should appear early in prompt for best results
+        if volume_context:
+            logger.debug(f"[VOLUME-CTX] Injecting volume context ({len(volume_context)} chars)")
+            volume_section = f"\n\n---\n\n# VOLUME-LEVEL CONTEXT\n\n{volume_context}\n\n---"
+            base_prompt = f"{base_prompt}{volume_section}"
+        # === END VOLUME CONTEXT ===
 
         # Inject Stage 2 scene/rhythm scaffold before source text section.
         stage2_scene_guidance = self._format_stage2_scene_guidance(scene_plan)

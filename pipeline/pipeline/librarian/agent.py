@@ -557,6 +557,14 @@ class LibrarianAgent:
             assets_dir, 
             exclude_files=spine_kuchie_originals
         )
+
+        # Guardrail: if cover copy succeeded but first-pass catalog missed it,
+        # backfill cover for manifest consistency.
+        if not image_catalog["cover"] and output_paths.get("cover"):
+            from types import SimpleNamespace
+            cover_name = Path(output_paths["cover"]).name
+            image_catalog["cover"] = [SimpleNamespace(filename=cover_name)]
+            print(f"     [INFO] Backfilled cover from copied assets: {cover_name}")
         
         # Merge filename mappings
         filename_mapping.update(kuchie_filename_mapping)
@@ -2246,7 +2254,38 @@ class LibrarianAgent:
                 # Silently continue on parse errors
                 continue
         
-        return kuchie_list
+        return self._normalize_kuchie_japanese_order(spine, kuchie_list)
+
+    def _normalize_kuchie_japanese_order(
+        self,
+        spine: Spine,
+        kuchie_list: List[Dict[str, Any]],
+    ) -> List[Dict[str, Any]]:
+        """
+        Normalize kuchie ordering to original Japanese reading order.
+
+        The Librarian is the single source of truth for kuchie ordering. Builder
+        should consume this order as-is and never re-interpret by output direction.
+        """
+        if not kuchie_list:
+            return []
+
+        ordered = [dict(item) for item in kuchie_list]
+        page_progression = (spine.page_progression or "ltr").lower()
+
+        # For RTL source EPUBs, preserve Japanese right-to-left page order.
+        # For LTR source EPUBs, keep natural spine order.
+        if page_progression == "rtl":
+            ordered.reverse()
+            print("     [INFO] page-progression-direction=rtl → preserving Japanese kuchie order")
+
+        # Renumber normalized filenames to match final manifest order.
+        for idx, item in enumerate(ordered, 1):
+            current_file = str(item.get("file", "") or "")
+            ext = Path(current_file).suffix or Path(str(item.get("original", ""))).suffix or ".jpg"
+            item["file"] = f"kuchie-{idx:03d}{ext}"
+
+        return ordered
 
     def _validate_toc_completeness(self, toc: TableOfContents, spine: Spine) -> tuple[float, set]:
         """
@@ -2607,7 +2646,7 @@ class LibrarianAgent:
                 except Exception:
                     continue
         
-        return kuchie_list
+        return self._normalize_kuchie_japanese_order(spine, kuchie_list)
 
     def _resolve_image_path(self, xhtml_href: str, img_src: str) -> str:
         """Resolve relative image path from XHTML location to content-dir-relative path."""

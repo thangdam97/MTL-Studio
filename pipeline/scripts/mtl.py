@@ -1669,7 +1669,12 @@ class PipelineController:
             cmd.append("--force")
 
         if self._run_command(cmd, "Phase 1.7 (Scene Planner)"):
-            logger.info("✓ Phase 1.7 completed successfully")
+            latest_manifest = self.load_manifest(volume_id) or {}
+            planner_state = latest_manifest.get("pipeline_state", {}).get("scene_planner", {})
+            if planner_state.get("status") == "partial":
+                logger.warning("⚠️  Phase 1.7 completed with partial failures (continuing)")
+            else:
+                logger.info("✓ Phase 1.7 completed successfully")
             self._log_phase1_7_confirmation(volume_id)
             return True
         return False

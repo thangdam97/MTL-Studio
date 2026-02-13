@@ -200,6 +200,15 @@
         "date_discovered": "2026-02-13"
       },
       {
+        "pattern": "悩",
+        "description": "Japanese noun 悩 (nayami - worries/troubles) leaked in EN/VN text",
+        "example": "apparently shared Mahiru's悩.",
+        "severity": "error",
+        "fix": "悩 → worries / concerns / troubles (context-dependent)",
+        "source": "Vol 1164 Ch02 Line 733",
+        "date_discovered": "2026-02-13"
+      },
+      {
         "pattern": "([À-ỹa-zA-Z]+)[\\u4E00-\\u9FFF]{2,}",
         "description": "Two+ character CJK compounds attached to Vietnamese words",
         "example": "Em年頃で知, có nhiều",
@@ -246,7 +255,8 @@
       "wasわざわざ": "was deliberately",
       "草原": "grassland / meadow / plain",
       "攻略": "strategy / walkthrough / guide",
-      "渋い": "grim / stern / displeased"
+      "渋い": "grim / stern / displeased",
+      "悩": "worries / concerns / troubles"
     },
     "common_korean_leaks": {
       "좌": "trái/ghế/giữa",

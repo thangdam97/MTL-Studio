@@ -1787,6 +1787,20 @@ class RichMetadataCacheUpdater:
         cleaned = re.sub(r"/\*[\s\S]*?\*/", "", cleaned)  # block comments
         # Repair malformed keys like: temporal_markers": [...]
         cleaned = re.sub(r'(?m)^(\s*)([A-Za-z_][A-Za-z0-9_]*)(\"?)\s*:', r'\1"\2":', cleaned)
+        # Repair malformed chapter timeline object entries like:
+        #   {
+        #     "chapter_04",
+        #     "sequence_index": 4,
+        #   }
+        # -> {
+        #      "chapter_id": "chapter_04",
+        #      "sequence_index": 4,
+        #    }
+        cleaned = re.sub(
+            r'(?m)^(\s*)"(chapter_\d{1,3})"\s*,\s*\n(\s*"sequence_index"\s*:)',
+            r'\1"chapter_id": "\2",\n\3',
+            cleaned,
+        )
         # Remove non-JSON control chars that models occasionally emit in long outputs.
         cleaned = re.sub(r"[\x00-\x08\x0B\x0C\x0E-\x1F]", " ", cleaned)
         return cleaned.strip()

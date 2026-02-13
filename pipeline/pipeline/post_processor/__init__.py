@@ -11,6 +11,7 @@ from .truncation_validator import TruncationValidator, TruncationIssue, Truncati
 from .pov_validator import POVValidator, POVIssue, POVReport
 from .tense_validator import TenseConsistencyValidator, TenseViolation, TenseReport
 from .reference_validator import ReferenceValidator, DetectedEntity, ValidationReport
+from .chapter_summarizer import ChapterSummarizationAgent, ChapterSummaryResult
 
 # Keep package import resilient when legacy cjk_cleaner.py is absent.
 try:
@@ -35,4 +36,6 @@ __all__ = [
     'ReferenceValidator',
     'DetectedEntity',
     'ValidationReport',
+    'ChapterSummarizationAgent',
+    'ChapterSummaryResult',
 ]

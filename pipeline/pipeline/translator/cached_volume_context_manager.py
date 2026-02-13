@@ -3,7 +3,7 @@ Cached Volume Context Manager - Optimizes Gemini API costs using context caching
 
 Based on official Gemini Context Caching specifications:
 - Caches cost 1/4 of input tokens ($0.01875 vs $0.075 per 1M tokens for Flash 2.5)
-- Minimum cacheable tokens: 32,768 (~13 KB)
+- Minimum cacheable size depends on model/API limits (manager skips tiny payloads)
 - Cache TTL: 1 hour (extendable)
 - Cache hit reduces cost by 75% for repeated context
 
@@ -37,6 +37,7 @@ class CachedVolumeContextManager:
     - Chapter 2: Create cache with Chapter 1 context
     - Chapters 3-15: Reuse + extend cache (hit rate: 93%)
     """
+    MIN_CACHEABLE_TOKENS = 1024  # Skip tiny contexts; cache overhead isn't worth it.
 
     def __init__(self, work_dir: Path, gemini_client):
         """
@@ -50,6 +51,7 @@ class CachedVolumeContextManager:
         self.gemini_client = gemini_client
         self.cache_metadata_path = work_dir / '.context' / 'CACHE_METADATA.json'
         self.cache_metadata = self._load_cache_metadata()
+        self._cache_unavailable_reason: Optional[str] = None
 
     def _load_cache_metadata(self) -> Dict[str, Any]:
         """Load cache metadata if exists."""
@@ -73,7 +75,7 @@ class CachedVolumeContextManager:
 
     def _save_cache_metadata(self):
         """Save cache metadata to disk."""
-        self.cache_metadata_path.parent.mkdir(exist_ok=True)
+        self.cache_metadata_path.parent.mkdir(parents=True, exist_ok=True)
 
         try:
             with open(self.cache_metadata_path, 'w', encoding='utf-8') as f:
@@ -151,18 +153,22 @@ class CachedVolumeContextManager:
         # Create new cache
         logger.info(f"Creating new cache for Chapter {chapter_num}")
 
+        if not self._supports_cache_creation():
+            if self._cache_unavailable_reason:
+                logger.info(f"Skipping volume cache creation: {self._cache_unavailable_reason}")
+            return None
+
         try:
             # Generate unique cache name
             cache_name = f"volume_context_{self.work_dir.name}_{context_hash}"
 
-            # Use Gemini client to create cached content
-            # This is a placeholder - actual implementation depends on Gemini SDK
-            # See: https://ai.google.dev/gemini-api/docs/caching
+            # Use shared Gemini client cache API.
             cache_response = self._create_gemini_cache(cache_name, volume_context_text)
 
             if cache_response:
+                created_cache_name = cache_response.get('name') or cache_name
                 # Update metadata
-                self.cache_metadata['volume_cache_name'] = cache_name
+                self.cache_metadata['volume_cache_name'] = created_cache_name
                 self.cache_metadata['cached_context_hash'] = context_hash
                 self.cache_metadata['cache_created_at'] = datetime.now().isoformat()
                 self.cache_metadata['cache_expires_at'] = (
@@ -172,62 +178,76 @@ class CachedVolumeContextManager:
 
                 self._save_cache_metadata()
 
-                logger.info(f"Cache created successfully: {cache_name}")
-                return cache_name
+                logger.info(f"Cache created successfully: {created_cache_name}")
+                return created_cache_name
             else:
-                logger.error("Failed to create Gemini cache")
                 return None
 
         except Exception as e:
-            logger.error(f"Cache creation failed: {e}")
+            logger.warning(f"Cache creation failed; continuing uncached: {e}")
             return None
+
+    def _supports_cache_creation(self) -> bool:
+        """Check whether the attached Gemini client supports cache creation."""
+        if self.gemini_client is None:
+            self._cache_unavailable_reason = "gemini_client is not initialized"
+            return False
+
+        if not getattr(self.gemini_client, "enable_caching", False):
+            self._cache_unavailable_reason = "Gemini caching disabled in client config"
+            return False
+
+        if not hasattr(self.gemini_client, "create_cache"):
+            self._cache_unavailable_reason = "Gemini client has no create_cache() support"
+            return False
+
+        self._cache_unavailable_reason = None
+        return True
+
+    def _estimate_token_count(self, content: str) -> int:
+        """Estimate/measure token count for cache eligibility checks."""
+        if not content:
+            return 0
+        try:
+            if hasattr(self.gemini_client, "get_token_count"):
+                return int(self.gemini_client.get_token_count(content))
+        except Exception:
+            pass
+        # Fallback estimate (~4 chars/token for JP+EN markdown mixed text).
+        return max(1, len(content) // 4)
 
     def _create_gemini_cache(self, cache_name: str, content: str) -> Optional[Dict[str, Any]]:
         """
         Create cached content using Gemini API.
 
-        Official API usage (from Gemini docs):
-        ```python
-        from google.generativeai import caching
-        import datetime
-
-        cache = caching.CachedContent.create(
-            model='models/gemini-2.5-flash-002',
-            contents=[{
-                'role': 'user',
-                'parts': [{
-                    'text': content
-                }]
-            }],
-            ttl=datetime.timedelta(hours=1),
-            display_name=cache_name
-        )
-        ```
-
         Returns:
             Cache metadata if successful, None otherwise
         """
-        # This is a stub - actual implementation requires google.generativeai SDK
-        # For now, we'll return a mock response to demonstrate the flow
-
-        logger.warning("_create_gemini_cache is a stub - requires google.generativeai SDK")
-
-        # Check if content meets minimum cache size (32,768 tokens ≈ 80 KB)
-        content_size_kb = len(content) / 1024
-        if content_size_kb < 80:
-            logger.warning(
-                f"Content size ({content_size_kb:.1f} KB) below minimum cache threshold (80 KB)"
+        token_count = self._estimate_token_count(content)
+        if token_count < self.MIN_CACHEABLE_TOKENS:
+            logger.info(
+                f"Content too small for cache optimization "
+                f"({token_count} tokens < {self.MIN_CACHEABLE_TOKENS} threshold)"
             )
             return None
 
-        # Mock response for development
+        model_name = getattr(self.gemini_client, "model", "gemini-2.5-flash")
+        cache_resource_name = self.gemini_client.create_cache(
+            model=model_name,
+            contents=[content],
+            ttl_seconds=3600,
+            display_name=cache_name,
+        )
+        if not cache_resource_name:
+            return None
+
         return {
-            'name': cache_name,
-            'model': 'models/gemini-2.5-flash-002',
+            'name': cache_resource_name,
+            'model': model_name,
             'create_time': datetime.now().isoformat(),
             'expire_time': (datetime.now() + timedelta(hours=1)).isoformat(),
             'usage_metadata': {
-                'total_token_count': int(content_size_kb * 400)  # ~400 tokens per KB
+                'total_token_count': token_count
             }
         }
 

@@ -24,6 +24,7 @@ from pipeline.translator.continuity_manager import detect_and_offer_continuity, 
 from pipeline.translator.per_chapter_workflow import PerChapterWorkflow
 from pipeline.translator.glossary_lock import GlossaryLock
 from pipeline.translator.series_bible import BibleController
+from pipeline.post_processor.chapter_summarizer import ChapterSummarizationAgent
 from pipeline.config import get_target_language, get_language_config, PIPELINE_ROOT
 from modules.gap_integration import GapIntegrationEngine
 
@@ -322,6 +323,27 @@ class TranslatorAgent:
         # Translation Log
         self.log_path = work_dir / "translation_log.json"
         self.translation_log = self._load_log()
+
+        # Chapter summarization (Phase 1.x continuity support for volume context)
+        self.enable_chapter_summarizer = bool(
+            self.translation_config.get("enable_chapter_summarizer", True)
+        )
+        self.chapter_summarizer: Optional[ChapterSummarizationAgent] = None
+        if self.enable_chapter_summarizer:
+            summarizer_model = (
+                self.translation_config.get("chapter_summarizer_model")
+                or gemini_config.get("fallback_model")
+                or "gemini-2.5-flash"
+            )
+            self.chapter_summarizer = ChapterSummarizationAgent(
+                gemini_client=self.client,
+                work_dir=self.work_dir,
+                target_language=self.target_language,
+                model=summarizer_model,
+            )
+            logger.info(f"✓ Chapter summarizer enabled (model: {summarizer_model})")
+        else:
+            logger.info("Chapter summarizer disabled by config")
         
         # Per-Chapter Workflow (schema extraction, review, caching)
         self.per_chapter_workflow = PerChapterWorkflow(
@@ -790,6 +812,32 @@ class TranslatorAgent:
         except Exception:
             return None
 
+    def _resolve_chapter_number(
+        self,
+        chapter_id: str,
+        source_filename: Optional[str] = None,
+        fallback: Optional[int] = None,
+    ) -> Optional[int]:
+        """Resolve chapter number from chapter id/source file with safe fallback."""
+        for candidate in (chapter_id, source_filename):
+            if not candidate:
+                continue
+            match = self._CHAPTER_ID_PATTERN.search(str(candidate))
+            if not match:
+                continue
+            try:
+                return int(match.group(1))
+            except Exception:
+                continue
+        return fallback
+
+    def _build_context_summary_text(self, plot_points: List[str], chapter_title: str) -> str:
+        """Build compact summary text for ContextManager continuity prompt."""
+        cleaned = [str(p).strip() for p in (plot_points or []) if str(p).strip()]
+        if cleaned:
+            return " | ".join(cleaned[:2])
+        return chapter_title or "Translated chapter"
+
     def _resolve_prompt_titles(self, chapters: List[Dict[str, Any]]) -> Dict[str, Optional[str]]:
         """
         Resolve chapter titles for prompt/output usage.
@@ -1240,6 +1288,13 @@ class TranslatorAgent:
                 file_key = f"{self.target_language}_file"
                 # Store the actual output filename (not the fallback variable)
                 chapter[file_key] = output_path.name  # e.g., "CHAPTER_01_EN.md"
+
+                translation_text = ""
+                try:
+                    with open(output_path, 'r', encoding='utf-8') as f:
+                        translation_text = f.read()
+                except Exception as e:
+                    logger.error(f"Failed reading translated chapter for post-processing: {e}")
                 
                 # === PER-CHAPTER WORKFLOW: Extract schema, review, cache ===
                 if self.enable_continuity:
@@ -1248,28 +1303,27 @@ class TranslatorAgent:
                     logger.info(f"{'─'*60}\n")
                     
                     try:
-                        # Read the translated chapter
-                        with open(output_path, 'r', encoding='utf-8') as f:
-                            translation_text = f.read()
-                        
-                        # Process chapter (extract, review, cache)
-                        workflow_success, cache_name = self.per_chapter_workflow.process_chapter(
-                            chapter_num=i + 1,  # 1-indexed chapter number
-                            chapter_id=chapter_id,
-                            translation_text=translation_text,
-                            skip_review=False  # User review required
-                        )
-                        
-                        if not workflow_success:
-                            logger.warning("Per-chapter workflow failed or was cancelled by user")
-                            # User cancelled - should we stop the pipeline?
-                            if input("\nContinue to next chapter anyway? (y/N): ").strip().lower() != 'y':
-                                logger.info("Pipeline stopped by user")
-                                break
-                        
-                        # Store cache info in chapter metadata
-                        if cache_name:
-                            chapter["schema_cache"] = cache_name
+                        if not translation_text.strip():
+                            logger.warning("Translated chapter text is empty; skipping continuity schema extraction")
+                        else:
+                            # Process chapter (extract, review, cache)
+                            workflow_success, cache_name = self.per_chapter_workflow.process_chapter(
+                                chapter_num=i + 1,  # 1-indexed chapter number
+                                chapter_id=chapter_id,
+                                translation_text=translation_text,
+                                skip_review=False  # User review required
+                            )
+
+                            if not workflow_success:
+                                logger.warning("Per-chapter workflow failed or was cancelled by user")
+                                # User cancelled - should we stop the pipeline?
+                                if input("\nContinue to next chapter anyway? (y/N): ").strip().lower() != 'y':
+                                    logger.info("Pipeline stopped by user")
+                                    break
+
+                            # Store cache info in chapter metadata
+                            if cache_name:
+                                chapter["schema_cache"] = cache_name
                         
                     except Exception as e:
                         logger.error(f"Per-chapter workflow error: {e}")
@@ -1280,12 +1334,79 @@ class TranslatorAgent:
                     logger.info(f"{'─'*60}\n")
                 
                 # === END PER-CHAPTER WORKFLOW ===
-                
-                # Add context summaries context_manager handles internally?
-                # Actually context_manager needs explicit add. 
-                # Since we don't extract summary from LLM output yet, we might generate a dummy or simple one.
-                # For now, just logging completion.
-                self.context_manager.add_chapter_context(chapter_id, "Translated", {}) 
+
+                # === CHAPTER SUMMARIZATION + CONTEXT UPDATE ===
+                chapter_num = self._resolve_chapter_number(
+                    chapter_id=chapter_id,
+                    source_filename=jp_file,
+                    fallback=i + 1,
+                )
+                context_title = (
+                    translated_title
+                    or chapter.get(f"title_{self.target_language}")
+                    or chapter.get("title_en")
+                    or chapter.get("title")
+                    or self._canonical_title_from_chapter_id(chapter_id)
+                    or chapter_id
+                )
+
+                if self.chapter_summarizer and translation_text.strip() and chapter_num is not None:
+                    summary_result = self.chapter_summarizer.summarize_chapter(
+                        chapter_id=chapter_id,
+                        chapter_num=chapter_num,
+                        chapter_title=context_title,
+                        translation_text=translation_text,
+                    )
+                    if summary_result.success:
+                        chapter["summary_file"] = (
+                            summary_result.summary_path.name
+                            if summary_result.summary_path else None
+                        )
+                        summary_data = summary_result.summary_data
+                        context_summary = self._build_context_summary_text(
+                            summary_data.get("plot_points", []),
+                            chapter_title=str(summary_data.get("title") or context_title),
+                        )
+                        self.context_manager.add_chapter_context(
+                            chapter_id=chapter_id,
+                            summary=context_summary,
+                            metadata={
+                                "chapter_num": summary_data.get("chapter_num"),
+                                "chapter_title": summary_data.get("title"),
+                                "emotional_tone": summary_data.get("emotional_tone"),
+                                "running_jokes": summary_data.get("running_jokes", []),
+                                "tone_shifts": summary_data.get("tone_shifts", []),
+                                "summary_file": chapter.get("summary_file"),
+                                "summarizer_model": summary_result.model,
+                                "summarizer_fallback": summary_result.used_fallback,
+                            },
+                            characters=summary_data.get("new_characters", []),
+                            plot_points=summary_data.get("plot_points", []),
+                        )
+                        logger.info(
+                            f"[CH-SUMMARY] Context updated for {chapter_id} "
+                            f"(fallback={summary_result.used_fallback})"
+                        )
+                    else:
+                        logger.warning(
+                            f"[CH-SUMMARY] Failed for {chapter_id}: {summary_result.error}; "
+                            "using minimal context entry."
+                        )
+                        self.context_manager.add_chapter_context(
+                            chapter_id=chapter_id,
+                            summary=context_title or "Translated chapter",
+                            metadata={"chapter_num": chapter_num, "summary_error": summary_result.error},
+                            plot_points=[],
+                            characters=[],
+                        )
+                else:
+                    self.context_manager.add_chapter_context(
+                        chapter_id=chapter_id,
+                        summary=context_title or "Translated chapter",
+                        metadata={"chapter_num": chapter_num, "summary_skipped": True},
+                        plot_points=[],
+                        characters=[],
+                    )
                 
                 success_count += 1
                 if result.warnings:

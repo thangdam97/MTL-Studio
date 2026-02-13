@@ -173,6 +173,33 @@
         "date_discovered": "2026-02-12"
       },
       {
+        "pattern": "草原",
+        "description": "Japanese noun 草原 (sougen - grassland) leaked in EN/VN text",
+        "example": "I was running through a草原 far from the academy.",
+        "severity": "error",
+        "fix": "草原 → grassland / meadow / plain (context-dependent)",
+        "source": "Vol c9337f Ch03 Line 2229, 2255",
+        "date_discovered": "2026-02-13"
+      },
+      {
+        "pattern": "攻略",
+        "description": "Japanese noun 攻略 (kouryaku - strategy/walkthrough) leaked in EN/VN text",
+        "example": "if you're looking for攻略 info",
+        "severity": "error",
+        "fix": "攻略 → strategy / walkthrough / guide (context-dependent)",
+        "source": "Vol c9337f Ch04 Line 41, 45, 1355",
+        "date_discovered": "2026-02-13"
+      },
+      {
+        "pattern": "渋い",
+        "description": "Japanese adjective 渋い (shibui - grim/sour) leaked in EN/VN text",
+        "example": "with a very渋い face",
+        "severity": "error",
+        "fix": "渋い → grim / stern / displeased (context-dependent)",
+        "source": "Vol c9337f Ch04 Line 1699",
+        "date_discovered": "2026-02-13"
+      },
+      {
         "pattern": "([À-ỹa-zA-Z]+)[\\u4E00-\\u9FFF]{2,}",
         "description": "Two+ character CJK compounds attached to Vietnamese words",
         "example": "Em年頃で知, có nhiều",
@@ -216,7 +243,10 @@
       "なるほど": "I see (can be dismissive) / uh-huh (SARCASTIC) / oh really (IRONIC)",
       "落ち着いた色のものを着れば": "if she wore something in calmer colors",
       "わざわざ": "even / deliberately (context-dependent)",
-      "wasわざわざ": "was deliberately"
+      "wasわざわざ": "was deliberately",
+      "草原": "grassland / meadow / plain",
+      "攻略": "strategy / walkthrough / guide",
+      "渋い": "grim / stern / displeased"
     },
     "common_korean_leaks": {
       "좌": "trái/ghế/giữa",

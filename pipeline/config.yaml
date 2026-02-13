@@ -102,6 +102,8 @@ kimi:
     cache_ttl_hours: 168
 translation:
   enable_multimodal: true
+  enable_chapter_summarizer: true
+  chapter_summarizer_model: gemini-2.5-flash
   enable_self_healing_anti_ai_ism: false
   quality:
     contraction_rate_min: 0.95

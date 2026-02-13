@@ -975,11 +975,8 @@ This document contains the internal reasoning process that Gemini used while tra
 
             # Post-process (cleanup markdown fences if any)
             cleaned_body = self._clean_output(translated_body)
-            
-            # Inject EN title if provided
-            final_content = cleaned_body
+            final_content = self._compose_chapter_markdown(cleaned_body, en_title)
             if en_title:
-                final_content = f"# {en_title}\n\n{cleaned_body}"
                 logger.info(f"Injected title: {en_title}")
             
             # Format scene breaks (replace *, **, *** with centered ◆)
@@ -1167,9 +1164,7 @@ This document contains the internal reasoning process that Gemini used while tra
             merger = ChunkMerger(self.context_manager.work_dir)
             merge_result = merger.merge_chapter(chapter_id, output_filename=output_path.name)
             merged_content = merge_result.output_path.read_text(encoding="utf-8")
-
-            if en_title and not merged_content.lstrip().startswith("# "):
-                merged_content = f"# {en_title}\n\n{merged_content.strip()}\n"
+            merged_content = self._compose_chapter_markdown(merged_content, en_title)
 
             merged_content, _ = SceneBreakFormatter.format_scene_breaks(merged_content)
             output_path.parent.mkdir(parents=True, exist_ok=True)
@@ -2115,3 +2110,88 @@ This document contains the internal reasoning process that Gemini used while tra
         if match:
             return match.group(1).strip()
         return text.strip()
+
+    def _compose_chapter_markdown(self, body: str, en_title: Optional[str]) -> str:
+        """
+        Compose final chapter markdown with at most one top-level H1 title.
+
+        If `en_title` is provided, any model-emitted leading H1 is removed first so
+        we never produce duplicate chapter headers in EN output.
+        """
+        normalized_body = self._clean_output(body or "")
+        if en_title:
+            stripped_body, removed_h1 = self._strip_leading_h1(normalized_body)
+            if removed_h1:
+                logger.info(f"Removed model-emitted leading H1 before title injection: {removed_h1}")
+            if stripped_body:
+                composed = f"# {en_title}\n\n{stripped_body}"
+            else:
+                composed = f"# {en_title}"
+        else:
+            composed = normalized_body
+
+        deduped, removed_count = self._dedupe_consecutive_top_h1(composed)
+        if removed_count > 0:
+            logger.info(f"Removed {removed_count} duplicate top-level chapter header(s)")
+        return deduped
+
+    def _strip_leading_h1(self, text: str) -> tuple[str, Optional[str]]:
+        """Remove the first non-empty top-level H1 at file start, if present."""
+        lines = (text or "").splitlines()
+        if not lines:
+            return "", None
+
+        idx = 0
+        while idx < len(lines) and not lines[idx].strip():
+            idx += 1
+
+        if idx >= len(lines):
+            return "", None
+
+        first = lines[idx].strip()
+        if not (first.startswith("# ") and not first.startswith("## ")):
+            return text.strip(), None
+
+        removed_h1 = first[2:].strip()
+        remaining = lines[:idx] + lines[idx + 1 :]
+        return "\n".join(remaining).strip(), removed_h1
+
+    def _dedupe_consecutive_top_h1(self, text: str) -> tuple[str, int]:
+        """
+        Remove consecutive duplicate H1 headers near the top of content.
+
+        Handles patterns like:
+          # Chapter 1
+          # Chapter 1
+        """
+        lines = (text or "").splitlines()
+        if not lines:
+            return "", 0
+
+        changed = 0
+        while True:
+            idx = 0
+            while idx < len(lines) and not lines[idx].strip():
+                idx += 1
+            if idx >= len(lines):
+                break
+
+            first = lines[idx].strip()
+            if not (first.startswith("# ") and not first.startswith("## ")):
+                break
+
+            j = idx + 1
+            while j < len(lines) and not lines[j].strip():
+                j += 1
+            if j >= len(lines):
+                break
+
+            second = lines[j].strip()
+            if second != first:
+                break
+
+            # Drop duplicate header and keep surrounding body.
+            del lines[j]
+            changed += 1
+
+        return "\n".join(lines).strip(), changed

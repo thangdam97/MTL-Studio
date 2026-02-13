@@ -139,6 +139,12 @@
         "english": ["envious", "jealous", "wish I could"],
         "context": "envy",
         "usage": "common"
+      },
+      "余裕": {
+        "readings": ["yoyuu", "yoyū"],
+        "english": ["composure", "poise", "calm confidence", "ease"],
+        "context": "emotional_composure",
+        "usage": "common"
       }
     },
     "emotional_expressions": {
@@ -263,6 +269,12 @@
         "english": ["come", "arrive"],
         "context": "movement",
         "usage": "very_common"
+      },
+      "慌てて追いかける": {
+        "readings": ["awatete oikakeru"],
+        "english": ["hurry after", "rush after", "chase after in a panic"],
+        "context": "urgent_movement",
+        "usage": "common"
       }
     },
     "character_descriptions": {
@@ -435,6 +447,12 @@
           "meaning": "oblivious/insensitive/dense",
           "english": ["oblivious", "dense", "clueless", "insensitive"],
           "context": "character trait - not noticing romantic feelings"
+        },
+        "慌てて追いかける": {
+          "readings": ["awatete oikakeru"],
+          "meaning": "to rush after someone in a flustered state",
+          "english": ["hurried after her", "rushed after her", "went after her in a panic"],
+          "context": "urgent reaction movement"
         }
       },
       "mixed_language_artifacts": {
@@ -444,6 +462,13 @@
           "english": ["girl", "young woman", "maiden"],
           "context": "describing young female characters",
           "notes": "Often appears in mixed contexts like 'mỹ少女' or 'beautiful少女'"
+        },
+        "calm余裕": {
+          "readings": ["calm + yoyuu"],
+          "meaning": "mixed English+CJK leak expressing calm composure",
+          "english": ["calm composure", "easy composure", "adult poise"],
+          "context": "mixed-language phrase contamination",
+          "notes": "Detected in EN output; always convert to pure English phrase."
         }
       },
       "particle_combinations": {

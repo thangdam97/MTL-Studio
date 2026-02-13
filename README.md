@@ -20,10 +20,11 @@ flowchart TB
         P1S2["metadata_parser → OPF XML parsing"]
         P1S3["toc_parser + spine_parser → TOC/Spine"]
         P1S4["xhtml_to_markdown → XHTML→MD"]
+        P1S8["reference_validator → deobfuscation reports\nJP/*.references.{json,md}"]
         P1S5["ruby_extractor → Furigana names"]
         P1S6["image_extractor → Catalog assets"]
         P1S7["publisher_profiles → Kadokawa/MF/etc"]
-        P1A --> P1S1 --> P1S2 --> P1S3 --> P1S4 --> P1S5 --> P1S6
+        P1A --> P1S1 --> P1S2 --> P1S3 --> P1S4 --> P1S8 --> P1S5 --> P1S6
         P1S4 -.-> P1S7
     end
 
@@ -94,14 +95,11 @@ flowchart TB
             T3["T3 Lookback\nChapter Summaries\nName Registry\nContinuity Pack"]
         end
 
-        subgraph POST["Post-Processing Stack"]
+        subgraph POST["Runtime Guardrails (Current)"]
             direction LR
-            PP1["CJK Cleaner"]
-            PP2["AntiAIismAgent\n3-layer LLM fix"]
-            PP3["RTAS Voice"]
-            PP4["Truncation\nValidator"]
-            PP5["GlossaryLock\nName drift guard"]
-            PP6["Scene Break\nFormatter"]
+            PP1["GlossaryLock + Truncation\nin-translation checks"]
+            PP2["CJK Validator\nauto scan after Phase 2"]
+            PP3["Manual utilities\ncjk-clean / heal (optional)"]
         end
 
         P2A --> P2CP
@@ -218,8 +216,7 @@ flowchart TB
 13. [File Structure](#file-structure)
 14. [RAG Modules](#rag-modules)
 15. [Quality Control](#quality-control)
-    - [Self-Healing Anti-AI-ism Agent](#self-healing-anti-ai-ism-agent)
-    - [Streamlined Post-Processing Pipeline](#streamlined-post-processing-pipeline)
+    - [Runtime Post-Processing Policy](#runtime-post-processing-policy)
 16. [Illustration System](#illustration-system)
 17. [Versus Official Publishing](#versus-official-publishing)
 18. [Troubleshooting](#troubleshooting)
@@ -276,17 +273,18 @@ V5.2 (February 2026) introduces a **Three-Pillar Translation Architecture** that
 - **Bible Auto-Sync (Phase 1.5)**: Two-way sync during metadata processing — PULL inherits 130+ canonical terms from the bible before ruby translation; PUSH exports newly discovered terms back to the bible after processing. Fully automatic, non-fatal on failure.
 - **World Setting Directives**: Per-series honorific policy (localize/retain), name order (given-family/family-given), and per-character exceptions injected at the TOP of the system instruction.
 - **Schema Agent auto-update with Google Search grounding**: After Librarian extraction, Gemini 2.5 Flash enriches schema metadata with always-on Google Search using two fixed hierarchies: `Official Localization -> AniDB (public API) -> MyAnimeList -> Ranobe-Mori (JP) -> Fan Translation -> Heuristic Inference` (applied for both Series/Volume and Character/Term resolution).
+- **Reference deobfuscation validator (new)**: Phase 1 auto-detects real-world references (brands/authors/titles/persons/places), resolves obfuscated LN forms, and writes per-chapter reports (`JP/*.references.json`, `JP/*.references.md`).
 - **Phase 1.5 safe metadata processing**: Translates title/author/chapter fields while preserving deeper semantic configuration assets, schema-agent enrichments, and bible canonical terms.
 - **Sequel-aware continuity**: Character names, glossary, and series conventions inherited from both bible (canonical source) and predecessor volumes (fallback).
 - **Bible CLI tooling**: `mtl bible` provides 9 subcommands for managing bibles: `list`, `show`, `validate`, `import`, `link`, `unlink`, `orphans`, `prompt`, `sync`.
 - **Schema operations CLI**: `mtl.py metadata` and `mtl.py schema` provide compatibility checks, validation, and controlled metadata manipulation.
 
-#### 5) Quality Control and Self-Healing Stack
+#### 5) Quality Control Runtime Policy
 
-- **CJK leak detection and cleanup**: Automated validation plus dedicated cleanup commands for post-translation script artifacts.
-- **Self-Healing Anti-AI-ism Agent**: Pattern + vector + LLM correction stack removes translationese and recurring machine-style phrasing.
-- **Echo/proximity detection**: Cluster-level repetition detection reduces local stylistic redundancy and preserves prose variation.
-- **Post-processing hardening**: Format normalization, typography cleanup, and quality audit integration run at translation completion.
+- **CJK leak detection is automatic**: Phase 2 triggers `scripts/cjk_validator.py` and reports leak counts at translation completion.
+- **GlossaryLock + truncation guardrails stay active**: Name consistency and cutoff checks run inside translator chapter processing.
+- **Anti-AI-ism controls are prompt-time, not auto-heal runtime**: Pattern libraries and echo detection guide generation; the translator does not auto-run self-healing.
+- **Manual cleanup remains available**: `mtl.py cjk-clean` and `mtl.py heal` are optional post-run tools for targeted repair.
 
 #### 6) Modern v5.2 CLI Operations and UX
 
@@ -1397,19 +1395,21 @@ This section uses the same capability taxonomy as **Core Capabilities** so the r
 - **Bible Auto-Sync (Phase 1.5)**: Two-way sync — PULL inherits 133 canonical terms before translation; PUSH exports newly discovered terms back to bible after processing. Fully automatic, non-fatal on failure.
 - **World Setting Directive**: Per-series honorific policy (localize/retain), name order, and per-character exceptions injected at TOP of system instruction.
 - **Schema Agent with Google Search grounding**: Always-on Google Search in Gemini 2.5 Flash with two fixed priority chains: `Official Localization -> AniDB (public API) -> MyAnimeList -> Ranobe-Mori (JP) -> Fan Translation -> Heuristic Inference` for both localization metadata and canonical term resolution.
+- **Reference deobfuscation integration**: Librarian Phase 1 now auto-runs real-world reference validation/deobfuscation and emits `JP/*.references.{json,md}` artifacts for downstream review.
 - **Schema v3.6 enrichment**: Metadata now includes `gap_moe_markers`, `dual_voice_analysis`, and `transcreation_notes`.
 - **Schema Agent v3.6 auto-run in Phase 1.5**: Flow is now `Librarian → Schema Agent autoupdate → Bible PULL → Title/Chapter translation → Bible PUSH → Phase 1.55 → Phase 1.6 → Phase 1.7 → Phase 2`.
 - **Official localization preference**: When a series has an established localized title, schema auto-update prioritizes official localization metadata over literal fallback naming.
 - **Bible CLI tooling**: `mtl bible` provides 9 subcommands for managing bibles: `list`, `show`, `validate`, `import`, `link`, `unlink`, `orphans`, `prompt`, `sync`.
 - **Continuity-focused validation**: Name consistency via bible glossary lock, sequel inheritance safety, and schema integrity checks are enforced earlier in the pipeline.
 
-### 5) Quality Control and Self-Healing Stack
+### 5) Quality Control Runtime Policy
 
-- **AUDIT_AGENT v2.0 (4-subagent model)**:
-  - Content Fidelity (zero-tolerance truncation/censorship checks)
-  - Content Integrity (names/formatting/sequel continuity)
-  - Prose Quality (AI-ism and transcreation quality)
-  - Gap Preservation (emotion+action+ruby/subtext carryover)
+- **Automatic runtime checks**:
+  - CJK validation scan after Phase 2
+  - GlossaryLock + truncation checks during Stage 2 translation
+- **Manual-only cleanup tools**:
+  - `mtl.py cjk-clean`
+  - `mtl.py heal`
 - **Enhanced structural QA**: Publisher structure validation, image reference integrity, and pre-TOC exclusion checks are included as explicit gates.
 - **Expanded metric surface**: Gap Moe accuracy, transcreation coverage, image mapping integrity, and pre-TOC detection rate are now tracked.
 
@@ -1559,6 +1559,7 @@ BUILDER reads         → assembles EPUB from all resources
 - `content_parser.py` - XHTML to Markdown conversion
 - `ruby_extractor.py` - Character name extraction with furigana
 - `image_extractor.py` - Asset cataloging and normalization
+- `pipeline/post_processor/reference_validator.py` (Librarian hook) - Real-world reference detection + LN obfuscation resolution reports
 
 **Output Structure**:
 ```
@@ -1584,6 +1585,10 @@ WORK/[volume_id]/
     ├── chapter_summaries.json         # Lookback continuity memory
     └── continuity_pack.json           # Legacy continuity bridge
 ```
+
+Additional Phase 1 artifacts:
+- `JP/CHAPTER_XX.references.json` - Machine-readable reference/deobfuscation report
+- `JP/CHAPTER_XX.references.md` - Human-readable validation report
 
 ### Phase 1.5: Metadata Processor
 
@@ -1623,7 +1628,7 @@ WORK/[volume_id]/
 - Pushes only **volume-scoped event metadata** to bible (relationship dynamics, keigo shifts, arcs), not canonical naming fields.
 - Writes patch artifact: `WORK/<volume>/rich_metadata_cache_patch.json`.
 
-**Enhanced Co-Processors (Context Offload)**:
+**Enhanced Co-Processors and Validators**:
 - **Processor 1 - Character Context** → `.context/character_registry.json`
   - Canonical names, aliases, role tags, relationship edges, pronoun hints.
 - **Processor 2 - Cultural Context** → `.context/cultural_glossary.json`
@@ -1633,6 +1638,9 @@ WORK/[volume_id]/
 - **Processor 4 - Opportunistic Idiom Transcreation** → `.context/idiom_transcreation_cache.json`
   - Confidence-ranked transcreation options + Stage 2 guidance.
   - Uses Google Search grounding when `google.genai.types` is available.
+- **Processor 5 - Reference Deobfuscation Validation (Phase 1 hook)** → `JP/*.references.json`, `JP/*.references.md`
+  - Detects real-world entities and resolves LN obfuscation forms (brands/authors/persons/titles/places).
+  - Produces chapter-local reports for metadata/QC review; non-fatal if unavailable.
 
 **Gemini cache/tool constraint handling (important)**:
 - Gemini rejects `generate` requests that combine `cached_content` with `tools/tool_config`.
@@ -1651,6 +1659,8 @@ WORK/[volume_id]/
 - `.context/cultural_glossary.json`
 - `.context/timeline_map.json`
 - `.context/idiom_transcreation_cache.json`
+- `JP/CHAPTER_XX.references.json`
+- `JP/CHAPTER_XX.references.md`
 
 ### Phase 1.6: Art Director (Multimodal)
 
@@ -2095,7 +2105,7 @@ python mtl.py config --toggle-multimodal
 | Command | Description |
 |---------|-------------|
 | `run` | Execute full pipeline from EPUB input |
-| `phase1` | Librarian: Extract EPUB to working directory |
+| `phase1` | Librarian: Extract EPUB, convert chapters, and emit reference/deobfuscation reports |
 | `phase1.5` | Metadata Processor: Translate metadata, bible auto-sync (PULL/PUSH), and preserve schema continuity |
 | `phase1.55` | Rich Metadata Cache: Build full-LN cache and apply safe metadata patch refinement |
 | `phase1.6` | Art Director: Analyze illustrations and build `visual_cache.json` |
@@ -2112,7 +2122,7 @@ python mtl.py config --toggle-multimodal
 | `schema` | Advanced schema manipulation and validation actions |
 | `config` | View or modify pipeline configuration |
 | `cjk-clean` | Run VN CJK hard substitution cleaner on translated files |
-| `heal` | Run Self-Healing Anti-AI-ism Agent (3-layer detection + auto-fix) |
+| `heal` | Run standalone Self-Healing Anti-AI-ism pass manually (not auto-run in Phase 2) |
 | `cleanup` | Clean translated chapter titles and illustration marker artifacts |
 | `bible list` | List all registered series bibles with entry counts |
 | `bible show` | Display bible entries grouped by category |
@@ -2371,7 +2381,7 @@ The translation system uses a 2.5MB retrieval-augmented generation knowledge bas
 
 | Configuration | Patterns | Purpose |
 |---------------|----------|---------||
-| anti_ai_ism_patterns.json | 65 patterns | AI-ism detection with 4 severity tiers + Self-Healing Agent |
+| anti_ai_ism_patterns.json | 65 patterns | AI-ism detection with 4 severity tiers for prompt/runtime guidance |
 | Echo Detection System | 23 patterns | Proximity-based clustering detection (50/75/100/150-word windows) |
 | Documentation | ECHO_DETECTION_GUIDE.md | Complete technical specifications and integration guide |
 
@@ -2498,12 +2508,11 @@ Implementation note: `cjk_cleaner_v2.py` and `multi_script_detector.py` both con
 
 ### Automatic QC Features
 
-- **Typography Fixes**: Smart quotes, em-dashes, ellipses standardization
-- **Contraction Enforcement**: Expansion patterns detected and corrected
-- **CJK Pattern Detection**: Full Unicode block scanning via `ComprehensiveCJKDetector` with suspicion scoring
-- **AI-ism Detection**: 65-pattern library with severity classification + Self-Healing Agent
-- **Echo Detection**: Proximity-based clustering analysis with automatic escalation
-- **Name Consistency**: Ruby text verification against translations
+- **CJK validation scan**: Auto-runs after Phase 2 and reports leak counts
+- **CJK pattern detection**: Full Unicode block scanning via `ComprehensiveCJKDetector` with suspicion scoring
+- **Prompt-time AI-ism controls**: 65-pattern library + echo detection drive generation behavior
+- **Name consistency checks**: GlossaryLock enforcement during translation
+- **Truncation checks**: Detect likely cutoffs before packaging
 
 ### QC Report Schema
 
@@ -2523,93 +2532,21 @@ Implementation note: `cjk_cleaner_v2.py` and `multi_script_detector.py` both con
 }
 ```
 
-### Self-Healing Anti-AI-ism Agent
+### Runtime Post-Processing Policy
 
-**Version 1.0** — Automated post-processor with three-layer detection and LLM self-correction.
+Current runtime behavior is intentionally conservative:
 
-Replaces the previous 4-subagent AUDIT_AGENT system with a single, fully automated agent that detects AND fixes AI-generated prose artifacts in one pass.
+- **Automatically active in Phase 2**
+  - GlossaryLock + truncation checks inside chapter translation
+  - CJK leak scan at end of translation (`scripts/cjk_validator.py`)
+- **Disabled in automatic translator runtime**
+  - Self-healing Anti-AI-ism auto-pass
+  - Legacy grammar/format normalization post-stack
+- **Manual-only utilities (opt-in)**
+  - `python mtl.py cjk-clean <volume_id>`
+  - `python mtl.py heal <volume_id> [--en|--vn] [--dry-run]`
 
-**Architecture**:
-```
-┌──────────────────────────────────────────────────────────────────────┐
-│                SELF-HEALING ANTI-AI-ISM AGENT v1.0                   │
-│                                                                      │
-│  INPUT: Translated chapter files (EN or VN)                          │
-│                                                                      │
-│  ┌──────────────────────────────────────────────────────────────┐    │
-│  │ LAYER 1: Regex Scanner                                       │    │
-│  │ 65 patterns from anti_ai_ism_patterns.json                   │    │
-│  │ CRITICAL → block | MAJOR → degrade | MINOR → flag            │    │
-│  └──────────────────────────┬───────────────────────────────────┘    │
-│                             ▼                                        │
-│  ┌──────────────────────────────────────────────────────────────┐    │
-│  │ LAYER 2: Vector Bad Prose DB                                 │    │
-│  │ ChromaDB + gemini-embedding-001 (3072D)                      │    │
-│  │ 35 BAD_PROSE_SEEDS × cosine similarity                       │    │
-│  │ ≥ 0.80 → FLAG | ≥ 0.70 → WARN                               │    │
-│  └──────────────────────────┬───────────────────────────────────┘    │
-│                             ▼                                        │
-│  ┌──────────────────────────────────────────────────────────────┐    │
-│  │ LAYER 3: Psychic Distance Filter                             │    │
-│  │ Filter words (seemed, appeared, felt) — narrative distance   │    │
-│  │ Nominalizations (the realization of) — verb→noun bloat       │    │
-│  │ Prepositional chains (of the X of the Y) — chain detection   │    │
-│  │ VN patterns (một cách, một cảm giác, sự + noun)             │    │
-│  └──────────────────────────┬───────────────────────────────────┘    │
-│                             ▼                                        │
-│  ┌──────────────────────────────────────────────────────────────┐    │
-│  │ SELF-HEALING ENGINE                                          │    │
-│  │ Gemini Flash (temp=0.3) rewrites flagged sentences           │    │
-│  │ Category-specific prompts × severity-ordered processing      │    │
-│  │ CRITICAL first → MAJOR → MINOR                               │    │
-│  └──────────────────────────────────────────────────────────────┘    │
-│                                                                      │
-│  OUTPUT: Healed files + Markdown audit report                        │
-└──────────────────────────────────────────────────────────────────────┘
-```
-
-**Bad Prose DB Categories**:
-| Category | Seeds | Example |
-|----------|-------|---------|
-| filter_word | 8 | "He seemed to understand" → "He understood" |
-| nominalization | 6 | "The realization of the truth" → "She realized the truth" |
-| prepositional_bloat | 5 | "In the process of walking" → "Walking" |
-| ai_crutch | 6 | "As if reading her mind" → character-specific phrasing |
-| vn_mot_cach | 4 | "một cách chậm rãi" → "chầm chậm" |
-| vn_mot_cam_giac | 3 | "một cảm giác ấm áp" → "ấm lòng" |
-| vn_su_nominalization | 3 | "sự xuất hiện của" → direct verb form |
-
-**CLI Usage**:
-```bash
-# Scan + auto-heal English volume
-python mtl.py heal 05df
-
-# Dry run (scan only, no modifications)
-python mtl.py heal 05df --dry-run
-
-# Explicit Vietnamese targeting
-python mtl.py heal 05df --vn
-
-# Explicit English targeting
-python mtl.py heal 05df --en
-```
-
-**Module**: `pipeline/modules/anti_ai_ism_agent.py`
-
-### Streamlined Post-Processing Pipeline
-
-MTL Studio's post-processing now runs exactly **two automated tools** after translation:
-
-```
-Phase 2 Output → CJK Cleaner v2 → Self-Healing Anti-AI-ism Agent → Publication Ready
-```
-
-| Tool | Purpose | Detection | Auto-Fix |
-|------|---------|-----------|----------|
-| **CJK Cleaner v2** | Remove script contamination | CJK + Cyrillic + Arabic + 9M+ artifacts | LLM rewrite via Gemini |
-| **Anti-AI-ism Agent** | Eliminate AI prose artifacts | 65 regex + Vector DB + Psychic Distance | Gemini Flash rewrite |
-
-This replaces the previous external IDE workflow (AUDIT_AGENT V2.0 with 4 subagents) with a fully integrated, single-command pipeline that both detects AND corrects issues automatically.
+This policy avoids over-correction regressions while keeping deterministic leak detection and targeted manual repair paths.
 
 ### External IDE Agents
 
@@ -3361,7 +3298,8 @@ See LICENSE.txt for licensing information.
 - **Config/TUI Enhancements**: Smart Chunking and Multimodal toggles in settings + `mtl.py config --toggle-smart-chunking` / `--toggle-multimodal`
 - **Cache Runtime Upgrade**: Context cache TTL standardized to 120 minutes with explicit volume-cache source coverage verification logging
 - **Publisher Profile Hardening**: Shueisha-specific `embed0000.jpg` exclusion to suppress publisher-logo gaiji noise in JP extraction and translation flow
-- **Self-Healing Quality Pipeline**: Integrated CJK cleaning + Anti-AI-ism healing for post-translation stabilization
+- **Reference Deobfuscation Integration**: Librarian now auto-runs chapter-level real-world reference validation and writes `JP/*.references.{json,md}`
+- **Runtime QC Policy Update**: Automatic Phase 2 post-processing narrowed to CJK validation + in-translation guardrails; `heal` remains manual
 - **CLI Expansion**: `phase1.55`, `phase1.6`, `phase1.7`, `multimodal`, `cache-inspect`, `visual-thinking`, and richer schema tooling
 
 ### Version 4.0 LTS (February 2026)
@@ -3396,7 +3334,7 @@ See LICENSE.txt for licensing information.
 - **New Metrics**: Gap Moe Accuracy (90%+), Transcreation Coverage, Image Mapping Integrity, Pre-TOC Detection Rate
 
 ### Version 3.5 LTS (January 2026)
-- **Anti-AI-ism Pattern Library**: Comprehensive 65-pattern detection system (6 CRITICAL, 28 MAJOR, 29 MINOR, 2 VN_CRITICAL) + Self-Healing Agent
+- **Anti-AI-ism Pattern Library**: Comprehensive 65-pattern detection system (6 CRITICAL, 28 MAJOR, 29 MINOR, 2 VN_CRITICAL) + optional manual self-healing tooling
 - **Echo Detection System**: Professional proximity-based clustering detection (23 patterns with 50/75/100/150-word windows)
 - **Pattern Categories**: 11 specialized subcategories including emotion_wrappers, filter_phrases, process_verbs, ai_crutch_phrases, perception_verbs, reaction_verbs, gaze_verbs, hedge_words
 - **Flow-Based Quality Checking**: Moves from count-based ("Is this word bad?") to flow-based ("Is this rhythm bad?") analysis

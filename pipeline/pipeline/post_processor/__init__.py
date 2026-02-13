@@ -10,6 +10,7 @@ from .vn_cjk_cleaner import VietnameseCJKCleaner, format_cleaner_report
 from .truncation_validator import TruncationValidator, TruncationIssue, TruncationReport
 from .pov_validator import POVValidator, POVIssue, POVReport
 from .tense_validator import TenseConsistencyValidator, TenseViolation, TenseReport
+from .reference_validator import ReferenceValidator, DetectedEntity, ValidationReport
 
 # Keep package import resilient when legacy cjk_cleaner.py is absent.
 try:
@@ -31,4 +32,7 @@ __all__ = [
     'TenseConsistencyValidator',
     'TenseViolation',
     'TenseReport',
+    'ReferenceValidator',
+    'DetectedEntity',
+    'ValidationReport',
 ]

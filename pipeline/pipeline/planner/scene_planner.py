@@ -189,6 +189,7 @@ class ScenePlanningAgent:
             f"- dialogue_register (suggested set: {register_hint})\n"
             f"- target_rhythm (one of: {rhythm_hint})\n"
             "- illustration_anchor (boolean)\n"
+            "- consistency rule: if beat_type is 'illustration_anchor', illustration_anchor must be true\n"
             "- start_paragraph (integer or null)\n"
             "- end_paragraph (integer or null)\n\n"
             "Character profile keys:\n"
@@ -304,6 +305,28 @@ class ScenePlanningAgent:
         if isinstance(value, (int, float)):
             return bool(value)
         return False
+
+    def _resolve_illustration_anchor(self, raw_scene: Dict[str, Any], beat_type: str) -> bool:
+        """
+        Resolve illustration anchor with resilient key lookup.
+
+        Models sometimes emit alternate fields (e.g., scene_anchor, visual_anchor)
+        or only signal this through beat_type. We preserve that intent here.
+        """
+        anchor_keys = (
+            "illustration_anchor",
+            "scene_anchor",
+            "visual_anchor",
+            "is_illustration_anchor",
+            "has_illustration_anchor",
+            "anchor_illustration",
+        )
+        for key in anchor_keys:
+            if key in raw_scene:
+                return self._coerce_bool(raw_scene.get(key))
+
+        # Preserve explicit beat semantics when planner omits the boolean field.
+        return beat_type == "illustration_anchor"
 
     @staticmethod
     def _coerce_string_list(values: Any) -> List[str]:
@@ -482,7 +505,7 @@ class ScenePlanningAgent:
             "emotional_arc": self._coerce_text(raw_scene.get("emotional_arc"), "neutral_progression"),
             "dialogue_register": self._map_dialogue_register(raw_scene.get("dialogue_register")),
             "target_rhythm": self._map_target_rhythm(raw_scene.get("target_rhythm")),
-            "illustration_anchor": self._coerce_bool(raw_scene.get("illustration_anchor")),
+            "illustration_anchor": self._resolve_illustration_anchor(raw_scene, beat_type),
             "start_paragraph": start_paragraph,
             "end_paragraph": end_paragraph,
         }

@@ -23,6 +23,13 @@ from .content_splitter import ContentSplitter, KodanshaSplitter
 from .config import get_volume_structure, get_work_dir, get_pre_toc_detection_config
 from .publisher_profiles.manager import get_profile_manager, PublisherProfile
 
+# Phase 1.55: Reference Validator
+try:
+    from pipeline.post_processor import ReferenceValidator
+    REFERENCE_VALIDATOR_AVAILABLE = True
+except ImportError:
+    REFERENCE_VALIDATOR_AVAILABLE = False
+
 
 @dataclass
 class ChapterEntry:
@@ -470,7 +477,11 @@ class LibrarianAgent:
                 converter
             )
         print(f"     Converted {len(chapters)} chapters")
-        
+
+        # Phase 1.55: Validate real-world references in source chapters
+        print("\n[PHASE 1.55] Validating real-world references...")
+        self._validate_references_in_chapters(chapters, source_dir)
+
         # Post-process: Check for Kodansha heading-based splitting
         heading_split_config = profile_manager.get_heading_split_config(publisher_name)
         if heading_split_config and heading_split_config.get("split_on_heading", False):
@@ -2366,6 +2377,74 @@ class LibrarianAgent:
             elif part != '.':
                 resolved.append(part)
         return '/'.join(resolved)
+
+    def _validate_references_in_chapters(
+        self,
+        chapters: List['ConvertedChapter'],
+        source_dir: Path
+    ):
+        """
+        Validate real-world references in converted chapters using Phase 1.55 Reference Validator.
+
+        This detects and logs:
+        - Author names (デボラ・ザック → Devora Zack)
+        - Book titles (『シングルタスク』→ Singletasking)
+        - Celebrity/person names (タ○ソン → Mike Tyson)
+        - Brand names (LIME → LINE, MgRonald's → McDonald's)
+        - Place names (ニューヨーク → New York)
+
+        Args:
+            chapters: List of converted chapters
+            source_dir: Directory where source markdown files are saved
+        """
+        if not REFERENCE_VALIDATOR_AVAILABLE:
+            print("     [SKIP] Reference Validator not available (optional feature)")
+            return
+
+        try:
+            validator = ReferenceValidator(enable_wikipedia=False)  # Skip Wikipedia per user request
+
+            total_entities = 0
+            total_obfuscated = 0
+
+            for chapter in chapters:
+                # Read chapter markdown file
+                chapter_path = source_dir / chapter.filename
+
+                if not chapter_path.exists():
+                    continue
+
+                # Validate references
+                report = validator.validate_file(chapter_path)
+
+                if report.total_entities_detected > 0:
+                    print(f"       {chapter.filename}: {report.total_entities_detected} entities "
+                          f"({report.obfuscated_entities} obfuscated)")
+
+                    # Log high-confidence entities that need correction
+                    for entity in report.entities:
+                        if entity.is_obfuscated and entity.confidence >= 0.95:
+                            print(f"         → {entity.detected_term} → {entity.real_name} "
+                                  f"({entity.entity_type}, {entity.confidence:.2f})")
+
+                    total_entities += report.total_entities_detected
+                    total_obfuscated += report.obfuscated_entities
+
+                    # Save validation report alongside source chapter
+                    report_path = chapter_path.with_suffix('.references')
+                    validator.generate_report(report, report_path)
+
+            if total_entities > 0:
+                print(f"     Total: {total_entities} real-world references detected "
+                      f"({total_obfuscated} need correction)")
+            else:
+                print("     No real-world references detected")
+
+        except Exception as e:
+            print(f"     [WARNING] Reference validation failed: {e}")
+            # Don't fail the entire pipeline if reference validation fails
+            import traceback
+            traceback.print_exc()
 
     def _build_manifest(
         self,

@@ -201,3 +201,41 @@ def test_generate_plan_hard_maps_register_and_rhythm_enums_and_fills_tiny_gaps(t
     assert plan.scenes[0].end_paragraph == 5
     # Tiny tail gap P18 should be absorbed into the final scene.
     assert plan.scenes[-1].end_paragraph == 18
+
+
+def test_generate_plan_infers_illustration_anchor_from_beat_and_alt_keys():
+    payload = """
+{
+  "chapter_id": "chapter_03",
+  "scenes": [
+    {
+      "id": "S01",
+      "beat_type": "illustration_anchor",
+      "emotional_arc": "visual beat",
+      "dialogue_register": "casual_teen",
+      "target_rhythm": "medium_casual",
+      "start_paragraph": 1,
+      "end_paragraph": 3
+    },
+    {
+      "id": "S02",
+      "beat_type": "setup",
+      "emotional_arc": "setup",
+      "dialogue_register": "casual_teen",
+      "target_rhythm": "medium_casual",
+      "scene_anchor": "yes",
+      "start_paragraph": 4,
+      "end_paragraph": 6
+    }
+  ],
+  "character_profiles": {},
+  "overall_tone": "romcom",
+  "pacing_strategy": "steady"
+}
+"""
+    client = _DummyGeminiClient(payload)
+    planner = ScenePlanningAgent(gemini_client=client)
+    plan = planner.generate_plan("chapter_03", "P1\n\nP2\n\nP3\n\nP4\n\nP5\n\nP6")
+
+    assert plan.scenes[0].illustration_anchor is True
+    assert plan.scenes[1].illustration_anchor is True

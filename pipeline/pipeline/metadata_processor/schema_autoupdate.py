@@ -211,6 +211,8 @@ class SchemaAutoUpdater:
             "  6) Heuristic Inference (LAST RESORT)\n"
             "- Official localization data from licensed publishers ALWAYS overrides romanization/inference.\n"
             "- For character names: prefer the official English release spelling over Hepburn or phonetic guesses.\n"
+            "- NAME ORDER ENFORCEMENT (MANDATORY): apply `name_order_grounding_policy` from INPUT.\n"
+            "- Keep canonical spelling from sources, but normalize display order to policy (do not mirror source order blindly).\n"
             "- For setting/place names: prefer canon from anime subtitles or official manga translations.\n"
             "- If no official localization exists, fall back to established fan-translation consensus before heuristic methods.\n"
             "- Populate official_localization block with sources and confidence when official data is found.\n"
@@ -230,6 +232,7 @@ class SchemaAutoUpdater:
         metadata = manifest.get("metadata", {})
         metadata_en = manifest.get("metadata_en", {})
         chapter_entries = manifest.get("chapters", [])
+        name_order_policy = self._resolve_name_order_policy(manifest)
 
         chapter_outline = [
             {
@@ -249,6 +252,7 @@ class SchemaAutoUpdater:
             "chapter_outline": chapter_outline,
             "chapter_snippets": snippets,
             "localized_series_hint": search_hint,
+            "name_order_grounding_policy": name_order_policy,
         }
 
         prompt = (
@@ -263,6 +267,7 @@ class SchemaAutoUpdater:
             "- Add `character_profiles.*.visual_identity_non_color` using non-color descriptors "
             "(hairstyle, outfit silhouette, expression signature, posture, accessories).\n"
             "- If localized_series_hint.use_online_search=true, use online search and adopt official localization metadata.\n"
+            "- Enforce name_order_grounding_policy for all grounded person names (official or fan sources).\n"
             "- Output valid JSON only.\n\n"
             f"INPUT:\n{json.dumps(payload, ensure_ascii=False, indent=2)}"
         )
@@ -280,11 +285,81 @@ class SchemaAutoUpdater:
             "- Source priority HIERARCHY B (Character/Term): Official Localization -> AniDB (public API) -> MyAnimeList -> Ranobe-Mori (JP) -> Fan Translation -> Heuristic Inference.\n"
             "- Prefer publisher listings (Yen Press, Seven Seas, J-Novel Club), official license pages,\n"
             "  then AniDB, MyAnimeList, and Ranobe-Mori before fan translation references.\n"
+            f"- NAME ORDER LOCK: {name_order_policy['default']} ({name_order_policy['label']}).\n"
+            f"- Name-order policy: {name_order_policy['policy']}.\n"
+            "- Regardless of source style, preserve canonical spelling but normalize person-name order to this policy.\n"
             "- Adopt official character name spellings, place names, and terminology from existing media canon.\n"
             "- Populate metadata_en_patch.official_localization from official sources.\n"
             "- Set should_use_official=true when confidence is medium/high.\n"
         )
         return prompt
+
+    def _resolve_name_order_policy(self, manifest: Dict[str, Any]) -> Dict[str, str]:
+        """
+        Resolve the canonical name-order policy used to normalize grounded metadata.
+
+        Priority:
+        1) metadata_en.world_setting.name_order.default
+        2) world-setting inference (Japan -> family_given)
+        3) fallback given_family
+        """
+        metadata = manifest.get("metadata", {}) if isinstance(manifest, dict) else {}
+        metadata_en = manifest.get("metadata_en", {}) if isinstance(manifest, dict) else {}
+
+        world_setting = metadata_en.get("world_setting", {})
+        if not isinstance(world_setting, dict):
+            world_setting = {}
+
+        name_order = world_setting.get("name_order", {})
+        if not isinstance(name_order, dict):
+            name_order = {}
+
+        default_order = str(name_order.get("default", "")).strip().lower()
+        policy_text = str(name_order.get("policy", "")).strip()
+        policy_source = "metadata_en.world_setting.name_order.default"
+
+        if default_order not in {"family_given", "given_family"}:
+            ws_type = str(world_setting.get("type", "")).lower()
+            ws_label = str(world_setting.get("label", "")).lower()
+            source_lang = str(metadata.get("source_language", "")).lower()
+            japan_like = (
+                "japan" in ws_type
+                or "japan" in ws_label
+                or "japanese" in ws_type
+                or "japanese" in ws_label
+                or source_lang == "ja"
+            )
+            if japan_like:
+                default_order = "family_given"
+                policy_source = "world_setting_inference:japan"
+            else:
+                default_order = "given_family"
+                policy_source = "fallback_default"
+
+        if not policy_text:
+            if default_order == "family_given":
+                policy_text = (
+                    "Use Family Given order for Japanese names by default; preserve canonical spelling. "
+                    "Use Given Family only for explicit non-Japanese exceptions."
+                )
+            else:
+                policy_text = (
+                    "Use Given Family order by default; preserve canonical spelling. "
+                    "Use Family Given only for explicit Japanese-style exceptions."
+                )
+
+        label = (
+            "Family-Given (Japanese surname-first order)"
+            if default_order == "family_given"
+            else "Given-Family (Western first-name order)"
+        )
+
+        return {
+            "default": default_order,
+            "label": label,
+            "policy": policy_text,
+            "source": policy_source,
+        }
 
     def _detect_localized_series_hint(self, metadata: Dict[str, Any]) -> Dict[str, Any]:
         """

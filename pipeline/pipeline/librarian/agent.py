@@ -483,10 +483,6 @@ class LibrarianAgent:
             )
         print(f"     Converted {len(chapters)} chapters")
 
-        # Phase 1.55: Validate real-world references in source chapters
-        print("\n[PHASE 1.55] Validating real-world references...")
-        self._validate_references_in_chapters(chapters, source_dir)
-
         # Post-process: Check for Kodansha heading-based splitting
         heading_split_config = profile_manager.get_heading_split_config(publisher_name)
         if heading_split_config and heading_split_config.get("split_on_heading", False):
@@ -605,6 +601,11 @@ class LibrarianAgent:
             print(f"     Copied {len(copied_illustrations)} inline illustrations to assets")
         if filtered_illustrations:
             print(f"     Hard-filtered {filtered_illustrations} excluded inline image references")
+
+        # Phase 1.55: Validate real-world references in source chapters.
+        # Keep this after asset copy so a slow/failed validator does not block asset extraction.
+        print("\n[PHASE 1.55] Validating real-world references...")
+        self._validate_references_in_chapters(chapters, source_dir)
 
         # Update illustration references in markdown files
         if filename_mapping:

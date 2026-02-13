@@ -1,6 +1,6 @@
 {
   "version": "1.0",
-  "last_updated": "2026-02-13T03:48:20.041958+00:00",
+  "last_updated": "2026-02-13T08:22:09.926052+00:00",
   "series": {
     "madan_no_ou_to_vanadis": {
       "bible_file": "madan_no_ou_to_vanadis.json",
@@ -353,6 +353,18 @@
       ],
       "entry_count": 11,
       "last_updated": "2026-02-13T03:26:40.942319+00:00"
+    },
+    "series_79b1014ec6": {
+      "bible_file": "series_79b1014ec6.json",
+      "match_patterns": [
+        "お隣の天使様にいつの間にか駄目人間にされていた件",
+        "お隣の天使様にいつの間にか駄目人間にされていた件5 -- 佐伯さん"
+      ],
+      "volumes": [
+        "1164"
+      ],
+      "entry_count": 19,
+      "last_updated": "2026-02-13T08:21:23.082462+00:00"
     }
   }
 }

@@ -1,0 +1,538 @@
+{
+  "bible_version": "1.0",
+  "series_id": "series_79b1014ec6",
+  "series_title": {
+    "ja": "お隣の天使様にいつの間にか駄目人間にされていた件",
+    "en": "お隣の天使様にいつの間にか駄目人間にされていた件",
+    "romaji": ""
+  },
+  "created_at": "2026-02-13T08:21:23.080150+00:00",
+  "last_updated": "2026-02-13T08:22:09.925181+00:00",
+  "volumes_registered": [
+    {
+      "volume_id": "1164",
+      "title": "お隣の天使様にいつの間にか駄目人間にされていた件５",
+      "index": 5
+    }
+  ],
+  "world_setting": {
+    "type": "modern_japan",
+    "label": "Contemporary Japanese High School Life with Romantic Comedy Elements",
+    "honorifics": {
+      "mode": "localize",
+      "policy": "Honorifics should generally be localized to convey appropriate levels of respect or familiarity in English, avoiding direct translation unless culturally significant and explained. Contextual cues (e.g., first name vs. last name, casual vs. formal address) should guide choices."
+    },
+    "name_order": {
+      "default": "family_given",
+      "policy": "For Japanese characters, use Japanese name order by default (Family Name Given Name) across metadata and translation guidance. Keep canonical spelling, and only use Given Name Family Name for explicit non-Japanese exceptions."
+    },
+    "exceptions": []
+  },
+  "characters": {
+    "周": {
+      "canonical_en": "Fujimiya Amane",
+      "source": "manifest_profile_seed",
+      "category": "Protagonist (self)",
+      "affiliation": "Japanese",
+      "keigo": {
+        "narration": "casual",
+        "internal_thoughts": "casual",
+        "speaking_to": {
+          "Mahiru Shiina": "mix of casual and slightly formal/polite, especially when flustered or showing affection",
+          "Friends (Itsuki, Yuuta)": "casual, teasing",
+          "Parents": "respectful but can be a bit blunt/sarcastic"
+        },
+        "emotional_shifts": {
+          "flustered/embarrassed": "more polite/formal, stutters",
+          "affectionate": "softer, more direct"
+        },
+        "notes": "Tends to revert to more formal/hesitant speech when deeply embarrassed or asking for something sensitive from Mahiru."
+      },
+      "visual_identity_non_color": {
+        "identity_summary": "Clean, styled dark hair (previously unkempt); often seen in school uniform or casual, comfortable clothes; generally calm expression, but prone to visible embarrassment or deep thought; posture can be somewhat guarded initially, becoming more relaxed and protective around Mahiru; no specific signature accessories mentioned."
+      },
+      "notes": "Initially stoic, lonely, self-indulgent, and apathetic about his appearance and surroundings. Becomes more confident, caring, and open after starting to date Mahiru. Can be a bit of a 'scaredy-cat' or hesitant in romantic advances due to inexperience, but deeply devoted and protective of Mahiru. Possessive but tries to rein it in.",
+      "volume_events": {
+        "1164": {
+          "relationship_to_protagonist": "Protagonist (self)",
+          "relationship_to_others": "Boyfriend of Shiina Mahiru, friend of Akazawa Itsuki and Kadowaki Yuuta, son of Shuuto and Fujimiya Shihoko.",
+          "keigo_switch": {
+            "narration": "casual",
+            "internal_thoughts": "casual",
+            "speaking_to": {
+              "Mahiru Shiina": "mix of casual and slightly formal/polite, especially when flustered or showing affection",
+              "Friends (Itsuki, Yuuta)": "casual, teasing",
+              "Parents": "respectful but can be a bit blunt/sarcastic"
+            },
+            "emotional_shifts": {
+              "flustered/embarrassed": "more polite/formal, stutters",
+              "affectionate": "softer, more direct"
+            },
+            "notes": "Tends to revert to more formal/hesitant speech when deeply embarrassed or asking for something sensitive from Mahiru."
+          },
+          "character_arc": "Transforms from a reclusive, self-neglecting individual to a confident, caring, and openly affectionate boyfriend. Overcomes past trauma and learns to embrace his relationships."
+        }
+      }
+    },
+    "真昼": {
+      "canonical_en": "Shiina Mahiru",
+      "source": "manifest_profile_seed",
+      "short_name": "Angel (Tenshi-sama)",
+      "category": "Girlfriend of Fujimiya Amane",
+      "affiliation": "Japanese",
+      "keigo": {
+        "narration": "polite",
+        "internal_thoughts": "polite",
+        "speaking_to": {
+          "Amane Fujimiya": "polite, but softens and becomes more direct/teasing when alone or emotional",
+          "Friends (Chitose)": "polite, but more relaxed",
+          "Amane's Parents": "very polite and respectful"
+        },
+        "emotional_shifts": {
+          "embarrassed/flustered": "stutters, voice becomes softer, sometimes uses more direct, less formal language",
+          "teasing/playful": "can drop some formality, uses more suggestive phrasing"
+        },
+        "notes": "Her formal speech acts as a baseline; emotional shifts or comfort with Amane cause subtle deviations."
+      },
+      "visual_identity_non_color": {
+        "identity_summary": "Long, flowing flax-colored hair (sometimes tied up in pigtails or braids when humid); elegant and composed posture; typically wears school uniform or modest, feminine dresses/skirts; gentle, often angelic expression, but prone to blushing and pouting when flustered or teasing; no specific signature accessories, but always impeccably groomed."
+      },
+      "notes": "Initially appears perfect, graceful, and reserved to others ('Angel'). In reality, she is kind, caring, diligent, somewhat naive about romance, and has a playful, 'little devil' (koakuma) side when alone with Amane. Can be easily flustered and embarrassed. Suffered from parental neglect.",
+      "volume_events": {
+        "1164": {
+          "relationship_to_protagonist": "Girlfriend of Fujimiya Amane",
+          "relationship_to_others": "Friend of Shirakawa Chitose, admired by many classmates, treated like a daughter by Amane's parents.",
+          "keigo_switch": {
+            "narration": "polite",
+            "internal_thoughts": "polite",
+            "speaking_to": {
+              "Amane Fujimiya": "polite, but softens and becomes more direct/teasing when alone or emotional",
+              "Friends (Chitose)": "polite, but more relaxed",
+              "Amane's Parents": "very polite and respectful"
+            },
+            "emotional_shifts": {
+              "embarrassed/flustered": "stutters, voice becomes softer, sometimes uses more direct, less formal language",
+              "teasing/playful": "can drop some formality, uses more suggestive phrasing"
+            },
+            "notes": "Her formal speech acts as a baseline; emotional shifts or comfort with Amane cause subtle deviations."
+          },
+          "character_arc": "Learns to open up and express her true self, finding happiness and emotional fulfillment through her relationship with Amane. Overcomes the emotional scars of parental neglect."
+        }
+      }
+    },
+    "樹": {
+      "canonical_en": "Akazawa Itsuki",
+      "source": "manifest_profile_seed",
+      "short_name": "Ik-kun (by Chitose)",
+      "category": "Amane's close friend",
+      "affiliation": "Japanese",
+      "keigo": {
+        "narration": "casual",
+        "internal_thoughts": "casual",
+        "speaking_to": {
+          "Amane Fujimiya": "casual, teasing",
+          "Chitose Shirakawa": "casual, affectionate",
+          "Others": "casual, friendly"
+        },
+        "emotional_shifts": {},
+        "notes": "Maintains a consistently casual and friendly tone."
+      },
+      "visual_identity_non_color": {
+        "identity_summary": "Casual, slightly disheveled hair; relaxed posture; often seen with a playful smirk or grin; typically wears school uniform casually or trendy streetwear; no specific signature accessories."
+      },
+      "notes": "Outgoing, cheerful, perceptive, often teases Amane but is supportive. Acts as a foil to Amane's stoicism.",
+      "volume_events": {
+        "1164": {
+          "relationship_to_protagonist": "Amane's close friend",
+          "relationship_to_others": "Shirakawa Chitose's boyfriend, friend of Kadowaki Yuuta.",
+          "keigo_switch": {
+            "narration": "casual",
+            "internal_thoughts": "casual",
+            "speaking_to": {
+              "Amane Fujimiya": "casual, teasing",
+              "Chitose Shirakawa": "casual, affectionate",
+              "Others": "casual, friendly"
+            },
+            "emotional_shifts": {},
+            "notes": "Maintains a consistently casual and friendly tone."
+          },
+          "character_arc": "Provides stable friendship and comedic relief, supports Amane's growth."
+        }
+      }
+    },
+    "千歳": {
+      "canonical_en": "Shirakawa Chitose",
+      "source": "manifest_profile_seed",
+      "short_name": "Chii (by Itsuki)",
+      "category": "Amane's classmate and friend, Mahiru's close friend",
+      "affiliation": "Japanese",
+      "keigo": {
+        "narration": "casual",
+        "internal_thoughts": "casual",
+        "speaking_to": {
+          "Amane Fujimiya": "casual, friendly, teasing",
+          "Mahiru Shiina": "casual, affectionate, encouraging",
+          "Itsuki Akazawa": "casual, very affectionate"
+        },
+        "emotional_shifts": {},
+        "notes": "Consistently energetic and casual, even when giving advice."
+      },
+      "visual_identity_non_color": {
+        "identity_summary": "Lively, often tied-up hair (e.g., pigtails or side ties, especially in humid weather); energetic and expressive facial features, often smiling broadly; dynamic, active posture; wears school uniform or casual, sporty clothes; no specific signature accessories."
+      },
+      "notes": "Energetic, outspoken, friendly, a 'genki girl'. Very supportive of Mahiru and Amane's relationship, often giving Mahiru (sometimes questionable) advice. Can be a bit of a 'cloudcuckoolander'.",
+      "volume_events": {
+        "1164": {
+          "relationship_to_protagonist": "Amane's classmate and friend, Mahiru's close friend",
+          "relationship_to_others": "Akazawa Itsuki's girlfriend.",
+          "keigo_switch": {
+            "narration": "casual",
+            "internal_thoughts": "casual",
+            "speaking_to": {
+              "Amane Fujimiya": "casual, friendly, teasing",
+              "Mahiru Shiina": "casual, affectionate, encouraging",
+              "Itsuki Akazawa": "casual, very affectionate"
+            },
+            "emotional_shifts": {},
+            "notes": "Consistently energetic and casual, even when giving advice."
+          },
+          "character_arc": "Provides comedic relief and emotional support, acts as a catalyst for Mahiru's opening up."
+        }
+      }
+    },
+    "優太": {
+      "canonical_en": "Kadowaki Yuuta",
+      "source": "manifest_profile_seed",
+      "short_name": "Class Prince",
+      "category": "Amane's classmate and friend",
+      "affiliation": "Japanese",
+      "keigo": {
+        "narration": "polite",
+        "internal_thoughts": "polite",
+        "speaking_to": {
+          "Amane Fujimiya": "polite, friendly",
+          "Itsuki Akazawa": "polite, friendly",
+          "Others": "polite, considerate"
+        },
+        "emotional_shifts": {},
+        "notes": "Maintains a consistently polite and gentle demeanor."
+      },
+      "visual_identity_non_color": {
+        "identity_summary": "Neatly styled hair; composed expression; upright posture; typically wears school uniform impeccably; no specific signature accessories."
+      },
+      "notes": "Considered the 'class prince', good-natured, honest, and generally well-liked. More reserved than Itsuki.",
+      "volume_events": {
+        "1164": {
+          "relationship_to_protagonist": "Amane's classmate and friend",
+          "relationship_to_others": "Itsuki's friend.",
+          "keigo_switch": {
+            "narration": "polite",
+            "internal_thoughts": "polite",
+            "speaking_to": {
+              "Amane Fujimiya": "polite, friendly",
+              "Itsuki Akazawa": "polite, friendly",
+              "Others": "polite, considerate"
+            },
+            "emotional_shifts": {},
+            "notes": "Maintains a consistently polite and gentle demeanor."
+          },
+          "character_arc": "Supports Amane and Mahiru's relationship, offers a contrasting perspective to Itsuki."
+        }
+      }
+    },
+    "修斗": {
+      "canonical_en": "Fujimiya Shuuto",
+      "source": "manifest_profile_seed",
+      "category": "Amane's father",
+      "affiliation": "Japanese",
+      "keigo": {
+        "narration": "polite",
+        "internal_thoughts": "polite",
+        "speaking_to": {
+          "Amane Fujimiya": "polite, affectionate",
+          "Mahiru Shiina": "very polite, gentle, doting",
+          "Shihoko Fujimiya": "polite, affectionate"
+        },
+        "emotional_shifts": {},
+        "notes": "Consistently gentle and polite, reflecting his calm nature."
+      },
+      "visual_identity_non_color": {
+        "identity_summary": "Neatly styled hair; gentle, warm expression; relaxed but composed posture; wears casual, comfortable clothing at home; no specific signature accessories."
+      },
+      "notes": "Calm, gentle, good cook, dotes on his family, especially Mahiru. Very understanding and supportive.",
+      "volume_events": {
+        "1164": {
+          "relationship_to_protagonist": "Amane's father",
+          "relationship_to_others": "Fujimiya Shihoko's husband, Mahiru's adoptive father figure.",
+          "keigo_switch": {
+            "narration": "polite",
+            "internal_thoughts": "polite",
+            "speaking_to": {
+              "Amane Fujimiya": "polite, affectionate",
+              "Mahiru Shiina": "very polite, gentle, doting",
+              "Shihoko Fujimiya": "polite, affectionate"
+            },
+            "emotional_shifts": {},
+            "notes": "Consistently gentle and polite, reflecting his calm nature."
+          },
+          "character_arc": "Provides a loving family environment for Amane and Mahiru, offering a contrast to Mahiru's own family situation."
+        }
+      }
+    },
+    "志保子": {
+      "canonical_en": "Fujimiya Shihoko",
+      "source": "manifest_profile_seed",
+      "category": "Amane's mother",
+      "affiliation": "Japanese",
+      "keigo": {
+        "narration": "casual",
+        "internal_thoughts": "casual",
+        "speaking_to": {
+          "Amane Fujimiya": "casual, teasing, affectionate",
+          "Mahiru Shiina": "very friendly, doting, affectionate",
+          "Shuuto Fujimiya": "casual, affectionate"
+        },
+        "emotional_shifts": {},
+        "notes": "Her energetic personality is reflected in her speech, often playful."
+      },
+      "visual_identity_non_color": {
+        "identity_summary": "Lively, often styled hair; bright, cheerful expression, prone to playful smirks; energetic posture; wears fashionable, comfortable clothing; no specific signature accessories."
+      },
+      "notes": "Outgoing, excitable, doting mother, especially towards Mahiru. Very similar in temperament to Chitose. Enjoys teasing Amane.",
+      "volume_events": {
+        "1164": {
+          "relationship_to_protagonist": "Amane's mother",
+          "relationship_to_others": "Fujimiya Shuuto's wife, Mahiru's adoptive mother figure.",
+          "keigo_switch": {
+            "narration": "casual",
+            "internal_thoughts": "casual",
+            "speaking_to": {
+              "Amane Fujimiya": "casual, teasing, affectionate",
+              "Mahiru Shiina": "very friendly, doting, affectionate",
+              "Shuuto Fujimiya": "casual, affectionate"
+            },
+            "emotional_shifts": {},
+            "notes": "Her energetic personality is reflected in her speech, often playful."
+          },
+          "character_arc": "Provides a loving family environment for Amane and Mahiru, offering a contrast to Mahiru's own family situation."
+        }
+      }
+    },
+    "東城": {
+      "canonical_en": "Toujou",
+      "source": "manifest_profile_seed",
+      "category": "Amane's former friend/bully from middle school",
+      "affiliation": "Japanese",
+      "visual_identity_non_color": {
+        "identity_summary": "Unchanged appearance since middle school; often has a mocking or sneering expression; casual, somewhat slouching posture; wears typical student clothes without much care; no specific signature accessories."
+      },
+      "notes": "Initially a friend, later became a bully, showing a 'frivolous' and 'delinquent' type of charm. Envies what others have.",
+      "keigo": {
+        "narration": "casual",
+        "internal_thoughts": "casual",
+        "speaking_to": {
+          "Amane Fujimiya": "casual, taunting, condescending",
+          "Mahiru Shiina": "casual, dismissive"
+        },
+        "emotional_shifts": {},
+        "notes": "His speech reflects his unpleasant and taunting personality."
+      },
+      "volume_events": {
+        "1164": {
+          "relationship_to_protagonist": "Amane's former friend/bully from middle school",
+          "keigo_switch": {
+            "narration": "casual",
+            "internal_thoughts": "casual",
+            "speaking_to": {
+              "Amane Fujimiya": "casual, taunting, condescending",
+              "Mahiru Shiina": "casual, dismissive"
+            },
+            "emotional_shifts": {},
+            "notes": "His speech reflects his unpleasant and taunting personality."
+          },
+          "character_arc": "Represents Amane's past trauma and serves as an antagonist for Amane to confront and overcome."
+        }
+      }
+    },
+    "誠": {
+      "canonical_en": "Inukai Makoto",
+      "source": "manifest_profile_seed",
+      "category": "Amane's classmate and friend",
+      "affiliation": "Japanese",
+      "keigo": {
+        "narration": "casual",
+        "internal_thoughts": "casual",
+        "speaking_to": {
+          "Amane Fujimiya": "casual, observational",
+          "Itsuki Akazawa": "casual",
+          "Others": "casual"
+        },
+        "emotional_shifts": {},
+        "notes": "His speech is generally straightforward and observant."
+      },
+      "visual_identity_non_color": {
+        "identity_summary": "Neatly styled hair; calm, observant expression; relaxed posture; wears school uniform; no specific signature accessories."
+      },
+      "notes": "Observant, often makes comments about Amane and Mahiru's relationship, generally supportive.",
+      "volume_events": {
+        "1164": {
+          "relationship_to_protagonist": "Amane's classmate and friend",
+          "relationship_to_others": "Friend of Itsuki and Yuuta.",
+          "keigo_switch": {
+            "narration": "casual",
+            "internal_thoughts": "casual",
+            "speaking_to": {
+              "Amane Fujimiya": "casual, observational",
+              "Itsuki Akazawa": "casual",
+              "Others": "casual"
+            },
+            "emotional_shifts": {},
+            "notes": "His speech is generally straightforward and observant."
+          },
+          "character_arc": "Provides a secondary perspective on Amane and Mahiru's relationship."
+        }
+      }
+    },
+    "彩香": {
+      "canonical_en": "Kido Ayaka",
+      "source": "manifest_profile_seed",
+      "category": "Amane's classmate",
+      "affiliation": "Japanese",
+      "keigo": {
+        "narration": "casual",
+        "internal_thoughts": "casual",
+        "speaking_to": {
+          "Amane Fujimiya": "friendly, slightly teasing",
+          "Others": "friendly, cheerful"
+        },
+        "emotional_shifts": {},
+        "notes": "Her speech reflects her cheerful and observant nature."
+      },
+      "visual_identity_non_color": {
+        "identity_summary": "Cheerful, expressive face; friendly, open posture; wears school uniform or stylish casual clothes; no specific signature accessories."
+      },
+      "notes": "Observant, friendly, popular, has a 'hobby' of observing people. Appears cheerful and easygoing.",
+      "volume_events": {
+        "1164": {
+          "relationship_to_protagonist": "Amane's classmate",
+          "relationship_to_others": "Popular among classmates, observant of others.",
+          "keigo_switch": {
+            "narration": "casual",
+            "internal_thoughts": "casual",
+            "speaking_to": {
+              "Amane Fujimiya": "friendly, slightly teasing",
+              "Others": "friendly, cheerful"
+            },
+            "emotional_shifts": {},
+            "notes": "Her speech reflects her cheerful and observant nature."
+          },
+          "character_arc": "Offers an outside perspective on Amane's personal growth."
+        }
+      }
+    },
+    "Fujimiya Amane": {
+      "category": "Protagonist (self)",
+      "affiliation": "Japanese",
+      "visual_identity_non_color": {
+        "identity_summary": "Clean, styled dark hair (previously unkempt); often seen in school uniform or casual, comfortable clothes; generally calm expression, but prone to visible embarrassment or deep thought; posture can be somewhat guarded initially, becoming more relaxed and protective around Mahiru; no specific signature accessories mentioned."
+      },
+      "notes": "Initially stoic, lonely, self-indulgent, and apathetic about his appearance and surroundings. Becomes more confident, caring, and open after starting to date Mahiru. Can be a bit of a 'scaredy-cat' or hesitant in romantic advances due to inexperience, but deeply devoted and protective of Mahiru. Possessive but tries to rein it in.",
+      "keigo": {
+        "narration": "casual",
+        "internal_thoughts": "casual",
+        "speaking_to": {},
+        "emotional_shifts": {},
+        "notes": "[TO BE FILLED - context-dependent register notes]"
+      },
+      "volume_events": {
+        "1164": {
+          "keigo_switch": {
+            "narration": "casual",
+            "internal_thoughts": "casual",
+            "speaking_to": {},
+            "emotional_shifts": {},
+            "notes": "[TO BE FILLED - context-dependent register notes]"
+          }
+        }
+      }
+    },
+    "Shiina Mahiru": {
+      "short_name": "Angel (Tenshi-sama)",
+      "category": "Girlfriend of Fujimiya Amane",
+      "affiliation": "Japanese",
+      "visual_identity_non_color": {
+        "identity_summary": "Long, flowing flax-colored hair (sometimes tied up in pigtails or braids when humid); elegant and composed posture; typically wears school uniform or modest, feminine dresses/skirts; gentle, often angelic expression, but prone to blushing and pouting when flustered or teasing; no specific signature accessories, but always impeccably groomed."
+      },
+      "notes": "Initially appears perfect, graceful, and reserved to others ('Angel'). In reality, she is kind, caring, diligent, somewhat naive about romance, and has a playful, 'little devil' (koakuma) side when alone with Amane. Can be easily flustered and embarrassed. Suffered from parental neglect."
+    },
+    "Akazawa Itsuki": {
+      "short_name": "Ik-kun (by Chitose)",
+      "category": "Amane's close friend",
+      "affiliation": "Japanese",
+      "visual_identity_non_color": {
+        "identity_summary": "Casual, slightly disheveled hair; relaxed posture; often seen with a playful smirk or grin; typically wears school uniform casually or trendy streetwear; no specific signature accessories."
+      },
+      "notes": "Outgoing, cheerful, perceptive, often teases Amane but is supportive. Acts as a foil to Amane's stoicism."
+    },
+    "Shirakawa Chitose": {
+      "short_name": "Chii (by Itsuki)",
+      "category": "Amane's classmate and friend, Mahiru's close friend",
+      "affiliation": "Japanese",
+      "visual_identity_non_color": {
+        "identity_summary": "Lively, often tied-up hair (e.g., pigtails or side ties, especially in humid weather); energetic and expressive facial features, often smiling broadly; dynamic, active posture; wears school uniform or casual, sporty clothes; no specific signature accessories."
+      },
+      "notes": "Energetic, outspoken, friendly, a 'genki girl'. Very supportive of Mahiru and Amane's relationship, often giving Mahiru (sometimes questionable) advice. Can be a bit of a 'cloudcuckoolander'."
+    },
+    "Kadowaki Yuuta": {
+      "short_name": "Class Prince",
+      "category": "Amane's classmate and friend",
+      "affiliation": "Japanese",
+      "visual_identity_non_color": {
+        "identity_summary": "Neatly styled hair; composed expression; upright posture; typically wears school uniform impeccably; no specific signature accessories."
+      },
+      "notes": "Considered the 'class prince', good-natured, honest, and generally well-liked. More reserved than Itsuki."
+    },
+    "Fujimiya Shuuto": {
+      "category": "Amane's father",
+      "affiliation": "Japanese",
+      "visual_identity_non_color": {
+        "identity_summary": "Neatly styled hair; gentle, warm expression; relaxed but composed posture; wears casual, comfortable clothing at home; no specific signature accessories."
+      },
+      "notes": "Calm, gentle, good cook, dotes on his family, especially Mahiru. Very understanding and supportive."
+    },
+    "Fujimiya Shihoko": {
+      "category": "Amane's mother",
+      "affiliation": "Japanese",
+      "visual_identity_non_color": {
+        "identity_summary": "Lively, often styled hair; bright, cheerful expression, prone to playful smirks; energetic posture; wears fashionable, comfortable clothing; no specific signature accessories."
+      },
+      "notes": "Outgoing, excitable, doting mother, especially towards Mahiru. Very similar in temperament to Chitose. Enjoys teasing Amane."
+    },
+    "Inukai Makoto": {
+      "category": "Amane's classmate and friend",
+      "affiliation": "Japanese",
+      "visual_identity_non_color": {
+        "identity_summary": "Neatly styled hair; calm, observant expression; relaxed posture; wears school uniform; no specific signature accessories."
+      },
+      "notes": "Observant, often makes comments about Amane and Mahiru's relationship, generally supportive."
+    },
+    "Kido Ayaka": {
+      "category": "Amane's classmate",
+      "affiliation": "Japanese",
+      "visual_identity_non_color": {
+        "identity_summary": "Cheerful, expressive face; friendly, open posture; wears school uniform or stylish casual clothes; no specific signature accessories."
+      },
+      "notes": "Observant, friendly, popular, has a 'hobby' of observing people. Appears cheerful and easygoing."
+    }
+  },
+  "geography": {
+    "countries": {},
+    "regions": {},
+    "cities": {}
+  },
+  "weapons_artifacts": {},
+  "organizations": {},
+  "cultural_terms": {},
+  "mythology": {},
+  "translation_rules": {}
+}

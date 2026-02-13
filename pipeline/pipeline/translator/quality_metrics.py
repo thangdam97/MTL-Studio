@@ -101,6 +101,19 @@ class QualityMetrics:
         "it cannot be helped", "shikatanai"
     ]
 
+    _APOSTROPHE_TRANSLATION = str.maketrans({
+        "\u2019": "'",  # right single quotation mark
+        "\u2018": "'",  # left single quotation mark
+        "`": "'",       # grave accent used as apostrophe in some outputs
+    })
+
+    @staticmethod
+    def _normalize_apostrophes(text: str) -> str:
+        """Normalize common apostrophe variants for stable contraction matching."""
+        if not text:
+            return text
+        return text.translate(QualityMetrics._APOSTROPHE_TRANSLATION)
+
     @staticmethod
     def calculate_contraction_rate(text: str) -> float:
         """
@@ -112,7 +125,9 @@ class QualityMetrics:
         """
         if not text:
             return 0.0
-            
+
+        text = QualityMetrics._normalize_apostrophes(text)
+
         contracted_count = 0
         missed_count = 0
         
@@ -121,7 +136,7 @@ class QualityMetrics:
         
         # Count actual contractions (apostrophe + s/t/re/ll/ve/m/d)
         contracted_count += len(re.findall(r"\w+'(?:t|s|re|ll|ve|m|d)\b", text, re.IGNORECASE))
-        contracted_count += len(re.findall(r"\bwonna\b|\bgonna\b", text, re.IGNORECASE))
+        contracted_count += len(re.findall(r"\bwanna\b|\bgonna\b|\bgotta\b", text, re.IGNORECASE))
 
         # Count missed opportunities
         for pattern, _ in QualityMetrics.CONTRACTIBLE_PATTERNS:

@@ -250,7 +250,7 @@ V5.2 (February 2026) introduces a **Three-Pillar Translation Architecture** that
 
 - **Single-command production flow**: `mtl.py run <epub>` executes extraction, grounded metadata/bible sync, rich metadata cache refinement, multimodal analysis, Stage 1 scene planning, Stage 2 translation, and EPUB build in sequence.
 - **Modular phase control**: Each stage can run independently (`phase1`, `phase1.5`, `phase1.55`, `phase1.6`, `phase1.7`, `phase2`, `phase3`, `phase4`) for iterative workflows and targeted retries.
-- **Backward-compatible operation**: Legacy paths remain supported while v5.2 behavior is standardized around the Three-Pillar architecture.
+- **Standalone Librarian flow**: Interactive extraction can stop at Phase 1 or continue directly into Phase 1.5 + 1.55 without re-selecting the volume.
 - **Manifest-driven state tracking**: `manifest.json` stores pipeline state, chapter status, language outputs, and audit metadata for resumable execution.
 
 #### 2) Three-Pillar Translation Intelligence (v5.2 Core)
@@ -273,6 +273,7 @@ V5.2 (February 2026) introduces a **Three-Pillar Translation Architecture** that
 - **Bible Auto-Sync (Phase 1.5)**: Two-way sync during metadata processing — PULL inherits 130+ canonical terms from the bible before ruby translation; PUSH exports newly discovered terms back to the bible after processing. Fully automatic, non-fatal on failure.
 - **World Setting Directives**: Per-series honorific policy (localize/retain), name order (given-family/family-given), and per-character exceptions injected at the TOP of the system instruction.
 - **Schema Agent auto-update with Google Search grounding**: After Librarian extraction, Gemini 2.5 Flash enriches schema metadata with always-on Google Search using two fixed hierarchies: `Official Localization -> AniDB (public API) -> MyAnimeList -> Ranobe-Mori (JP) -> Fan Translation -> Heuristic Inference` (applied for both Series/Volume and Character/Term resolution).
+- **Grounded name-order enforcement**: Grounded names (official or fan source) are normalized to the series world-setting policy before manifest commit (for example, JP settings keep family-first).
 - **Reference deobfuscation validator (new)**: Phase 1 auto-detects real-world references (brands/authors/titles/persons/places), resolves obfuscated LN forms, and writes per-chapter reports (`JP/*.references.json`, `JP/*.references.md`).
 - **Phase 1.5 safe metadata processing**: Translates title/author/chapter fields while preserving deeper semantic configuration assets, schema-agent enrichments, and bible canonical terms.
 - **Sequel-aware continuity**: Character names, glossary, and series conventions inherited from both bible (canonical source) and predecessor volumes (fallback).
@@ -297,6 +298,8 @@ V5.2 (February 2026) introduces a **Three-Pillar Translation Architecture** that
 #### 7) Massive LN Reliability Layer (New)
 
 - **Smart Chunking for oversized chapters**: Massive source files are split at scene/paragraph boundaries and translated in resumable chunk units.
+- **Malformed-TOC recovery**: When TOC is missing/malformed and content collapses into one spine block, Librarian auto-splits by original text-page boundaries and records split metadata.
+- **Raw-structure rebuild parity**: Builder detects text-page boundary split strategy and auto-merges translated output back into the original one-content raw structure before EPUB packaging.
 - **Volume-level Gemini cache**: Entire JP volume can be cached once and reused across chapter calls for stronger cross-chapter consistency.
 - **Manifest glossary lock**: Character/name romanizations from manifest metadata are enforced during translation output validation.
 - **Truncation guardrails**: Post-translation validation detects likely mid-sentence/mid-word cutoffs before final packaging.
@@ -1016,7 +1019,7 @@ This caused:
 | **"Zxtat" incident** | ザクスタン (Sachstein) was never locked → model invented "Zxtat" in Vol 2 Chapter 2. Vol 1 had 4 different spellings across 15 chapters. |
 | **Cross-volume drift** | 68 volumes in WORK/, at least 15 multi-volume series with NO shared glossary. |
 | **Character profile data loss** | Rich RTAS data (keigo switches, contraction rates, relationship scores) curated in `character_profiles` was silently dropped by the transform layer — the LLM never saw it. |
-| **Dead continuity system** | `continuity_manager.py` (429 lines) was fully disabled — `detect_and_offer_continuity()` always returned `None`. |
+| **Fragmented continuity handling** | Per-volume continuity had no series-level canonical source, causing repeated name drift and glossary divergence. |
 
 ### The Solution: LN Bible System
 
@@ -1032,10 +1035,10 @@ pipeline/
 │   └── ...                                 ← One JSON per series
 └── pipeline/
     └── translator/
-        ├── series_bible.py                  ← SeriesBible + BibleController (985 lines)
-        ├── glossary_lock.py                 ← MODIFIED: accepts bible_glossary
-        ├── agent.py                         ← MODIFIED: loads bible before glossary
-        └── continuity_manager.py            ← DEPRECATED: replaced by bible system
+        ├── series_bible.py                 ← SeriesBible + BibleController (985 lines)
+        ├── glossary_lock.py                ← MODIFIED: accepts bible_glossary
+        ├── agent.py                        ← MODIFIED: loads bible before glossary
+        └── prompt_loader.py                ← MODIFIED: injects bible/world-setting directives
 ```
 
 **`BibleController`** — The universal orchestrator:
@@ -1302,12 +1305,12 @@ mtl bible sync 15c4 --direction push
 
 | Metric | Value |
 |--------|-------|
-| **Phases implemented** | 7 (Phase 0 → E + Auto-Sync) |
+| **Phases implemented** | 8 (Phase 1 → 1.5 → 1.55 → 1.6 → 1.7 → 2 → 3 → 4) |
 | **New code** | ~1,825 lines (series_bible + bible_commands + bible_sync) |
 | **Modified files** | 5 (agent.py, prompt_loader.py, glossary_lock.py, parser.py, dispatcher.py) |
 | **Automated checks** | 93 passed (56 + 16 + 13 + 8) |
 | **Madan prototype** | 136 entries (88 chars, 26 geo, 9 weapons, 3 orgs, 7 cultural, 3 mythology) |
-| **Backward compatible** | ✅ Volumes without `bible_id` see zero behavioral change |
+| **Compatibility mode** | ✅ Volumes without `bible_id` keep existing behavior |
 
 ### Reference Series: Lord Marksman and Vanadis (魔弾の王と戦姫)
 
@@ -1372,6 +1375,7 @@ This section uses the same capability taxonomy as **Core Capabilities** so the r
 ### 1) Full Pipeline Orchestration (Phase 1 → 1.5 → 1.55 → 1.6 → 1.7 → 2 → 3 → 4)
 
 - **Phase model standardized around v5.2**: The production workflow is explicitly structured as Librarian → Schema Agent Autoupdate → Metadata → Rich Metadata Cache → Art Director → Scene Planner (Stage 1) → Translator (Stage 2) → Critics → Builder.
+- **Standalone Librarian menu path**: Interactive extraction now offers immediate continuation into Phase 1.5 + 1.55 (or skip) after Phase 1 completes.
 - **Builder/navigation hardening**: Chapters marked `is_pre_toc_content: true` are excluded from reader navigation generation (`nav.xhtml`) for publisher-correct frontmatter handling.
 - **Image mapping continuity**: Source image naming and normalized image IDs are tracked in manifest-level mapping for reliable downstream packaging.
 - **Stage 2 normalization wiring**: Scene plan `dialogue_register` and `target_rhythm` are hard-mapped to `planning_config.json` enums before prompt-time injection.
@@ -1395,6 +1399,7 @@ This section uses the same capability taxonomy as **Core Capabilities** so the r
 - **Bible Auto-Sync (Phase 1.5)**: Two-way sync — PULL inherits 133 canonical terms before translation; PUSH exports newly discovered terms back to bible after processing. Fully automatic, non-fatal on failure.
 - **World Setting Directive**: Per-series honorific policy (localize/retain), name order, and per-character exceptions injected at TOP of system instruction.
 - **Schema Agent with Google Search grounding**: Always-on Google Search in Gemini 2.5 Flash with two fixed priority chains: `Official Localization -> AniDB (public API) -> MyAnimeList -> Ranobe-Mori (JP) -> Fan Translation -> Heuristic Inference` for both localization metadata and canonical term resolution.
+- **Grounded person-name normalization**: Search-derived names are now forced to world-setting order policy before writeback (official and fan sources treated identically for order).
 - **Reference deobfuscation integration**: Librarian Phase 1 now auto-runs real-world reference validation/deobfuscation and emits `JP/*.references.{json,md}` artifacts for downstream review.
 - **Schema v3.6 enrichment**: Metadata now includes `gap_moe_markers`, `dual_voice_analysis`, and `transcreation_notes`.
 - **Schema Agent v3.6 auto-run in Phase 1.5**: Flow is now `Librarian → Schema Agent autoupdate → Bible PULL → Title/Chapter translation → Bible PUSH → Phase 1.55 → Phase 1.6 → Phase 1.7 → Phase 2`.
@@ -1416,7 +1421,7 @@ This section uses the same capability taxonomy as **Core Capabilities** so the r
 ### 6) Modern v5.2 CLI Operations and UX
 
 - **Operational command surface unified**: v5.2 documentation and command semantics now align with the full CLI set and phase model.
-- **Modern UI mode baseline (v1.1)**: Rich panels, status bars, and live progress tracking complement legacy plain mode for deterministic scriptability.
+- **Modern UI mode baseline (v1.1)**: Rich panels, status bars, and live progress tracking with deterministic plain output mode.
 - **IDE-centric review loop**: VSCode/Windsurf/Cursor-friendly external agent workflows are treated as first-class QC execution paths.
 - **Config toggles for non-menu workflows**:
   - `mtl.py config --toggle-smart-chunking`
@@ -1432,6 +1437,9 @@ This section uses the same capability taxonomy as **Core Capabilities** so the r
 - **Resumable chunk artifacts**:
   - `WORK/<volume>/temp/chunks/<chapter>_chunk_###.json`
   - Failed long-chapter runs can resume from completed chunks.
+- **Spine fallback split/merge path**:
+  - Librarian auto-splits malformed single-content spines by text-page boundaries.
+  - Builder auto-merges translated split chapters back to raw spine structure for faithful rebuild.
 - **Validation-first finishing**:
   - Truncation validator runs after chapter/chunk merge.
   - Glossary lock checks canonical name consistency.
@@ -1561,6 +1569,12 @@ BUILDER reads         → assembles EPUB from all resources
 - `image_extractor.py` - Asset cataloging and normalization
 - `pipeline/post_processor/reference_validator.py` (Librarian hook) - Real-world reference detection + LN obfuscation resolution reports
 
+**Extraction/runtime policy**:
+- Copy and normalize cover/kuchie/illustration assets before triggering Phase 1.55 reference validation.
+- Hard-filter non-narrative inline images from chapter placeholders and asset copy: fan letters, gaiji glyphs/icons, i-bookwalker promo images, and stylized header cards.
+- Detect stylized headers from top-of-file JP raw `<img>` blocks (before narrative text) and remove those placeholders from chapter markdown.
+- If TOC/spine is malformed (single giant content block), auto-split chapters by original text-page boundaries and persist split metadata for Builder merge-back.
+
 **Output Structure**:
 ```
 WORK/[volume_id]/
@@ -1582,8 +1596,7 @@ WORK/[volume_id]/
     ├── cultural_glossary.json         # P1.55 Processor 2 (cultural context)
     ├── timeline_map.json              # P1.55 Processor 3 (temporal context)
     ├── idiom_transcreation_cache.json # P1.55 Processor 4 (idiom transcreation)
-    ├── chapter_summaries.json         # Lookback continuity memory
-    └── continuity_pack.json           # Legacy continuity bridge
+    └── chapter_summaries.json         # Translator lookback + volume context memory
 ```
 
 Additional Phase 1 artifacts:
@@ -1608,6 +1621,10 @@ Additional Phase 1 artifacts:
 **Google Search Grounding Priority Hierarchies**:
 1. **Hierarchy A (Series/Volume localization)**: Official Localization -> AniDB (with public API) -> MyAnimeList -> Ranobe-Mori (JP) -> Fan Translation -> Heuristic Inference
 2. **Hierarchy B (Character/Term canonicalization)**: Official Localization -> AniDB (with public API) -> MyAnimeList -> Ranobe-Mori (JP) -> Fan Translation -> Heuristic Inference
+
+**Grounded name-order policy (mandatory)**:
+- All grounded person names must follow `name_order_grounding_policy` from world setting before manifest writeback.
+- Canonical spelling is preserved, but display order is normalized (for example, JP-world settings remain family-first even when sources are given-name-first).
 
 **Output**:
 - `metadata_en.json` - Localized metadata configuration
@@ -1762,6 +1779,8 @@ Additional Phase 1 artifacts:
 - **Multimodal**: Art Director's Notes injected for chapters with `[ILLUSTRATION:]` markers
 - **Smart Chunking (massive chapters)**: byte/char-threshold split + resumable chunk translation
 - **Volume-level cache**: one cache for the full volume to stabilize cross-chapter context
+- **Chapter Summarization Agent**: writes `.context/CHAPTER_XX_SUMMARY.json` and updates `.context/chapter_summaries.json` after each translated chapter
+- **Volume context aggregation**: Chapter summaries + character/glossary context are aggregated into `CHAPTER_XX_VOLUME_CONTEXT.json` for downstream chapter prompting
 - **Glossary Lock**: manifest-based canonical name enforcement during output validation
 - **Truncation Validator**: post-translation detection of likely incomplete output
 - **Chunk Merger**: deduplicates scene-break overlap at chunk boundaries
@@ -1843,6 +1862,7 @@ Additional Phase 1 artifacts:
    - Illustration embedding with proper markup
    - Metadata preservation (POV, themes, mood)
    - Chapter title translation from manifest
+   - Raw-structure parity merge for Librarian text-page boundary splits
 
 6. **Frontmatter Generation**
    - Cover page (cover.xhtml)
@@ -1855,6 +1875,7 @@ Additional Phase 1 artifacts:
    - toc.ncx for backward compatibility
    - Automatic spine order generation
    - TOC hierarchy preservation
+   - Excludes `is_pre_toc_content: true` chapters from reader navigation
 
 8. **Build Workflow** (8 Steps):
    ```
@@ -2239,7 +2260,7 @@ directories:
 |-------|----------|-------------|
 | gemini-2.5-pro | Primary translation | Highest quality |
 | gemini-2.5-flash | Fallback | Fast, reliable |
-| gemini-2.0-flash-exp | Legacy fallback | Experimental |
+| gemini-2.0-flash-exp | Compatibility fallback | Experimental |
 
 ---
 
@@ -2267,7 +2288,7 @@ MTL Studio includes a comprehensive reverse-engineered pattern database for majo
 - **Cover Recognition**: 11 variations (including `allcover`, `hyoushi`, `frontcover`, `h1`)
 - **Kuchie Detection**: 13 variations (including spine-based extraction for Shueisha)
 - **Illustration Patterns**: 13 variations (with HD variants, prefix systems)
-- **Exclusion Rules**: Includes `gaiji` glyph filters and Shueisha `embed0000.jpg` publisher-page exclusion
+- **Exclusion Rules**: Includes `gaiji` glyph filters, fan-letter/reader-survey pages, i-bookwalker promo images, stylized header cards, and Shueisha `embed0000.jpg` publisher-page exclusion
 - **Fallback Patterns**: 16 generic patterns for unknown publishers
 
 ### Unique Features Discovered
@@ -2541,7 +2562,7 @@ Current runtime behavior is intentionally conservative:
   - CJK leak scan at end of translation (`scripts/cjk_validator.py`)
 - **Disabled in automatic translator runtime**
   - Self-healing Anti-AI-ism auto-pass
-  - Legacy grammar/format normalization post-stack
+  - Compatibility grammar/format normalization post-stack
 - **Manual-only utilities (opt-in)**
   - `python mtl.py cjk-clean <volume_id>`
   - `python mtl.py heal <volume_id> [--en|--vn] [--dry-run]`
@@ -2594,12 +2615,18 @@ MTL Studio supports external IDE agents (VSCode, Windsurf, Cursor, etc.) for adv
 2. **Content Analysis**: Post-processing scan identifies illustration-only files:
    - File size <2KB (quick filter for image pages)
    - Body contains only `<svg><image>` elements with no text content
-3. **Classification**: Marks spine items with `is_illustration: true` flag
+3. **Top-of-page stylized header detection**: Scans JP raw XHTML for leading `<img>` blocks before first narrative paragraph and marks those image references as decorative headers
+4. **Classification**: Marks spine items with `is_illustration: true` flag
 
 **Illustration Extraction**:
 - **Image Normalization**: Copies and renames illustrations to standard format:
   - Publisher-specific (p017.jpg, m045.jpg, etc.) → Standard (illust-001.jpg, illust-002.jpg, etc.)
   - Maintains aspect ratio and orientation metadata
+- **Hard exclusion filter**: Removes non-narrative image references from both copy and markdown placeholder update:
+  - fan-letter / reader survey inserts
+  - gaiji glyph/icon assets
+  - i-bookwalker promo pages and logos
+  - stylized chapter header/title cards (often first `<img>` before text)
 - **Markdown Placeholder Insertion**: Embeds `[ILLUSTRATION: illust-XXX.jpg]` markers at correct chapter positions
   - Spine order determines placement (illustration pages between content pages)
   - Multi-file chapters: illustrations inserted after preceding content file
@@ -2614,7 +2641,7 @@ MTL Studio supports external IDE agents (VSCode, Windsurf, Cursor, etc.) for adv
 
 **Markdown to XHTML Conversion**:
 1. **Pattern Detection**: Recognizes two formats:
-   - Legacy: `[ILLUSTRATION: filename.jpg]`
+   - Compatibility format: `[ILLUSTRATION: filename.jpg]`
    - Markdown: `![illustration](filename.jpg)` or `![gaiji](filename.jpg)`
 2. **XHTML Generation**: Converts placeholders to semantic markup:
    ```html
@@ -2901,7 +2928,7 @@ The translator supports **four metadata schema variants** for enhanced character
 |--------|----------|------------|
 | **V3 Enhanced** | **Recommended** - Full character continuity | `character_profiles` with `keigo_switch`, `relationship_to_others`, `occurrences`, `inherited_from` |
 | **Enhanced v2.1** | New volumes, full control | `characters`, `dialogue_patterns`, `translation_guidelines` |
-| **Legacy V2** | Volumes 1-3 style | `character_profiles`, `localization_notes`, `speech_pattern` |
+| **Compatibility V2** | Older volume manifests | `character_profiles`, `localization_notes`, `speech_pattern` |
 | **V4 Nested** | Compact character data | `character_names` with nested `{relationships, traits, pronouns}` |
 
 #### V3.6 Enhanced Schema (Current - With Gap Moe & TTS Support)
@@ -3088,7 +3115,7 @@ The translator supports **four metadata schema variants** for enhanced character
 }
 ```
 
-#### Legacy V2 Schema
+#### Compatibility V2 Schema
 
 ```json
 {
@@ -3207,7 +3234,7 @@ python mtl.py metadata volume_id --validate
 
 **Example Output:**
 ```
-Detected Schema: Legacy V2
+Detected Schema: Compatibility V2
   ✓ character_profiles: 9 entries
   ✓ localization_notes: Present
   ✓ speech_pattern (in profiles): Yes
@@ -3348,7 +3375,7 @@ See LICENSE.txt for licensing information.
 ### Version 3.0 LTS (January 2026)
 - **V3.5 Enhanced Schema**: Rich character profiles with `keigo_switch`, `relationship_to_others`, `speech_pattern`, `character_arc`, `occurrences` tracking, and **TTS voice assignments** with emotional variations
 - **POV Tracking System**: Per-chapter `pov_tracking` array supporting mid-chapter POV shifts with line ranges
-- **Legacy System Disabled**: `.context/` continuity pack system replaced by superior v3 schema character_profiles
+- **Continuity Pack Retired**: `.context/` continuity pack system replaced by v3 schema character_profiles
 - **Double-Spread Illustration Detection**: Automatic pattern matching for `p###-p###.jpg` two-page spreads
 - **Comprehensive Scene Break Patterns**: 30+ proprietary patterns (◆, ◇, ★, ☆, ※※※, etc.) normalized to unified standard
 - **Sequel Inheritance**: `inherited_from` field tracks volume lineage for character profile continuity
@@ -3362,7 +3389,7 @@ See LICENSE.txt for licensing information.
 - **AUDIT_AGENT.md**: AI-powered quality control with 4-phase audit system (renamed from GEMINI.md)
 - **SCHEMA_V3.6_AGENT.md**: External IDE agent for enriched metadata generation
 - **Interactive CLI**: Volume selection menus, configuration commands
-- **Semantic Metadata Schema System**: Three schema variants (Enhanced v2.1, Legacy V2, V4 Nested) with auto-transformation
+- **Semantic Metadata Schema System**: Three schema variants (Enhanced v2.1, Compatibility V2, V4 Nested) with auto-transformation
 - **Keigo Switch System**: Automatic speech register switching based on narration, conversation partner, and emotional state
 - **Metadata Schema Inspector**: New `metadata` CLI command with `--validate` for schema compatibility checking
 - **Post-Processing**: CJK artifact cleaner, format normalizer

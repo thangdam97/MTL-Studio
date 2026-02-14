@@ -137,6 +137,7 @@ class PublisherProfileManager:
         re.compile(r'^dx_logo\.(jpe?g|png)$', re.IGNORECASE),
         re.compile(r'^fan[-_]?letter\.(jpe?g|png)$', re.IGNORECASE),
         re.compile(r'^(?:i[-_])?bookwalker(?:[-_].*)?\.(jpe?g|png)$', re.IGNORECASE),
+        re.compile(r'^(?:end|profile)\.(jpe?g|png)$', re.IGNORECASE),
         re.compile(r'^m[-_]?\d{2,4}\.(jpe?g|png)$', re.IGNORECASE),
         re.compile(r'^midashi\d+\.(jpe?g|png)$', re.IGNORECASE),
     )

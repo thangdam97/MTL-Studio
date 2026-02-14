@@ -125,11 +125,26 @@ class GeminiClient:
 
         # Keep ASCII letters/digits plus dot/dash/underscore only.
         # Non-ASCII is normalized away to avoid byte-length surprises.
+        has_non_ascii = any(ord(ch) > 127 for ch in raw)
         normalized = re.sub(r"\s+", "_", raw)
         normalized = re.sub(r"[^A-Za-z0-9.\-]+", "_", normalized)
         normalized = re.sub(r"_+", "_", normalized).strip("._-")
         if not normalized:
             normalized = "cache"
+
+        # If source contains non-ASCII, append deterministic hash suffix so
+        # heavily-normalized display names remain traceable/unique.
+        if has_non_ascii:
+            short_hash = hashlib.sha1(raw.encode("utf-8")).hexdigest()[:8]
+            candidate = f"{normalized}-{short_hash}"
+            if len(candidate.encode("utf-8")) <= self._CACHE_DISPLAY_NAME_MAX_LEN:
+                normalized = candidate
+            else:
+                head_len = self._CACHE_DISPLAY_NAME_MAX_LEN - len(short_hash) - 1
+                if head_len < 1:
+                    normalized = short_hash[: self._CACHE_DISPLAY_NAME_MAX_LEN]
+                else:
+                    normalized = f"{normalized[:head_len].rstrip('._-') or 'cache'}-{short_hash}"
 
         if len(normalized.encode("utf-8")) <= self._CACHE_DISPLAY_NAME_MAX_LEN:
             return normalized
@@ -176,7 +191,7 @@ class GeminiClient:
                 safe_display_name = self._sanitize_cache_display_name(display_name)
                 if safe_display_name != display_name:
                     logger.debug(
-                        "[CACHE] display_name normalized for API limit: %r -> %r",
+                        "[CACHE] display_name normalized for API constraints (charset/length): %r -> %r",
                         display_name,
                         safe_display_name,
                     )

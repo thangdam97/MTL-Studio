@@ -1,7 +1,7 @@
 {
   "version": "1.0",
   "description": "CJK Character Validation Rules for Vietnamese Translation Quality Control",
-  "last_updated": "2026-01-25",
+  "last_updated": "2026-02-14",
   "character_ranges": {
     "chinese_hanzi": {
       "range": "\\u4E00-\\u9FFF",
@@ -209,6 +209,15 @@
         "date_discovered": "2026-02-13"
       },
       {
+        "pattern": "癒し",
+        "description": "Japanese noun 癒し (iyashi - soothing comfort/healing) leaked in EN/VN text",
+        "example": "just enjoyed the癒し of her hand-holding",
+        "severity": "error",
+        "fix": "癒し → soothing comfort / healing / relief (context-dependent)",
+        "source": "Vol 02f6 Ch05 Line 231",
+        "date_discovered": "2026-02-14"
+      },
+      {
         "pattern": "([À-ỹa-zA-Z]+)[\\u4E00-\\u9FFF]{2,}",
         "description": "Two+ character CJK compounds attached to Vietnamese words",
         "example": "Em年頃で知, có nhiều",
@@ -256,7 +265,8 @@
       "草原": "grassland / meadow / plain",
       "攻略": "strategy / walkthrough / guide",
       "渋い": "grim / stern / displeased",
-      "悩": "worries / concerns / troubles"
+      "悩": "worries / concerns / troubles",
+      "癒し": "soothing comfort / healing / relief"
     },
     "common_korean_leaks": {
       "좌": "trái/ghế/giữa",

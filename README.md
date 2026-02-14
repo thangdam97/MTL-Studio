@@ -4,7 +4,7 @@
 
 Version 5.2 | Production Ready | February 2026
 
-> Multi-Language Support: English & Vietnamese | Multimodal Vision + Vector Search | Smart Chunking + Volume Cache | Glossary Lock + Truncation Guardrails
+> Multi-Language Support: English & Vietnamese | Multimodal Vision + Vector Search | Hierarchical Identity Lock + Dynamic Thinking | Smart Chunking + Volume Cache | Glossary Lock + Truncation Guardrails
 
 ---
 
@@ -60,12 +60,12 @@ flowchart TB
 
     BIBLE[("📖 Series Bible\nbibles/series.json\ncharacters · geography\nweapons · orgs · cultural\nmythology")]
 
-    subgraph P16["PHASE 1.6 — ART DIRECTOR · Gemini 3 Pro Preview · Vision + Thinking"]
+    subgraph P16["PHASE 1.6 — ART DIRECTOR · Gemini 3 Vision · Hierarchical ID Lock + Dynamic Thinking"]
         direction TB
         P16A["VisualAssetProcessor\nasset_processor.py · 487 lines"]
         P16S1["integrity_checker → Pre-flight check"]
         P16S2["Illustration Discovery\nMap images to chapters"]
-        P16S3["Vision Analysis\nGemini 3 Pro · thinking: HIGH\nCanonNameEnforcer injection"]
+        P16S3["Vision Analysis\nthinking: dynamic (low/medium/high)\nHierarchical identity lock\nscene-local → full-LN fallback"]
         P16S4["cache_manager → Persist results"]
         P16S5["thought_logger → CoT logs"]
         P16A --> P16S1 --> P16S2 --> P16S3 --> P16S4 --> P16S5
@@ -199,7 +199,7 @@ flowchart TB
 1. [Overview](#overview)
 2. [Gemini Embedding: Vector Search Engine](#-gemini-embedding-vector-search-engine)
     - [Why Vector Search? Traditional MT and CAT Tools Compared](#why-vector-search-traditional-mt-and-cat-tools-compared)
-3. [Gemini 3 Pro Vision: Illustration Multimodal Processor](#gemini-3-pro-vision-illustration-multimodal-processor)
+3. [Gemini 3 Vision: Illustration Multimodal Processor](#gemini-3-vision-illustration-multimodal-processor)
 4. [Bible & Lore Manager: Series-Level Canonical Metadata](#-bible--lore-manager-series-level-canonical-metadata)
     - [Architecture: BibleController + SeriesBible](#architecture-biblecontroller--seriesbible)
     - [Bible Auto-Sync in Phase 1.5](#bible-auto-sync-in-phase-15)
@@ -240,9 +240,9 @@ V5.2 (February 2026) introduces a **Three-Pillar Translation Architecture** that
 |--------|-----------|------|
 | **RAG Engine** | 3.2MB+ knowledge base | Character voices, localization primers, genre patterns |
 | **Vector Search** | Gemini Embedding 001 (3072D) + ChromaDB | Semantic grammar matching — 70+ JP regex → 204 EN natural phrasing patterns |
-| **Multimodal Vision** | Gemini 3 Pro Vision (ThinkingConfig HIGH) | Illustration analysis → Art Director's Notes for visually-informed prose calibration |
+| **Multimodal Vision** | Gemini 3 Vision family (dynamic low/medium/high routing + hierarchical identity lock) | Illustration analysis → Art Director's Notes for visually-informed prose calibration |
 
-**Key innovations**: Hash-based visual cache invalidation, batch embedding optimization (1 API call for N patterns), auto-rebuild logic for empty ChromaDB, schema auto-update via Gemini 2.5 Flash, sliding window context for Sino-Vietnamese disambiguation, and ThinkingConfig reasoning capture for editorial review.
+**Key innovations**: Hash-based visual cache invalidation, hierarchical visual identity lock (scene-local primary + full-LN fallback), dynamic per-illustration thinking routing, batch embedding optimization (1 API call for N patterns), auto-rebuild logic for empty ChromaDB, schema auto-update via Gemini 2.5 Flash, and sliding-window context for Sino-Vietnamese disambiguation.
 
 ### Core Capabilities
 
@@ -257,7 +257,7 @@ V5.2 (February 2026) introduces a **Three-Pillar Translation Architecture** that
 
 - **RAG + Vector + Multimodal fusion**: Translator prompts combine knowledge-base context, semantic grammar guidance, and optional Art Director notes in one decision frame.
 - **Gemini Embedding semantic matching**: `gemini-embedding-001` (3072D) maps Japanese structures to natural target phrasing using confidence-gated ChromaDB retrieval.
-- **Multimodal Art Director layer**: Gemini 3 Pro Vision pre-analyzes illustrations (Phase 1.6) into `visual_cache.json` and injects non-spoiler style directives during Phase 2.
+- **Multimodal Art Director layer**: Gemini 3 Vision pre-analyzes illustrations (Phase 1.6) into `visual_cache.json`, enforces hierarchical identity lock, and injects non-spoiler style directives during Phase 2.
 - **Context-aware style calibration**: Emotional deltas, composition, and narrative directives influence lexical choices without introducing off-canon events.
 
 #### 3) Language and Localization Systems
@@ -619,9 +619,9 @@ The translator log reports guidance statistics per chapter:
 
 ---
 
-## Gemini 3 Pro Vision: Illustration Multimodal Processor
+## Gemini 3 Vision: Illustration Multimodal Processor
 
-**Status**: Deployed (Phase 1.6) | **Model**: `gemini-3-pro-preview` | **February 2026**
+**Status**: Deployed (Phase 1.6) | **Mode**: Hierarchical identity lock + dynamic thinking routing | **February 2026**
 
 > The multimodal processor **sees** every illustration in a volume and generates structured "Art Director's Notes" — a visual cache that the Translator reads to make visually-informed prose decisions, without ever seeing the images itself.
 
@@ -645,17 +645,21 @@ The system splits visual understanding from translation into two specialized pha
                                │
 ┌──────────────────────────────▼──────────────────────────────────────┐
 │  Phase 1.6 — "Art Director" (runs ONCE per volume)                 │
-│  Model: Gemini 3 Pro Vision + ThinkingConfig(HIGH)                 │
+│  Model family: Gemini 3 Vision + Dynamic Thinking Routing          │
 │                                                                     │
 │  INPUT:  _assets/illustrations/*.jpg  (raw images)                 │
-│          + CHARACTER IDENTITY LOCK from manifest + bible            │
+│          + HIERARCHICAL IDENTITY LOCK from manifest + bible         │
 │  OUTPUT: visual_cache.json            (structured analysis + canon) │
 │                                                                     │
 │  For each illustration:                                            │
-│    1. Build prompt with canon names + non-color identity markers    │
-│    2. Send image + name-enriched prompt to Gemini 3 Pro Vision     │
-│    3. Model identifies characters BY NAME (not generic description)│
-│    4. Output: JSON with narrative_directives + spoiler_prevention   │
+│    1. Build hierarchical lock:                                      │
+│       PRIMARY scene-local JP anchors near the illustration marker   │
+│       SECONDARY full-LN roster fallback from manifest + bible       │
+│    2. Route thinking level (low/medium/high) by scene complexity    │
+│       and identity ambiguity heuristics                             │
+│    3. Send image + routed prompt to Gemini 3 Vision                 │
+│    4. Validate identity output against primary/secondary policy      │
+│       (confidence-gated fallback)                                   │
 │    5. Post-analysis canon reconciliation + label normalization      │
 │    6. Cache with hash-based invalidation (prompt + image + model)  │
 └──────────────────────────────┬──────────────────────────────────────┘
@@ -677,9 +681,9 @@ The system splits visual understanding from translation into two specialized pha
 └─────────────────────────────────────────────────────────────────────┘
 ```
 
-**Key insight**: Because Phase 1 (Librarian) caches the entire LN and extracts character names into `manifest.json` before any illustration analysis begins, Phase 1.6 can inject canon character names directly into the Gemini 3 Pro Vision prompt. The vision model identifies "Tigre" and "Elen" instead of "the male protagonist" and "the silver-haired girl" — eliminating name ambiguity before it reaches the Translator.
+**Key insight**: Because Phase 1 (Librarian) caches the entire LN and extracts chapter/source anchors + character metadata before illustration analysis, Phase 1.6 can do identity resolution with hierarchical evidence. It tries scene-local text anchors first, then falls back to full-LN canonical roster data only when needed, reducing false-positive name assignment.
 
-Gemini 2.5 Pro never sees the image. It receives a structured JSON interpretation from Gemini 3 Pro Vision, formatted as stylistic guidance with canon names already resolved. This decouples the expensive vision analysis (run once) from the translation (run per chapter, potentially multiple times for retranslation).
+Gemini 2.5 Pro never sees the image. It receives a structured JSON interpretation from Gemini 3 Vision, formatted as stylistic guidance with canon names already resolved. This decouples vision analysis (run once) from translation (run per chapter, potentially multiple times for retranslation).
 
 ### What the Visual Cache Contains
 
@@ -689,8 +693,11 @@ Each illustration entry in `visual_cache.json` provides structured visual guidan
 {
   "i-079": {
     "status": "cached",
-    "model": "gemini-3-pro-preview",
-    "thinking_level": "HIGH",
+    "model": "gemini-3-flash-preview",
+    "thinking_level": "medium",
+    "thinking_level_used": "medium",
+    "routing_reason": "default",
+    "identity_lock_policy": "scene_local_primary_then_full_ln_fallback",
     "visual_ground_truth": {
       "composition": "A medium shot centering on the female character's upper body,
         utilizing a slightly high angle to emphasize her upward gaze and inviting posture.",
@@ -710,7 +717,7 @@ Each illustration entry in `visual_cache.json` provides structured visual guidan
       ]
     },
     "identity_resolution": {
-      "resolved_characters": [],
+      "recognized_characters": [],
       "unresolved_characters": []
     },
     "spoiler_prevention": {
@@ -865,45 +872,57 @@ The multimodal identity lock and post-analysis canon reconciliation rely on the 
 - If bible is present, identity lock merges manifest + bible records.
 - Canon labels are relation-aware and normalized before `_canon_names` is written.
 
-The system uses a **two-layer handoff** — pre-analysis identity lock plus post-analysis canon reconciliation:
+The system uses a **two-stage identity assurance flow** — hierarchical prompt-time lock plus post-analysis canon reconciliation:
 
-#### Layer 1: Pre-Analysis Identity Lock (Vision Prompt Enrichment)
+#### Stage 1: Hierarchical Identity Lock (Pre-Analysis)
 
-Before sending each illustration to Gemini 3 Pro Vision, `asset_processor` builds a `CHARACTER IDENTITY LOCK (NON-COLOR)` block from manifest + bible:
+Before each illustration call, `asset_processor` builds a hierarchical lock block:
+- **PRIMARY**: scene-local JP anchor candidates (text window around the illustration marker in the chapter file)
+- **SECONDARY**: full-LN canonical roster fallback (manifest + linked bible)
+
+The lock is built with non-color identity hints and explicit fallback rules:
 
 ```
-=== CHARACTER IDENTITY LOCK (NON-COLOR) ===
-- Nishimura Hideki [西村英騎] / nickname=Rusian
-  non-color-id: hair:short, tousled | outfit:male school uniform silhouette | expr:exasperated stare
-- Tamaki Ako [玉置亜子] / nickname=Ako
-  non-color-id: hair:long flowing | outfit:petite schoolgirl silhouette | expr:blushing lovestruck smile
-- Ako's Mother [玉置の母親] / nickname=Okaasan
-  non-color-id: pose:calm hosting posture | id:maternal domestic presence
+=== HIERARCHICAL VISUAL IDENTITY LOCK ===
+PRIORITY 1 (PRIMARY): Scene-local JP text near this illustration marker.
+PRIORITY 2 (SECONDARY): Full-LN canonical roster (fallback only if primary is weak/broken).
+Do NOT invent names outside the PRIMARY/SECONDARY candidate lists.
+Variation Tolerance: hairstyle, outfit, and expression can differ across scenes.
 ...
-=== END IDENTITY LOCK ===
+=== END HIERARCHICAL IDENTITY LOCK ===
 ```
 
-With this context, Gemini 3 Pro Vision can identify characters **by name** in its output:
+With this context, Gemini 3 Vision can identify characters by name while staying constrained by chapter-local evidence first:
 - ❌ Before: *"A medium shot centering on **the female character's** upper body"*
-- ✅ After: *"A medium shot centering on **Elen's** upper body, her silver hair catching the light"*
+- ✅ After: *"A medium shot centering on **Kanon's** upper body..."* (if supported by scene-local anchors or high-confidence fallback)
 
-This eliminates the fundamental limitation of a name-blind vision prompt — the model no longer produces generic descriptions that downstream string-replacement cannot fix.
+#### Stage 2: Post-Analysis Canon Reconciliation
 
-#### Layer 2: Post-Analysis Canon Reconciliation
-
-After Gemini 3 Pro Vision returns its analysis, `KuchieVisualizer.inject_canon_into_visual_cache()` applies `CanonNameEnforcer` across the cache and writes `_canon_names`:
+After Gemini 3 Vision returns its analysis, `KuchieVisualizer.inject_canon_into_visual_cache()` applies `CanonNameEnforcer` across the cache and writes `_canon_names`:
 
 1. **JP → EN replacement**: Any Japanese names in visual output are replaced with canonical English labels
 2. **Relation-aware canonical labels**: Ambiguous labels are normalized (example: `玉置の母親` → `Ako's Mother`, not just `Tamaki`)
 3. **Recursive enforcement**: Entire cache dict is traversed so canon labels stay consistent in all text fields
 4. **Cache-level registry**: `_canon_names` is refreshed for downstream prompt consumers
 
-This two-layer handoff ensures Art Director's Notes arrive at the Translator with stable naming and low identity ambiguity across manifest, bible, and translation prompts.
+This two-stage flow ensures Art Director's Notes arrive at the Translator with stable naming and lower identity ambiguity across manifest, bible, and chapter-local text.
+
+#### Dynamic Thinking Level Router (Conservative Default)
+
+Thinking level is selected per illustration (not globally fixed):
+
+| Route | Trigger (current policy) | Thinking level |
+|---|---|---|
+| Low complexity | Single high-confidence candidate, low ambiguity, non-crowded scene | `low` |
+| Default | No strong high/low signal | `medium` |
+| High complexity | Chapter climax signals, crowded candidate set, or ambiguous multi-character resolution | `high` |
+
+Routing metadata is stored per cache entry (`thinking_level_used`, `routing_reason`, `routing_features`) for auditability.
 
 #### Kuchie (Color Plate) Special Handling
 
 Color plates (kuchie) often have character names overlaid as printed text. `KuchieVisualizer` runs a dedicated OCR pipeline that:
-1. Extracts printed names from the color plate via Gemini 3 Pro Vision OCR prompt
+1. Extracts printed names from the color plate via Gemini 3 Vision OCR prompt
 2. Cross-references extracted names against manifest canon (exact kanji match → partial → reading/furigana)
 3. Produces `KuchieCharacter` entries with `canon_name` and `ruby_match_confidence`
 4. Injects validated canon names back into the visual cache for the corresponding illustrations
@@ -914,11 +933,20 @@ Each entry is hashed by three components: `prompt_hash + image_hash + model`. If
 
 ### Configuration
 
-Multimodal translation is controlled by a single setting in `config.yaml`:
+Multimodal translation and thinking routing are controlled in `config.yaml`:
 
 ```yaml
 translation:
   enable_multimodal: true  # Auto-load visual_cache.json for context-aware translation
+
+multimodal:
+  thinking:
+    default_level: medium
+    routing:
+      enabled: true
+      levels: [low, medium, high]
+      high_confidence_min: 0.75
+      low_confidence_margin: 0.15
 ```
 
 When enabled, the Translator agent automatically:
@@ -931,14 +959,14 @@ When enabled, the Translator agent automatically:
 
 | Phase | Command | Action |
 |-------|---------|--------|
-| **Phase 1.6** | `mtl.py phase1.6 <volume_id>` | Gemini 3 Pro Vision analyzes all illustrations → `visual_cache.json` |
+| **Phase 1.6** | `mtl.py phase1.6 <volume_id>` | Gemini 3 Vision analyzes all illustrations with hierarchical identity lock + dynamic thinking routing → `visual_cache.json` |
 | **Phase 1.7** | `mtl.py phase1.7 <volume_id>` | Stage 1 scene planner writes beat/rhythm scaffold to `PLANS/` |
 | **Phase 2** | `mtl.py phase2 <volume_id>` | Stage 2 translator consumes `visual_cache.json` + `PLANS/` scene scaffold |
 | **Full Pipeline** | `mtl.py run <epub>` | Phase 1.6 and Phase 1.7 run automatically before Phase 2 |
 
 ### Thought Logging
 
-Gemini 3 Pro Vision's internal reasoning is captured in `cache/thoughts/*.json` for editorial review:
+Gemini 3 Vision reasoning traces (when available) are captured in `cache/thoughts/*.json` for editorial review:
 
 ```
 cache/thoughts/
@@ -954,13 +982,13 @@ When the translator saves its THINKING log, it includes the Art Director's visua
 
 | File | Purpose |
 |------|---------|
-| `modules/multimodal/asset_processor.py` | Phase 1.6 orchestrator — analyzes all illustrations with Gemini 3 Pro Vision; builds pre-analysis identity lock from manifest + bible |
+| `modules/multimodal/asset_processor.py` | Phase 1.6 orchestrator — analyzes all illustrations; builds hierarchical identity lock (scene-local primary + full-LN fallback) and applies dynamic thinking routing |
 | `modules/multimodal/cache_manager.py` | Loads, saves, and queries `visual_cache.json` with hash-based invalidation; provides `get_character_profiles()` and `get_canon_name()` helpers |
 | `modules/multimodal/prompt_injector.py` | `CanonNameEnforcer` + `build_multimodal_identity_lock()` for canonical label normalization and identity-lock prompt assembly |
 | `modules/multimodal/segment_classifier.py` | Extracts `[ILLUSTRATION: ...]` markers from chapter source text |
 | `modules/multimodal/integrity_checker.py` | Pre-flight validation: JP tags ↔ asset files ↔ manifest mapping |
 | `modules/multimodal/kuchie_visualizer.py` | Kuchie OCR → canon name cross-reference + color plate visualization |
-| `modules/multimodal/thought_logger.py` | Captures Gemini 3 Pro Vision's ThinkingConfig reasoning |
+| `modules/multimodal/thought_logger.py` | Captures per-illustration thinking traces and routing metadata |
 
 ### Validated Results
 
@@ -974,7 +1002,7 @@ When the translator saves its THINKING log, it includes the Art Director's visua
 
 ### Safety & Error Handling
 
-- **Safety blocks**: If Gemini 3 Pro Vision refuses an illustration (content policy), a `safety_blocked` entry is cached with fallback text: "Visual analysis unavailable — use text-only context"
+- **Safety blocks**: If Gemini 3 Vision refuses an illustration (content policy), a `safety_blocked` entry is cached with fallback text: "Visual analysis unavailable — use text-only context"
 - **Retry logic**: Transient API errors (429, 503) retry with exponential backoff (3s, 5s, 9s)
 - **Rate limiting**: Configurable delay between API calls (default: 3s)
 - **Graceful degradation**: If `visual_cache.json` doesn't exist, Phase 2 proceeds in text-only mode with no errors
@@ -1462,7 +1490,7 @@ This section uses the same capability taxonomy as **Core Capabilities** so the r
 flowchart LR
     P1["Phase 1\nLibrarian"] --> P15["Phase 1.5\nMetadata + Bible sync"]
     P15 --> P155["Phase 1.55\nRich metadata cache\n(full-LN context patch)"]
-    P155 --> P16["Phase 1.6\nArt Director multimodal"]
+    P155 --> P16["Phase 1.6\nArt Director multimodal\n(hierarchical ID lock + dynamic thinking)"]
     P16 --> P17["Phase 1.7\nStage 1 Scene Planner"]
     P17 --> P2["Phase 2\nStage 2 Translator"]
     P2 --> P4["Phase 4\nBuilder"]
@@ -1510,11 +1538,12 @@ RICH METADATA CACHE   → Full-LN JP cache created (Gemini cache, 2h TTL)
                       → Bible event metadata sync (volume-scoped only)
                       → Grounding chain: consumes Phase 1.5 always-on Google-grounded canon
 
-ART DIRECTOR          → Gemini 3 Pro Vision analyzes all illustrations
- (Phase 1.6)          → Builds IDENTITY LOCK from manifest + bible before analysis
+ART DIRECTOR          → Gemini 3 Vision analyzes all illustrations
+ (Phase 1.6)          → Builds HIERARCHICAL IDENTITY LOCK (scene-local primary + full-LN fallback)
+                      → Routes per-image thinking level (low/medium/high) from ambiguity + chapter signals
                       → visual_cache.json created (visual_ground_truth + _canon_names)
                       → post-analysis canon reconciliation applied to cache entries
-                      → cache/thoughts/*.json (reasoning traces)
+                      → cache/thoughts/*.json (reasoning traces + routing metadata)
 
 SCENE PLANNER         → Stage 1 planning for narrative beats and rhythm
  (Phase 1.7)          → Reads JP chapter + metadata context
@@ -1681,18 +1710,18 @@ Additional Phase 1 artifacts:
 
 ### Phase 1.6: Art Director (Multimodal)
 
-**Purpose**: Analyze illustrations with Gemini 3 Pro Vision to generate visual context for the Translator
+**Purpose**: Analyze illustrations with Gemini 3 Vision to generate visual context for the Translator, with hierarchical identity lock and dynamic thinking routing
 
 **Components**:
-- `asset_processor.py` - Orchestrates Gemini 3 Pro Vision analysis for all illustrations
+- `asset_processor.py` - Orchestrates multimodal analysis, hierarchical identity lock, and per-image thinking routing
 - `cache_manager.py` - Hash-based `visual_cache.json` persistence and invalidation
 - `prompt_injector.py` - Formats cached analysis as Art Director's Notes
 - `integrity_checker.py` - Pre-flight validation (JP tags ↔ asset files ↔ manifest)
-- `thought_logger.py` - Captures Gemini 3 Pro Vision reasoning traces
+- `thought_logger.py` - Captures reasoning traces and routing metadata
 
 **Output**:
 - `visual_cache.json` - Structured visual analysis per illustration (composition, emotional_delta, narrative_directives, spoiler_prevention)
-- `cache/thoughts/*.json` - ThinkingConfig(HIGH) reasoning traces for editorial review
+- `cache/thoughts/*.json` - Thinking traces for editorial review (level selected per image: low/medium/high)
 
 ### Phase 1.7: Scene Planner (Stage 1)
 
@@ -3318,7 +3347,7 @@ See LICENSE.txt for licensing information.
 ### Version 5.2 (February 2026)
 - **Three-Pillar Translation Architecture**: Unified RAG + Vector Search + Multimodal Vision workflow
 - **Gemini Embedding Vector Search**: Semantic grammar matching pipeline with confidence-gated injection and auto-rebuild
-- **Phase 1.6 Multimodal Processor**: Gemini 3 Pro Vision Art Director's Notes with hash-based visual cache invalidation
+- **Phase 1.6 Multimodal Processor**: Hierarchical Identity Lock + Dynamic Thinking Routing for Art Director analysis, with hash-based visual cache invalidation
 - **Massive LN Reliability Layer**: Smart Chunking + volume-level cache + resumable chunk JSON workflow
 - **Schema Agent Automation**: Phase 1.5 now auto-runs schema enrichment through Gemini 2.5 Flash and merges into manifest/metadata before chapter translation
 - **Output Safety Guardrails**: Truncation validator + manifest glossary lock + cross-chapter name drift auditing

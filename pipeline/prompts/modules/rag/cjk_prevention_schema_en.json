@@ -453,6 +453,12 @@
           "meaning": "to rush after someone in a flustered state",
           "english": ["hurried after her", "rushed after her", "went after her in a panic"],
           "context": "urgent reaction movement"
+        },
+        "癒し": {
+          "readings": ["iyashi"],
+          "meaning": "soothing comfort/healing relief",
+          "english": ["soothing comfort", "comfort", "healing relief"],
+          "context": "emotional warmth or calming affection"
         }
       },
       "mixed_language_artifacts": {
@@ -512,8 +518,8 @@
   ],
   "failure_condition": "ANY CJK character (U+4E00 to U+9FFF) in final English output = TRANSLATION FAILED",
   "metadata": {
-    "last_updated": "2026-01-26",
-    "total_patterns": 62,
+    "last_updated": "2026-02-14",
+    "total_patterns": 63,
     "sources": [
       "production_validation_0cb9_20260126",
       "production_validation_becb4d_20260126",
@@ -522,18 +528,20 @@
       "light_novel_translation_conventions"
     ],
     "recent_additions": {
-      "date": "2026-01-26",
-      "patterns_added": 14,
+      "date": "2026-02-14",
+      "patterns_added": 15,
       "source_volumes": [
         "0cb9 Vietnamese (11 leaks - patterns apply to English)",
-        "becb4d Vietnamese (12 leaks - patterns apply to English)"
+        "becb4d Vietnamese (12 leaks - patterns apply to English)",
+        "02f6 English (癒し mixed token leak)"
       ],
       "key_discoveries": [
         "Mixed language patterns (mỹ少女 → must be fully English)",
         "Particle combinations requiring contextual translation",
         "Ruby text artifacts that must be stripped",
         "Shape descriptors in hiragana (く → C-shape, bent over)",
-        "Chinese character contamination in source material"
+        "Chinese character contamination in source material",
+        "Affection/comfort noun leaks (癒し) in mixed English+CJK output"
       ]
     }
   }

@@ -1,6 +1,6 @@
 {
     "publisher": "kodansha",
-    "version": "1.0.0",
+    "version": "1.1.0",
     "detection": {
         "opf_markers": [
             "<!-- Kodansha ver.",
@@ -86,7 +86,9 @@
                     "cover-page",
                     "caution-page",
                     "image-page",
-                    "info-middle"
+                    "info-middle",
+                    "info-top",
+                    "colophon-page"
                 ],
                 "action": "mark_as_pre_toc"
             }
@@ -97,9 +99,42 @@
         "heading_selector": "h2",
         "chapter_start_class": "main-top",
         "title_extraction": "h2_text_content",
-        "numbering_format": "japanese_numerical"
+        "numbering_format": "japanese_numerical",
+        "non_content_xhtml": {
+            "body_classes": [
+                "caution-page",
+                "info-middle",
+                "info-top",
+                "colophon-page"
+            ],
+            "text_marker_pairs": [
+                [
+                    "本作品は、縦書き表示での閲覧を推奨",
+                    "表示が一部くずれる恐れがあります"
+                ],
+                [
+                    "口絵・本文イラスト",
+                    "デザイン／"
+                ],
+                [
+                    "本電子書籍内の外部リンクに関して",
+                    "ご利用の端末によっては"
+                ],
+                [
+                    "本電子書籍は、購入者個人の閲覧の目的のためにのみ",
+                    "私的利用の範囲をこえる行為は著作権法上、禁じられています"
+                ]
+            ]
+        }
     },
     "image_handling": {
+        "hard_exclude_patterns": [
+            "^(?:end|profile)\\.(?:png|jpe?g)$",
+            "^gaiji[-_].*\\.(?:png|jpe?g)$",
+            "^(?:i[-_])?bookwalker(?:[-_].*)?\\.(?:png|jpe?g)$",
+            "^fan[-_]?letter\\.(?:png|jpe?g)$",
+            "^midashi\\d+\\.(?:png|jpe?g)$"
+        ],
         "illustration_conversion": {
             "from_format": "p{page_num}.jpg",
             "to_format": "illust-{sequence:03d}.jpg",
@@ -247,6 +282,15 @@
         ]
     },
     "changelog": [
+        {
+            "version": "1.1.0",
+            "date": "2026-02-15",
+            "changes": [
+                "Added hard-exclude patterns for non-content images (end/profile/gaiji/bookwalker/fan-letter/midashi)",
+                "Added non-content XHTML body classes and text marker pairs (caution/info/colophon/legal notices)",
+                "Expanded pre-TOC detection class list with info-top and colophon-page"
+            ]
+        },
         {
             "version": "1.0.0",
             "date": "2026-02-01",

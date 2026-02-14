@@ -1,6 +1,6 @@
 {
   "version": "1.0",
-  "last_updated": "2026-02-14T13:52:14.525922+00:00",
+  "last_updated": "2026-02-14T15:51:16.415991+00:00",
   "series": {
     "madan_no_ou_to_vanadis": {
       "bible_file": "madan_no_ou_to_vanadis.json",
@@ -125,7 +125,8 @@
         "25e8",
         "1294",
         "17fb",
-        "003e"
+        "003e",
+        "02f6"
       ],
       "entry_count": 13,
       "last_updated": "2026-02-09T08:16:46Z"

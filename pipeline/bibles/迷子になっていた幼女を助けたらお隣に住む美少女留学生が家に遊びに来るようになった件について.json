@@ -6,7 +6,7 @@
     "en": "I Rescued a Lost Little Girl, and Now the Beautiful Exchange Student Next Door Won't Stop Visiting!",
     "romaji": ""
   },
-  "last_updated": "2026-02-14T13:52:14.524817+00:00",
+  "last_updated": "2026-02-14T15:51:16.414984+00:00",
   "volumes_registered": [
     {
       "volume_id": "0b24",
@@ -47,6 +47,11 @@
       "volume_id": "003e",
       "title": "迷子になっていた幼女を助けたら、お隣に住む美少女留学生が家に遊びに来るようになった件について 5",
       "index": 5
+    },
+    {
+      "volume_id": "02f6",
+      "title": "迷子になっていた幼女を助けたら、お隣に住む美少女留学生が家に遊びに来るようになった件について 6 (ダッシュエックス文庫DIGITAL)",
+      "index": 6
     }
   ],
   "characters": {
@@ -137,6 +142,37 @@
             "emotional_shifts": "Can become more formal or gentle when trying to comfort Charlotte; becomes firm when defending Charlotte or Akira; apologetic when discussing his past."
           },
           "character_arc": "Continues to overcome past trauma, strengthens his relationship with Charlotte and Emma, confronts his past with Kaede, uses his soccer skills to protect Charlotte's reputation and his own, makes a decision about his future in soccer."
+        },
+        "02f6": {
+          "relationship_to_protagonist": "Protagonist (Self-reference)",
+          "rtas_relationships": {
+            "Charlotte Bennett": "Deeply in love, protective, physically affectionate. Often flustered by her advances, but always accepts her.",
+            "Emma Bennett": "Affectionate, caring older brother figure, dotes on her, prioritizes her well-being.",
+            "Hime柊 Kaon": "Respects her like an older sister, trusts her advice, slightly wary of her teasing and machinations.",
+            "Hime柊 Kaguya": "Wary of her intimidating nature and strictness, but also respects her loyalty and capabilities.",
+            "Sophia Bennett": "Respects her, grateful for her role in his relationship with Charlotte, slightly intimidated by her sharp observations and teasing.",
+            "Saionji Akira": "Close friend, relies on him for male companionship and support.",
+            "Shinonome Karin": "Caring older brother, wants her to be happy and grow, tries to reassure her when she's jealous.",
+            "Shimizu": "Classmate, friendly banter, sometimes exasperated by her teasing.",
+            "Kousaka": "Junior, tries to be helpful and understanding, somewhat exasperated by her antics with Shimizu.",
+            "Olivia Kenny": "Helpful, friendly, but often overwhelmed by her forwardness and physical expressiveness.",
+            "Nikaidou": "Junior, sees her as a kind junior, willing to help her connect with Kousaka."
+          },
+          "how_character_refers_to_others": {
+            "Charlotte Bennett": "シャル (Charlotte), シャルの (my Charlotte), 彼女 (my girlfriend), お嫁さん (my wife - in thought/Kaon's teasing)",
+            "Emma Bennett": "エマちゃん (Emma-chan)",
+            "Hime柊 Kaon": "花音さん (Kaon-san), 花音お姉さん (Kaon-oneesan - in thought, later '姉のように慕っていますので' - I admire her like an older sister)",
+            "Hime柊 Kaguya": "神楽耶さん (Kaguya-san)",
+            "Sophia Bennett": "ソフィアさん (Sophia-san)",
+            "Saionji Akira": "彰 (Akira)",
+            "Shinonome Karin": "華凜 (Karin)",
+            "Shimizu": "清水さん (Shimizu-san)",
+            "Kousaka": "香坂さん (Kousaka-san)",
+            "Olivia Kenny": "リヴィ (Livvy)",
+            "Nikaidou": "二階堂さん (Nikaidou-san)"
+          },
+          "keigo_switch": "Uses polite speech (です/ます) with adults/seniors/new acquaintances (Kaon, Kaguya, Sophia, Olivia, Shimizu, Kousaka, Nikaidou), casual speech with close friends/family (Charlotte, Emma, Akira, Karin).",
+          "contraction_rate": "High in internal monologue and casual speech."
         }
       }
     },
@@ -223,6 +259,25 @@
             "emotional_shifts": "Shifts to more direct or flustered speech when embarrassed, jealous, or expressing strong affection. Can become firm or assertive when defending Akihito or expressing her feelings about him."
           },
           "character_arc": "Becomes more open about her feelings and jealousy, deepens her relationship with Akihito, learns about and supports Akihito through his past trauma, becomes bolder in expressing her love and possessiveness."
+        },
+        "02f6": {
+          "relationship_to_protagonist": "Protagonist's fiancée, main heroine.",
+          "rtas_relationships": {
+            "Aoyagi Akihito": "Deeply in love, dependent, extremely affectionate, seeks physical intimacy and reassurance. Prone to jealousy regarding other women interacting with Akihito.",
+            "Emma Bennett": "Caring older sister, protective, prioritizes her well-being, but sometimes feels conflicted when it means time away from Akihito.",
+            "Hime柊 Kaon": "Respects her, slightly intimidated by her teasing, sees her as an older sister figure, grateful for her gifts.",
+            "Hime柊 Kaguya": "Respects her, slightly wary of her strictness, but accepts her presence.",
+            "Sophia Bennett": "Mother, initially some awkwardness due to past issues, but now more open and affectionate, though still embarrassed by her mother's teasing."
+          },
+          "how_character_refers_to_others": {
+            "Aoyagi Akihito": "あーくん (A-kun)",
+            "Emma Bennett": "エマ (Emma)",
+            "Hime柊 Kaon": "花音さん (Kaon-san), 花音お姉さん (Kaon-oneesan)",
+            "Hime柊 Kaguya": "神楽耶さん (Kaguya-san)",
+            "Sophia Bennett": "お母さん (Okaasan - Mother)"
+          },
+          "keigo_switch": "Uses polite speech (です/ます) consistently, especially with Akihito, but her tone can become very intimate, breathless, and less formal when highly emotional or aroused.",
+          "contraction_rate": "Low in general, but higher in internal thoughts or when flustered."
         }
       },
       "biological_arrays": {
@@ -314,6 +369,23 @@
             "emotional_shifts": "Becomes sulky when denied something, excited when offered something fun, affectionate when praised or comforted."
           },
           "character_arc": "Turns five, learns new skills (soccer), strengthens friendship with Claire, continues to be a central figure in Akihito and Charlotte's lives, shows signs of growth (e.g., sharing Akihito)."
+        },
+        "02f6": {
+          "relationship_to_protagonist": "Charlotte's younger sister, Akihito's 'adopted' younger sister.",
+          "rtas_relationships": {
+            "Aoyagi Akihito": "Adorably dotes on him, seeks his attention and affection, sees him as a beloved older brother.",
+            "Charlotte Bennett": "Older sister, cares for her, but often prioritizes Akihito's attention.",
+            "Sophia Bennett": "Mother, comfortable and affectionate with her.",
+            "Hime柊 Kaon": "Accepts her presence, comfortable with her gentle demeanor.",
+            "Olivia Kenny": "Initially reserved, but warms up to her friendliness, especially over shared love for ramen."
+          },
+          "how_character_refers_to_others": {
+            "Aoyagi Akihito": "おにいちゃん (Onii-chan)",
+            "Sophia Bennett": "お母さん (Okaasan)",
+            "Olivia Kenny": "リヴィ (Livvy) - after warming up to her."
+          },
+          "keigo_switch": "Child-like speech, simple phrases, often uses 'んっ' for affirmation.",
+          "contraction_rate": "N/A (child speech)."
         }
       }
     },
@@ -394,6 +466,22 @@
             "emotional_shifts": "Becomes angry and confrontational when Akihito is insulted or his past is brought up. Can be sulky when Akihito doesn't follow his advice."
           },
           "character_arc": "Supports Akihito through school gossip, confronts his own soccer skills and pride in a match against Akihito, re-evaluates his path as a soccer player, expresses a desire to play with Akihito again."
+        },
+        "02f6": {
+          "relationship_to_protagonist": "Akihito's close friend.",
+          "rtas_relationships": {
+            "Aoyagi Akihito": "Close friend, relies on him for male companionship and support, often engages in friendly banter.",
+            "Charlotte Bennett": "Respectful, but still a bit awkward due to past romantic attempts, keeps his distance.",
+            "Shinonome Karin": "Polite, tries to be friendly, but not close.",
+            "Shimizu": "Classmate, friendly, but not as close as with Akihito."
+          },
+          "how_character_refers_to_others": {
+            "Aoyagi Akihito": "青柳 (Aoyagi)",
+            "Charlotte Bennett": "シャーロットさん (Charlotte-san)",
+            "Shinonome Karin": "東雲さん (Shinonome-san)"
+          },
+          "keigo_switch": "Casual speech.",
+          "contraction_rate": "High."
         }
       }
     },

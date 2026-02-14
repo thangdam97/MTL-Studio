@@ -9,7 +9,7 @@ and generates manifest.json for downstream agents.
 import json
 from pathlib import Path
 from datetime import datetime
-from typing import Dict, Any, Optional, List
+from typing import Dict, Any, Optional, List, Tuple, Set
 from dataclasses import dataclass, field, asdict
 
 from .epub_extractor import EPUBExtractor, ExtractionResult
@@ -111,6 +111,21 @@ class LibrarianAgent:
     5. Catalog images by type
     6. Generate manifest.json
     """
+
+    # Non-story XHTML classes/markers seen in JP commercial EPUB front/end matter.
+    # These pages are notices/credits/colophon metadata and must not become chapters.
+    NON_CONTENT_BODY_CLASSES: Set[str] = {
+        "caution-page",    # vertical-reading notice
+        "info-middle",     # illustrator/designer credits
+        "info-top",        # external link notices
+        "colophon-page",   # publication/legal page
+    }
+    NON_CONTENT_TEXT_PAIRS: Tuple[Tuple[str, str], ...] = (
+        ("本作品は、縦書き表示での閲覧を推奨", "表示が一部くずれる恐れがあります"),
+        ("口絵・本文イラスト", "デザイン／"),
+        ("本電子書籍内の外部リンクに関して", "ご利用の端末によっては"),
+        ("本電子書籍は、購入者個人の閲覧の目的のためにのみ", "私的利用の範囲をこえる行為は著作権法上、禁じられています"),
+    )
 
     def __init__(self, work_base: Optional[Path] = None):
         """
@@ -747,6 +762,9 @@ class LibrarianAgent:
             if any(skip in lower_name for skip in ['nav', 'toc', 'cover', 'copyright']):
                 print(f"     [SKIP] Navigation/cover: {filename}")
                 continue
+            if self._is_non_content_xhtml_file(xhtml_path):
+                print(f"     [SKIP] Non-content XHTML: {filename}")
+                continue
 
             try:
                 # Get title from TOC
@@ -906,6 +924,10 @@ class LibrarianAgent:
                             all_illustrations.append(illust_ref)
                         continue
 
+                    # Skip non-story front/end-matter XHTML pages.
+                    if self._is_non_content_xhtml_file(xhtml_path):
+                        continue
+
                     # Convert regular content file
                     # Don't include title for continuation files
                     is_first = (filename == file_list[0])
@@ -1054,6 +1076,7 @@ class LibrarianAgent:
                 continue
 
             spine_item = spine_map.get(filename)
+            is_non_content = self._is_non_content_xhtml_file(xhtml_path)
 
             # Check if this is an illustration-only page
             if spine_item and spine_item.is_illustration:
@@ -1069,6 +1092,9 @@ class LibrarianAgent:
             has_content = self._file_has_text_content(xhtml_path)
 
             if not has_content:
+                if is_non_content:
+                    # Do not attach caution/credit/legal pages to chapters.
+                    continue
                 # Skip files without text content (image pages, etc.)
                 # But still track illustration references
                 if current_title is not None:
@@ -1320,8 +1346,12 @@ class LibrarianAgent:
                     leading_non_text.append(filename)
                 continue
 
+            is_non_content = self._is_non_content_xhtml_file(xhtml_path)
             has_content = self._file_has_text_content(xhtml_path)
             if not has_content:
+                if is_non_content:
+                    # Explicitly drop caution/credits/legal metadata pages.
+                    continue
                 if current_segment is not None:
                     current_segment["files"].append(filename)
                 else:
@@ -1501,6 +1531,50 @@ class LibrarianAgent:
         except Exception:
             return None
 
+    def _is_non_content_body(self, body, text: str) -> bool:
+        """
+        Identify non-story XHTML pages (caution/credits/legal/colophon).
+        """
+        if body is None:
+            return False
+
+        body_classes = body.get('class', [])
+        if isinstance(body_classes, str):
+            class_set = {c.strip().lower() for c in body_classes.split() if c.strip()}
+        elif isinstance(body_classes, list):
+            class_set = {str(c).strip().lower() for c in body_classes if str(c).strip()}
+        else:
+            class_set = set()
+
+        if class_set.intersection(self.NON_CONTENT_BODY_CLASSES):
+            return True
+
+        normalized_text = ''.join((text or '').split())
+        if not normalized_text:
+            return False
+
+        for marker_a, marker_b in self.NON_CONTENT_TEXT_PAIRS:
+            if marker_a in normalized_text and marker_b in normalized_text:
+                return True
+
+        return False
+
+    def _is_non_content_xhtml_file(self, xhtml_path: Path) -> bool:
+        """Classify a specific XHTML file as non-content front/end matter."""
+        from bs4 import BeautifulSoup
+
+        try:
+            with open(xhtml_path, 'r', encoding='utf-8') as f:
+                content = f.read()
+            soup = BeautifulSoup(content, 'xml')
+            body = soup.find('body')
+            if not body:
+                return False
+            text = body.get_text(strip=True)
+            return self._is_non_content_body(body, text)
+        except Exception:
+            return False
+
     def _file_has_text_content(self, xhtml_path: Path) -> bool:
         """
         Check if XHTML file has meaningful text content (not just images).
@@ -1529,6 +1603,10 @@ class LibrarianAgent:
 
             # Get text content
             text = body.get_text(strip=True)
+
+            # Skip non-story boilerplate pages (caution/credits/colophon/legal notices).
+            if self._is_non_content_body(body, text):
+                return False
 
             # Need at least some text
             return len(text) > 20
@@ -1773,6 +1851,10 @@ class LibrarianAgent:
             
             # Get text content
             text = body.get_text(strip=True)
+
+            # Skip non-story boilerplate pages (caution/credits/colophon/legal notices).
+            if self._is_non_content_body(body, text):
+                return False
 
             # Check if this is a TOC page (目次 = Table of Contents in Japanese)
             # TOC pages have "目次" and multiple internal chapter links

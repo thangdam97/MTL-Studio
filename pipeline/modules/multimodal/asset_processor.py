@@ -10,6 +10,7 @@ narrative interpretations of each illustration.
 
 Features:
   - Cache invalidation via prompt+image+model hash
+  - Dynamic per-image thinking routing (conservative, text-first)
   - Retry with exponential backoff for transient API errors (429/503)
   - Configurable timeout, rate limit, and max retries
   - Safety block handling with meaningful fallback text
@@ -92,10 +93,61 @@ class VisualAssetProcessor:
             "manifest_canon": 0,
             "bible_canon": 0,
         }
+        self.routing_policy = self._load_thinking_routing_policy()
+        self.routing_version = str(self.routing_policy.get("version", "v1")).strip() or "v1"
         self.analysis_prompt = self._build_analysis_prompt()
 
         # Deferred Gemini client initialization
         self._genai_client = None
+
+    def _load_thinking_routing_policy(self) -> Dict[str, Any]:
+        """Load multimodal thinking routing policy from config.yaml with safe defaults."""
+        defaults: Dict[str, Any] = {
+            "enabled": True,
+            "default_level": self.thinking_level,
+            "version": "v1",
+            "levels": ["low", "medium", "high"],
+            "high_triggers": ["climax", "emotional_peak", "plot_revelation"],
+            "high_confidence_min": 0.75,
+            "low_confidence_margin": 0.15,
+        }
+        try:
+            from pipeline.config import get_config_section
+
+            multimodal_cfg = get_config_section("multimodal")
+            thinking_cfg = multimodal_cfg.get("thinking", {}) if isinstance(multimodal_cfg, dict) else {}
+            routing_cfg = thinking_cfg.get("routing", {}) if isinstance(thinking_cfg, dict) else {}
+
+            levels = routing_cfg.get("levels", defaults["levels"])
+            if not isinstance(levels, list) or not levels:
+                levels = defaults["levels"]
+            levels = [str(v).strip().lower() for v in levels if str(v).strip()]
+            levels = [v for v in levels if v in {"low", "medium", "high"}] or defaults["levels"]
+
+            default_level = str(thinking_cfg.get("default_level", defaults["default_level"])).strip().lower()
+            if default_level not in {"low", "medium", "high"}:
+                default_level = str(defaults["default_level"]).strip().lower()
+            if default_level not in levels:
+                default_level = "medium" if "medium" in levels else levels[0]
+
+            high_triggers = routing_cfg.get("high_triggers", defaults["high_triggers"])
+            if not isinstance(high_triggers, list):
+                high_triggers = defaults["high_triggers"]
+            high_triggers = [str(v).strip().lower() for v in high_triggers if str(v).strip()]
+
+            policy = {
+                "enabled": bool(routing_cfg.get("enabled", defaults["enabled"])),
+                "default_level": default_level,
+                "version": str(routing_cfg.get("version", defaults["version"])).strip() or defaults["version"],
+                "levels": levels,
+                "high_triggers": high_triggers,
+                "high_confidence_min": float(routing_cfg.get("high_confidence_min", defaults["high_confidence_min"])),
+                "low_confidence_margin": float(routing_cfg.get("low_confidence_margin", defaults["low_confidence_margin"])),
+            }
+            return policy
+        except Exception as e:
+            logger.debug(f"[PHASE 1.6] Could not load thinking routing policy; using defaults: {e}")
+            return defaults
 
     def _build_analysis_prompt(self) -> str:
         """
@@ -340,6 +392,149 @@ class VisualAssetProcessor:
         source_anchor = f"{source_file}:{marker_idx + 1}"
         return candidates, source_anchor
 
+    def _global_identity_candidates(self, max_candidates: int = 24) -> List[Dict[str, Any]]:
+        """
+        Build full-LN identity candidates from manifest metadata.
+
+        These are secondary fallback anchors when scene-local text anchors are weak
+        or absent for a specific illustration.
+        """
+        manifest = self.cache_manager.get_manifest()
+        metadata_en = manifest.get("metadata_en", {}) if isinstance(manifest, dict) else {}
+        profiles = metadata_en.get("character_profiles", {}) if isinstance(metadata_en, dict) else {}
+        character_names = metadata_en.get("character_names", {}) if isinstance(metadata_en, dict) else {}
+        if not isinstance(profiles, dict):
+            return []
+
+        jp_to_en: Dict[str, str] = {}
+        en_to_jp: Dict[str, str] = {}
+        if isinstance(character_names, dict):
+            for jp_name, en_name in character_names.items():
+                jp = str(jp_name).strip()
+                en = str(en_name).strip()
+                if jp and en:
+                    jp_to_en[jp] = en
+                    en_to_jp[en] = jp
+
+        rows: List[Dict[str, Any]] = []
+        for key, profile in profiles.items():
+            if key == "Unknown" or not isinstance(profile, dict):
+                continue
+            canonical = str(profile.get("full_name", "")).strip()
+            if not canonical:
+                raw_key = str(key).strip()
+                if raw_key in jp_to_en:
+                    canonical = jp_to_en[raw_key]
+                else:
+                    canonical = raw_key
+            if not canonical:
+                continue
+            ruby_base = str(profile.get("ruby_base", "")).strip()
+            rows.append({
+                "canonical_name": canonical,
+                "japanese_name": ruby_base or en_to_jp.get(canonical, ""),
+                "visual_identity_non_color": profile.get("visual_identity_non_color"),
+            })
+
+        deduped: List[Dict[str, Any]] = []
+        seen: set = set()
+        for row in rows:
+            canonical = str(row.get("canonical_name", "")).strip()
+            if not canonical or canonical in seen:
+                continue
+            seen.add(canonical)
+            deduped.append(row)
+
+        deduped.sort(key=lambda r: str(r.get("canonical_name", "")))
+        return deduped[:max_candidates]
+
+    def _determine_thinking_level(
+        self,
+        img_path: Path,
+        *,
+        chapter: Optional[Dict[str, Any]],
+        candidates: List[Dict[str, Any]],
+        multi_expected: bool,
+    ) -> Tuple[str, str, Dict[str, Any]]:
+        """
+        Determine per-image thinking level with conservative text-first routing.
+        """
+        levels = self.routing_policy.get("levels", ["low", "medium", "high"])
+        default_level = str(self.routing_policy.get("default_level", self.thinking_level)).strip().lower()
+        if default_level not in levels:
+            default_level = "medium" if "medium" in levels else levels[0]
+        if not self.routing_policy.get("enabled", True):
+            return default_level, "routing_disabled", {"default_level": default_level}
+
+        image_kind = "inline"
+        lowered_parts = [p.lower() for p in img_path.parts]
+        if "kuchie" in lowered_parts:
+            image_kind = "kuchie"
+        elif img_path.stem.lower() == "cover":
+            image_kind = "cover"
+
+        chapter_dict = chapter if isinstance(chapter, dict) else {}
+        chapter_signals: List[str] = []
+        scene_position = str(chapter_dict.get("scene_position", "")).strip().lower()
+        if scene_position:
+            chapter_signals.append(scene_position)
+        for key in ("narrative_flags", "tags"):
+            vals = chapter_dict.get(key)
+            if isinstance(vals, list):
+                chapter_signals.extend(str(v).strip().lower() for v in vals if str(v).strip())
+            elif isinstance(vals, str):
+                chapter_signals.extend(
+                    str(v).strip().lower()
+                    for v in re.split(r"[,/|]+", vals)
+                    if str(v).strip()
+                )
+
+        high_triggers = set(self.routing_policy.get("high_triggers", []))
+        trigger_hit = next((sig for sig in chapter_signals if sig in high_triggers), "")
+
+        score_values = [float(c.get("match_score", 0.0) or 0.0) for c in candidates]
+        top_score = score_values[0] if score_values else 0.0
+        second_score = score_values[1] if len(score_values) > 1 else 0.0
+        margin = top_score - second_score
+        candidate_count = len(candidates)
+
+        high_conf_min = float(self.routing_policy.get("high_confidence_min", 0.75))
+        low_margin = float(self.routing_policy.get("low_confidence_margin", 0.15))
+
+        level = default_level
+        reason = "default"
+        if trigger_hit and "high" in levels:
+            level = "high"
+            reason = f"chapter_trigger:{trigger_hit}"
+        elif candidate_count >= 4 and "high" in levels:
+            level = "high"
+            reason = "crowded_candidate_set"
+        elif multi_expected and candidate_count >= 2 and (top_score < high_conf_min or margin < low_margin) and "high" in levels:
+            level = "high"
+            reason = "ambiguous_multi_character_scene"
+        elif candidate_count <= 1 and top_score >= high_conf_min and not multi_expected and "low" in levels:
+            level = "low"
+            reason = "single_high_confidence_candidate"
+        elif image_kind == "cover" and candidate_count <= 1 and "low" in levels:
+            level = "low"
+            reason = "cover_low_complexity"
+        elif image_kind == "kuchie" and candidate_count >= 3 and "high" in levels:
+            level = "high"
+            reason = "kuchie_multi_character_density"
+
+        features = {
+            "image_kind": image_kind,
+            "candidate_count": candidate_count,
+            "top_score": round(top_score, 4),
+            "second_score": round(second_score, 4),
+            "margin": round(margin, 4),
+            "multi_expected": bool(multi_expected),
+            "trigger_hit": trigger_hit,
+            "default_level": default_level,
+            "routing_version": self.routing_version,
+        }
+        return level, reason, features
+
     @staticmethod
     def _expand_jp_name_tokens(raw_name: str) -> List[str]:
         """Expand a JP name string into matchable tokens."""
@@ -420,21 +615,37 @@ class VisualAssetProcessor:
     def _build_scene_candidate_prompt(
         self,
         img_path: Path,
-    ) -> Tuple[str, List[str], bool, Optional[str]]:
+    ) -> Tuple[str, List[str], bool, Optional[str], List[Dict[str, Any]], Dict[str, Any]]:
         """
-        Build scene-local candidate prompt block.
+        Build hierarchical identity candidate prompt block.
 
         Returns tuple:
             - prompt block string
-            - allowed canonical names
+            - allowed canonical names (primary if available, else secondary)
             - multi-character expected signal
             - source anchor
+            - candidate rows (with scores)
+            - policy metadata
         """
-        candidates, source_anchor = self._scene_local_candidates(img_path)
-        if not candidates:
+        primary_candidates, source_anchor = self._scene_local_candidates(img_path)
+        secondary_candidates = self._global_identity_candidates()
+
+        primary_allowed = [c["canonical_name"] for c in primary_candidates if c.get("canonical_name")]
+        secondary_allowed = [c["canonical_name"] for c in secondary_candidates if c.get("canonical_name")]
+        allowed_names = primary_allowed if primary_allowed else secondary_allowed
+        multi_expected = len(primary_allowed) >= 2
+
+        policy = {
+            "strategy": "scene_local_primary_then_full_ln_fallback",
+            "primary_allowed": primary_allowed,
+            "secondary_allowed": [n for n in secondary_allowed if n not in primary_allowed],
+            "fallback_confidence_min": 0.85,
+        }
+
+        if not primary_candidates and not secondary_candidates:
             lines = [
                 "=== SCENE-LOCAL IDENTITY CANDIDATES (RAW TEXT ANCHOR) ===",
-                "No reliable JP name candidates were found near this illustration marker.",
+                "No reliable scene-local or full-LN identity candidates were found.",
                 "Do NOT invent proper names from prior knowledge or external canon.",
                 "If identity is uncertain, prefer unresolved_characters with neutral descriptors.",
                 "Variation Tolerance: attire/hairstyle/expression may deviate from profile snapshots.",
@@ -445,39 +656,55 @@ class VisualAssetProcessor:
                 "SOURCE OF TRUTH: Multimodal is descriptive only; raw text is canonical truth.",
                 "=== END SCENE-LOCAL CANDIDATES ===",
             ])
-            return "\n".join(lines), [], False, source_anchor
-
-        allowed_names = [c["canonical_name"] for c in candidates if c.get("canonical_name")]
-        multi_expected = len(allowed_names) >= 2
+            return "\n".join(lines), [], False, source_anchor, [], policy
 
         lines = [
-            "=== SCENE-LOCAL IDENTITY CANDIDATES (RAW TEXT ANCHOR) ===",
-            "Raw text near this illustration is canonical for who is present.",
-            "Use ONLY the following canonical names for recognized_characters in this scene.",
-            "If uncertain, keep unresolved_characters and DO NOT guess outside this list.",
+            "=== HIERARCHICAL VISUAL IDENTITY LOCK ===",
+            "PRIORITY 1 (PRIMARY): Scene-local JP text near this illustration marker.",
+            "PRIORITY 2 (SECONDARY): Full-LN canonical roster (fallback only if primary is weak/broken).",
+            "Do NOT invent names outside the PRIMARY/SECONDARY candidate lists.",
             "Variation Tolerance: hairstyle, outfit, and facial expression can differ across scenes.",
             "Do NOT eliminate a candidate from one visual mismatch; use aggregate cues + text anchor.",
         ]
         if source_anchor:
             lines.append(f"Source anchor: {source_anchor}")
-        for c in candidates[:10]:
-            canonical = c.get("canonical_name", "")
-            jp = c.get("japanese_name", "")
-            score = c.get("match_score", 0.0)
-            tokens = c.get("matched_tokens", [])
-            lines.append(f"- {canonical} [{jp}]")
-            lines.append(f"  anchor-score: {score}")
-            if tokens:
-                lines.append(f"  text-evidence: {', '.join(str(t) for t in tokens[:6])}")
-            hint = self._format_identity_hint(c.get("visual_identity_non_color"))
-            if hint:
-                lines.append(f"  non-color-id: {hint}")
+        if primary_candidates:
+            lines.append("PRIMARY candidates (scene-local):")
+            for c in primary_candidates[:10]:
+                canonical = c.get("canonical_name", "")
+                jp = c.get("japanese_name", "")
+                score = c.get("match_score", 0.0)
+                tokens = c.get("matched_tokens", [])
+                lines.append(f"- {canonical} [{jp}]")
+                lines.append(f"  anchor-score: {score}")
+                if tokens:
+                    lines.append(f"  text-evidence: {', '.join(str(t) for t in tokens[:6])}")
+                hint = self._format_identity_hint(c.get("visual_identity_non_color"))
+                if hint:
+                    lines.append(f"  non-color-id: {hint}")
+        else:
+            lines.append("PRIMARY candidates: none (scene-local anchor unavailable).")
+
+        fallback_rows = [c for c in secondary_candidates if c.get("canonical_name") not in set(primary_allowed)]
+        if fallback_rows:
+            lines.append("SECONDARY fallback candidates (full-LN canon):")
+            for c in fallback_rows[:12]:
+                canonical = c.get("canonical_name", "")
+                jp = c.get("japanese_name", "")
+                lines.append(f"- {canonical} [{jp}]")
+                hint = self._format_identity_hint(c.get("visual_identity_non_color"))
+                if hint:
+                    lines.append(f"  non-color-id: {hint}")
+            lines.append(
+                "Fallback rule: use SECONDARY only when PRIMARY cannot explain the scene. "
+                "Prefer unresolved_characters over low-confidence guesses."
+            )
 
         lines.extend([
             "SOURCE OF TRUTH: Multimodal is descriptive only; raw text is canonical truth.",
-            "=== END SCENE-LOCAL CANDIDATES ===",
+            "=== END HIERARCHICAL IDENTITY LOCK ===",
         ])
-        return "\n".join(lines), allowed_names, multi_expected, source_anchor
+        return "\n".join(lines), allowed_names, multi_expected, source_anchor, primary_candidates, policy
 
     @staticmethod
     def _coerce_identity_resolution(identity_resolution: Any) -> Dict[str, Any]:
@@ -542,21 +769,46 @@ class VisualAssetProcessor:
         allowed_names: List[str],
         multi_expected: bool,
         text_mentions: Optional[List[str]] = None,
+        primary_names: Optional[List[str]] = None,
+        secondary_names: Optional[List[str]] = None,
+        fallback_confidence_min: float = 0.85,
     ) -> Tuple[Dict[str, Any], Dict[str, Any]]:
         """
-        Validate and sanitize identity_resolution against scene-local candidates.
+        Validate and sanitize identity_resolution against hierarchical candidates.
         """
         normalized = self._coerce_identity_resolution(identity_resolution)
         recognized = normalized.get("recognized_characters", [])
         unresolved = normalized.get("unresolved_characters", [])
 
+        primary_set = {str(n).strip() for n in (primary_names or []) if str(n).strip()}
+        secondary_set = {str(n).strip() for n in (secondary_names or []) if str(n).strip()}
         allowed_set = {str(n).strip() for n in allowed_names if str(n).strip()}
+        if not allowed_set:
+            allowed_set = primary_set or secondary_set
+
         out_of_candidate: List[str] = []
-        if allowed_set:
+        fallback_used: List[str] = []
+        if primary_set or secondary_set or allowed_set:
             kept = []
             for item in recognized:
                 canonical = str(item.get("canonical_name", "")).strip()
-                if canonical in allowed_set:
+                confidence_raw = item.get("confidence", 0.0)
+                try:
+                    confidence = float(confidence_raw)
+                except Exception:
+                    confidence = 0.0
+
+                if primary_set:
+                    if canonical in primary_set:
+                        kept.append(item)
+                    elif canonical in secondary_set and confidence >= fallback_confidence_min:
+                        kept.append(item)
+                        fallback_used.append(canonical)
+                        unresolved.append(f"fallback_secondary:{canonical}")
+                    else:
+                        out_of_candidate.append(canonical)
+                        unresolved.append(f"out_of_candidate:{canonical}")
+                elif canonical in allowed_set:
                     kept.append(item)
                 else:
                     out_of_candidate.append(canonical)
@@ -573,6 +825,9 @@ class VisualAssetProcessor:
         if out_of_candidate:
             status = "fail"
             reason = "out_of_candidate_names"
+        elif fallback_used:
+            status = "warn"
+            reason = "used_secondary_fallback"
         elif recognized_names and text_mentioned_names and set(recognized_names) != set(text_mentioned_names):
             status = "fail"
             reason = "text_vs_identity_conflict"
@@ -582,21 +837,25 @@ class VisualAssetProcessor:
         elif multi_expected and len(recognized) == 1:
             status = "warn"
             reason = "single_recognized_for_multi_character_scene"
-        elif not allowed_set:
+        elif not (primary_set or secondary_set or allowed_set):
             status = "warn"
-            reason = "no_scene_local_candidates_available"
+            reason = "no_identity_candidates_available"
 
         validation = {
             "identity_consistency": {
                 "status": status,
                 "reason": reason,
                 "out_of_candidate_names": out_of_candidate,
+                "secondary_fallback_used": sorted(set(fallback_used)),
                 "text_mentioned_names": text_mentioned_names,
                 "recognized_names": recognized_names,
             },
             "recognized_count": len(recognized),
             "multi_character_expected": bool(multi_expected),
             "allowed_candidates": sorted(allowed_set),
+            "primary_candidates": sorted(primary_set),
+            "secondary_candidates": sorted(secondary_set),
+            "fallback_confidence_min": float(fallback_confidence_min),
             "checked_at": datetime.now().isoformat(),
         }
         return normalized, validation
@@ -758,6 +1017,12 @@ class VisualAssetProcessor:
         logger.info(
             "[PHASE 1.6] Processing priority: kuchie (color) -> inline illustrations -> cover"
         )
+        logger.info(
+            "[PHASE 1.6] Thinking routing: "
+            f"enabled={self.routing_policy.get('enabled', True)} "
+            f"default={self.routing_policy.get('default_level', self.thinking_level)} "
+            f"version={self.routing_version}"
+        )
         if self.identity_lock_status.get("enabled"):
             logger.info(
                 "[PHASE 1.6] Identity lock active BEFORE analysis: "
@@ -770,11 +1035,24 @@ class VisualAssetProcessor:
 
         for img_path in illustrations:
             illust_id = img_path.stem
-            current_key = VisualCacheManager.compute_cache_key(
-                img_path, self.analysis_prompt, self.model
+            chapter = self._chapter_for_illustration(img_path.name)
+            scene_prompt, allowed_candidates, scene_multi_expected, source_anchor, candidate_rows, candidate_policy = self._build_scene_candidate_prompt(img_path)
+            thinking_level_used, routing_reason, routing_features = self._determine_thinking_level(
+                img_path,
+                chapter=chapter,
+                candidates=candidate_rows,
+                multi_expected=scene_multi_expected,
             )
-
-            scene_prompt, allowed_candidates, scene_multi_expected, source_anchor = self._build_scene_candidate_prompt(img_path)
+            effective_prompt = self.analysis_prompt
+            if scene_prompt:
+                effective_prompt = f"{effective_prompt}\n\n{scene_prompt}"
+            current_key = VisualCacheManager.compute_cache_key(
+                img_path,
+                effective_prompt,
+                self.model,
+                thinking_level=thinking_level_used,
+                routing_version=self.routing_version,
+            )
 
             # Check if regeneration needed
             existing_entry = self.cache_manager.cache.get(illust_id)
@@ -789,11 +1067,18 @@ class VisualAssetProcessor:
                 continue
 
             # Process illustration
-            logger.info(f"  [ANALYZE] {illust_id}: Running visual analysis...")
+            logger.info(
+                f"  [ANALYZE] {illust_id}: Running visual analysis "
+                f"(thinking={thinking_level_used}, reason={routing_reason})..."
+            )
             start_time = time.time()
 
             try:
-                analysis = self._analyze_illustration(img_path, prompt_override=scene_prompt)
+                analysis = self._analyze_illustration(
+                    img_path,
+                    prompt_override=scene_prompt,
+                    thinking_level_override=thinking_level_used,
+                )
                 elapsed = time.time() - start_time
 
                 visual_ground_truth = analysis.get("visual_ground_truth", {})
@@ -811,6 +1096,9 @@ class VisualAssetProcessor:
                     allowed_names=allowed_candidates,
                     multi_expected=multi_expected,
                     text_mentions=text_mentions,
+                    primary_names=candidate_policy.get("primary_allowed", []),
+                    secondary_names=candidate_policy.get("secondary_allowed", []),
+                    fallback_confidence_min=float(candidate_policy.get("fallback_confidence_min", 0.85)),
                 )
 
                 final_status = analysis.get("status", "cached")
@@ -838,11 +1126,19 @@ class VisualAssetProcessor:
                     "cache_version": "1.0",
                     "generated_at": datetime.now().isoformat(),
                     "model": self.model,
-                    "thinking_level": self.thinking_level,
+                    "thinking_level": thinking_level_used,
+                    "thinking_level_used": thinking_level_used,
+                    "routing_reason": routing_reason,
+                    "routing_features": routing_features,
+                    "routing_version": self.routing_version,
                     "visual_ground_truth": visual_ground_truth,
                     "spoiler_prevention": analysis.get("spoiler_prevention", {}),
                     "identity_resolution": identity_resolution,
                     "scene_local_candidates": allowed_candidates,
+                    "identity_lock_policy": candidate_policy.get("strategy"),
+                    "identity_lock_primary_candidates": candidate_policy.get("primary_allowed", []),
+                    "identity_lock_secondary_candidates": candidate_policy.get("secondary_allowed", []),
+                    "identity_lock_fallback_confidence_min": candidate_policy.get("fallback_confidence_min", 0.85),
                     "source_anchor": source_anchor,
                     "multi_character_expected": multi_expected,
                     "validation": validation,
@@ -852,7 +1148,7 @@ class VisualAssetProcessor:
                 self.thought_logger.log_analysis(VisualAnalysisLog(
                     illustration_id=illust_id,
                     model=self.model,
-                    thinking_level=self.thinking_level,
+                    thinking_level=thinking_level_used,
                     thoughts=analysis.get("thoughts", []),
                     iterations=1,
                     processing_time_seconds=elapsed,
@@ -934,7 +1230,12 @@ class VisualAssetProcessor:
         except Exception as e:
             logger.warning(f"[PHASE 1.6] Failed to inject canon names: {e}")
 
-    def _analyze_illustration(self, img_path: Path, prompt_override: str = "") -> Dict[str, Any]:
+    def _analyze_illustration(
+        self,
+        img_path: Path,
+        prompt_override: str = "",
+        thinking_level_override: Optional[str] = None,
+    ) -> Dict[str, Any]:
         """
         Analyze a single illustration using Gemini 3 Pro Vision + Thinking.
 
@@ -957,7 +1258,12 @@ class VisualAssetProcessor:
         last_error = None
         for attempt in range(1, self.max_retries + 1):
             try:
-                return self._call_gemini_vision(image_part, attempt, prompt_override=prompt_override)
+                return self._call_gemini_vision(
+                    image_part,
+                    attempt,
+                    prompt_override=prompt_override,
+                    thinking_level_override=thinking_level_override,
+                )
             except Exception as e:
                 last_error = e
                 error_str = str(e)
@@ -994,7 +1300,13 @@ class VisualAssetProcessor:
         # Should not reach here, but safety net
         raise last_error  # type: ignore
 
-    def _call_gemini_vision(self, image_part, attempt: int = 1, prompt_override: str = "") -> Dict[str, Any]:
+    def _call_gemini_vision(
+        self,
+        image_part,
+        attempt: int = 1,
+        prompt_override: str = "",
+        thinking_level_override: Optional[str] = None,
+    ) -> Dict[str, Any]:
         """Execute a single Gemini Vision API call with timeout."""
         from google.genai import types
 
@@ -1002,6 +1314,7 @@ class VisualAssetProcessor:
             prompt_text = self.analysis_prompt
             if prompt_override:
                 prompt_text = f"{prompt_text}\n\n{prompt_override}"
+            thinking_level = str(thinking_level_override or self.thinking_level).strip().lower() or "medium"
 
             response = self.genai_client.models.generate_content(
                 model=self.model,
@@ -1009,7 +1322,7 @@ class VisualAssetProcessor:
                 config=types.GenerateContentConfig(
                     thinking_config=types.ThinkingConfig(
                         include_thoughts=True,
-                        thinking_level=self.thinking_level
+                        thinking_level=thinking_level
                     ),
                     temperature=0.3,
                     max_output_tokens=4096,
@@ -1064,7 +1377,7 @@ class VisualAssetProcessor:
                     config=types.GenerateContentConfig(
                         thinking_config=types.ThinkingConfig(
                             include_thoughts=True,
-                            thinking_level=self.thinking_level
+                            thinking_level=thinking_level
                         ),
                         temperature=0.2,
                         max_output_tokens=4096,

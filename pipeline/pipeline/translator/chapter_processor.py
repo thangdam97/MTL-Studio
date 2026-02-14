@@ -978,6 +978,45 @@ This document contains the internal reasoning process that Gemini used while tra
             final_content = self._compose_chapter_markdown(cleaned_body, en_title)
             if en_title:
                 logger.info(f"Injected title: {en_title}")
+
+            bleed_headings = self._detect_cross_chapter_heading_bleed(
+                final_content,
+                chapter_id=chapter_id,
+                en_title=en_title,
+            )
+            if bleed_headings and effective_cache:
+                logger.warning(
+                    f"[CACHE BLEED] Detected possible cross-chapter heading bleed in {chapter_id}: "
+                    f"{', '.join(bleed_headings[:3])}"
+                )
+                logger.warning("[CACHE BLEED] Retrying chapter once without external cache...")
+                fallback_system_instruction = system_instruction or self.prompt_loader.build_system_instruction()
+                retry_response = self.client.generate(
+                    prompt=user_prompt,
+                    system_instruction=fallback_system_instruction,
+                    temperature=self.gen_params.get("temperature", 0.7),
+                    max_output_tokens=self.gen_params.get("max_output_tokens", 65536),
+                    model=model_name or self.model_name,
+                    cached_content=None,
+                    force_new_session=True,
+                )
+                if retry_response.content:
+                    response = retry_response
+                    translated_body = retry_response.content
+                    cleaned_body = self._clean_output(translated_body)
+                    final_content = self._compose_chapter_markdown(cleaned_body, en_title)
+                    bleed_headings = self._detect_cross_chapter_heading_bleed(
+                        final_content,
+                        chapter_id=chapter_id,
+                        en_title=en_title,
+                    )
+                    if bleed_headings:
+                        logger.warning(
+                            f"[CACHE BLEED] Retry still has suspicious headings in {chapter_id}: "
+                            f"{', '.join(bleed_headings[:3])}"
+                        )
+                    else:
+                        logger.info(f"[CACHE BLEED] Retry without cache resolved heading bleed for {chapter_id}")
             
             # Format scene breaks (replace *, **, *** with centered ◆)
             final_content, scene_break_count = SceneBreakFormatter.format_scene_breaks(final_content)
@@ -2195,3 +2234,48 @@ This document contains the internal reasoning process that Gemini used while tra
             changed += 1
 
         return "\n".join(lines).strip(), changed
+
+    def _detect_cross_chapter_heading_bleed(
+        self,
+        text: str,
+        chapter_id: str,
+        en_title: Optional[str],
+    ) -> List[str]:
+        """
+        Detect likely cross-chapter bleed by scanning top-level H1 chapter headings.
+
+        Returns a list of suspicious top-level headings found in content.
+        """
+        if not text:
+            return []
+        lines = (text or "").splitlines()
+        h1_lines = [ln.strip() for ln in lines if re.match(r"^#\s+.+", ln.strip()) and not ln.strip().startswith("## ")]
+        if len(h1_lines) <= 1:
+            return []
+
+        expected_numbers = set()
+        for candidate in (chapter_id, en_title):
+            if not candidate:
+                continue
+            m = re.search(r"(\d+)", str(candidate))
+            if m:
+                try:
+                    expected_numbers.add(int(m.group(1)))
+                except Exception:
+                    pass
+
+        suspicious: List[str] = []
+        for h in h1_lines[1:]:
+            m = re.search(r"chapter\s+(\d+)", h, flags=re.IGNORECASE)
+            if not m:
+                suspicious.append(h)
+                continue
+            try:
+                num = int(m.group(1))
+            except Exception:
+                suspicious.append(h)
+                continue
+            if expected_numbers and num not in expected_numbers:
+                suspicious.append(h)
+
+        return suspicious

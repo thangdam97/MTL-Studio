@@ -812,6 +812,24 @@ class TranslatorAgent:
         except Exception:
             return None
 
+    @staticmethod
+    def _is_generic_english_chapter_title(title: Optional[str]) -> bool:
+        """
+        Return True if title is a generic English chapter label without subtitle.
+
+        Examples:
+          - "Chapter 3"            -> True
+          - "Chapter 3:"           -> True
+          - "Chapter 3 - ..."      -> False
+          - "Chapter 3: ..."       -> False
+        """
+        if not isinstance(title, str):
+            return False
+        raw = title.strip()
+        if not raw:
+            return False
+        return re.match(r"^chapter\s+\d+\s*:?\s*$", raw, flags=re.IGNORECASE) is not None
+
     def _resolve_chapter_number(
         self,
         chapter_id: str,
@@ -878,8 +896,13 @@ class TranslatorAgent:
                 and title_num != canonical_num
             )
 
-            if canonical and (duplicate or mismatch):
-                reason = "duplicate title" if duplicate else "title/chapter_id mismatch"
+            # Do NOT normalize descriptive titles solely due chapter number mismatch:
+            # prologue/extra sections can shift chapter_id numbering by +1.
+            # Normalize only when clearly generic or duplicated.
+            generic_raw = self._is_generic_english_chapter_title(raw)
+            should_normalize = duplicate or (mismatch and generic_raw)
+            if canonical and should_normalize:
+                reason = "duplicate title" if duplicate else "generic title/chapter_id mismatch"
                 logger.warning(
                     f"[TITLE] Normalizing ambiguous title for {chapter_id}: "
                     f"'{raw}' -> '{canonical}' ({reason})"
@@ -1015,7 +1038,14 @@ class TranslatorAgent:
             logger.warning("Volume cache skipped: no JP chapter text available")
             return None
 
-        full_volume_text = "\n\n---\n\n".join(chapter_blocks)
+        cache_guardrail = (
+            "=== REFERENCE CORPUS (DO NOT TRANSLATE DIRECTLY) ===\n"
+            "This cached corpus is continuity/reference memory only.\n"
+            "When translating, output must be based ONLY on the runtime SOURCE TEXT TO TRANSLATE block.\n"
+            "Never translate this cached corpus itself.\n"
+            "=== END REFERENCE CORPUS GUARDRAIL ===\n"
+        )
+        full_volume_text = f"{cache_guardrail}\n\n" + "\n\n---\n\n".join(chapter_blocks)
         system_instruction = self.prompt_loader.build_system_instruction()
 
         try:

@@ -2855,7 +2855,8 @@ class PromptLoader:
 
         if self.target_language == 'vn':
             # Vietnamese-specific instructions
-            parts.append(f"Translate the above Japanese text to {lang_name} following all guidelines in the system prompt.")
+            parts.append(f"Translate ONLY the Japanese text inside the SOURCE TEXT TO TRANSLATE block to {lang_name}, following all guidelines in the system prompt.")
+            parts.append("CRITICAL SCOPE: Ignore any Japanese text that appears in cache/reference/continuity context.")
             parts.append("IMPORTANT: Preserve all [ILLUSTRATION: filename] tags exactly as they appear.")
             parts.append("IMPORTANT: Apply character archetypes and pronoun systems as defined in the prompt.")
             parts.append("IMPORTANT: Transcreate SFX to Vietnamese prose (except for Gyaru archetype with high boldness).")
@@ -2898,7 +2899,8 @@ class PromptLoader:
             parts.append("  ✓ If gaiji appears mid-dialogue, integrate naturally without breaking flow")
         else:
             # English instructions (default)
-            parts.append(f"Translate the above Japanese text to {lang_name} following all guidelines in the system prompt.")
+            parts.append(f"Translate ONLY the Japanese text inside the SOURCE TEXT TO TRANSLATE block to {lang_name}, following all guidelines in the system prompt.")
+            parts.append("CRITICAL SCOPE: Ignore any Japanese text that appears in cache/reference/continuity context.")
             parts.append("IMPORTANT: Preserve all [ILLUSTRATION: filename] tags exactly as they appear.")
             parts.append("IMPORTANT: Use contractions naturally (target 80%+ contraction rate).")
             parts.append("IMPORTANT: Avoid AI-isms and formal language patterns.")

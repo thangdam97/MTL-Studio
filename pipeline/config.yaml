@@ -203,11 +203,24 @@ multimodal:
     log_blocked_images: true
   thinking:
     enabled: true
-    default_level: HIGH
+    default_level: medium
     high_triggers:
     - emotional_climax
     - character_introduction
     - plot_revelation
+    routing:
+      enabled: true
+      version: v1
+      levels:
+      - low
+      - medium
+      - high
+      high_triggers:
+      - climax
+      - emotional_peak
+      - plot_revelation
+      high_confidence_min: 0.75
+      low_confidence_margin: 0.15
   lookahead:
     enabled: true
     buffer_size: 3

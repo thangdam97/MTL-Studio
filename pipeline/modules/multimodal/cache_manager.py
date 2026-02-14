@@ -192,12 +192,25 @@ class VisualCacheManager:
         return entry.get("status") == "manual_override"
 
     @staticmethod
-    def compute_cache_key(img_path: Path, prompt: str, model: str) -> Dict[str, str]:
+    def compute_cache_key(
+        img_path: Path,
+        prompt: str,
+        model: str,
+        *,
+        thinking_level: str = "",
+        routing_version: str = "",
+    ) -> Dict[str, str]:
         """Generate cache key for invalidation checks."""
         prompt_hash = hashlib.sha256(prompt.encode()).hexdigest()[:16]
         with open(img_path, 'rb') as f:
             image_hash = hashlib.sha256(f.read()).hexdigest()[:16]
-        return {"model": model, "prompt_hash": prompt_hash, "image_hash": image_hash}
+        return {
+            "model": model,
+            "prompt_hash": prompt_hash,
+            "image_hash": image_hash,
+            "thinking_level": str(thinking_level or "").strip().lower(),
+            "routing_version": str(routing_version or "").strip(),
+        }
 
     @staticmethod
     def should_regenerate(
@@ -220,6 +233,10 @@ class VisualCacheManager:
         if cached_key.get("prompt_hash") != current_key["prompt_hash"]:
             return True
         if cached_key.get("image_hash") != current_key["image_hash"]:
+            return True
+        if cached_key.get("thinking_level", "") != current_key.get("thinking_level", ""):
+            return True
+        if cached_key.get("routing_version", "") != current_key.get("routing_version", ""):
             return True
 
         generated_at = entry.get("generated_at")

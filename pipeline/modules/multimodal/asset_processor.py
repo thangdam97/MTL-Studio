@@ -238,58 +238,163 @@ class VisualAssetProcessor:
 
         window_start = max(0, marker_idx - 40)
         window_end = min(len(lines), marker_idx + 41)
-        scene_text_raw = "\n".join(lines[window_start:window_end])
+        scene_lines_raw = lines[window_start:window_end]
         # Strip ruby annotations: 笠{かさ}原 -> 笠原
-        scene_text = re.sub(r"\{[^{}]*\}", "", scene_text_raw)
+        scene_lines = [re.sub(r"\{[^{}]*\}", "", ln) for ln in scene_lines_raw]
 
         manifest = self.cache_manager.get_manifest()
         metadata_en = manifest.get("metadata_en", {}) if isinstance(manifest, dict) else {}
         profiles = metadata_en.get("character_profiles", {}) if isinstance(metadata_en, dict) else {}
+        character_names = metadata_en.get("character_names", {}) if isinstance(metadata_en, dict) else {}
         if not isinstance(profiles, dict):
             return [], None
 
         candidates: List[Dict[str, Any]] = []
+        canonical_name_map: Dict[str, str] = {}
+        if isinstance(character_names, dict):
+            for jp_name, en_name in character_names.items():
+                jp = str(jp_name).strip()
+                en = str(en_name).strip()
+                if jp and en:
+                    canonical_name_map[en] = jp
+
+        profile_rows: List[Dict[str, Any]] = []
         for jp_name, profile in profiles.items():
             if jp_name == "Unknown" or not isinstance(profile, dict):
                 continue
 
-            ruby_base = str(profile.get("ruby_base", "")).strip()
-            alias_tokens: List[str] = []
-            # JP key might already be Japanese in some manifests
-            if any(ord(ch) > 127 for ch in str(jp_name)):
-                alias_tokens.append(str(jp_name))
-            if ruby_base:
-                alias_tokens.append(ruby_base)
-                if len(ruby_base) >= 2:
-                    alias_tokens.append(ruby_base[:2])  # likely surname form
-                if len(ruby_base) == 2:
-                    alias_tokens.append(ruby_base[:1])  # e.g., 林恵 -> 林
-
-            matched = False
-            for token in {t.strip() for t in alias_tokens if t and t.strip()}:
-                if len(token) == 1:
-                    if re.search(rf"{re.escape(token)}(?:さん|君|ちゃん|くん|は|が|を|に|と|、|。|！|？)", scene_text):
-                        matched = True
-                        break
-                else:
-                    if token in scene_text:
-                        matched = True
-                        break
-            if not matched:
-                continue
-
             canonical_name = str(profile.get("full_name", "")).strip()
             if not canonical_name:
+                canonical_name = canonical_name_map.get(str(jp_name).strip(), "")
+            if not canonical_name:
                 continue
-            visual_non_color = profile.get("visual_identity_non_color")
-            candidates.append({
+
+            ruby_base = str(profile.get("ruby_base", "")).strip()
+            alias_tokens = self._build_jp_alias_tokens(
+                profile_key=str(jp_name),
+                profile=profile,
+                canonical_name=canonical_name,
+            )
+            if not alias_tokens:
+                continue
+
+            profile_rows.append({
                 "canonical_name": canonical_name,
-                "japanese_name": ruby_base or jp_name,
-                "visual_identity_non_color": visual_non_color if isinstance(visual_non_color, (dict, list, str)) else "",
+                "japanese_name": ruby_base or canonical_name,
+                "visual_identity_non_color": profile.get("visual_identity_non_color"),
+                "alias_tokens": alias_tokens,
             })
+
+        token_owner_count: Dict[str, int] = {}
+        for row in profile_rows:
+            for token in set(row.get("alias_tokens", [])):
+                token_owner_count[token] = token_owner_count.get(token, 0) + 1
+
+        for row in profile_rows:
+            match_score = 0.0
+            matched_tokens: List[str] = []
+            for offset, line in enumerate(scene_lines):
+                line_no = window_start + offset
+                distance = abs(line_no - marker_idx)
+                proximity_weight = 1.0 / (1.0 + float(distance))
+                for token in row.get("alias_tokens", []):
+                    owner_count = token_owner_count.get(token, 1)
+                    if owner_count > 1 and len(token) <= 3:
+                        continue
+                    uniqueness_weight = 1.0 / float(owner_count * owner_count)
+                    if len(token) == 1:
+                        hit = re.search(
+                            rf"{re.escape(token)}(?:さん|君|ちゃん|くん|は|が|を|に|と|、|。|！|？)",
+                            line,
+                        ) is not None
+                    else:
+                        hit = token in line
+                    if hit:
+                        match_score += proximity_weight * uniqueness_weight
+                        matched_tokens.append(token)
+
+            if match_score <= 0:
+                continue
+
+            visual_non_color = row.get("visual_identity_non_color")
+            candidates.append({
+                "canonical_name": row.get("canonical_name", ""),
+                "japanese_name": row.get("japanese_name", ""),
+                "visual_identity_non_color": visual_non_color if isinstance(visual_non_color, (dict, list, str)) else "",
+                "match_score": round(match_score, 4),
+                "matched_tokens": sorted(set(matched_tokens)),
+            })
+
+        if candidates:
+            candidates.sort(
+                key=lambda c: (
+                    -float(c.get("match_score", 0.0)),
+                    str(c.get("canonical_name", "")),
+                )
+            )
+            best_score = float(candidates[0].get("match_score", 0.0))
+            if best_score > 0:
+                floor = best_score * 0.25
+                candidates = [c for c in candidates if float(c.get("match_score", 0.0)) >= floor][:8]
 
         source_anchor = f"{source_file}:{marker_idx + 1}"
         return candidates, source_anchor
+
+    @staticmethod
+    def _expand_jp_name_tokens(raw_name: str) -> List[str]:
+        """Expand a JP name string into matchable tokens."""
+        name = str(raw_name or "").strip()
+        if not name:
+            return []
+        tokens = set()
+        collapsed = re.sub(r"[ \u3000]", "", name)
+        if collapsed:
+            tokens.add(collapsed)
+        for part in re.split(r"[ \u3000・･／/,，、]+", name):
+            token = part.strip()
+            if token:
+                tokens.add(token)
+        return sorted(tokens, key=len, reverse=True)
+
+    def _build_jp_alias_tokens(
+        self,
+        *,
+        profile_key: str,
+        profile: Dict[str, Any],
+        canonical_name: str,
+    ) -> List[str]:
+        """Collect JP-side alias tokens for scene-local matching."""
+        aliases = set()
+        if any(ord(ch) > 127 for ch in profile_key):
+            aliases.update(self._expand_jp_name_tokens(profile_key))
+
+        ruby_base = str(profile.get("ruby_base", "")).strip()
+        if ruby_base:
+            aliases.update(self._expand_jp_name_tokens(ruby_base))
+
+        if canonical_name:
+            aliases.update(self._expand_jp_name_tokens(canonical_name))
+
+        nickname = str(profile.get("nickname", "")).strip()
+        if nickname:
+            for part in re.split(r"[,\u3001\uFF0C/／|]+", nickname):
+                piece = part.strip()
+                if any(ord(ch) > 127 for ch in piece):
+                    aliases.update(self._expand_jp_name_tokens(piece))
+
+        raw_aliases = profile.get("aliases")
+        if isinstance(raw_aliases, list):
+            for item in raw_aliases:
+                token = str(item).strip()
+                if any(ord(ch) > 127 for ch in token):
+                    aliases.update(self._expand_jp_name_tokens(token))
+        elif isinstance(raw_aliases, str):
+            for part in re.split(r"[,\u3001\uFF0C/／|]+", raw_aliases):
+                token = part.strip()
+                if any(ord(ch) > 127 for ch in token):
+                    aliases.update(self._expand_jp_name_tokens(token))
+
+        return sorted({t for t in aliases if t}, key=len, reverse=True)
 
     @staticmethod
     def _format_identity_hint(identity_value: Any) -> str:
@@ -327,7 +432,20 @@ class VisualAssetProcessor:
         """
         candidates, source_anchor = self._scene_local_candidates(img_path)
         if not candidates:
-            return "", [], False, source_anchor
+            lines = [
+                "=== SCENE-LOCAL IDENTITY CANDIDATES (RAW TEXT ANCHOR) ===",
+                "No reliable JP name candidates were found near this illustration marker.",
+                "Do NOT invent proper names from prior knowledge or external canon.",
+                "If identity is uncertain, prefer unresolved_characters with neutral descriptors.",
+                "Variation Tolerance: attire/hairstyle/expression may deviate from profile snapshots.",
+            ]
+            if source_anchor:
+                lines.append(f"Source anchor: {source_anchor}")
+            lines.extend([
+                "SOURCE OF TRUTH: Multimodal is descriptive only; raw text is canonical truth.",
+                "=== END SCENE-LOCAL CANDIDATES ===",
+            ])
+            return "\n".join(lines), [], False, source_anchor
 
         allowed_names = [c["canonical_name"] for c in candidates if c.get("canonical_name")]
         multi_expected = len(allowed_names) >= 2
@@ -337,13 +455,20 @@ class VisualAssetProcessor:
             "Raw text near this illustration is canonical for who is present.",
             "Use ONLY the following canonical names for recognized_characters in this scene.",
             "If uncertain, keep unresolved_characters and DO NOT guess outside this list.",
+            "Variation Tolerance: hairstyle, outfit, and facial expression can differ across scenes.",
+            "Do NOT eliminate a candidate from one visual mismatch; use aggregate cues + text anchor.",
         ]
         if source_anchor:
             lines.append(f"Source anchor: {source_anchor}")
         for c in candidates[:10]:
             canonical = c.get("canonical_name", "")
             jp = c.get("japanese_name", "")
+            score = c.get("match_score", 0.0)
+            tokens = c.get("matched_tokens", [])
             lines.append(f"- {canonical} [{jp}]")
+            lines.append(f"  anchor-score: {score}")
+            if tokens:
+                lines.append(f"  text-evidence: {', '.join(str(t) for t in tokens[:6])}")
             hint = self._format_identity_hint(c.get("visual_identity_non_color"))
             if hint:
                 lines.append(f"  non-color-id: {hint}")

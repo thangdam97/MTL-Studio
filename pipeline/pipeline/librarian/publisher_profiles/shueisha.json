@@ -7,17 +7,24 @@
   "image_patterns": {
     "exclude": {
       "patterns": [
-        "^embed0000\\.jpe?g$"
+        "^embed0000\\.jpe?g$",
+        "^gaiji\\d*\\.(?:png|jpe?g)$",
+        "^dx_logo\\.(?:png|jpe?g)$",
+        "^(?:i[-_])?bookwalker(?:[-_].*)?\\.(?:png|jpe?g)$",
+        "^(?:reader|survey|campaign|present|presents?)[-_].*\\.(?:png|jpe?g)$"
       ],
       "examples": [
-        "embed0000.jpg"
+        "embed0000.jpg",
+        "gaiji0.png",
+        "dx_logo.png",
+        "bookwalker.jpg"
       ],
-      "notes": "Exclude publisher logo/gaiji image from extraction and chapter markdown."
+      "notes": "Exclude publisher logo/gaiji/promo assets from extraction and chapter markdown."
     },
     "cover": {
       "patterns": [
-        "cover\\.jpe?g",
-        "embed0016_HD\\.jpe?g"
+        "^cover\\.jpe?g$",
+        "^embed0016_HD\\.jpe?g$"
       ],
       "examples": [
         "cover.jpg",
@@ -27,29 +34,35 @@
     },
     "kuchie": {
       "patterns": [
-        "kuchie-\\d{3}\\.jpe?g",
-        "embed000[0-4]_HD\\.jpe?g"
+        "^kuchie-\\d{3}\\.jpe?g$",
+        "^embed000[0-4]_HD\\.jpe?g$",
+        "^image(?:[1-7]|0[1-7])\\.jpe?g$"
       ],
       "examples": [
         "kuchie-001.jpg",
         "kuchie-002.jpg",
         "embed0000_HD.jpg",
-        "embed0001_HD.jpg"
+        "embed0001_HD.jpg",
+        "image1.jpg",
+        "image7.jpg"
       ],
-      "notes": "Kuchie (color plates) typically embed0000-0004_HD.jpg, found in p-fmatter-*.xhtml spine entries. System extracts and renames to kuchie-###.jpg"
+      "notes": "Kuchie (color plates) typically embed0000-0004_HD.jpg or image1-image7 variants, found in p-cover/p-fmatter/pre-content spine entries. System extracts and renames to kuchie-###.jpg"
     },
     "illustrations": {
       "patterns": [
-        "embed\\d{4}_HD\\.jpe?g",
-        "embed\\d{4}\\.jpe?g"
+        "^embed\\d{4}_HD\\.jpe?g$",
+        "^embed\\d{4}\\.jpe?g$",
+        "^image(?:[89]|1\\d|[2-9]\\d)\\.jpe?g$"
       ],
       "examples": [
         "embed0006_HD.jpg",
         "embed0007_HD.jpg",
         "embed0009.jpg",
-        "embed0014.jpg"
+        "embed0014.jpg",
+        "image8.jpg",
+        "image15.jpg"
       ],
-      "notes": "HD variants (_HD suffix) for high quality, standard (no suffix) for lower resolution. Embedded in chapter content."
+      "notes": "HD variants (_HD suffix) for high quality, standard (no suffix) for lower resolution. Includes image8+ variant used for chapter inline illustrations."
     },
     "special": {
       "patterns": [],
@@ -97,6 +110,17 @@
       },
       "verified": true,
       "notes": "embed0000-0004_HD.jpg + embed0016_HD.jpg as kuchie. embed0006-0015 as illustrations. Kuchie in spine entries, not Image/ folder pattern matching."
+    },
+    {
+      "title": "迷子になっていた幼女を助けたら、お隣に住む美少女留学生が家に遊びに来るようになった件について (5)",
+      "volume_id": "003e",
+      "images": {
+        "kuchie": 8,
+        "illustrations": 8,
+        "cover": 1
+      },
+      "verified": true,
+      "notes": "Shueisha imageN naming variant: cover.jpg + image1-image7 pre-content kuchie, image8-image15 chapter illustrations, gaiji0.png/dx_logo.png excluded."
     }
   ]
 }

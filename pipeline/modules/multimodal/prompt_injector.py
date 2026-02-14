@@ -507,6 +507,9 @@ def build_multimodal_identity_lock(
         "Use this registry before any scene analysis.",
         "If a visible character matches markers below, use canonical_en immediately.",
         "Do NOT guess alternate names when a canonical match exists.",
+        "Variation Tolerance: attire, hairstyle, and expression can vary by scene/time/cosplay/pose.",
+        "Treat visual markers as soft evidence; do not reject a candidate for one mismatching trait.",
+        "When raw-text scene candidates are provided, prioritize those names over visual priors.",
     ]
 
     for i, (jp_name, record) in enumerate(identity_records.items()):
@@ -570,6 +573,7 @@ def build_multimodal_identity_lock(
             lines.append(f"  - {rule}")
 
     lines.extend([
+        "If markers conflict or remain ambiguous, output unresolved_character (do not invent names).",
         "If uncertain, mark as unresolved_character and continue scene analysis.",
         "=== END IDENTITY LOCK ===",
     ])
